@@ -12,7 +12,7 @@ import { AM_TITLES, PM_TITLES } from '../data/ampmTitles';
  *   isTomorrow  – boolean, shows indigo "Tomorrow" badge
  *   initialData – { am: { groups }, pm: { groups } } from storage
  */
-export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow, initialData }) {
+export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow, initialData, hideBadge }) {
   const [dayData, setDayData]   = useState(() => ensureAmPm(initialData));
   const [activeTab, setActiveTab] = useState('am');
   const [saveFlash, setSaveFlash] = useState(false);
@@ -66,16 +66,18 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
 
   return (
     <section className="flex flex-col gap-4">
-      {/* ── Day header ────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 flex-wrap">
-        {badge}
-        <h2 className="text-lg font-bold text-gray-800">
-          {day}
-          {muscleGroup ? (
-            <span className="text-gray-400 font-normal ml-2">— {muscleGroup}</span>
-          ) : null}
-        </h2>
-      </div>
+      {/* ── Day header (hidden when inside accordion) ─────────── */}
+      {!hideBadge && (
+        <div className="flex items-center gap-3 flex-wrap">
+          {badge}
+          <h2 className="text-lg font-bold text-gray-800">
+            {day}
+            {muscleGroup ? (
+              <span className="text-gray-400 font-normal ml-2">— {muscleGroup}</span>
+            ) : null}
+          </h2>
+        </div>
+      )}
 
       {/* ── AM / PM tab switcher ──────────────────────────────── */}
       <div className="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit">
