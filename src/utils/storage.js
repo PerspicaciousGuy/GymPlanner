@@ -30,8 +30,23 @@ export function defaultGroup() {
   return { rows: [defaultRow(), defaultRow(), defaultRow()] };
 }
 
-export function defaultDayWorkout() {
+export function defaultSession() {
   return { groups: [defaultGroup(), defaultGroup(), defaultGroup(), defaultGroup()] };
+}
+
+// Each day now stores two independent sessions: am and pm
+export function defaultDayWorkout() {
+  return { am: defaultSession(), pm: defaultSession() };
+}
+
+// Migrate old single-session format to new am/pm format
+export function ensureAmPm(dayData) {
+  if (!dayData) return defaultDayWorkout();
+  if (dayData.am && dayData.pm) return dayData;
+  // Old format had a top-level `groups` array — migrate to am
+  const migrated = defaultDayWorkout();
+  if (dayData.groups) migrated.am.groups = dayData.groups;
+  return migrated;
 }
 
 // ─── Workouts (keyed by day name) ─────────────────────────────
@@ -50,12 +65,13 @@ export function loadCompletion() {
   return safeLoad(COMPLETION_KEY, {});
 }
 
-export function markDayComplete(day) {
+// session: 'am' | 'pm'
+export function markDayComplete(day, session = 'am') {
   const all = loadCompletion();
-  all[day] = true;
+  all[`${day}_${session}`] = true;
   localStorage.setItem(COMPLETION_KEY, JSON.stringify(all));
 }
 
-export function isDayComplete(day) {
-  return loadCompletion()[day] === true;
+export function isDayComplete(day, session = 'am') {
+  return loadCompletion()[`${day}_${session}`] === true;
 }

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import WorkoutSection from '../components/WorkoutSection';
-import { loadSchedule, loadWorkouts, isDayComplete, defaultDayWorkout } from '../utils/storage';
+import { loadSchedule, loadWorkouts, isDayComplete, defaultDayWorkout, ensureAmPm } from '../utils/storage';
 import { DAYS } from '../data/exerciseDatabase';
 
 function getDayName(date) {
@@ -13,23 +13,31 @@ function getYesterday() {
   return getDayName(d);
 }
 
+function getTomorrow() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return getDayName(d);
+}
+
 export default function WorkoutSchedulerPage() {
   const today     = getDayName(new Date());
   const yesterday = getYesterday();
+  const tomorrow  = getTomorrow();
 
   const schedule  = loadSchedule();
   const workouts  = loadWorkouts();
 
-  // Determine if yesterday was missed (scheduled, not completed, not Rest)
+  // Yesterday is missed if it was scheduled (non-Rest) and neither session is done
   const yesterdayMuscle = schedule[yesterday] || '';
   const yesterdayMissed =
     yesterdayMuscle &&
     yesterdayMuscle !== 'Rest' &&
-    !isDayComplete(yesterday);
+    !isDayComplete(yesterday, 'am') &&
+    !isDayComplete(yesterday, 'pm');
 
-  const todayMuscle = schedule[today] || '';
+  const todayMuscle    = schedule[today]    || '';
+  const tomorrowMuscle = schedule[tomorrow] || '';
 
-  // Pre-load stored data or fall back to defaults
   const sections = useMemo(() => {
     const list = [];
     if (yesterdayMissed) {
@@ -37,14 +45,23 @@ export default function WorkoutSchedulerPage() {
         day: yesterday,
         muscleGroup: yesterdayMuscle,
         isMissed: true,
-        data: workouts[yesterday] || defaultDayWorkout(),
+        isTomorrow: false,
+        data: ensureAmPm(workouts[yesterday]),
       });
     }
     list.push({
       day: today,
       muscleGroup: todayMuscle,
       isMissed: false,
-      data: workouts[today] || defaultDayWorkout(),
+      isTomorrow: false,
+      data: ensureAmPm(workouts[today]),
+    });
+    list.push({
+      day: tomorrow,
+      muscleGroup: tomorrowMuscle,
+      isMissed: false,
+      isTomorrow: true,
+      data: ensureAmPm(workouts[tomorrow]),
     });
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -59,18 +76,13 @@ export default function WorkoutSchedulerPage() {
         </p>
       </div>
 
-      {sections.length === 0 && (
-        <div className="bg-gray-100 rounded-lg px-6 py-8 text-center text-gray-500">
-          No workout scheduled for today. Set up your weekly schedule to get started.
-        </div>
-      )}
-
       {sections.map((s) => (
         <WorkoutSection
           key={s.day}
           day={s.day}
           muscleGroup={s.muscleGroup}
           isMissed={s.isMissed}
+          isTomorrow={s.isTomorrow}
           initialData={s.data}
         />
       ))}
