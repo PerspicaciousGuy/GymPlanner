@@ -2,12 +2,7 @@ const inputCls =
   'w-full border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400';
 
 /**
- * ExerciseRow — one table row.
- * Columns: Exercise (text) | Sets | Reps | Weight (kg) | Drop Set | Drop Weight (kg)
- *
- * Props:
- *   row      – { exercise, sets, reps, weight, dropSets, dropWeight }
- *   onChange – (updatedRow) => void
+ * ExerciseRow — one row: Exercise (free text) | Sets | Reps | Weight | Drop Set | Drop Weight
  */
 export default function ExerciseRow({ row, onChange }) {
   const { exercise, sets, reps, weight, dropSets, dropWeight } = row;
@@ -16,13 +11,13 @@ export default function ExerciseRow({ row, onChange }) {
 
   return (
     <tr className="hover:bg-gray-50 transition-colors align-top">
-      {/* Exercise (free text) */}
-      <td className="px-3 py-2 min-w-[200px]">
+      {/* Exercise */}
+      <td className="px-3 py-2 min-w-[180px]">
         <input
           type="text"
           value={exercise}
           onChange={(e) => set({ exercise: e.target.value })}
-          placeholder="e.g. Preacher Curl"
+          placeholder="e.g. Bench Press"
           className={inputCls}
         />
       </td>
