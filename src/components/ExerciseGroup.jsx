@@ -1,6 +1,6 @@
 import ExerciseRow from './ExerciseRow';
 
-const COLS = ['Muscle Group', 'Sub Muscle', 'Exercise', 'Sets', 'Reps', 'Weight (kg)', 'Notes'];
+const COLS = ['Muscle Group', 'Sub Muscle', 'Exercise', 'Sets', 'Reps', 'Weight (kg)'];
 
 /**
  * ExerciseGroup — one group card with 3 exercise rows.

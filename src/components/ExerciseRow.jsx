@@ -8,14 +8,14 @@ const inputCls =
 
 /**
  * ExerciseRow — one full row of the exercise table.
- * Columns: Muscle Group | Sub Muscle | Exercise | Sets | Reps | Weight | Notes
+ * Columns: Muscle Group | Sub Muscle | Exercise | Sets | Reps | Weight
  *
  * Props:
- *   row      – { muscle, subMuscle, exercise, sets, reps, weight, notes }
+ *   row      – { muscle, subMuscle, exercise, sets, reps, weight }
  *   onChange – (updatedRow) => void
  */
 export default function ExerciseRow({ row, onChange }) {
-  const { muscle, subMuscle, exercise, sets, reps, weight, notes } = row;
+  const { muscle, subMuscle, exercise, sets, reps, weight } = row;
 
   const subMuscles = muscle ? Object.keys(exerciseDatabase[muscle]) : [];
   const exercises = muscle && subMuscle ? exerciseDatabase[muscle][subMuscle] : [];
@@ -119,16 +119,6 @@ export default function ExerciseRow({ row, onChange }) {
         />
       </td>
 
-      {/* Notes */}
-      <td className="px-3 py-2">
-        <input
-          type="text"
-          value={notes}
-          onChange={(e) => set({ notes: e.target.value })}
-          placeholder="Optional notes…"
-          className={inputCls}
-        />
-      </td>
     </tr>
   );
 }
