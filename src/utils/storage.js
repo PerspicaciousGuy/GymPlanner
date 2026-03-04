@@ -23,7 +23,7 @@ export function saveSchedule(schedule) {
 
 // ─── Per-row / group defaults ─────────────────────────────────
 export function defaultRow() {
-  return { muscle: '', subMuscle: '', exercise: '', sets: '', reps: '', weight: '' };
+  return { muscle: '', subMuscle: '', exercise: '', sets: '', reps: '', weight: '', dropSets: '', dropWeight: '' };
 }
 
 export function defaultGroup() {

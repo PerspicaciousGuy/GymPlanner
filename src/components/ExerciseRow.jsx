@@ -15,7 +15,7 @@ const inputCls =
  *   onChange – (updatedRow) => void
  */
 export default function ExerciseRow({ row, onChange }) {
-  const { muscle, subMuscle, exercise, sets, reps, weight } = row;
+  const { muscle, subMuscle, exercise, sets, reps, weight, dropSets, dropWeight } = row;
 
   const subMuscles = muscle ? Object.keys(exerciseDatabase[muscle]) : [];
   const exercises = muscle && subMuscle ? exerciseDatabase[muscle][subMuscle] : [];
@@ -114,6 +114,32 @@ export default function ExerciseRow({ row, onChange }) {
           step="0.5"
           value={weight}
           onChange={(e) => set({ weight: e.target.value })}
+          placeholder="kg"
+          className={inputCls}
+        />
+      </td>
+
+      {/* Drop Set */}
+      <td className="px-3 py-2">
+        <input
+          type="number"
+          min="1"
+          max="99"
+          value={dropSets}
+          onChange={(e) => set({ dropSets: e.target.value })}
+          placeholder="e.g. 2"
+          className={inputCls}
+        />
+      </td>
+
+      {/* Drop Weight (kg) */}
+      <td className="px-3 py-2">
+        <input
+          type="number"
+          min="0"
+          step="0.5"
+          value={dropWeight}
+          onChange={(e) => set({ dropWeight: e.target.value })}
           placeholder="kg"
           className={inputCls}
         />
