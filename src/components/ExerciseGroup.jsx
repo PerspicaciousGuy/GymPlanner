@@ -21,13 +21,8 @@ export default function ExerciseGroup({ groupIndex, group, onChange }) {
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-      <div className="bg-gray-50 border-b border-gray-200 px-4 py-2 flex items-center justify-between">
+      <div className="bg-gray-50 border-b border-gray-200 px-4 py-2 flex items-center">
         <span className="font-semibold text-gray-700">Group {groupIndex + 1}</span>
-        {badge && (
-          <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full truncate max-w-xs">
-            {badge}
-          </span>
-        )}
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
