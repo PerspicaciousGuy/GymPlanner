@@ -1,3 +1,5 @@
+import { apiFetchAll, apiSaveSchedule, apiSaveWorkout, apiMarkComplete } from './api.js';
+
 // ─── Storage keys ────────────────────────────────────────────
 const SCHEDULE_KEY    = 'gymplanner_schedule';
 const WORKOUTS_KEY    = 'gymplanner_workouts';
@@ -74,4 +76,42 @@ export function markDayComplete(day, session = 'am') {
 
 export function isDayComplete(day, session = 'am') {
   return loadCompletion()[`${day}_${session}`] === true;
+}
+
+// ─── Async Sheets-sync variants ───────────────────────────────
+// Pull schedule + completion from Sheets and refresh localStorage cache.
+// Returns true on success, false if offline/failed.
+export async function syncFromSheets() {
+  const result = await apiFetchAll();
+  if (!result) return false;
+  const { schedule, completion } = result;
+  if (schedule && typeof schedule === 'object') {
+    localStorage.setItem(SCHEDULE_KEY, JSON.stringify(schedule));
+  }
+  if (completion && typeof completion === 'object') {
+    localStorage.setItem(COMPLETION_KEY, JSON.stringify(completion));
+  }
+  return true;
+}
+
+// Save locally (instant) then fire Sheets write in background.
+export function saveDayWorkoutWithSync(day, dayData) {
+  saveDayWorkout(day, dayData);
+  apiSaveWorkout(day, dayData).catch((err) =>
+    console.warn('[storage] Sheets workout sync failed:', err)
+  );
+}
+
+export function markDayCompleteWithSync(day, session = 'am') {
+  markDayComplete(day, session);
+  apiMarkComplete(day, session).catch((err) =>
+    console.warn('[storage] Sheets completion sync failed:', err)
+  );
+}
+
+export function saveScheduleWithSync(schedule) {
+  saveSchedule(schedule);
+  apiSaveSchedule(schedule).catch((err) =>
+    console.warn('[storage] Sheets schedule sync failed:', err)
+  );
 }

@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import WorkoutSection from '../components/WorkoutSection';
-import { loadSchedule, loadWorkouts, isDayComplete, ensureAmPm } from '../utils/storage';
+import { loadSchedule, loadWorkouts, isDayComplete, ensureAmPm, syncFromSheets } from '../utils/storage';
 
 function getDayName(date) {
   return date.toLocaleDateString('en-US', { weekday: 'long' });
@@ -79,20 +79,25 @@ export default function WorkoutSchedulerPage() {
   const yesterday = getYesterday();
   const tomorrow  = getTomorrow();
 
-  const schedule = loadSchedule();
-  const workouts = loadWorkouts();
+  // 'loading' while Sheets fetch is in-flight, 'ok' on success, 'offline' on failure
+  const [syncState, setSyncState] = useState('loading');
 
-  const yesterdayMuscle = schedule[yesterday] || '';
-  const yesterdayMissed =
-    yesterdayMuscle &&
-    yesterdayMuscle !== 'Rest' &&
-    !isDayComplete(yesterday, 'am') &&
-    !isDayComplete(yesterday, 'pm');
+  useEffect(() => {
+    syncFromSheets().then((ok) => setSyncState(ok ? 'ok' : 'offline'));
+  }, []);
 
-  const todayMuscle    = schedule[today]    || '';
-  const tomorrowMuscle = schedule[tomorrow] || '';
-
+  // Re-derive sections each time syncState changes so fresh Sheets data is shown
   const sections = useMemo(() => {
+    const schedule = loadSchedule();
+    const workouts = loadWorkouts();
+    const yesterdayMuscle = schedule[yesterday] || '';
+    const yesterdayMissed =
+      yesterdayMuscle &&
+      yesterdayMuscle !== 'Rest' &&
+      !isDayComplete(yesterday, 'am') &&
+      !isDayComplete(yesterday, 'pm');
+    const todayMuscle    = schedule[today]    || '';
+    const tomorrowMuscle = schedule[tomorrow] || '';
     const list = [];
     if (yesterdayMissed) {
       list.push({ day: yesterday, muscleGroup: yesterdayMuscle, isMissed: true,  isTomorrow: false, data: ensureAmPm(workouts[yesterday]) });
@@ -100,8 +105,7 @@ export default function WorkoutSchedulerPage() {
     list.push(  { day: today,    muscleGroup: todayMuscle,     isMissed: false, isTomorrow: false, data: ensureAmPm(workouts[today])    });
     list.push(  { day: tomorrow, muscleGroup: tomorrowMuscle,  isMissed: false, isTomorrow: true,  data: ensureAmPm(workouts[tomorrow]) });
     return list;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [syncState, today, yesterday, tomorrow]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col gap-4">
@@ -110,6 +114,12 @@ export default function WorkoutSchedulerPage() {
         <p className="text-gray-500 text-sm">
           {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
+        {syncState === 'loading' && (
+          <p className="text-xs text-blue-500 mt-1 animate-pulse">⟳ Syncing from Google Sheets…</p>
+        )}
+        {syncState === 'offline' && (
+          <p className="text-xs text-amber-500 mt-1">⚠ Offline — showing local data</p>
+        )}
       </div>
 
       {sections.map((s) => (

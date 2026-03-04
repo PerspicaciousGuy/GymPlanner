@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import ExerciseGroup from './ExerciseGroup';
-import { saveDayWorkout, markDayComplete, isDayComplete, ensureAmPm } from '../utils/storage';
+import { saveDayWorkoutWithSync, markDayCompleteWithSync, isDayComplete, ensureAmPm } from '../utils/storage';
 import { AM_TITLES, PM_TITLES } from '../data/ampmTitles';
 
 export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow, initialData, hideBadge }) {
@@ -17,15 +17,15 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
   };
 
   const handleSave = () => {
-    saveDayWorkout(day, dayData);
+    saveDayWorkoutWithSync(day, dayData);
     setSaveFlash(true);
     setTimeout(() => setSaveFlash(false), 2000);
   };
 
   const handleComplete = () => {
-    saveDayWorkout(day, dayData);
-    markDayComplete(day, 'am');
-    markDayComplete(day, 'pm');
+    saveDayWorkoutWithSync(day, dayData);
+    markDayCompleteWithSync(day, 'am');
+    markDayCompleteWithSync(day, 'pm');
     setCompleted(true);
   };
 
