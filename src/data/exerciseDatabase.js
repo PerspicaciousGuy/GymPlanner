@@ -84,6 +84,13 @@ export const exerciseDatabase = {
       "Hamstring Curls",
       "Knee Pivot Hyperextension",
       "Standing Barbell Ham Lifts"
+    ],
+    "Glutes": [
+      "Glute Bridge"
+    ],
+    "Calves": [
+      "Calf Press Machine",
+      "Standing Calf Raises"
     ]
   },
   "Shoulders": {
@@ -255,15 +262,6 @@ export const exerciseDatabase = {
       "Diagonal Leg Raises",
       "Hanging Tuck Oblique Crunch",
       "Hanging Full Oblique Crunch"
-    ]
-  },
-  "Calves and Glutes": {
-    "Glutes": [
-      "Glute Bridge"
-    ],
-    "Calves": [
-      "Calf Press Machine",
-      "Standing Calf Raises"
     ]
   }
 };
