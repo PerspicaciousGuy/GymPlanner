@@ -2,47 +2,47 @@
 const API_URL =
   'https://script.google.com/macros/s/AKfycbzDQ1XYShC-DkBkkhmanle8r1Zw8m8mJ1wY2naHuIwDMd-2TAbpnAzHrufpbRoNtbmt/exec';
 
-async function get(params = {}) {
-  const qs = new URLSearchParams({ ...params }).toString();
-  const res = await fetch(`${API_URL}?${qs}`);
-  if (!res.ok) throw new Error(`Sheets GET failed: ${res.status}`);
-  return res.json();
-}
-
-async function post(body = {}) {
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`Sheets POST failed: ${res.status}`);
+// All requests use GET to avoid Apps Script CORS issues with POST redirects.
+// Object values are JSON-encoded into query params.
+async function callApi(params = {}) {
+  const qs = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(params).map(([k, v]) => [
+        k,
+        typeof v === 'object' ? JSON.stringify(v) : v,
+      ])
+    )
+  ).toString();
+  const res = await fetch(`${API_URL}?${qs}`, { redirect: 'follow' });
+  if (!res.ok) throw new Error(`Sheets API failed: ${res.status}`);
   return res.json();
 }
 
 // ─── Schedule ─────────────────────────────────────────────────
 export async function apiGetSchedule() {
-  return get({ action: 'getSchedule' });
+  return callApi({ action: 'getSchedule' });
 }
 
 export async function apiSaveSchedule(data) {
-  return post({ action: 'saveSchedule', data });
+  return callApi({ action: 'saveSchedule', data });
 }
 
 // ─── Workouts ─────────────────────────────────────────────────
 export async function apiGetWorkouts(day) {
-  return get({ action: 'getWorkouts', day });
+  return callApi({ action: 'getWorkouts', day });
 }
 
 export async function apiSaveWorkout(day, data) {
-  return post({ action: 'saveWorkout', day, data });
+  return callApi({ action: 'saveWorkout', day, data });
 }
 
 // ─── Completion ───────────────────────────────────────────────
 export async function apiGetCompletion() {
-  return get({ action: 'getCompletion' });
+  return callApi({ action: 'getCompletion' });
 }
 
 export async function apiMarkComplete(day, session) {
-  return post({ action: 'markComplete', day, session });
+  return callApi({ action: 'markComplete', day, session });
 }
 
 // ─── Bulk sync helpers ────────────────────────────────────────

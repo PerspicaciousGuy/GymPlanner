@@ -85,8 +85,12 @@ export async function syncFromSheets() {
   const result = await apiFetchAll();
   if (!result) return false;
   const { schedule, completion } = result;
+  // Only overwrite local schedule if Sheets actually has muscle group data
   if (schedule && typeof schedule === 'object') {
-    localStorage.setItem(SCHEDULE_KEY, JSON.stringify(schedule));
+    const hasData = Object.values(schedule).some((v) => v && v !== '');
+    if (hasData) {
+      localStorage.setItem(SCHEDULE_KEY, JSON.stringify(schedule));
+    }
   }
   if (completion && typeof completion === 'object') {
     localStorage.setItem(COMPLETION_KEY, JSON.stringify(completion));
