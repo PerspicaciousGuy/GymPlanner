@@ -1,22 +1,31 @@
 import ExerciseRow from './ExerciseRow';
 
+const COLS = ['Muscle Group', 'Sub Muscle', 'Exercise', 'Sets', 'Reps', 'Weight (kg)', 'Notes'];
+
 /**
- * ExerciseGroup — card wrapper for one exercise group.
- * Renders a header and the 7-column ExerciseRow inside a scrollable table.
- *
+ * ExerciseGroup — one group card with 3 exercise rows.
  * Props:
- *   groupNumber – 1-based group index label
- *   row         – the row data object
- *   onChange    – (updatedRow) => void
+ *   groupIndex  – 0-based
+ *   group       – { rows: [row, row, row] }
+ *   onChange    – (updatedGroup) => void
  */
-export default function ExerciseGroup({ groupNumber, row, onChange }) {
+export default function ExerciseGroup({ groupIndex, group, onChange }) {
+  const handleRowChange = (rowIdx, updatedRow) => {
+    const updatedRows = group.rows.map((r, i) => (i === rowIdx ? updatedRow : r));
+    onChange({ ...group, rows: updatedRows });
+  };
+
+  // Badge: show distinct exercises selected in this group
+  const exercises = group.rows.map((r) => r.exercise).filter(Boolean);
+  const badge = exercises.length > 0 ? exercises.join(', ') : null;
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
       <div className="bg-gray-50 border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-        <span className="font-semibold text-gray-700">Group {groupNumber}</span>
-        {row.exercise && (
-          <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full">
-            {row.exercise}
+        <span className="font-semibold text-gray-700">Group {groupIndex + 1}</span>
+        {badge && (
+          <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full truncate max-w-xs">
+            {badge}
           </span>
         )}
       </div>
@@ -24,17 +33,21 @@ export default function ExerciseGroup({ groupNumber, row, onChange }) {
         <table className="min-w-full text-sm">
           <thead className="border-b border-gray-100 bg-gray-50">
             <tr>
-              <th className="px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap">Muscle Group</th>
-              <th className="px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap">Sub Muscle</th>
-              <th className="px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap">Exercise</th>
-              <th className="px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap">Sets</th>
-              <th className="px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap">Reps</th>
-              <th className="px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap">Weight (kg)</th>
-              <th className="px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap">Notes</th>
+              {COLS.map((col) => (
+                <th key={col} className="px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap">
+                  {col}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody>
-            <ExerciseRow row={row} onChange={onChange} />
+          <tbody className="divide-y divide-gray-50">
+            {group.rows.map((row, rowIdx) => (
+              <ExerciseRow
+                key={rowIdx}
+                row={row}
+                onChange={(updated) => handleRowChange(rowIdx, updated)}
+              />
+            ))}
           </tbody>
         </table>
       </div>
