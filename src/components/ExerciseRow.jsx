@@ -1,83 +1,30 @@
-import { exerciseDatabase, muscleGroupKeys } from '../data/exerciseDatabase';
-
-const selectCls =
-  'w-full border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-50 disabled:text-gray-400';
-
 const inputCls =
   'w-full border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400';
 
 /**
- * ExerciseRow — one full row of the exercise table.
- * Columns: Muscle Group | Sub Muscle | Exercise | Sets | Reps | Weight
+ * ExerciseRow — one table row.
+ * Columns: Exercise (text) | Sets | Reps | Weight (kg) | Drop Set | Drop Weight (kg)
  *
  * Props:
- *   row      – { muscle, subMuscle, exercise, sets, reps, weight }
+ *   row      – { exercise, sets, reps, weight, dropSets, dropWeight }
  *   onChange – (updatedRow) => void
  */
 export default function ExerciseRow({ row, onChange }) {
-  const { muscle, subMuscle, exercise, sets, reps, weight, dropSets, dropWeight } = row;
-
-  const subMuscles = muscle ? Object.keys(exerciseDatabase[muscle]) : [];
-  const exercises = muscle && subMuscle ? exerciseDatabase[muscle][subMuscle] : [];
+  const { exercise, sets, reps, weight, dropSets, dropWeight } = row;
 
   const set = (patch) => onChange({ ...row, ...patch });
 
-  const handleMuscleChange = (value) =>
-    set({ muscle: value, subMuscle: '', exercise: '' });
-
-  const handleSubMuscleChange = (value) =>
-    set({ subMuscle: value, exercise: '' });
-
   return (
     <tr className="hover:bg-gray-50 transition-colors align-top">
-      {/* Muscle Group */}
-      <td className="px-3 py-2">
-        <select
-          value={muscle}
-          onChange={(e) => handleMuscleChange(e.target.value)}
-          className={selectCls}
-        >
-          <option value="">— Select —</option>
-          {muscleGroupKeys.map((mg) => (
-            <option key={mg} value={mg}>
-              {mg}
-            </option>
-          ))}
-        </select>
-      </td>
-
-      {/* Sub Muscle */}
-      <td className="px-3 py-2">
-        <select
-          value={subMuscle}
-          onChange={(e) => handleSubMuscleChange(e.target.value)}
-          className={selectCls}
-          disabled={!muscle}
-        >
-          <option value="">— Select —</option>
-          {subMuscles.map((sm) => (
-            <option key={sm} value={sm}>
-              {sm}
-            </option>
-          ))}
-        </select>
-      </td>
-
-      {/* Exercise */}
-      <td className="px-3 py-2">
-        <select
+      {/* Exercise (free text) */}
+      <td className="px-3 py-2 min-w-[200px]">
+        <input
+          type="text"
           value={exercise}
           onChange={(e) => set({ exercise: e.target.value })}
-          className={selectCls}
-          disabled={!subMuscle}
-        >
-          <option value="">— Select —</option>
-          {exercises.map((ex) => (
-            <option key={ex} value={ex}>
-              {ex}
-            </option>
-          ))}
-        </select>
+          placeholder="e.g. Preacher Curl"
+          className={inputCls}
+        />
       </td>
 
       {/* Sets */}
