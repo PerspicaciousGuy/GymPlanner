@@ -32,9 +32,14 @@ export default function ExerciseGroup({ groupIndex, group, onChange }) {
                 <th
                   key={col}
                   className={`px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap${
-                    col === 'Exercise' ? ' min-w-[220px]'
-                    : col === 'Muscle Group' ? ' min-w-[140px]'
-                    : col === 'Sub Muscle' ? ' min-w-[140px]'
+                    col === 'Muscle Group'    ? ' min-w-[140px]'
+                    : col === 'Sub Muscle'   ? ' min-w-[140px]'
+                    : col === 'Exercise'     ? ' min-w-[220px]'
+                    : col === 'Sets'         ? ' min-w-[90px]'
+                    : col === 'Reps'         ? ' min-w-[90px]'
+                    : col === 'Weight (kg)'  ? ' min-w-[120px]'
+                    : col === 'Drop Set'     ? ' min-w-[100px]'
+                    : col === 'Drop Weight (kg)' ? ' min-w-[140px]'
                     : ''
                   }`}
                 >

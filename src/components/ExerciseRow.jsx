@@ -135,7 +135,7 @@ export default function ExerciseRow({ row, onChange }) {
       </td>
 
       {/* Sets */}
-      <td className="px-3 py-2">
+      <td className="px-3 py-2 min-w-[90px]">
         <input
           type="text"
           value={sets}
@@ -146,7 +146,7 @@ export default function ExerciseRow({ row, onChange }) {
       </td>
 
       {/* Reps */}
-      <td className="px-3 py-2">
+      <td className="px-3 py-2 min-w-[90px]">
         <input
           type="text"
           value={reps}
@@ -157,7 +157,7 @@ export default function ExerciseRow({ row, onChange }) {
       </td>
 
       {/* Weight (kg) */}
-      <td className="px-3 py-2">
+      <td className="px-3 py-2 min-w-[120px]">
         <input
           type="text"
           value={weight}
@@ -168,7 +168,7 @@ export default function ExerciseRow({ row, onChange }) {
       </td>
 
       {/* Drop Set */}
-      <td className="px-3 py-2">
+      <td className="px-3 py-2 min-w-[100px]">
         <input
           type="text"
           value={dropSets}
@@ -179,7 +179,7 @@ export default function ExerciseRow({ row, onChange }) {
       </td>
 
       {/* Drop Weight (kg) */}
-      <td className="px-3 py-2">
+      <td className="px-3 py-2 min-w-[140px]">
         <input
           type="text"
           value={dropWeight}
