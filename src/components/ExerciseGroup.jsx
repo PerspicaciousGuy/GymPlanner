@@ -29,7 +29,10 @@ export default function ExerciseGroup({ groupIndex, group, onChange }) {
           <thead className="border-b border-gray-100 bg-gray-50">
             <tr>
               {COLS.map((col) => (
-                <th key={col} className="px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap">
+                <th
+                  key={col}
+                  className={`px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap${col === 'Exercise' ? ' min-w-[220px]' : ''}`}
+                >
                   {col}
                 </th>
               ))}

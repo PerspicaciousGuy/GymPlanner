@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { exerciseDatabase, muscleGroupKeys } from '../data/exerciseDatabase';
+import { getCustomExercisesForSubMuscle, saveCustomExercise } from '../utils/storage';
+import { apiSaveCustomExercise } from '../utils/api';
 
 const selectCls =
   'w-full border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-50 disabled:text-gray-400';
@@ -17,8 +20,13 @@ const inputCls =
 export default function ExerciseRow({ row, onChange }) {
   const { muscle, subMuscle, exercise, sets, reps, weight, dropSets, dropWeight } = row;
 
+  const [isAdding, setIsAdding] = useState(false);
+  const [newExName, setNewExName] = useState('');
+
   const subMuscles = muscle ? Object.keys(exerciseDatabase[muscle]) : [];
-  const exercises = muscle && subMuscle ? exerciseDatabase[muscle][subMuscle] : [];
+  const dbExercises = muscle && subMuscle ? exerciseDatabase[muscle][subMuscle] : [];
+  const customExs = muscle && subMuscle ? getCustomExercisesForSubMuscle(muscle, subMuscle) : [];
+  const allExercises = [...dbExercises, ...customExs.filter((e) => !dbExercises.includes(e))];
 
   const set = (patch) => onChange({ ...row, ...patch });
 
@@ -27,6 +35,32 @@ export default function ExerciseRow({ row, onChange }) {
 
   const handleSubMuscleChange = (value) =>
     set({ subMuscle: value, exercise: '' });
+
+  const handleExerciseChange = (value) => {
+    if (value === '__ADD_NEW__') {
+      setIsAdding(true);
+      setNewExName('');
+    } else {
+      set({ exercise: value });
+    }
+  };
+
+  const handleConfirmNew = () => {
+    const name = newExName.trim();
+    if (!name) return;
+    saveCustomExercise(muscle, subMuscle, name);
+    apiSaveCustomExercise(muscle, subMuscle, name).catch((err) =>
+      console.warn('[api] saveCustomExercise failed:', err)
+    );
+    set({ exercise: name });
+    setIsAdding(false);
+    setNewExName('');
+  };
+
+  const handleCancelNew = () => {
+    setIsAdding(false);
+    setNewExName('');
+  };
 
   return (
     <tr className="hover:bg-gray-50 transition-colors align-top">
@@ -64,28 +98,46 @@ export default function ExerciseRow({ row, onChange }) {
       </td>
 
       {/* Exercise */}
-      <td className="px-3 py-2">
-        <select
-          value={exercise}
-          onChange={(e) => set({ exercise: e.target.value })}
-          className={selectCls}
-          disabled={!subMuscle}
-        >
-          <option value="">— Select —</option>
-          {exercises.map((ex) => (
-            <option key={ex} value={ex}>
-              {ex}
-            </option>
-          ))}
-        </select>
+      <td className="px-3 py-2 min-w-[220px]">
+        {isAdding ? (
+          <div className="flex gap-1 items-center">
+            <input
+              type="text"
+              autoFocus
+              value={newExName}
+              onChange={(e) => setNewExName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleConfirmNew();
+                if (e.key === 'Escape') handleCancelNew();
+              }}
+              placeholder="New exercise name…"
+              className={inputCls + ' flex-1'}
+            />
+            <button onClick={handleConfirmNew} className="text-green-600 hover:text-green-800 font-bold px-1 text-sm" title="Confirm">✓</button>
+            <button onClick={handleCancelNew} className="text-red-400 hover:text-red-600 px-1 text-sm" title="Cancel">✕</button>
+          </div>
+        ) : (
+          <select
+            value={exercise}
+            onChange={(e) => handleExerciseChange(e.target.value)}
+            className={selectCls}
+            disabled={!subMuscle}
+          >
+            <option value="">— Select —</option>
+            {allExercises.map((ex) => (
+              <option key={ex} value={ex}>
+                {ex}
+              </option>
+            ))}
+            {subMuscle && <option value="__ADD_NEW__">️ Add new exercise…</option>}
+          </select>
+        )}
       </td>
 
       {/* Sets */}
       <td className="px-3 py-2">
         <input
-          type="number"
-          min="1"
-          max="99"
+          type="text"
           value={sets}
           onChange={(e) => set({ sets: e.target.value })}
           placeholder="e.g. 4"
@@ -96,9 +148,7 @@ export default function ExerciseRow({ row, onChange }) {
       {/* Reps */}
       <td className="px-3 py-2">
         <input
-          type="number"
-          min="1"
-          max="999"
+          type="text"
           value={reps}
           onChange={(e) => set({ reps: e.target.value })}
           placeholder="e.g. 10"
@@ -109,9 +159,7 @@ export default function ExerciseRow({ row, onChange }) {
       {/* Weight (kg) */}
       <td className="px-3 py-2">
         <input
-          type="number"
-          min="0"
-          step="0.5"
+          type="text"
           value={weight}
           onChange={(e) => set({ weight: e.target.value })}
           placeholder="kg"
@@ -122,9 +170,7 @@ export default function ExerciseRow({ row, onChange }) {
       {/* Drop Set */}
       <td className="px-3 py-2">
         <input
-          type="number"
-          min="1"
-          max="99"
+          type="text"
           value={dropSets}
           onChange={(e) => set({ dropSets: e.target.value })}
           placeholder="e.g. 2"
@@ -135,9 +181,7 @@ export default function ExerciseRow({ row, onChange }) {
       {/* Drop Weight (kg) */}
       <td className="px-3 py-2">
         <input
-          type="number"
-          min="0"
-          step="0.5"
+          type="text"
           value={dropWeight}
           onChange={(e) => set({ dropWeight: e.target.value })}
           placeholder="kg"

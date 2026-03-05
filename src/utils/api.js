@@ -45,15 +45,25 @@ export async function apiMarkComplete(day, session) {
   return callApi({ action: 'markComplete', day, session });
 }
 
+// ─── Custom Exercises ─────────────────────────────────────────
+export async function apiGetCustomExercises() {
+  return callApi({ action: 'getCustomExercises' });
+}
+
+export async function apiSaveCustomExercise(muscle, subMuscle, name) {
+  return callApi({ action: 'saveCustomExercise', muscle, subMuscle, name });
+}
+
 // ─── Bulk sync helpers ────────────────────────────────────────
 // Returns { schedule, completion } or null on failure
 export async function apiFetchAll() {
   try {
-    const [schedule, completion] = await Promise.all([
+    const [schedule, completion, customExercises] = await Promise.all([
       apiGetSchedule(),
       apiGetCompletion(),
+      apiGetCustomExercises(),
     ]);
-    return { schedule, completion };
+    return { schedule, completion, customExercises };
   } catch (err) {
     console.warn('[api] fetchAll failed — offline?', err);
     return null;

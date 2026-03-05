@@ -1,9 +1,10 @@
 import { apiFetchAll, apiSaveSchedule, apiSaveWorkout, apiMarkComplete } from './api.js';
 
 // ─── Storage keys ────────────────────────────────────────────
-const SCHEDULE_KEY    = 'gymplanner_schedule';
-const WORKOUTS_KEY    = 'gymplanner_workouts';
-const COMPLETION_KEY  = 'gymplanner_completion';
+const SCHEDULE_KEY         = 'gymplanner_schedule';
+const WORKOUTS_KEY         = 'gymplanner_workouts';
+const COMPLETION_KEY       = 'gymplanner_completion';
+const CUSTOM_EXERCISES_KEY = 'gymplanner_custom_exercises';
 
 // ─── Helpers ──────────────────────────────────────────────────
 function safeLoad(key, fallback) {
@@ -78,13 +79,33 @@ export function isDayComplete(day, session = 'am') {
   return loadCompletion()[`${day}_${session}`] === true;
 }
 
+// ─── Custom Exercises ─────────────────────────────────────────
+export function loadCustomExercises() {
+  return safeLoad(CUSTOM_EXERCISES_KEY, {});
+}
+
+export function getCustomExercisesForSubMuscle(muscle, subMuscle) {
+  const all = loadCustomExercises();
+  return all[muscle]?.[subMuscle] ?? [];
+}
+
+export function saveCustomExercise(muscle, subMuscle, name) {
+  const all = loadCustomExercises();
+  if (!all[muscle]) all[muscle] = {};
+  if (!all[muscle][subMuscle]) all[muscle][subMuscle] = [];
+  if (!all[muscle][subMuscle].includes(name)) {
+    all[muscle][subMuscle].push(name);
+    localStorage.setItem(CUSTOM_EXERCISES_KEY, JSON.stringify(all));
+  }
+}
+
 // ─── Async Sheets-sync variants ───────────────────────────────
 // Pull schedule + completion from Sheets and refresh localStorage cache.
 // Returns true on success, false if offline/failed.
 export async function syncFromSheets() {
   const result = await apiFetchAll();
   if (!result) return false;
-  const { schedule, completion } = result;
+  const { schedule, completion, customExercises } = result;
   // Only overwrite local schedule if Sheets actually has muscle group data
   if (schedule && typeof schedule === 'object') {
     const hasData = Object.values(schedule).some((v) => v && v !== '');
@@ -94,6 +115,20 @@ export async function syncFromSheets() {
   }
   if (completion && typeof completion === 'object') {
     localStorage.setItem(COMPLETION_KEY, JSON.stringify(completion));
+  }
+  // Merge custom exercises from Sheets into local cache
+  if (customExercises && typeof customExercises === 'object') {
+    const local = loadCustomExercises();
+    for (const [mg, subMap] of Object.entries(customExercises)) {
+      if (!local[mg]) local[mg] = {};
+      for (const [sm, names] of Object.entries(subMap)) {
+        if (!local[mg][sm]) local[mg][sm] = [];
+        for (const name of names) {
+          if (!local[mg][sm].includes(name)) local[mg][sm].push(name);
+        }
+      }
+    }
+    localStorage.setItem(CUSTOM_EXERCISES_KEY, JSON.stringify(local));
   }
   return true;
 }
