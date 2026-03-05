@@ -31,7 +31,12 @@ export default function ExerciseGroup({ groupIndex, group, onChange }) {
               {COLS.map((col) => (
                 <th
                   key={col}
-                  className={`px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap${col === 'Exercise' ? ' min-w-[220px]' : ''}`}
+                  className={`px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap${
+                    col === 'Exercise' ? ' min-w-[220px]'
+                    : col === 'Muscle Group' ? ' min-w-[140px]'
+                    : col === 'Sub Muscle' ? ' min-w-[140px]'
+                    : ''
+                  }`}
                 >
                   {col}
                 </th>

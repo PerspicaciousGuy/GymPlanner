@@ -65,7 +65,7 @@ export default function ExerciseRow({ row, onChange }) {
   return (
     <tr className="hover:bg-gray-50 transition-colors align-top">
       {/* Muscle Group */}
-      <td className="px-3 py-2">
+      <td className="px-3 py-2 min-w-[140px]">
         <select
           value={muscle}
           onChange={(e) => handleMuscleChange(e.target.value)}
@@ -81,7 +81,7 @@ export default function ExerciseRow({ row, onChange }) {
       </td>
 
       {/* Sub Muscle */}
-      <td className="px-3 py-2">
+      <td className="px-3 py-2 min-w-[140px]">
         <select
           value={subMuscle}
           onChange={(e) => handleSubMuscleChange(e.target.value)}
