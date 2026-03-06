@@ -90,7 +90,7 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
   const groups = dayData[activeSession]?.groups ?? [];
 
   const tabCls = (session, done, skipped) => [
-    'flex flex-1 min-w-0 flex-wrap items-center gap-1.5 px-3 py-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer text-left',
+    'flex shrink-0 items-center gap-1.5 px-4 py-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap',
     activeSession === session
       ? 'border-blue-500 text-blue-700'
       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
@@ -122,27 +122,29 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
       ) : (
         <>
           {/* AM / PM tab switcher */}
-          <div className="flex border-b border-gray-200">
-            <button className={tabCls('am', amDone, amSkipped)} onClick={() => setActiveSession('am')}>
-              🌅 AM
-              {amDone && <span className="text-green-500 text-xs">✓</span>}
-              {amSkipped && <span className="text-gray-400 text-xs">⏭</span>}
-              {amTitle && (
-                <span className="basis-full text-gray-400 font-normal text-[11px] leading-4 whitespace-normal break-words sm:basis-auto sm:ml-1 sm:text-sm sm:leading-5">
-                  — {amTitle}
-                </span>
-              )}
-            </button>
-            <button className={tabCls('pm', pmDone, pmSkipped)} onClick={() => setActiveSession('pm')}>
-              🌆 PM
-              {pmDone && <span className="text-green-500 text-xs">✓</span>}
-              {pmSkipped && <span className="text-gray-400 text-xs">⏭</span>}
-              {pmTitle && (
-                <span className="basis-full text-gray-400 font-normal text-[11px] leading-4 whitespace-normal break-words sm:basis-auto sm:ml-1 sm:text-sm sm:leading-5">
-                  — {pmTitle}
-                </span>
-              )}
-            </button>
+          <div className="overflow-x-auto scrollbar-thin">
+            <div className="flex min-w-max border-b border-gray-200">
+              <button className={tabCls('am', amDone, amSkipped)} onClick={() => setActiveSession('am')}>
+                🌅 AM
+                {amDone && <span className="text-green-500 text-xs">✓</span>}
+                {amSkipped && <span className="text-gray-400 text-xs">⏭</span>}
+                {amTitle && (
+                  <span className="text-gray-400 font-normal ml-1 text-xs sm:text-sm">
+                    — {amTitle}
+                  </span>
+                )}
+              </button>
+              <button className={tabCls('pm', pmDone, pmSkipped)} onClick={() => setActiveSession('pm')}>
+                🌆 PM
+                {pmDone && <span className="text-green-500 text-xs">✓</span>}
+                {pmSkipped && <span className="text-gray-400 text-xs">⏭</span>}
+                {pmTitle && (
+                  <span className="text-gray-400 font-normal ml-1 text-xs sm:text-sm">
+                    — {pmTitle}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Exercise groups for active session */}
