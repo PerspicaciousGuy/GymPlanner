@@ -110,20 +110,31 @@ export function saveExerciseDbCache(db) {
   localStorage.setItem(EXERCISE_DB_KEY, JSON.stringify(db));
 }
 
+function isValidDb(db) {
+  // Guard against error responses like { error: '...' } being cached as the DB
+  return (
+    db &&
+    typeof db === 'object' &&
+    !db.error &&
+    Object.keys(db).length > 0 &&
+    Object.values(db).every((v) => v && typeof v === 'object' && !Array.isArray(v))
+  );
+}
+
 export function getMuscleGroupKeys() {
   const db = loadExerciseDb();
-  return db ? Object.keys(db) : Object.keys(exerciseDatabase);
+  return isValidDb(db) ? Object.keys(db) : Object.keys(exerciseDatabase);
 }
 
 export function getSubMusclesForMuscle(muscle) {
   const db = loadExerciseDb();
-  const src = db ?? exerciseDatabase;
+  const src = isValidDb(db) ? db : exerciseDatabase;
   return src[muscle] ? Object.keys(src[muscle]) : [];
 }
 
 export function getExercisesForSubMuscle(muscle, subMuscle) {
   const db = loadExerciseDb();
-  const src = db ?? exerciseDatabase;
+  const src = isValidDb(db) ? db : exerciseDatabase;
   return src[muscle]?.[subMuscle] ?? [];
 }
 
@@ -165,8 +176,8 @@ export async function syncFromSheets() {
   if (completion && typeof completion === 'object') {
     localStorage.setItem(COMPLETION_KEY, JSON.stringify(completion));
   }
-  // Cache exercise database from Sheets if it has data
-  if (exerciseDb && typeof exerciseDb === 'object' && Object.keys(exerciseDb).length > 0) {
+  // Cache exercise database from Sheets if it has valid structure
+  if (isValidDb(exerciseDb)) {
     saveExerciseDbCache(exerciseDb);
   }
   return true;
