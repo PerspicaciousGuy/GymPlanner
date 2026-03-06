@@ -33,10 +33,7 @@
 ## Google Sheets Setup
 
 - **Spreadsheet tabs:** Schedule, Workouts, Completion, ExerciseDatabase
-- **Apps Script URL:**
-  ```
-  https://script.google.com/macros/s/AKfycbzDQ1XYShC-DkBkkhmanle8r1Zw8m8mJ1wY2naHuIwDMd-2TAbpnAzHrufpbRoNtbmt/exec
-  ```
+- **Apps Script URL:** stored in `.env` as `VITE_APPS_SCRIPT_URL` — never committed to git
 - **All requests use GET** — objects are JSON-encoded into query params via `callApi()` in `src/utils/api.js`
 - **Supported actions** (pass as `?action=...`):
   - `getSchedule` / `saveSchedule`
@@ -164,6 +161,9 @@ On page load:
 - [x] Mark session Complete → clears that session's groups, other session untouched
 - [x] ExerciseDatabase tab in Sheets as source of truth (synced on load, validates response)
 - [x] Bad Sheets response guard (`isValidDb`) — prevents `{error: ...}` from polluting dropdown
+- [x] Strip empty rows before Sheets sync — blank PM sessions are never written to Sheets
+- [x] PWA support — installable on phone, offline caching via service worker
+- [x] Apps Script URL moved to `.env` (`VITE_APPS_SCRIPT_URL`) — no longer hardcoded in repo
 
 ---
 
@@ -174,6 +174,8 @@ On page load:
 - **Static `exerciseDatabase.js`** — kept as fallback when Sheets cache is absent or invalid
 - **AM titles are display-only** — `ampmTitles.js` is hardcoded; not editable from UI yet
 - **Single set of groups per session** — no separate AM/PM exercise split within one session
+- **Apps Script URL in `.env`** — never commit `.env`; add `VITE_APPS_SCRIPT_URL` in Vercel dashboard for production
+- **Firebase project exists but not yet integrated** — project `gymplanner-97ad0` created, Firestore ready; migration deferred
 
 ---
 
@@ -181,12 +183,14 @@ On page load:
 
 | Commit | Description |
 |---|---|
+| `2151a89` | Move Apps Script URL to env variable — remove hardcoded key from repo |
+| `6b18cfc` | Add vite-plugin-pwa to lockfile |
+| `db9ce96` | Add PWA support — manifest, service worker, icons, offline caching |
+| `7c2d040` | Independent AM/PM tabs, strip empty Sheets rows, updated README |
+| `4ed096e` | Add PROJECT_CONTEXT.md with full project context and custom instructions |
 | `957d0cb` | Replace window.confirm with inline styled delete confirmation prompt |
 | `7c24bdb` | Fix: validate exerciseDb response before caching to prevent {error} in dropdown |
 | `bd30b77` | ExerciseDB from Sheets, delete row, add row, dynamic groups, clear on complete |
-| `6e20980` | Widen all remaining table columns |
-| `f8723c6` | Widen Exercise column |
-| `00e6e01` | Switch all API calls to GET, fix syncFromSheets empty-data guard |
 
 ---
 
@@ -198,6 +202,12 @@ npm run dev       # starts Vite dev server on localhost:5173
 npm run build     # production build → dist/
 ```
 
+**Environment setup:** Copy `.env.example` to `.env` and fill in your Apps Script URL:
+```
+VITE_APPS_SCRIPT_URL=your_apps_script_url_here
+```
+Also add this variable in Vercel dashboard under Settings → Environment Variables.
+
 ---
 
 ## Pending / Future Ideas
@@ -205,7 +215,6 @@ npm run build     # production build → dist/
 - [ ] Schedule configurator UI (currently only editable in localStorage)
 - [ ] Workout history page (browse past days from Sheets Workouts tab)
 - [ ] Progressive overload tracking (highlight weight vs. last session)
-- [ ] PWA / offline support (manifest.json + service worker)
 - [ ] Weekly summary badges (Mon–Sun completion status at top)
-- [ ] Manual "Push to Sheets" button
-- [ ] MongoDB migration (replace Apps Script URL in `api.js` — rest of code stays same)
+- [ ] Notes field per group (free-text area below each group's table)
+- [ ] Firebase/Firestore migration (project `gymplanner-97ad0` already created — replace `api.js` only)
