@@ -21,6 +21,7 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
 
   const [isAdding, setIsAdding] = useState(false);
   const [newExName, setNewExName] = useState('');
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const muscleGroupKeys = getMuscleGroupKeys();
   const subMuscles = muscle ? getSubMusclesForMuscle(muscle) : [];
@@ -62,13 +63,19 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
 
   const handleDeleteExercise = () => {
     if (!exercise) return;
-    if (!window.confirm(`Delete "${exercise}" from the exercise database? This cannot be undone.`)) return;
+    setConfirmingDelete(true);
+  };
+
+  const handleConfirmDelete = () => {
     removeExerciseFromCache(muscle, subMuscle, exercise);
     apiDeleteExercise(muscle, subMuscle, exercise).catch((err) =>
       console.warn('[api] deleteExercise failed:', err)
     );
     set({ exercise: '' });
+    setConfirmingDelete(false);
   };
+
+  const handleCancelDelete = () => setConfirmingDelete(false);
 
   return (
     <tr className="hover:bg-gray-50 transition-colors align-top">
@@ -123,6 +130,20 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
             />
             <button onClick={handleConfirmNew} className="text-green-600 hover:text-green-800 font-bold px-1 text-sm" title="Confirm">✓</button>
             <button onClick={handleCancelNew} className="text-red-400 hover:text-red-600 px-1 text-sm" title="Cancel">✕</button>
+          </div>
+        ) : confirmingDelete ? (
+          <div className="flex flex-col gap-1 rounded border border-red-300 bg-red-50 px-2 py-1.5 text-sm">
+            <span className="text-red-700 font-medium leading-snug">Delete <span className="font-semibold">"{exercise}"</span> from database?</span>
+            <div className="flex gap-2">
+              <button
+                onClick={handleConfirmDelete}
+                className="flex-1 rounded bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1 transition-colors"
+              >Delete</button>
+              <button
+                onClick={handleCancelDelete}
+                className="flex-1 rounded border border-gray-300 hover:bg-gray-100 text-gray-600 text-xs font-semibold py-1 transition-colors"
+              >Cancel</button>
+            </div>
           </div>
         ) : (
           <div className="flex gap-1 items-center">
