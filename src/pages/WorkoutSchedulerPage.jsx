@@ -18,7 +18,7 @@ function getTomorrow() {
   return getDayName(d);
 }
 
-function AccordionSection({ section, defaultOpen }) {
+function AccordionSection({ section, defaultOpen, syncToken }) {
   const [open, setOpen] = useState(defaultOpen);
 
   const badgeEl = section.isMissed ? (
@@ -66,6 +66,7 @@ function AccordionSection({ section, defaultOpen }) {
             isMissed={section.isMissed}
             isTomorrow={section.isTomorrow}
             initialData={section.data}
+            syncToken={syncToken}
             hideBadge
           />
         </div>
@@ -127,6 +128,7 @@ export default function WorkoutSchedulerPage() {
           key={s.day}
           section={s}
           defaultOpen={!s.isTomorrow}
+          syncToken={syncState}
         />
       ))}
     </div>

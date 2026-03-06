@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ExerciseGroup from './ExerciseGroup';
 import { saveDayWorkoutWithSync, markDayCompleteWithSync, markDaySkippedWithSync, isDayComplete, isDaySkipped, ensureAmPm, defaultSession, defaultGroup } from '../utils/storage';
 import { AM_TITLES, PM_TITLES } from '../data/ampmTitles';
 
-export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow, initialData, hideBadge }) {
+export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken }) {
   const [dayData, setDayData] = useState(() => ensureAmPm(initialData));
   const [activeSession, setActiveSession] = useState('am');
   const [saveFlash, setSaveFlash] = useState(false);
@@ -11,6 +11,19 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
   const [pmDone, setPmDone] = useState(() => isDayComplete(day, 'pm') && !isDaySkipped(day, 'pm'));
   const [amSkipped, setAmSkipped] = useState(() => isDaySkipped(day, 'am'));
   const [pmSkipped, setPmSkipped] = useState(() => isDaySkipped(day, 'pm'));
+
+  useEffect(() => {
+    setDayData(ensureAmPm(initialData));
+  }, [initialData]);
+
+  useEffect(() => {
+    const amIsSkipped = isDaySkipped(day, 'am');
+    const pmIsSkipped = isDaySkipped(day, 'pm');
+    setAmSkipped(amIsSkipped);
+    setPmSkipped(pmIsSkipped);
+    setAmDone(isDayComplete(day, 'am') && !amIsSkipped);
+    setPmDone(isDayComplete(day, 'pm') && !pmIsSkipped);
+  }, [day, syncToken]);
 
   const handleGroupChange = (groupIdx, updatedGroup) => {
     setDayData((prev) => {
@@ -30,16 +43,23 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
     saveDayWorkoutWithSync(day, dayData);
     markDayCompleteWithSync(day, activeSession);
     setDayData((prev) => ({ ...prev, [activeSession]: defaultSession() }));
-    if (activeSession === 'am') setAmDone(true);
-    else setPmDone(true);
+    if (activeSession === 'am') {
+      setAmDone(true);
+      setAmSkipped(false);
+    } else {
+      setPmDone(true);
+      setPmSkipped(false);
+    }
   };
 
   const handleSkip = () => {
     markDaySkippedWithSync(day, activeSession);
     if (activeSession === 'am') {
+      setAmDone(false);
       setAmSkipped(true);
       setActiveSession('pm');
     } else {
+      setPmDone(false);
       setPmSkipped(true);
     }
   };

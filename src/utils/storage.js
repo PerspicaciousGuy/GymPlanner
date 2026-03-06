@@ -67,7 +67,41 @@ export function saveDayWorkout(day, dayData) {
 
 // ─── Completion ───────────────────────────────────────────────
 export function loadCompletion() {
-  return safeLoad(COMPLETION_KEY, {});
+  return normalizeCompletionMap(safeLoad(COMPLETION_KEY, {}));
+}
+
+function normalizeCompletionMap(raw) {
+  if (!raw || typeof raw !== 'object') return {};
+  const normalized = {};
+
+  const isTruthy = (v) => v === true || v === 1 || v === '1' || v === 'true';
+
+  for (const [key, value] of Object.entries(raw)) {
+    if (typeof key !== 'string') continue;
+
+    // Backward compatibility for server keys like "Monday_am_skipped": true
+    const skippedMatch = key.match(/^(.*)_(am|pm)_skipped$/);
+    if (skippedMatch) {
+      if (isTruthy(value) || String(value).toLowerCase() === 'skipped') {
+        normalized[`${skippedMatch[1]}_${skippedMatch[2]}`] = 'skipped';
+      }
+      continue;
+    }
+
+    if (!/(?:_am|_pm)$/.test(key)) continue;
+
+    const lower = String(value).toLowerCase();
+    if (lower === 'skipped' || lower === 'skip') {
+      normalized[key] = 'skipped';
+      continue;
+    }
+
+    if (isTruthy(value) && normalized[key] !== 'skipped') {
+      normalized[key] = true;
+    }
+  }
+
+  return normalized;
 }
 
 // session: 'am' | 'pm'
@@ -185,7 +219,18 @@ export async function syncFromSheets() {
     }
   }
   if (completion && typeof completion === 'object') {
-    localStorage.setItem(COMPLETION_KEY, JSON.stringify(completion));
+    const localCompletion = loadCompletion();
+    const remoteCompletion = normalizeCompletionMap(completion);
+    const mergedCompletion = { ...localCompletion, ...remoteCompletion };
+
+    // If local has skipped but remote only has complete, keep skipped so UI stays consistent.
+    for (const [key, value] of Object.entries(localCompletion)) {
+      if (value === 'skipped' && mergedCompletion[key] === true) {
+        mergedCompletion[key] = 'skipped';
+      }
+    }
+
+    localStorage.setItem(COMPLETION_KEY, JSON.stringify(mergedCompletion));
   }
   // Cache exercise database from Sheets if it has valid structure
   if (isValidDb(exerciseDb)) {
