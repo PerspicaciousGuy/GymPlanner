@@ -127,13 +127,21 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
               🌅 AM
               {amDone && <span className="text-green-500 text-xs">✓</span>}
               {amSkipped && <span className="text-gray-400 text-xs">⏭</span>}
-              {amTitle && <span className="hidden md:inline text-gray-400 font-normal ml-1">— {amTitle}</span>}
+              {amTitle && (
+                <span className="inline-block max-w-[32vw] truncate text-gray-400 font-normal ml-1 text-xs align-bottom sm:max-w-none sm:text-sm">
+                  — {amTitle}
+                </span>
+              )}
             </button>
             <button className={tabCls('pm', pmDone, pmSkipped)} onClick={() => setActiveSession('pm')}>
               🌆 PM
               {pmDone && <span className="text-green-500 text-xs">✓</span>}
               {pmSkipped && <span className="text-gray-400 text-xs">⏭</span>}
-              {pmTitle && <span className="hidden md:inline text-gray-400 font-normal ml-1">— {pmTitle}</span>}
+              {pmTitle && (
+                <span className="inline-block max-w-[32vw] truncate text-gray-400 font-normal ml-1 text-xs align-bottom sm:max-w-none sm:text-sm">
+                  — {pmTitle}
+                </span>
+              )}
             </button>
           </div>
 
