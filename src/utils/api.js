@@ -45,25 +45,35 @@ export async function apiMarkComplete(day, session) {
   return callApi({ action: 'markComplete', day, session });
 }
 
-// ─── Custom Exercises ─────────────────────────────────────────
-export async function apiGetCustomExercises() {
-  return callApi({ action: 'getCustomExercises' });
+// ─── Exercise Database ─────────────────────────────────────────
+export async function apiGetExerciseDatabase() {
+  return callApi({ action: 'getExerciseDatabase' });
 }
 
-export async function apiSaveCustomExercise(muscle, subMuscle, name) {
-  return callApi({ action: 'saveCustomExercise', muscle, subMuscle, name });
+export async function apiSaveExercise(muscle, subMuscle, name) {
+  return callApi({ action: 'saveExercise', muscle, subMuscle, name });
+}
+
+export async function apiDeleteExercise(muscle, subMuscle, name) {
+  return callApi({ action: 'deleteExercise', muscle, subMuscle, name });
 }
 
 // ─── Bulk sync helpers ────────────────────────────────────────
-// Returns { schedule, completion } or null on failure
+// Returns { schedule, completion, exerciseDb } or null on failure
 export async function apiFetchAll() {
   try {
-    const [schedule, completion, customExercises] = await Promise.all([
+    const [schedule, completion] = await Promise.all([
       apiGetSchedule(),
       apiGetCompletion(),
-      apiGetCustomExercises(),
     ]);
-    return { schedule, completion, customExercises };
+    // Exercise DB is optional — don't block if handler not yet in Apps Script
+    let exerciseDb = null;
+    try {
+      exerciseDb = await apiGetExerciseDatabase();
+    } catch {
+      console.warn('[api] Exercise DB fetch failed — using local fallback');
+    }
+    return { schedule, completion, exerciseDb };
   } catch (err) {
     console.warn('[api] fetchAll failed — offline?', err);
     return null;

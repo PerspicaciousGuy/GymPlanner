@@ -1,10 +1,12 @@
 import { apiFetchAll, apiSaveSchedule, apiSaveWorkout, apiMarkComplete } from './api.js';
+import { exerciseDatabase } from '../data/exerciseDatabase.js';
 
 // ─── Storage keys ────────────────────────────────────────────
 const SCHEDULE_KEY         = 'gymplanner_schedule';
 const WORKOUTS_KEY         = 'gymplanner_workouts';
 const COMPLETION_KEY       = 'gymplanner_completion';
 const CUSTOM_EXERCISES_KEY = 'gymplanner_custom_exercises';
+const EXERCISE_DB_KEY      = 'gymplanner_exercise_db';
 
 // ─── Helpers ──────────────────────────────────────────────────
 function safeLoad(key, fallback) {
@@ -34,7 +36,7 @@ export function defaultGroup() {
 }
 
 export function defaultSession() {
-  return { groups: [defaultGroup(), defaultGroup(), defaultGroup(), defaultGroup()] };
+  return { groups: [defaultGroup(), defaultGroup()] };
 }
 
 // Each day now stores two independent sessions: am and pm
@@ -99,13 +101,60 @@ export function saveCustomExercise(muscle, subMuscle, name) {
   }
 }
 
+// ─── Exercise Database (Sheets-sourced) ──────────────────────
+export function loadExerciseDb() {
+  return safeLoad(EXERCISE_DB_KEY, null);
+}
+
+export function saveExerciseDbCache(db) {
+  localStorage.setItem(EXERCISE_DB_KEY, JSON.stringify(db));
+}
+
+export function getMuscleGroupKeys() {
+  const db = loadExerciseDb();
+  return db ? Object.keys(db) : Object.keys(exerciseDatabase);
+}
+
+export function getSubMusclesForMuscle(muscle) {
+  const db = loadExerciseDb();
+  const src = db ?? exerciseDatabase;
+  return src[muscle] ? Object.keys(src[muscle]) : [];
+}
+
+export function getExercisesForSubMuscle(muscle, subMuscle) {
+  const db = loadExerciseDb();
+  const src = db ?? exerciseDatabase;
+  return src[muscle]?.[subMuscle] ?? [];
+}
+
+export function addExerciseToCache(muscle, subMuscle, name) {
+  let db = loadExerciseDb();
+  if (!db) {
+    // Initialize from static DB so existing exercises are preserved
+    db = JSON.parse(JSON.stringify(exerciseDatabase));
+  }
+  if (!db[muscle]) db[muscle] = {};
+  if (!db[muscle][subMuscle]) db[muscle][subMuscle] = [];
+  if (!db[muscle][subMuscle].includes(name)) {
+    db[muscle][subMuscle].push(name);
+    saveExerciseDbCache(db);
+  }
+}
+
+export function removeExerciseFromCache(muscle, subMuscle, name) {
+  const db = loadExerciseDb();
+  if (!db || !db[muscle]?.[subMuscle]) return;
+  db[muscle][subMuscle] = db[muscle][subMuscle].filter((e) => e !== name);
+  saveExerciseDbCache(db);
+}
+
 // ─── Async Sheets-sync variants ───────────────────────────────
 // Pull schedule + completion from Sheets and refresh localStorage cache.
 // Returns true on success, false if offline/failed.
 export async function syncFromSheets() {
   const result = await apiFetchAll();
   if (!result) return false;
-  const { schedule, completion, customExercises } = result;
+  const { schedule, completion, exerciseDb } = result;
   // Only overwrite local schedule if Sheets actually has muscle group data
   if (schedule && typeof schedule === 'object') {
     const hasData = Object.values(schedule).some((v) => v && v !== '');
@@ -116,19 +165,9 @@ export async function syncFromSheets() {
   if (completion && typeof completion === 'object') {
     localStorage.setItem(COMPLETION_KEY, JSON.stringify(completion));
   }
-  // Merge custom exercises from Sheets into local cache
-  if (customExercises && typeof customExercises === 'object') {
-    const local = loadCustomExercises();
-    for (const [mg, subMap] of Object.entries(customExercises)) {
-      if (!local[mg]) local[mg] = {};
-      for (const [sm, names] of Object.entries(subMap)) {
-        if (!local[mg][sm]) local[mg][sm] = [];
-        for (const name of names) {
-          if (!local[mg][sm].includes(name)) local[mg][sm].push(name);
-        }
-      }
-    }
-    localStorage.setItem(CUSTOM_EXERCISES_KEY, JSON.stringify(local));
+  // Cache exercise database from Sheets if it has data
+  if (exerciseDb && typeof exerciseDb === 'object' && Object.keys(exerciseDb).length > 0) {
+    saveExerciseDbCache(exerciseDb);
   }
   return true;
 }

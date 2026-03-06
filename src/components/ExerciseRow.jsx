@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { exerciseDatabase, muscleGroupKeys } from '../data/exerciseDatabase';
-import { getCustomExercisesForSubMuscle, saveCustomExercise } from '../utils/storage';
-import { apiSaveCustomExercise } from '../utils/api';
+import { getMuscleGroupKeys, getSubMusclesForMuscle, getExercisesForSubMuscle, addExerciseToCache, removeExerciseFromCache } from '../utils/storage';
+import { apiSaveExercise, apiDeleteExercise } from '../utils/api';
 
 const selectCls =
   'w-full border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-50 disabled:text-gray-400';
@@ -17,16 +16,15 @@ const inputCls =
  *   row      – { muscle, subMuscle, exercise, sets, reps, weight }
  *   onChange – (updatedRow) => void
  */
-export default function ExerciseRow({ row, onChange }) {
+export default function ExerciseRow({ row, onChange, onDelete }) {
   const { muscle, subMuscle, exercise, sets, reps, weight, dropSets, dropWeight } = row;
 
   const [isAdding, setIsAdding] = useState(false);
   const [newExName, setNewExName] = useState('');
 
-  const subMuscles = muscle ? Object.keys(exerciseDatabase[muscle]) : [];
-  const dbExercises = muscle && subMuscle ? exerciseDatabase[muscle][subMuscle] : [];
-  const customExs = muscle && subMuscle ? getCustomExercisesForSubMuscle(muscle, subMuscle) : [];
-  const allExercises = [...dbExercises, ...customExs.filter((e) => !dbExercises.includes(e))];
+  const muscleGroupKeys = getMuscleGroupKeys();
+  const subMuscles = muscle ? getSubMusclesForMuscle(muscle) : [];
+  const allExercises = muscle && subMuscle ? getExercisesForSubMuscle(muscle, subMuscle) : [];
 
   const set = (patch) => onChange({ ...row, ...patch });
 
@@ -48,9 +46,9 @@ export default function ExerciseRow({ row, onChange }) {
   const handleConfirmNew = () => {
     const name = newExName.trim();
     if (!name) return;
-    saveCustomExercise(muscle, subMuscle, name);
-    apiSaveCustomExercise(muscle, subMuscle, name).catch((err) =>
-      console.warn('[api] saveCustomExercise failed:', err)
+    addExerciseToCache(muscle, subMuscle, name);
+    apiSaveExercise(muscle, subMuscle, name).catch((err) =>
+      console.warn('[api] saveExercise failed:', err)
     );
     set({ exercise: name });
     setIsAdding(false);
@@ -60,6 +58,16 @@ export default function ExerciseRow({ row, onChange }) {
   const handleCancelNew = () => {
     setIsAdding(false);
     setNewExName('');
+  };
+
+  const handleDeleteExercise = () => {
+    if (!exercise) return;
+    if (!window.confirm(`Delete "${exercise}" from the exercise database? This cannot be undone.`)) return;
+    removeExerciseFromCache(muscle, subMuscle, exercise);
+    apiDeleteExercise(muscle, subMuscle, exercise).catch((err) =>
+      console.warn('[api] deleteExercise failed:', err)
+    );
+    set({ exercise: '' });
   };
 
   return (
@@ -117,20 +125,29 @@ export default function ExerciseRow({ row, onChange }) {
             <button onClick={handleCancelNew} className="text-red-400 hover:text-red-600 px-1 text-sm" title="Cancel">✕</button>
           </div>
         ) : (
-          <select
-            value={exercise}
-            onChange={(e) => handleExerciseChange(e.target.value)}
-            className={selectCls}
-            disabled={!subMuscle}
-          >
-            <option value="">— Select —</option>
-            {allExercises.map((ex) => (
-              <option key={ex} value={ex}>
-                {ex}
-              </option>
-            ))}
-            {subMuscle && <option value="__ADD_NEW__">️ Add new exercise…</option>}
-          </select>
+          <div className="flex gap-1 items-center">
+            <select
+              value={exercise}
+              onChange={(e) => handleExerciseChange(e.target.value)}
+              className={selectCls + ' flex-1'}
+              disabled={!subMuscle}
+            >
+              <option value="">— Select —</option>
+              {allExercises.map((ex) => (
+                <option key={ex} value={ex}>
+                  {ex}
+                </option>
+              ))}
+              {subMuscle && <option value="__ADD_NEW__">＋ Add new exercise…</option>}
+            </select>
+            {exercise && (
+              <button
+                onClick={handleDeleteExercise}
+                className="text-red-300 hover:text-red-600 px-1 text-base shrink-0 transition-colors"
+                title="Delete exercise from database"
+              >🗑</button>
+            )}
+          </div>
         )}
       </td>
 
@@ -187,6 +204,15 @@ export default function ExerciseRow({ row, onChange }) {
           placeholder="kg"
           className={inputCls}
         />
+      </td>
+
+      {/* Delete Row */}
+      <td className="px-2 py-2 text-center">
+        <button
+          onClick={onDelete}
+          className="text-gray-300 hover:text-red-500 transition-colors text-xl leading-none"
+          title="Remove row"
+        >×</button>
       </td>
 
     </tr>

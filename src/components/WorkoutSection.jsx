@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import ExerciseGroup from './ExerciseGroup';
-import { saveDayWorkoutWithSync, markDayCompleteWithSync, isDayComplete, ensureAmPm } from '../utils/storage';
+import { saveDayWorkoutWithSync, markDayCompleteWithSync, isDayComplete, ensureAmPm, defaultDayWorkout, defaultGroup } from '../utils/storage';
 import { AM_TITLES, PM_TITLES } from '../data/ampmTitles';
 
 export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow, initialData, hideBadge }) {
@@ -27,6 +27,8 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
     markDayCompleteWithSync(day, 'am');
     markDayCompleteWithSync(day, 'pm');
     setCompleted(true);
+    // Clear the exercise table so next session starts fresh
+    setDayData(defaultDayWorkout());
   };
 
   const badge = isMissed ? (
@@ -36,6 +38,13 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
   ) : (
     <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Today</span>
   );
+
+  const handleAddGroup = () => {
+    setDayData((prev) => ({
+      ...prev,
+      am: { ...prev.am, groups: [...prev.am.groups, defaultGroup()] },
+    }));
+  };
 
   const amTitle = AM_TITLES[day] || '';
   const pmTitle = PM_TITLES[day] || '';
@@ -75,6 +84,15 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
           onChange={(updated) => handleGroupChange('am', idx, updated)}
         />
       ))}
+
+      {!completed && (
+        <button
+          onClick={handleAddGroup}
+          className="self-start border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+        >
+          <span className="text-lg leading-none">+</span> Add Group
+        </button>
+      )}
 
       {/* Actions */}
       {completed ? (
