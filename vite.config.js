@@ -13,7 +13,7 @@ export default defineConfig({
       manifest: {
         name: 'GymPlanner',
         short_name: 'GymPlanner',
-        description: 'Daily workout scheduler with AM/PM sessions and Google Sheets sync',
+        description: 'Daily workout scheduler with AM/PM sessions and cloud sync',
         theme_color: '#2563eb',
         background_color: '#ffffff',
         display: 'standalone',
@@ -35,18 +35,6 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        runtimeCaching: [
-          {
-            // Cache Sheets API calls with network-first (fresh data preferred, cache as fallback)
-            urlPattern: /^https:\/\/script\.google\.com/,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'sheets-api-cache',
-              networkTimeoutSeconds: 5,
-              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 },
-            },
-          },
-        ],
       },
     }),
   ],

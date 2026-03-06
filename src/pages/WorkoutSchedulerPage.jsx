@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import WorkoutSection from '../components/WorkoutSection';
-import { loadSchedule, loadWorkouts, isDayComplete, ensureAmPm, syncFromSheets } from '../utils/storage';
+import { loadSessionTitles, loadWorkouts, isDayComplete, ensureAmPm, syncPlannerData } from '../utils/storage';
 
 function getDayName(date) {
   return date.toLocaleDateString('en-US', { weekday: 'long' });
@@ -75,30 +75,37 @@ function AccordionSection({ section, defaultOpen, syncToken }) {
   );
 }
 
-export default function WorkoutSchedulerPage() {
+export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
   const today     = getDayName(new Date());
   const yesterday = getYesterday();
   const tomorrow  = getTomorrow();
 
-  // 'loading' while Sheets fetch is in-flight, 'ok' on success, 'offline' on failure
+  // 'loading' while sync is in-flight, 'ok' on success, 'offline' on failure
   const [syncState, setSyncState] = useState('loading');
 
   useEffect(() => {
-    syncFromSheets().then((ok) => setSyncState(ok ? 'ok' : 'offline'));
-  }, []);
+    syncPlannerData().then((ok) => setSyncState(ok ? 'ok' : 'offline'));
+  }, [syncKey]);
 
-  // Re-derive sections each time syncState changes so fresh Sheets data is shown
+  // Re-derive sections each time syncState changes so fresh planner data is shown.
   const sections = useMemo(() => {
-    const schedule = loadSchedule();
+    const titles = loadSessionTitles();
     const workouts = loadWorkouts();
-    const yesterdayMuscle = schedule[yesterday] || '';
+
+    const hasPlannedTraining = (day) => {
+      const am = (titles.am?.[day] || '').trim().toLowerCase();
+      const pm = (titles.pm?.[day] || '').trim().toLowerCase();
+      const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ');
+      return !(isOff(am) && isOff(pm));
+    };
+
+    const yesterdayMuscle = '';
     const yesterdayMissed =
-      yesterdayMuscle &&
-      yesterdayMuscle !== 'Rest' &&
+      hasPlannedTraining(yesterday) &&
       !isDayComplete(yesterday, 'am') &&
       !isDayComplete(yesterday, 'pm');
-    const todayMuscle    = schedule[today]    || '';
-    const tomorrowMuscle = schedule[tomorrow] || '';
+    const todayMuscle = '';
+    const tomorrowMuscle = '';
     const list = [];
     if (yesterdayMissed) {
       list.push({ day: yesterday, muscleGroup: yesterdayMuscle, isMissed: true,  isTomorrow: false, data: ensureAmPm(workouts[yesterday]) });
@@ -116,7 +123,7 @@ export default function WorkoutSchedulerPage() {
           {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
         {syncState === 'loading' && (
-          <p className="text-xs text-blue-500 mt-1 animate-pulse">⟳ Syncing from Google Sheets…</p>
+          <p className="text-xs text-blue-500 mt-1 animate-pulse">⟳ Syncing planner data…</p>
         )}
         {syncState === 'offline' && (
           <p className="text-xs text-amber-500 mt-1">⚠ Offline — showing local data</p>

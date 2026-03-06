@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import ExerciseGroup from './ExerciseGroup';
-import { saveDayWorkoutWithSync, markDayCompleteWithSync, markDaySkippedWithSync, isDayComplete, isDaySkipped, ensureAmPm, defaultSession, defaultGroup } from '../utils/storage';
-import { AM_TITLES, PM_TITLES } from '../data/ampmTitles';
+import { saveDayWorkoutWithSync, markDayCompleteWithSync, markDaySkippedWithSync, isDayComplete, isDaySkipped, ensureAmPm, defaultSession, defaultGroup, loadSessionTitles } from '../utils/storage';
 
 export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken }) {
   const [dayData, setDayData] = useState(() => ensureAmPm(initialData));
@@ -25,6 +24,18 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
     setPmDone(isDayComplete(day, 'pm') && !pmIsSkipped);
   }, [day, syncToken]);
 
+  useEffect(() => {
+    const amLocked = amDone || amSkipped;
+    const pmLocked = pmDone || pmSkipped;
+
+    if (activeSession === 'am' && amLocked && !pmLocked) {
+      setActiveSession('pm');
+    }
+    if (activeSession === 'pm' && pmLocked && !amLocked) {
+      setActiveSession('am');
+    }
+  }, [activeSession, amDone, amSkipped, pmDone, pmSkipped]);
+
   const handleGroupChange = (groupIdx, updatedGroup) => {
     setDayData((prev) => {
       const s = { ...prev[activeSession] };
@@ -46,6 +57,7 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
     if (activeSession === 'am') {
       setAmDone(true);
       setAmSkipped(false);
+      setActiveSession('pm');
     } else {
       setPmDone(true);
       setPmSkipped(false);
@@ -82,19 +94,22 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
     <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Today</span>
   );
 
-  const amTitle = AM_TITLES[day] || '';
-  const pmTitle = PM_TITLES[day] || '';
+  const sessionTitles = loadSessionTitles();
+  const amTitle = sessionTitles.am[day] || '';
+  const pmTitle = sessionTitles.pm[day] || '';
   const sessionDone = activeSession === 'am' ? amDone : pmDone;
   const sessionSkipped = activeSession === 'am' ? amSkipped : pmSkipped;
   const bothDone = (amDone || amSkipped) && (pmDone || pmSkipped);
   const groups = dayData[activeSession]?.groups ?? [];
 
   const tabCls = (session, done, skipped) => [
-    'flex shrink-0 items-center gap-1.5 px-4 py-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap',
+    'flex shrink-0 items-center gap-1.5 px-4 py-2 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap',
     activeSession === session
       ? 'border-blue-500 text-blue-700'
-      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-    (done || skipped) ? 'opacity-70' : '',
+      : 'border-transparent text-gray-500',
+    (done || skipped)
+      ? 'opacity-65 cursor-not-allowed'
+      : 'cursor-pointer hover:text-gray-700 hover:border-gray-300',
   ].join(' ');
 
   return (
@@ -124,20 +139,38 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
           {/* AM / PM tab switcher */}
           <div className="overflow-x-auto scrollbar-thin">
             <div className="flex min-w-max border-b border-gray-200">
-              <button className={tabCls('am', amDone, amSkipped)} onClick={() => setActiveSession('am')}>
+              <button
+                className={tabCls('am', amDone, amSkipped)}
+                onClick={() => setActiveSession('am')}
+                disabled={amDone || amSkipped}
+              >
                 🌅 AM
                 {amDone && <span className="text-green-500 text-xs">✓</span>}
                 {amSkipped && <span className="text-gray-400 text-xs">⏭</span>}
+                {(amDone || amSkipped) && (
+                  <span className="text-gray-400 text-[10px]" title="Locked session">
+                    🔒
+                  </span>
+                )}
                 {amTitle && (
                   <span className="text-gray-400 font-normal ml-1 text-xs sm:text-sm">
                     — {amTitle}
                   </span>
                 )}
               </button>
-              <button className={tabCls('pm', pmDone, pmSkipped)} onClick={() => setActiveSession('pm')}>
+              <button
+                className={tabCls('pm', pmDone, pmSkipped)}
+                onClick={() => setActiveSession('pm')}
+                disabled={pmDone || pmSkipped}
+              >
                 🌆 PM
                 {pmDone && <span className="text-green-500 text-xs">✓</span>}
                 {pmSkipped && <span className="text-gray-400 text-xs">⏭</span>}
+                {(pmDone || pmSkipped) && (
+                  <span className="text-gray-400 text-[10px]" title="Locked session">
+                    🔒
+                  </span>
+                )}
                 {pmTitle && (
                   <span className="text-gray-400 font-normal ml-1 text-xs sm:text-sm">
                     — {pmTitle}

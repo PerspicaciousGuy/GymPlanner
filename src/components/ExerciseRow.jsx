@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { getMuscleGroupKeys, getSubMusclesForMuscle, getExercisesForSubMuscle, addExerciseToCache, removeExerciseFromCache } from '../utils/storage';
-import { apiSaveExercise, apiDeleteExercise } from '../utils/api';
+import { getMuscleGroupKeys, getSubMusclesForMuscle, getExercisesForSubMuscle, addExerciseWithSync, removeExerciseWithSync } from '../utils/storage';
 
 const selectCls =
   'w-full border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-50 disabled:text-gray-400';
@@ -47,10 +46,7 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
   const handleConfirmNew = () => {
     const name = newExName.trim();
     if (!name) return;
-    addExerciseToCache(muscle, subMuscle, name);
-    apiSaveExercise(muscle, subMuscle, name).catch((err) =>
-      console.warn('[api] saveExercise failed:', err)
-    );
+    addExerciseWithSync(muscle, subMuscle, name);
     set({ exercise: name });
     setIsAdding(false);
     setNewExName('');
@@ -67,10 +63,7 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
   };
 
   const handleConfirmDelete = () => {
-    removeExerciseFromCache(muscle, subMuscle, exercise);
-    apiDeleteExercise(muscle, subMuscle, exercise).catch((err) =>
-      console.warn('[api] deleteExercise failed:', err)
-    );
+    removeExerciseWithSync(muscle, subMuscle, exercise);
     set({ exercise: '' });
     setConfirmingDelete(false);
   };

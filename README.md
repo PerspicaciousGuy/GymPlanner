@@ -1,100 +1,59 @@
-# 💪 GymPlanner
+# GymPlanner
 
-A personal daily workout scheduler with Google Sheets as a backend. Log AM and PM sessions independently, track exercises per muscle group, and sync everything to a spreadsheet — all from a clean React UI. Installable as a PWA on your phone.
-
----
+GymPlanner is a daily workout scheduler with AM/PM planning, local-first persistence, and Firebase cloud sync for multi-device use.
 
 ## Features
 
-- **AM / PM session tabs** — log morning and evening workouts independently; complete each separately
-- **Exercise table** — per-group rows with Muscle Group, Sub Muscle, Exercise, Sets, Reps, Weight, Drop Set, Drop Weight
-- **Exercise database** — sourced from a Google Sheets tab; add or delete exercises directly from the UI
-- **Dynamic groups & rows** — start with 2 groups, add more with a button; add/remove rows per group
-- **Google Sheets sync** — all data persists to Sheets in the background; localStorage used as instant cache
-- **Missed workout detection** — yesterday shows a "Missed Workout" badge if neither AM nor PM was completed
-- **Clean Sheets output** — only rows with actual data are written; blank sessions are never saved
-- **PWA** — installable on Android and iOS; loads from cache when offline
-
----
+- AM/PM session planning per day with independent completion state
+- Workout logging by group and row with editable exercise fields
+- Data Console with spreadsheet-style tabs for session titles, workouts, completion, and exercise DB
+- Local-first writes for responsive UI and offline resilience
+- Firebase Auth + Firestore sync when signed in
+- PWA support for installable mobile/desktop usage
 
 ## Tech Stack
 
-| | |
+| Layer | Tech |
 |---|---|
-| Frontend | React 18 + Vite + TailwindCSS |
-| Backend | Google Sheets + Apps Script |
-| Storage | localStorage (cache) + Sheets (persistent) |
+| Frontend | React + Vite + Tailwind CSS |
+| Cloud | Firebase Authentication + Firestore |
+| Local persistence | localStorage |
 | PWA | vite-plugin-pwa + Workbox |
-
----
 
 ## Getting Started
 
 ```bash
-# Install dependencies
 npm install
-
-# Copy env template and fill in your Apps Script URL
 copy .env.example .env
-
-# Start dev server
 npm run dev
-
-# Production build
-npm run build
 ```
 
-Dev server runs at `http://localhost:5173`.
-
----
+Dev server: `http://localhost:5173`
 
 ## Environment Variables
 
-Create a `.env` file in the project root (never commit this):
+Set these values in `.env`:
 
-```
-VITE_APPS_SCRIPT_URL=your_apps_script_deployment_url_here
-```
-
-For Vercel: add `VITE_APPS_SCRIPT_URL` under **Settings → Environment Variables** in your Vercel project dashboard.
-
----
-
-## Google Sheets Setup
-
-The app expects a Google Spreadsheet with these four tabs:
-
-| Tab | Purpose |
-|---|---|
-| `Schedule` | Maps each weekday to a muscle group |
-| `Workouts` | Stores logged exercise rows per day/session |
-| `Completion` | Tracks which day/session has been marked complete |
-| `ExerciseDatabase` | Source of truth for the exercise dropdown |
-
-All API calls use **GET requests** — no POST — to avoid Apps Script CORS redirect issues.
-
----
-
-## Project Structure
-
-```
-src/
-├── pages/
-│   ├── WorkoutSchedulerPage.jsx   # Main page — today / yesterday / tomorrow accordion
-│   └── SchedulerPage.jsx          # Muscle group schedule config
-├── components/
-│   ├── WorkoutSection.jsx         # Day card with AM/PM tabs
-│   ├── ExerciseGroup.jsx          # Group card — table + add/delete rows
-│   ├── ExerciseRow.jsx            # Single exercise row
-│   └── Navbar.jsx
-├── utils/
-│   ├── api.js                     # All Sheets API calls
-│   └── storage.js                 # localStorage helpers + sync wrappers
-└── data/
-    ├── ampmTitles.js              # Static AM/PM titles per weekday
-    └── exerciseDatabase.js        # Fallback exercise list (used if Sheets cache missing)
+```env
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
 ```
 
----
+## Firebase Setup
 
-> For full developer context, architecture decisions, and Copilot instructions see [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md).
+1. Create a Firebase project and Web app.
+2. Copy the Web app config values into `.env`.
+3. Enable `Email/Password` in Firebase Authentication.
+4. Publish Firestore rules from `firestore.rules`.
+
+## Build
+
+```bash
+npm run build
+```
+
+For detailed project context, see `PROJECT_CONTEXT.md`.
