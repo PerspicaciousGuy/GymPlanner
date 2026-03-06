@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import ExerciseGroup from './ExerciseGroup';
-import { saveDayWorkoutWithSync, markDayCompleteWithSync, isDayComplete, ensureAmPm, defaultDayWorkout, defaultGroup } from '../utils/storage';
+import { saveDayWorkoutWithSync, markDayCompleteWithSync, isDayComplete, ensureAmPm, defaultSession, defaultGroup } from '../utils/storage';
 import { AM_TITLES, PM_TITLES } from '../data/ampmTitles';
 
 export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow, initialData, hideBadge }) {
   const [dayData, setDayData] = useState(() => ensureAmPm(initialData));
+  const [activeSession, setActiveSession] = useState('am');
   const [saveFlash, setSaveFlash] = useState(false);
-  const [completed, setCompleted]  = useState(() => isDayComplete(day, 'am') && isDayComplete(day, 'pm'));
+  const [amDone, setAmDone] = useState(() => isDayComplete(day, 'am'));
+  const [pmDone, setPmDone] = useState(() => isDayComplete(day, 'pm'));
 
-  const handleGroupChange = (session, groupIdx, updatedGroup) => {
+  const handleGroupChange = (groupIdx, updatedGroup) => {
     setDayData((prev) => {
-      const s = { ...prev[session] };
+      const s = { ...prev[activeSession] };
       s.groups = s.groups.map((g, i) => (i === groupIdx ? updatedGroup : g));
-      return { ...prev, [session]: s };
+      return { ...prev, [activeSession]: s };
     });
   };
 
@@ -24,11 +26,20 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
 
   const handleComplete = () => {
     saveDayWorkoutWithSync(day, dayData);
-    markDayCompleteWithSync(day, 'am');
-    markDayCompleteWithSync(day, 'pm');
-    setCompleted(true);
-    // Clear the exercise table so next session starts fresh
-    setDayData(defaultDayWorkout());
+    markDayCompleteWithSync(day, activeSession);
+    setDayData((prev) => ({ ...prev, [activeSession]: defaultSession() }));
+    if (activeSession === 'am') setAmDone(true);
+    else setPmDone(true);
+  };
+
+  const handleAddGroup = () => {
+    setDayData((prev) => ({
+      ...prev,
+      [activeSession]: {
+        ...prev[activeSession],
+        groups: [...prev[activeSession].groups, defaultGroup()],
+      },
+    }));
   };
 
   const badge = isMissed ? (
@@ -39,17 +50,18 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
     <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Today</span>
   );
 
-  const handleAddGroup = () => {
-    setDayData((prev) => ({
-      ...prev,
-      am: { ...prev.am, groups: [...prev.am.groups, defaultGroup()] },
-    }));
-  };
-
   const amTitle = AM_TITLES[day] || '';
   const pmTitle = PM_TITLES[day] || '';
-  // Use AM groups as the single workout log (same data, one set of groups)
-  const groups = dayData.am?.groups ?? [];
+  const sessionDone = activeSession === 'am' ? amDone : pmDone;
+  const groups = dayData[activeSession]?.groups ?? [];
+
+  const tabCls = (session, done) => [
+    'flex items-center gap-1.5 px-4 py-2 text-sm font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap',
+    activeSession === session
+      ? 'border-blue-500 text-blue-700'
+      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+    done ? 'opacity-70' : '',
+  ].join(' ');
 
   return (
     <section className="flex flex-col gap-4">
@@ -63,29 +75,31 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
         </div>
       )}
 
-      {/* AM / PM plain text info */}
-      <div className="flex flex-col gap-1">
-        <p className="text-sm text-gray-700">
-          <span className="font-semibold text-amber-700">🌅 AM</span>
-          {amTitle ? <span className="text-gray-500 ml-2">— {amTitle}</span> : null}
-        </p>
-        <p className="text-sm text-gray-700">
-          <span className="font-semibold text-slate-600">🌆 PM</span>
-          {pmTitle ? <span className="text-gray-500 ml-2">— {pmTitle}</span> : null}
-        </p>
+      {/* AM / PM tab switcher */}
+      <div className="flex border-b border-gray-200">
+        <button className={tabCls('am', amDone)} onClick={() => setActiveSession('am')}>
+          🌅 AM
+          {amDone && <span className="text-green-500 text-xs">✓</span>}
+          {amTitle && <span className="hidden md:inline text-gray-400 font-normal ml-1">— {amTitle}</span>}
+        </button>
+        <button className={tabCls('pm', pmDone)} onClick={() => setActiveSession('pm')}>
+          🌆 PM
+          {pmDone && <span className="text-green-500 text-xs">✓</span>}
+          {pmTitle && <span className="hidden md:inline text-gray-400 font-normal ml-1">— {pmTitle}</span>}
+        </button>
       </div>
 
-      {/* Exercise groups */}
+      {/* Exercise groups for active session */}
       {groups.map((group, idx) => (
         <ExerciseGroup
           key={idx}
           groupIndex={idx}
           group={group}
-          onChange={(updated) => handleGroupChange('am', idx, updated)}
+          onChange={(updated) => handleGroupChange(idx, updated)}
         />
       ))}
 
-      {!completed && (
+      {!sessionDone && (
         <button
           onClick={handleAddGroup}
           className="self-start border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
@@ -95,10 +109,12 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
       )}
 
       {/* Actions */}
-      {completed ? (
+      {sessionDone ? (
         <div className="bg-green-50 border border-green-200 rounded-lg px-5 py-3 flex items-center gap-2">
           <span className="text-green-600">✓</span>
-          <span className="text-green-800 font-semibold text-sm">{day} workout marked as complete!</span>
+          <span className="text-green-800 font-semibold text-sm">
+            {day} {activeSession.toUpperCase()} session marked as complete!
+          </span>
         </div>
       ) : (
         <div className="flex items-center gap-3 flex-wrap">
@@ -106,7 +122,7 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
             Save Workout
           </button>
           <button onClick={handleComplete} className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded transition-colors shadow-sm text-sm">
-            Mark Complete
+            Mark {activeSession.toUpperCase()} Complete
           </button>
           {saveFlash && <span className="text-green-600 font-medium text-sm">✓ Saved!</span>}
         </div>

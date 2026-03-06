@@ -183,12 +183,34 @@ export async function syncFromSheets() {
   return true;
 }
 
+// Strip blank rows/groups/sessions before sending to Sheets to avoid clutter.
+// localStorage always keeps the full data so the UI is unaffected.
+function stripEmptyRows(dayData) {
+  const isRowFilled = (row) =>
+    ['muscle', 'subMuscle', 'exercise', 'sets', 'reps', 'weight', 'dropSets', 'dropWeight']
+      .some((k) => row[k] && String(row[k]).trim() !== '');
+
+  const stripped = {};
+  for (const session of ['am', 'pm']) {
+    if (!dayData[session]) continue;
+    const groups = (dayData[session].groups ?? [])
+      .map((g) => ({ ...g, rows: (g.rows ?? []).filter(isRowFilled) }))
+      .filter((g) => g.rows.length > 0);
+    if (groups.length > 0) stripped[session] = { groups };
+  }
+  return stripped;
+}
+
 // Save locally (instant) then fire Sheets write in background.
 export function saveDayWorkoutWithSync(day, dayData) {
   saveDayWorkout(day, dayData);
-  apiSaveWorkout(day, dayData).catch((err) =>
-    console.warn('[storage] Sheets workout sync failed:', err)
-  );
+  const sheetsData = stripEmptyRows(dayData);
+  // Only send to Sheets if there's at least one filled session
+  if (Object.keys(sheetsData).length > 0) {
+    apiSaveWorkout(day, sheetsData).catch((err) =>
+      console.warn('[storage] Sheets workout sync failed:', err)
+    );
+  }
 }
 
 export function markDayCompleteWithSync(day, session = 'am') {

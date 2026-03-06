@@ -7,17 +7,14 @@
 ## Custom Instructions
 
 <!-- Add your personal instructions here. Copilot will follow these every session. -->
-<!-- Examples:
-- Always push code after making changes
-- Prefer Tailwind utility classes over custom CSS
-- Never use window.confirm — use inline styled prompts instead
--->
 
 - Never use `window.confirm` — always use inline styled prompts / modals
-- Push to GitHub after every completed feature unless told otherwise
+- Don't Push to GitHub after every completed feature unless told otherwise because I want to test the feature locally first then push it to prod
 - Keep all API calls as GET requests (no POST) to avoid Apps Script CORS issues
 - Prefer editing existing files over creating new ones
 - Keep solutions simple — no over-engineering or extra abstractions
+- Always ask before starting coding, because first i want to have a proper discussion about the feature that is being implemented.
+- Confirm everything before doing it yourself
 
 ---
 
