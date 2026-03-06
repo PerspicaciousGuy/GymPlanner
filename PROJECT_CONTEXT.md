@@ -35,9 +35,11 @@ Firestore path:
 - `src/hooks/useFirebaseAuth.js`: auth state, sign in/out helpers
 - `src/utils/cloudSync.js`: Firestore read/write helpers
 - `src/utils/storage.js`: local persistence plus cloud sync wrappers
+- `src/utils/exportWorkbook.js`: browser-side `.xlsx` export helpers
 - `src/pages/WorkoutSchedulerPage.jsx`: main workout page and sync bootstrap
 - `src/pages/DataConsolePage.jsx`: spreadsheet-style editing across planner datasets
-- `src/components/Navbar.jsx`: page navigation and cloud auth actions
+- `src/components/Navbar.jsx`: page navigation, auth actions, migration, local-clear/rehydrate actions
+- `src/components/WorkoutSection.jsx`: AM/PM workout flow with auto-switch and tab locking
 - `firestore.rules`: security rules template for planner docs
 
 ## Sync Behavior
@@ -46,6 +48,18 @@ Firestore path:
 - If signed in and Firebase is configured, writes are mirrored to Firestore.
 - On page bootstrap, cloud data is merged into local state.
 - If cloud sync fails, app continues using local data.
+
+## Data Console Export
+
+- Uses `xlsx` to generate real `.xlsx` files in-browser.
+- Supports `Export Current Tab` and `Export All Tabs`.
+- Export tabs: `Sessions`, `Workouts`, `Completion`, `ExerciseDB`.
+
+## Workout Session UX Rules
+
+- Completing AM auto-switches to PM.
+- Completed or skipped session tabs are locked (non-clickable) and show a lock icon.
+- If AM is already locked and PM is still open, PM becomes the active session.
 
 ## Environment Variables
 
