@@ -78,7 +78,18 @@ export function markDayComplete(day, session = 'am') {
 }
 
 export function isDayComplete(day, session = 'am') {
-  return loadCompletion()[`${day}_${session}`] === true;
+  const val = loadCompletion()[`${day}_${session}`];
+  return val === true || val === 'skipped';
+}
+
+export function isDaySkipped(day, session = 'am') {
+  return loadCompletion()[`${day}_${session}`] === 'skipped';
+}
+
+export function markDaySkipped(day, session = 'am') {
+  const all = loadCompletion();
+  all[`${day}_${session}`] = 'skipped';
+  localStorage.setItem(COMPLETION_KEY, JSON.stringify(all));
 }
 
 // ─── Custom Exercises ─────────────────────────────────────────
@@ -217,6 +228,13 @@ export function markDayCompleteWithSync(day, session = 'am') {
   markDayComplete(day, session);
   apiMarkComplete(day, session).catch((err) =>
     console.warn('[storage] Sheets completion sync failed:', err)
+  );
+}
+
+export function markDaySkippedWithSync(day, session = 'am') {
+  markDaySkipped(day, session);
+  apiMarkComplete(day, `${session}_skipped`).catch((err) =>
+    console.warn('[storage] Sheets skip sync failed:', err)
   );
 }
 
