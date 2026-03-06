@@ -1,6 +1,5 @@
 // ─── Google Sheets (Apps Script) API ─────────────────────────
-const API_URL =
-  'https://script.google.com/macros/s/AKfycbzDQ1XYShC-DkBkkhmanle8r1Zw8m8mJ1wY2naHuIwDMd-2TAbpnAzHrufpbRoNtbmt/exec';
+const API_URL = import.meta.env.VITE_APPS_SCRIPT_URL;
 
 // All requests use GET to avoid Apps Script CORS issues with POST redirects.
 // Object values are JSON-encoded into query params.
