@@ -15,6 +15,9 @@ import {
   saveSessionTitlesWithSync,
 } from '../utils/storage';
 import { exportPlannerWorkbook } from '../utils/exportWorkbook';
+import { importPlannerWorkbook } from '../utils/importWorkbook';
+import { useRef } from 'react';
+import AppleSelect from '../components/AppleSelect';
 
 const TABS = [
   { key: 'schedule', label: 'Sessions' },
@@ -214,6 +217,8 @@ export default function DataConsolePage() {
   const [exerciseSaved, setExerciseSaved] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportNote, setExportNote] = useState('');
+  const fileInputRef = useRef(null);
+  const [importing, setImporting] = useState(false);
 
   const flashSaved = (setter) => {
     setter(true);
@@ -221,10 +226,10 @@ export default function DataConsolePage() {
   };
 
   const tabClass = (tabKey) => [
-    'px-4 py-2 text-sm font-semibold border-b-2 transition-colors',
+    'px-6 py-2 text-xs font-black uppercase tracking-widest transition-all rounded-xl border-2',
     activeTab === tabKey
-      ? 'text-blue-700 border-blue-600'
-      : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300',
+      ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-100'
+      : 'bg-white border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50',
   ].join(' ');
 
   const updateWorkoutRow = (idx, field, value) => {
@@ -269,15 +274,14 @@ export default function DataConsolePage() {
     });
 
   const setCompletionCell = (day, session, status) => {
-    const key = `${day}_${session}`;
     setCompletion((prev) => {
       const next = { ...prev };
-      if (status === '') {
-        delete next[key];
-      } else if (status === 'done') {
-        next[key] = true;
+      if (!next[day]) next[day] = {};
+
+      if (status === 'none') {
+        delete next[day][session];
       } else {
-        next[key] = 'skipped';
+        next[day][session] = status === 'done' ? 'done' : 'skipped';
       }
       return next;
     });
@@ -329,36 +333,93 @@ export default function DataConsolePage() {
     }
   };
 
+  const handleImport = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setImporting(true);
+      const data = await importPlannerWorkbook(file);
+
+      let importedCount = 0;
+      if (data.sessionTitles) {
+        setSessionTitles(data.sessionTitles);
+        importedCount++;
+      }
+      if (data.workoutRows) {
+        setWorkoutRows(data.workoutRows);
+        importedCount++;
+      }
+      if (data.completion) {
+        setCompletion(data.completion);
+        importedCount++;
+      }
+      if (data.exerciseRows) {
+        setExerciseRows(data.exerciseRows);
+        importedCount++;
+      }
+
+      if (importedCount > 0) {
+        setExportNote(`Imported data from ${importedCount} tab(s). Don't forget to SAVE.`);
+      } else {
+        setExportNote('No valid GymPlanner tabs found in file.');
+      }
+    } catch (err) {
+      console.error(err);
+      setExportNote('Import failed: invalid or corrupt file');
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      setTimeout(() => setExportNote(''), 4000);
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
+    <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col gap-8 bg-gray-50/50 min-h-screen">
+      <div className="flex items-start justify-between gap-6 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-1">Data Console</h1>
-          <p className="text-sm text-gray-500">
-            Spreadsheet-style editable tables for all planner data.
-          </p>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-1 bg-blue-600 h-6 rounded-full"></div>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-600">Administrative</span>
+          </div>
+          <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2">Data Console</h1>
+          <p className="text-sm text-gray-400 font-medium">Manage your elite training datasets and cloud synchronization.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
           <button
             onClick={() => handleExport('current')}
             disabled={exporting}
-            className="px-4 py-2 rounded text-sm font-semibold border border-emerald-300 text-emerald-700 hover:bg-emerald-50 disabled:opacity-60"
+            className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-emerald-100 text-emerald-600 hover:bg-emerald-50 transition-all disabled:opacity-60"
           >
-            {exporting ? 'Exporting...' : 'Export Current Tab (.xlsx)'}
+            {exporting ? '...' : 'Export Tab'}
           </button>
           <button
             onClick={() => handleExport('all')}
             disabled={exporting}
-            className="px-4 py-2 rounded text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-60"
+            className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest border border-gray-100 text-gray-600 hover:bg-gray-50 transition-all disabled:opacity-60"
           >
-            Export All Tabs (.xlsx)
+            Export All
           </button>
-          {exportNote && <span className="text-xs text-emerald-700">{exportNote}</span>}
+          <div className="h-6 w-px bg-gray-100"></div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImport}
+            accept=".xlsx,.xls,.csv"
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+            className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-60"
+          >
+            {importing ? '...' : 'Import Excel'}
+          </button>
         </div>
       </div>
 
-      <div className="border-b border-gray-200 overflow-x-auto">
-        <div className="flex min-w-max gap-1">
+      <div className="flex justify-center">
+        <div className="inline-flex p-1.5 bg-gray-100 rounded-2xl border border-gray-200 shadow-inner gap-1">
           {TABS.map((tab) => (
             <button
               key={tab.key}
@@ -371,22 +432,30 @@ export default function DataConsolePage() {
         </div>
       </div>
 
+      {exportNote && (
+        <div className="flex justify-center -mt-4">
+          <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100 animate-in fade-in slide-in-from-top-1">
+            {exportNote}
+          </span>
+        </div>
+      )}
+
       {activeTab === 'schedule' && (
-        <div className="flex flex-col gap-4">
-          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className="min-w-full bg-white text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600 w-40">Day</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">AM Session Title</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">PM Session Title</th>
+        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="premium-card overflow-hidden">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-50 bg-white">
+                  <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 w-40">Day</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">AM Session Title</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">PM Session Title</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-50">
                 {DAYS.map((day) => (
-                  <tr key={day}>
-                    <td className="px-4 py-2 font-medium text-gray-800">{day}</td>
-                    <td className="px-4 py-2">
+                  <tr key={day} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 font-bold text-gray-900">{day}</td>
+                    <td className="px-6 py-3">
                       <input
                         value={sessionTitles.am?.[day] || ''}
                         onChange={(e) =>
@@ -395,11 +464,11 @@ export default function DataConsolePage() {
                             am: { ...prev.am, [day]: e.target.value },
                           }))
                         }
-                        className="border border-gray-300 rounded px-3 py-1.5 bg-white text-gray-800 w-full min-w-72"
-                        placeholder="AM title"
+                        className="w-full border border-gray-100 rounded-xl px-4 py-2.5 bg-gray-50/50 text-gray-800 text-sm focus:bg-white focus:ring-4 focus:ring-blue-100/50 outline-none transition-all font-semibold"
+                        placeholder="e.g. Upper Body Focus"
                       />
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-6 py-3">
                       <input
                         value={sessionTitles.pm?.[day] || ''}
                         onChange={(e) =>
@@ -408,8 +477,8 @@ export default function DataConsolePage() {
                             pm: { ...prev.pm, [day]: e.target.value },
                           }))
                         }
-                        className="border border-gray-300 rounded px-3 py-1.5 bg-white text-gray-800 w-full min-w-72"
-                        placeholder="PM title"
+                        className="w-full border border-gray-100 rounded-xl px-4 py-2.5 bg-gray-50/50 text-gray-800 text-sm focus:bg-white focus:ring-4 focus:ring-blue-100/50 outline-none transition-all font-semibold"
+                        placeholder="e.g. Cardio + Recovery"
                       />
                     </td>
                   </tr>
@@ -418,126 +487,130 @@ export default function DataConsolePage() {
             </table>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => {
                 saveSessionTitlesWithSync(sessionTitles);
                 flashSaved(setTitlesSaved);
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded text-sm"
+              className="px-8 py-3 rounded-xl text-xs font-black uppercase tracking-[0.2em] bg-blue-600 text-white shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2"
             >
-              Save Session Titles
+              Save Changes <span>→</span>
             </button>
             {titlesSaved && (
-              <span className="text-green-600 text-sm font-medium">Saved session titles</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                ✓ Strategy Updated
+              </span>
             )}
           </div>
         </div>
       )}
 
       {activeTab === 'workouts' && (
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3 flex-wrap">
-            <label className="text-sm font-medium text-gray-700">
-              Day
-              <select
+        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-6 flex-wrap">
+            <div className="flex items-center gap-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Filter Day</label>
+              <AppleSelect
                 value={workoutFilterDay}
-                onChange={(e) => setWorkoutFilterDay(e.target.value)}
-                className="ml-2 border border-gray-300 rounded px-3 py-1.5 bg-white"
-              >
-                <option value="all">All</option>
-                {DAYS.map((day) => (
-                  <option key={day} value={day}>{day}</option>
-                ))}
-              </select>
-            </label>
-            <label className="text-sm font-medium text-gray-700">
-              Session
-              <select
+                onChange={setWorkoutFilterDay}
+                options={[
+                  { label: 'ALL DAYS', value: 'all' },
+                  ...DAYS.map(day => ({ label: day.toUpperCase(), value: day }))
+                ]}
+                className="w-40"
+              />
+            </div>
+
+            <div className="flex items-center gap-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Phase</label>
+              <AppleSelect
                 value={workoutFilterSession}
-                onChange={(e) => setWorkoutFilterSession(e.target.value)}
-                className="ml-2 border border-gray-300 rounded px-3 py-1.5 bg-white"
+                onChange={setWorkoutFilterSession}
+                options={[
+                  { label: 'BOTH PHASES', value: 'all' },
+                  { label: 'AM ONLY', value: 'am' },
+                  { label: 'PM ONLY', value: 'pm' }
+                ]}
+                className="w-48"
+              />
+            </div>
+
+            <div className="h-6 w-px bg-gray-100"></div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowAdvancedCols((v) => !v)}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${showAdvancedCols ? 'bg-blue-50 border-blue-100 text-blue-600' : 'border-gray-100 text-gray-400 hover:bg-gray-50'}`}
               >
-                <option value="all">All</option>
-                <option value="am">AM</option>
-                <option value="pm">PM</option>
-              </select>
-            </label>
-            <button
-              onClick={() => setShowAdvancedCols((v) => !v)}
-              className="border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-medium px-4 py-2 rounded"
-            >
-              {showAdvancedCols ? 'Hide Advanced' : 'Show Advanced'}
-            </button>
-            <button
-              onClick={addWorkoutGridRow}
-              className="border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 text-sm font-medium px-4 py-2 rounded"
-            >
-              Add Workout Row
-            </button>
-            <button
-              onClick={saveWorkoutGrid}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded text-sm"
-            >
-              Save Workouts Grid
-            </button>
-            {workoutsSaved && (
-              <span className="text-green-600 text-sm font-medium">Saved workouts</span>
-            )}
-            <span className="text-xs text-gray-500">
-              Showing {visibleWorkoutRows.length} of {workoutRows.length} rows
-            </span>
-            {!showAdvancedCols && (
-              <span className="text-xs text-gray-400">
-                Group/Row index columns are hidden in basic view.
+                Advanced Mode
+              </button>
+              <button
+                onClick={addWorkoutGridRow}
+                className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-dashed border-blue-200 text-blue-600 hover:bg-blue-50 transition-all"
+              >
+                + New Exercise
+              </button>
+              <button
+                onClick={saveWorkoutGrid}
+                className="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all"
+              >
+                Save Workout Map
+              </button>
+            </div>
+
+            <div className="ml-auto flex items-center gap-4">
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">
+                {visibleWorkoutRows.length} Rows Active
               </span>
-            )}
+              {workoutsSaved && (
+                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                  Grid Synchronized
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className={`${showAdvancedCols ? 'min-w-[1550px]' : 'min-w-[1280px]'} bg-white text-sm`}>
+            <table className={`${showAdvancedCols ? 'min-w-[1900px]' : 'min-w-[1600px]'} bg-white text-sm`}>
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-3 py-2 text-left font-semibold text-gray-600 w-12">#</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-36">Day</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-24">Session</th>
-                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-28">GroupIndex</th>}
-                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-28">RowIndex</th>}
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-40">Muscle</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-40">SubMuscle</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-52">Exercise</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-24">Sets</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-24">Reps</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-24">Weight</th>
-                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-24">DropSets</th>}
-                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-28">DropWeight</th>}
+                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-44">Day</th>
+                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-32">Session</th>
+                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-32">GroupIndex</th>}
+                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-32">RowIndex</th>}
+                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-52">Muscle</th>
+                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-52">SubMuscle</th>
+                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-72">Exercise</th>
+                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-32">Sets</th>
+                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-32">Reps</th>
+                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-32">Weight</th>
+                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-32">DropSets</th>}
+                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-32">DropWeight</th>}
                   <th className="px-3 py-2 text-left font-semibold text-gray-600 w-20">Row</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {visibleWorkoutRows.map(({ row, idx }, visibleIdx) => (
-                  <tr key={`workout-row-${idx}`}>
-                    <td className="px-3 py-2 text-gray-500">{visibleIdx + 1}</td>
+                  <tr key={`workout-row-${idx}`} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-3 py-2 text-gray-300 font-bold">{visibleIdx + 1}</td>
                     <td className="px-3 py-2">
-                      <select
+                      <AppleSelect
                         value={row.day}
-                        onChange={(e) => updateWorkoutRow(idx, 'day', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-full bg-white"
-                      >
-                        {DAYS.map((day) => (
-                          <option key={day} value={day}>{day}</option>
-                        ))}
-                      </select>
+                        onChange={(val) => updateWorkoutRow(idx, 'day', val)}
+                        options={DAYS.map(day => ({ label: day.toUpperCase(), value: day }))}
+                      />
                     </td>
                     <td className="px-3 py-2">
-                      <select
+                      <AppleSelect
                         value={row.session}
-                        onChange={(e) => updateWorkoutRow(idx, 'session', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-full bg-white"
-                      >
-                        <option value="am">AM</option>
-                        <option value="pm">PM</option>
-                      </select>
+                        onChange={(val) => updateWorkoutRow(idx, 'session', val)}
+                        options={[
+                          { label: 'AM', value: 'am' },
+                          { label: 'PM', value: 'pm' }
+                        ]}
+                      />
                     </td>
                     {showAdvancedCols && (
                       <td className="px-3 py-2">
@@ -598,7 +671,7 @@ export default function DataConsolePage() {
                       <input
                         value={row.weight}
                         onChange={(e) => updateWorkoutRow(idx, 'weight', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                        className="border border-gray-100 rounded-lg px-3 py-1.5 bg-gray-50/50 text-gray-800 text-sm focus:bg-white focus:ring-4 focus:ring-blue-100/50 outline-none transition-all font-semibold"
                       />
                     </td>
                     {showAdvancedCols && (
@@ -606,7 +679,7 @@ export default function DataConsolePage() {
                         <input
                           value={row.dropSets}
                           onChange={(e) => updateWorkoutRow(idx, 'dropSets', e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 w-full"
+                          className="border border-gray-100 rounded-lg px-2 py-1.5 bg-gray-50/50 text-gray-800 text-sm focus:bg-white outline-none transition-all font-semibold"
                         />
                       </td>
                     )}
@@ -615,27 +688,22 @@ export default function DataConsolePage() {
                         <input
                           value={row.dropWeight}
                           onChange={(e) => updateWorkoutRow(idx, 'dropWeight', e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 w-full"
+                          className="border border-gray-100 rounded-lg px-2 py-1.5 bg-gray-50/50 text-gray-800 text-sm focus:bg-white outline-none transition-all font-semibold"
                         />
                       </td>
                     )}
                     <td className="px-3 py-2">
                       <button
                         onClick={() => removeWorkoutGridRow(idx)}
-                        className="text-red-600 hover:text-red-700 text-xs font-semibold"
+                        className="text-rose-400 hover:text-rose-600 transition-colors"
                       >
-                        Delete
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                       </button>
                     </td>
                   </tr>
                 ))}
-                {visibleWorkoutRows.length === 0 && (
-                  <tr>
-                    <td colSpan={showAdvancedCols ? 14 : 10} className="px-4 py-6 text-center text-sm text-gray-500">
-                      No rows match this filter. Add a workout row or switch filters.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
@@ -643,119 +711,139 @@ export default function DataConsolePage() {
       )}
 
       {activeTab === 'completion' && (
-        <div className="flex flex-col gap-4">
-          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className="min-w-full bg-white text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600 w-40">Day</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">AM</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">PM</th>
+        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="premium-card overflow-hidden">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-50 bg-white">
+                  <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 w-40">Day</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">AM Status</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">PM Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-50">
                 {DAYS.map((day) => (
-                  <tr key={day}>
-                    <td className="px-4 py-2 font-medium text-gray-800">{day}</td>
-                    {['am', 'pm'].map((session) => (
-                      <td key={session} className="px-4 py-2">
-                        <select
-                          value={completionStatus(completion[`${day}_${session}`])}
-                          onChange={(e) => setCompletionCell(day, session, e.target.value)}
-                          className="border border-gray-300 rounded px-3 py-1.5 bg-white"
-                        >
-                          <option value="">None</option>
-                          <option value="done">Done</option>
-                          <option value="skipped">Skipped</option>
-                        </select>
-                      </td>
-                    ))}
+                  <tr key={day} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4 font-bold text-gray-900">{day}</td>
+                    <td className="px-6 py-3">
+                      <AppleSelect
+                        value={completion[day]?.am || 'none'}
+                        onChange={(val) => setCompletionCell(day, 'am', val)}
+                        options={[
+                          { label: 'PENDING', value: 'none' },
+                          { label: 'COMPLETED', value: 'done' },
+                          { label: 'SKIPPED', value: 'skipped' }
+                        ]}
+                      />
+                    </td>
+                    <td className="px-6 py-3">
+                      <AppleSelect
+                        value={completion[day]?.pm || 'none'}
+                        onChange={(val) => setCompletionCell(day, 'pm', val)}
+                        options={[
+                          { label: 'PENDING', value: 'none' },
+                          { label: 'COMPLETED', value: 'done' },
+                          { label: 'SKIPPED', value: 'skipped' }
+                        ]}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <button
               onClick={saveCompletionGrid}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded text-sm"
+              className="px-8 py-3 rounded-xl text-xs font-black uppercase tracking-[0.2em] bg-blue-600 text-white shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2"
             >
-              Save Completion
+              Sync Log <span>→</span>
             </button>
             {completionSaved && (
-              <span className="text-green-600 text-sm font-medium">Saved completion</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                ✓ History Locked
+              </span>
             )}
           </div>
         </div>
       )}
 
       {activeTab === 'exerciseDb' && (
-        <div className="flex flex-col gap-4">
-          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className="min-w-full bg-white text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">Muscle</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">Sub Muscle</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">Exercise</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600 w-16">Row</th>
+        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={addExerciseRow}
+                className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-dashed border-blue-200 text-blue-600 hover:bg-blue-50 transition-all"
+              >
+                + Register New Movement
+              </button>
+              <button
+                onClick={saveExerciseGrid}
+                className="px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all"
+              >
+                Update Repository
+              </button>
+            </div>
+            {exerciseSaved && (
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                ✓ Master Data Locked
+              </span>
+            )}
+          </div>
+
+          <div className="premium-card overflow-hidden">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-50 bg-white">
+                  <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Muscle</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Sub Muscle</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 text-center">Exercise Name</th>
+                  <th className="px-6 py-4 w-20"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-50">
                 {exerciseRows.map((row, idx) => (
-                  <tr key={`${row.muscle}-${row.subMuscle}-${row.exercise}-${idx}`}>
-                    <td className="px-4 py-2">
+                  <tr key={`${row.muscle}-${row.subMuscle}-${row.exercise}-${idx}`} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-3">
                       <input
                         value={row.muscle}
                         onChange={(e) => updateExerciseRow(idx, 'muscle', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-44"
+                        className="w-full border border-gray-100 rounded-lg px-4 py-2 bg-gray-50/50 text-gray-800 text-xs font-bold focus:bg-white outline-none transition-all"
+                        placeholder="e.g. Back"
                       />
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-6 py-3">
                       <input
                         value={row.subMuscle}
                         onChange={(e) => updateExerciseRow(idx, 'subMuscle', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-44"
+                        className="w-full border border-gray-100 rounded-lg px-4 py-2 bg-gray-50/50 text-gray-800 text-xs font-bold focus:bg-white outline-none transition-all"
+                        placeholder="e.g. Lats"
                       />
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-6 py-3">
                       <input
                         value={row.exercise}
                         onChange={(e) => updateExerciseRow(idx, 'exercise', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-64"
+                        className="w-full border border-gray-100 rounded-lg px-4 py-2 bg-gray-50/50 text-gray-800 text-xs font-bold focus:bg-white outline-none transition-all text-center"
+                        placeholder="e.g. Pull Ups"
                       />
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-6 py-3 text-right">
                       <button
                         onClick={() => removeExerciseRow(idx)}
-                        className="text-red-600 hover:text-red-700 text-xs font-semibold"
+                        className="text-rose-400 hover:text-rose-600 transition-colors"
                       >
-                        Delete
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-
-          <div className="flex items-center gap-3 flex-wrap">
-            <button
-              onClick={addExerciseRow}
-              className="border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 text-sm font-medium px-4 py-2 rounded"
-            >
-              Add Exercise Row
-            </button>
-            <button
-              onClick={saveExerciseGrid}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded text-sm"
-            >
-              Save Exercise DB
-            </button>
-            {exerciseSaved && (
-              <span className="text-green-600 text-sm font-medium">Saved exercise DB</span>
-            )}
           </div>
         </div>
       )}

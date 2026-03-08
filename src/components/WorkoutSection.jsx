@@ -86,149 +86,78 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
     }));
   };
 
-  const badge = isMissed ? (
-    <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Missed Workout</span>
-  ) : isTomorrow ? (
-    <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Tomorrow</span>
-  ) : (
-    <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Today</span>
-  );
-
   const sessionTitles = loadSessionTitles();
   const amTitle = sessionTitles.am[day] || '';
   const pmTitle = sessionTitles.pm[day] || '';
-  const sessionDone = activeSession === 'am' ? amDone : pmDone;
-  const sessionSkipped = activeSession === 'am' ? amSkipped : pmSkipped;
-  const bothDone = (amDone || amSkipped) && (pmDone || pmSkipped);
+  const currentTitle = activeSession === 'am' ? amTitle : pmTitle;
+
   const groups = dayData[activeSession]?.groups ?? [];
 
-  const tabCls = (session, done, skipped) => [
-    'flex shrink-0 items-center gap-1.5 px-4 py-2 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap',
-    activeSession === session
-      ? 'border-blue-500 text-blue-700'
-      : 'border-transparent text-gray-500',
-    (done || skipped)
-      ? 'opacity-65 cursor-not-allowed'
-      : 'cursor-pointer hover:text-gray-700 hover:border-gray-300',
-  ].join(' ');
-
   return (
-    <section className="flex flex-col gap-4">
-      {!hideBadge && (
-        <div className="flex items-center gap-3 flex-wrap">
-          {badge}
-          <h2 className="text-lg font-bold text-gray-800">
-            {day}
-            {muscleGroup ? <span className="text-gray-400 font-normal ml-2">— {muscleGroup}</span> : null}
-          </h2>
+    <section className="flex flex-col gap-10 animate-apple">
+      {/* Session Toggle & Controls */}
+      <div className="flex items-center justify-between bg-white border border-gray-100 rounded-[24px] p-2 pr-6 shadow-sm">
+        <div className="segmented-control">
+          <button
+            className={`segmented-item ${activeSession === 'am' ? 'segmented-item-active' : 'segmented-item-inactive'}`}
+            onClick={() => setActiveSession('am')}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1m-16 0H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
+            </svg>
+            AM SESSION
+          </button>
+          <button
+            className={`segmented-item ${activeSession === 'pm' ? 'segmented-item-active' : 'segmented-item-inactive'}`}
+            onClick={() => setActiveSession('pm')}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            PM SESSION
+          </button>
         </div>
-      )}
 
-      {bothDone ? (
-        <div className="bg-green-50 border border-green-200 rounded-lg px-5 py-4 flex items-center gap-3">
-          <span className="text-green-600 text-lg">✓</span>
-          <div>
-            <p className="text-green-800 font-semibold text-sm">{day} — workout complete</p>
-            <p className="text-green-700 text-xs mt-0.5">
-              AM {amDone ? '✓ done' : '⏭ skipped'} &nbsp;·&nbsp; PM {pmDone ? '✓ done' : '⏭ skipped'}
-            </p>
-          </div>
+        <div className="flex items-center gap-4">
+          <button className="pill-button pill-button-ghost">
+            Skip Session
+          </button>
+          <button className={`pill-button ${activeSession === 'am' ? (amDone ? 'pill-button-ghost' : 'pill-button-success') : (pmDone ? 'pill-button-ghost' : 'pill-button-success')}`} onClick={handleComplete}>
+            {activeSession === 'am' ? (amDone ? 'AM Completed' : 'Mark AM Complete') : (pmDone ? 'PM Completed' : 'Mark PM Complete')}
+          </button>
         </div>
-      ) : (
-        <>
-          {/* AM / PM tab switcher */}
-          <div className="overflow-x-auto scrollbar-thin">
-            <div className="flex min-w-max border-b border-gray-200">
-              <button
-                className={tabCls('am', amDone, amSkipped)}
-                onClick={() => setActiveSession('am')}
-                disabled={amDone || amSkipped}
-              >
-                🌅 AM
-                {amDone && <span className="text-green-500 text-xs">✓</span>}
-                {amSkipped && <span className="text-gray-400 text-xs">⏭</span>}
-                {(amDone || amSkipped) && (
-                  <span className="text-gray-400 text-[10px]" title="Locked session">
-                    🔒
-                  </span>
-                )}
-                {amTitle && (
-                  <span className="text-gray-400 font-normal ml-1 text-xs sm:text-sm">
-                    — {amTitle}
-                  </span>
-                )}
-              </button>
-              <button
-                className={tabCls('pm', pmDone, pmSkipped)}
-                onClick={() => setActiveSession('pm')}
-                disabled={pmDone || pmSkipped}
-              >
-                🌆 PM
-                {pmDone && <span className="text-green-500 text-xs">✓</span>}
-                {pmSkipped && <span className="text-gray-400 text-xs">⏭</span>}
-                {(pmDone || pmSkipped) && (
-                  <span className="text-gray-400 text-[10px]" title="Locked session">
-                    🔒
-                  </span>
-                )}
-                {pmTitle && (
-                  <span className="text-gray-400 font-normal ml-1 text-xs sm:text-sm">
-                    — {pmTitle}
-                  </span>
-                )}
-              </button>
-            </div>
+      </div>
+
+      {/* Objective Box */}
+      <div className="objective-box relative overflow-hidden group">
+        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2 block">Objective</span>
+        <h3 className="text-3xl font-black text-[#1C1C1E] tracking-tight uppercase">{currentTitle || (activeSession === 'am' ? 'Daily Activation' : 'Evening Strength')}</h3>
+      </div>
+
+      {/* Exercise groups */}
+      <div className="flex flex-col gap-10">
+        {groups.map((group, idx) => (
+          <ExerciseGroup
+            key={`${activeSession}-${idx}`}
+            groupIndex={idx}
+            group={group}
+            onChange={(updated) => handleGroupChange(idx, updated)}
+          />
+        ))}
+      </div>
+
+      {/* Add Block Button */}
+      {!amDone && !pmDone && (
+        <button
+          onClick={handleAddGroup}
+          className="group flex flex-col items-center justify-center gap-4 py-8 rounded-[32px] border-2 border-dashed border-gray-100 bg-gray-50/10 hover:bg-white hover:border-[#007AFF] hover:shadow-xl hover:shadow-blue-50/50 transition-all duration-500"
+        >
+          <div className="w-12 h-12 rounded-full bg-gray-50 group-hover:bg-[#007AFF] flex items-center justify-center transition-all duration-500 shadow-inner">
+            <span className="text-[#8E8E93] group-hover:text-white text-3xl font-light leading-none">+</span>
           </div>
-
-          {/* Exercise groups for active session */}
-          {groups.map((group, idx) => (
-            <ExerciseGroup
-              key={idx}
-              groupIndex={idx}
-              group={group}
-              onChange={(updated) => handleGroupChange(idx, updated)}
-            />
-          ))}
-
-          {!sessionDone && !sessionSkipped && (
-            <button
-              onClick={handleAddGroup}
-              className="self-start border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
-            >
-              <span className="text-lg leading-none">+</span> Add Group
-            </button>
-          )}
-
-          {/* Actions */}
-          {sessionDone ? (
-            <div className="bg-green-50 border border-green-200 rounded-lg px-5 py-3 flex items-center gap-2">
-              <span className="text-green-600">✓</span>
-              <span className="text-green-800 font-semibold text-sm">
-                {day} {activeSession.toUpperCase()} session marked as complete!
-              </span>
-            </div>
-          ) : sessionSkipped ? (
-            <div className="bg-gray-50 border border-gray-200 rounded-lg px-5 py-3 flex items-center gap-2">
-              <span className="text-gray-400">⏭</span>
-              <span className="text-gray-600 font-semibold text-sm">
-                {day} {activeSession.toUpperCase()} session skipped
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3 flex-wrap">
-              <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded transition-colors shadow-sm text-sm">
-                Save Workout
-              </button>
-              <button onClick={handleComplete} className="bg-green-600 hover:bg-green-700 text-white font-semibold px-5 py-2 rounded transition-colors shadow-sm text-sm">
-                Mark {activeSession.toUpperCase()} Complete
-              </button>
-              <button onClick={handleSkip} className="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold px-5 py-2 rounded transition-colors shadow-sm text-sm border border-gray-300">
-                Skip Session
-              </button>
-              {saveFlash && <span className="text-green-600 font-medium text-sm">✓ Saved!</span>}
-            </div>
-          )}
-        </>
+          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[#8E8E93] group-hover:text-[#007AFF]">Append Training Block</span>
+        </button>
       )}
     </section>
   );

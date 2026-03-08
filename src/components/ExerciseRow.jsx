@@ -1,20 +1,10 @@
 import { useState } from 'react';
 import { getMuscleGroupKeys, getSubMusclesForMuscle, getExercisesForSubMuscle, addExerciseWithSync, removeExerciseWithSync } from '../utils/storage';
-
-const selectCls =
-  'w-full border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-50 disabled:text-gray-400';
+import AppleSelect from './AppleSelect';
 
 const inputCls =
-  'w-full border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400';
+  'w-full border border-gray-100 rounded-xl px-4 py-3 bg-gray-50/20 text-[#1C1C1E] text-sm focus:outline-none focus:ring-4 focus:ring-blue-100/30 focus:border-[#007AFF] focus:bg-white transition-all duration-300 font-semibold placeholder-[#AEAEC0]/70';
 
-/**
- * ExerciseRow — one full row of the exercise table.
- * Columns: Muscle Group | Sub Muscle | Exercise | Sets | Reps | Weight
- *
- * Props:
- *   row      – { muscle, subMuscle, exercise, sets, reps, weight }
- *   onChange – (updatedRow) => void
- */
 export default function ExerciseRow({ row, onChange, onDelete }) {
   const { muscle, subMuscle, exercise, sets, reps, weight, dropSets, dropWeight } = row;
 
@@ -52,63 +42,33 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
     setNewExName('');
   };
 
-  const handleCancelNew = () => {
-    setIsAdding(false);
-    setNewExName('');
-  };
-
-  const handleDeleteExercise = () => {
-    if (!exercise) return;
-    setConfirmingDelete(true);
-  };
-
-  const handleConfirmDelete = () => {
-    removeExerciseWithSync(muscle, subMuscle, exercise);
-    set({ exercise: '' });
-    setConfirmingDelete(false);
-  };
-
-  const handleCancelDelete = () => setConfirmingDelete(false);
-
   return (
-    <tr className="hover:bg-gray-50 transition-colors align-top">
+    <tr className="hover:bg-gray-50/20 transition-all duration-300 align-middle group">
       {/* Muscle Group */}
-      <td className="px-3 py-2 min-w-[140px]">
-        <select
+      <td className="px-2 py-4 min-w-[180px]">
+        <AppleSelect
           value={muscle}
-          onChange={(e) => handleMuscleChange(e.target.value)}
-          className={selectCls}
-        >
-          <option value="">— Select —</option>
-          {muscleGroupKeys.map((mg) => (
-            <option key={mg} value={mg}>
-              {mg}
-            </option>
-          ))}
-        </select>
+          onChange={handleMuscleChange}
+          options={muscleGroupKeys}
+          placeholder="e.g. Legs"
+        />
       </td>
 
       {/* Sub Muscle */}
-      <td className="px-3 py-2 min-w-[140px]">
-        <select
+      <td className="px-2 py-4 min-w-[180px]">
+        <AppleSelect
           value={subMuscle}
-          onChange={(e) => handleSubMuscleChange(e.target.value)}
-          className={selectCls}
+          onChange={handleSubMuscleChange}
+          options={subMuscles}
+          placeholder="e.g. Abs"
           disabled={!muscle}
-        >
-          <option value="">— Select —</option>
-          {subMuscles.map((sm) => (
-            <option key={sm} value={sm}>
-              {sm}
-            </option>
-          ))}
-        </select>
+        />
       </td>
 
       {/* Exercise */}
-      <td className="px-3 py-2 min-w-[220px]">
+      <td className="px-2 py-4 min-w-[340px]">
         {isAdding ? (
-          <div className="flex gap-1 items-center">
+          <div className="flex gap-2 items-center animate-apple">
             <input
               type="text"
               autoFocus
@@ -116,79 +76,53 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
               onChange={(e) => setNewExName(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleConfirmNew();
-                if (e.key === 'Escape') handleCancelNew();
+                if (e.key === 'Escape') setIsAdding(false);
               }}
-              placeholder="New exercise name…"
+              placeholder="New exercise…"
               className={inputCls + ' flex-1'}
             />
-            <button onClick={handleConfirmNew} className="text-green-600 hover:text-green-800 font-bold px-1 text-sm" title="Confirm">✓</button>
-            <button onClick={handleCancelNew} className="text-red-400 hover:text-red-600 px-1 text-sm" title="Cancel">✕</button>
-          </div>
-        ) : confirmingDelete ? (
-          <div className="flex flex-col gap-1 rounded border border-red-300 bg-red-50 px-2 py-1.5 text-sm">
-            <span className="text-red-700 font-medium leading-snug">Delete <span className="font-semibold">"{exercise}"</span> from database?</span>
-            <div className="flex gap-2">
-              <button
-                onClick={handleConfirmDelete}
-                className="flex-1 rounded bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1 transition-colors"
-              >Delete</button>
-              <button
-                onClick={handleCancelDelete}
-                className="flex-1 rounded border border-gray-300 hover:bg-gray-100 text-gray-600 text-xs font-semibold py-1 transition-colors"
-              >Cancel</button>
-            </div>
           </div>
         ) : (
-          <div className="flex gap-1 items-center">
-            <select
+          <div className="flex gap-2 items-center">
+            <AppleSelect
               value={exercise}
-              onChange={(e) => handleExerciseChange(e.target.value)}
-              className={selectCls + ' flex-1'}
+              onChange={handleExerciseChange}
+              options={[
+                ...allExercises.map(ex => ({ label: ex, value: ex })),
+                ...(subMuscle ? [{ label: '＋ Add New Movement', value: '__ADD_NEW__' }] : [])
+              ]}
+              placeholder="Select Movement"
               disabled={!subMuscle}
-            >
-              <option value="">— Select —</option>
-              {allExercises.map((ex) => (
-                <option key={ex} value={ex}>
-                  {ex}
-                </option>
-              ))}
-              {subMuscle && <option value="__ADD_NEW__">＋ Add new exercise…</option>}
-            </select>
-            {exercise && (
-              <button
-                onClick={handleDeleteExercise}
-                className="text-red-300 hover:text-red-600 px-1 text-base shrink-0 transition-colors"
-                title="Delete exercise from database"
-              >🗑</button>
-            )}
+              className="flex-1"
+            />
           </div>
         )}
       </td>
 
       {/* Sets */}
-      <td className="px-3 py-2 min-w-[90px]">
+      <td className="px-2 py-4 min-w-[120px]">
         <input
           type="text"
           value={sets}
           onChange={(e) => set({ sets: e.target.value })}
-          placeholder="e.g. 4"
+          placeholder="e.g. 3"
           className={inputCls}
         />
       </td>
 
       {/* Reps */}
-      <td className="px-3 py-2 min-w-[90px]">
+      <td className="px-2 py-4 min-w-[120px]">
         <input
           type="text"
           value={reps}
           onChange={(e) => set({ reps: e.target.value })}
-          placeholder="e.g. 10"
+          placeholder="e.g. 12"
           className={inputCls}
         />
       </td>
 
       {/* Weight (kg) */}
-      <td className="px-3 py-2 min-w-[120px]">
+      <td className="px-2 py-4 min-w-[140px]">
         <input
           type="text"
           value={weight}
@@ -199,18 +133,18 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
       </td>
 
       {/* Drop Set */}
-      <td className="px-3 py-2 min-w-[100px]">
+      <td className="px-2 py-4 min-w-[120px]">
         <input
           type="text"
           value={dropSets}
           onChange={(e) => set({ dropSets: e.target.value })}
-          placeholder="e.g. 2"
+          placeholder="Drop"
           className={inputCls}
         />
       </td>
 
       {/* Drop Weight (kg) */}
-      <td className="px-3 py-2 min-w-[140px]">
+      <td className="px-2 py-4 min-w-[140px]">
         <input
           type="text"
           value={dropWeight}
@@ -220,15 +154,18 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
         />
       </td>
 
-      {/* Delete Row */}
-      <td className="px-2 py-2 text-center">
+      {/* Action: Delete Row */}
+      <td className="px-4 py-4 text-right">
         <button
           onClick={onDelete}
-          className="text-gray-300 hover:text-red-500 transition-colors text-xl leading-none"
-          title="Remove row"
-        >×</button>
+          className="p-1.5 text-gray-300 hover:text-[#FF3B30] transition-all opacity-0 group-hover:opacity-100"
+          title="Remove"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
       </td>
-
     </tr>
   );
 }
