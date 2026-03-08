@@ -116,31 +116,31 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
   }, [syncState, today, tomorrow]);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col gap-10 bg-white min-h-screen relative pb-32">
+    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12 flex flex-col gap-6 md:gap-10 bg-white min-h-screen relative pb-40 md:pb-32">
       {/* Header Section */}
-      <div className="flex items-end justify-between animate-apple">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-0 animate-apple">
         <div>
-          <h1 className="text-5xl font-black text-[#1C1C1E] tracking-tighter">Workout Scheduler</h1>
-          <div className="flex items-center gap-2 mt-4 text-[#8E8E93] font-bold tracking-tight">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <h1 className="text-3xl md:text-5xl font-black text-[#1C1C1E] tracking-tighter">Workout Scheduler</h1>
+          <div className="flex items-center gap-2 mt-2 md:mt-4 text-[#8E8E93] font-bold tracking-tight text-xs md:text-sm">
+            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button className="pill-button pill-button-secondary bg-[#FAFAFA]">
+        <div className="flex items-center gap-3 md:gap-4">
+          <button className="pill-button pill-button-secondary bg-[#FAFAFA] flex-1 md:flex-none">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             History
           </button>
-          <button className="pill-button pill-button-primary" onClick={() => window.location.reload()}>
+          <button className="pill-button pill-button-primary flex-1 md:flex-none" onClick={() => window.location.reload()}>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
             </svg>
-            Save Workout
+            Save
           </button>
         </div>
       </div>
@@ -156,17 +156,17 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
           />
         ))}
 
-        {/* Placeholder for Add New Group button as seen in image */}
-        <div className="mt-4 border-2 border-dashed border-gray-100 rounded-[28px] py-8 flex flex-col items-center justify-center gap-3 bg-gray-50/20 hover:bg-gray-50 transition-all cursor-pointer group">
+        {/* Placeholder for Add New Group button */}
+        <div className="mt-4 border-2 border-dashed border-gray-100 rounded-[24px] md:rounded-[28px] py-6 md:py-8 flex flex-col items-center justify-center gap-3 bg-gray-50/20 hover:bg-white hover:border-[#007AFF] transition-all cursor-pointer group">
           <div className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-[#8E8E93] group-hover:text-[#007AFF] group-hover:border-[#007AFF] transition-all">
             <span className="text-2xl font-light">+</span>
           </div>
-          <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[#8E8E93] group-hover:text-[#007AFF]">Add New Exercise Group</span>
+          <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] text-[#8E8E93] group-hover:text-[#007AFF]">New Training Block</span>
         </div>
       </div>
 
-      {/* Fixed Status Bar */}
-      <div className="status-bar animate-apple">
+      {/* Fixed Status Bar - Hidden on small mobile to avoid clutter, shown on md+ */}
+      <div className="status-bar animate-apple hidden md:flex">
         <div className="flex items-center gap-12">
           <div className="flex flex-col">
             <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Volume (Est)</span>

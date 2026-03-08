@@ -94,12 +94,12 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
   const groups = dayData[activeSession]?.groups ?? [];
 
   return (
-    <section className="flex flex-col gap-10 animate-apple">
+    <section className="flex flex-col gap-6 md:gap-10 animate-apple">
       {/* Session Toggle & Controls */}
-      <div className="flex items-center justify-between bg-white border border-gray-100 rounded-[24px] p-2 pr-6 shadow-sm">
-        <div className="segmented-control">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between bg-white border border-gray-100 rounded-[28px] p-2 lg:pr-6 shadow-sm gap-4">
+        <div className="segmented-control w-full lg:w-auto">
           <button
-            className={`segmented-item ${activeSession === 'am' ? 'segmented-item-active' : 'segmented-item-inactive'}`}
+            className={`segmented-item flex-1 lg:flex-none ${activeSession === 'am' ? 'segmented-item-active' : 'segmented-item-inactive'}`}
             onClick={() => setActiveSession('am')}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -108,7 +108,7 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
             AM SESSION
           </button>
           <button
-            className={`segmented-item ${activeSession === 'pm' ? 'segmented-item-active' : 'segmented-item-inactive'}`}
+            className={`segmented-item flex-1 lg:flex-none ${activeSession === 'pm' ? 'segmented-item-active' : 'segmented-item-inactive'}`}
             onClick={() => setActiveSession('pm')}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -118,21 +118,23 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
           </button>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button className="pill-button pill-button-ghost">
-            Skip Session
+        <div className="flex items-center gap-3 px-2 lg:px-0">
+          <button className="pill-button pill-button-ghost text-[10px] md:text-xs">
+            Skip
           </button>
-          <button className={`pill-button ${activeSession === 'am' ? (amDone ? 'pill-button-ghost' : 'pill-button-success') : (pmDone ? 'pill-button-ghost' : 'pill-button-success')}`} onClick={handleComplete}>
-            {activeSession === 'am' ? (amDone ? 'AM Completed' : 'Mark AM Complete') : (pmDone ? 'PM Completed' : 'Mark PM Complete')}
+          <button className={`pill-button flex-1 md:flex-none text-[10px] md:text-xs ${activeSession === 'am' ? (amDone ? 'pill-button-ghost' : 'pill-button-success') : (pmDone ? 'pill-button-ghost' : 'pill-button-success')}`} onClick={handleComplete}>
+            {activeSession === 'am' ? (amDone ? 'AM Completed' : 'Finish Session') : (pmDone ? 'PM Completed' : 'Finish Session')}
           </button>
         </div>
       </div>
 
       {/* Objective Box */}
-      <div className="objective-box relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2 block">Objective</span>
-        <h3 className="text-3xl font-black text-[#1C1C1E] tracking-tight uppercase">{currentTitle || (activeSession === 'am' ? 'Daily Activation' : 'Evening Strength')}</h3>
+      <div className="objective-box relative overflow-hidden group py-6 md:py-8">
+        <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
+        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-blue-500 mb-2 block">Objective</span>
+        <h3 className="text-xl md:text-3xl font-black text-[#1C1C1E] tracking-tight uppercase leading-tight">
+          {currentTitle || (activeSession === 'am' ? 'Daily Activation' : 'Evening Strength')}
+        </h3>
       </div>
 
       {/* Exercise groups */}
