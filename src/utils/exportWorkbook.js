@@ -66,6 +66,7 @@ export function exportPlannerWorkbook({
     const workoutsRows = (workoutRows || [])
       .filter((row) => hasWorkoutData(row))
       .map((row) => [
+        toSafeCell(row.dateOrDay),
         toSafeCell(row.day),
         toSafeCell(String(row.session || '').toUpperCase()),
         toSafeCell(row.groupIndex),
@@ -83,6 +84,7 @@ export function exportPlannerWorkbook({
       workbook,
       'Workouts',
       [
+        'Date',
         'Day',
         'Session',
         'Group Index',
@@ -101,12 +103,35 @@ export function exportPlannerWorkbook({
   }
 
   if (includeTab('completion')) {
-    const completionRows = DAYS.map((day) => [
-      day,
-      completionStatus(completion?.[`${day}_am`]),
-      completionStatus(completion?.[`${day}_pm`]),
-    ]);
-    addSheet(workbook, 'Completion', ['Day', 'AM', 'PM'], completionRows);
+    // Export all completion data with dates (not just current week)
+    const completionEntries = Object.entries(completion || {})
+      .filter(([key]) => /_(?:am|pm)$/.test(key))
+      .map(([key, value]) => {
+        const match = key.match(/^(.+)_(am|pm)$/);
+        if (!match) return null;
+        const [_, identifier, session] = match;
+        // Check if identifier is a date (YYYY-MM-DD) or day name
+        const isDate = /^\d{4}-\d{2}-\d{2}$/.test(identifier);
+        return [
+          isDate ? identifier : identifier, // Date or Day
+          session.toUpperCase(),
+          completionStatus(value),
+        ];
+      })
+      .filter(Boolean)
+      .sort((a, b) => {
+        // Sort by date/day, then by session
+        const cmp = a[0].localeCompare(b[0]);
+        return cmp !== 0 ? cmp : a[1].localeCompare(b[1]);
+      });
+
+    if (completionEntries.length === 0) {
+      // Fallback: show empty week structure if no data
+      const completionRows = DAYS.map((day) => [day, '', '']);
+      addSheet(workbook, 'Completion', ['Day', 'Session', 'Status'], completionRows);
+    } else {
+      addSheet(workbook, 'Completion', ['Date/Day', 'Session', 'Status'], completionEntries);
+    }
   }
 
   if (includeTab('exerciseDb')) {

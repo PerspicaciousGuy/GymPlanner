@@ -2,27 +2,31 @@ import { useEffect, useState } from 'react';
 import ExerciseGroup from './ExerciseGroup';
 import { saveDayWorkoutWithSync, markDayCompleteWithSync, markDaySkippedWithSync, isDayComplete, isDaySkipped, ensureAmPm, defaultSession, defaultGroup, loadSessionTitles } from '../utils/storage';
 
-export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken }) {
+export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken }) {
+  // For backward compatibility: if date is not provided but day is, use day as dayName
+  const day = dayName || date;
+  
   const [dayData, setDayData] = useState(() => ensureAmPm(initialData));
   const [activeSession, setActiveSession] = useState('am');
   const [saveFlash, setSaveFlash] = useState(false);
-  const [amDone, setAmDone] = useState(() => isDayComplete(day, 'am') && !isDaySkipped(day, 'am'));
-  const [pmDone, setPmDone] = useState(() => isDayComplete(day, 'pm') && !isDaySkipped(day, 'pm'));
-  const [amSkipped, setAmSkipped] = useState(() => isDaySkipped(day, 'am'));
-  const [pmSkipped, setPmSkipped] = useState(() => isDaySkipped(day, 'pm'));
+  const [amDone, setAmDone] = useState(() => isDayComplete(date || day, 'am') && !isDaySkipped(date || day, 'am'));
+  const [pmDone, setPmDone] = useState(() => isDayComplete(date || day, 'pm') && !isDaySkipped(date || day, 'pm'));
+  const [amSkipped, setAmSkipped] = useState(() => isDaySkipped(date || day, 'am'));
+  const [pmSkipped, setPmSkipped] = useState(() => isDaySkipped(date || day, 'pm'));
 
   useEffect(() => {
     setDayData(ensureAmPm(initialData));
   }, [initialData]);
 
   useEffect(() => {
-    const amIsSkipped = isDaySkipped(day, 'am');
-    const pmIsSkipped = isDaySkipped(day, 'pm');
+    const dateOrDay = date || day;
+    const amIsSkipped = isDaySkipped(dateOrDay, 'am');
+    const pmIsSkipped = isDaySkipped(dateOrDay, 'pm');
     setAmSkipped(amIsSkipped);
     setPmSkipped(pmIsSkipped);
-    setAmDone(isDayComplete(day, 'am') && !amIsSkipped);
-    setPmDone(isDayComplete(day, 'pm') && !pmIsSkipped);
-  }, [day, syncToken]);
+    setAmDone(isDayComplete(dateOrDay, 'am') && !amIsSkipped);
+    setPmDone(isDayComplete(dateOrDay, 'pm') && !pmIsSkipped);
+  }, [date, day, syncToken]);
 
   useEffect(() => {
     const amLocked = amDone || amSkipped;
@@ -45,14 +49,14 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
   };
 
   const handleSave = () => {
-    saveDayWorkoutWithSync(day, dayData);
+    saveDayWorkoutWithSync(date || day, dayData);
     setSaveFlash(true);
     setTimeout(() => setSaveFlash(false), 2000);
   };
 
   const handleComplete = () => {
-    saveDayWorkoutWithSync(day, dayData);
-    markDayCompleteWithSync(day, activeSession);
+    saveDayWorkoutWithSync(date || day, dayData);
+    markDayCompleteWithSync(date || day, activeSession);
     setDayData((prev) => ({ ...prev, [activeSession]: defaultSession() }));
     if (activeSession === 'am') {
       setAmDone(true);
@@ -65,7 +69,7 @@ export default function WorkoutSection({ day, muscleGroup, isMissed, isTomorrow,
   };
 
   const handleSkip = () => {
-    markDaySkippedWithSync(day, activeSession);
+    markDaySkippedWithSync(date || day, activeSession);
     if (activeSession === 'am') {
       setAmDone(false);
       setAmSkipped(true);

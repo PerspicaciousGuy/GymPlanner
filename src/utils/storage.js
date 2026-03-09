@@ -10,6 +10,13 @@ import {
   saveCloudSchedule,
   saveCloudSessionTitles,
 } from './cloudSync.js';
+import {
+  formatDateKey,
+  getDayOfWeek,
+  getWeekStart,
+  getDateForDayInWeek,
+  getWeekDates,
+} from './dateUtils.js';
 
 // ─── Storage keys ────────────────────────────────────────────
 const SCHEDULE_KEY         = 'gymplanner_schedule';
@@ -18,6 +25,8 @@ const COMPLETION_KEY       = 'gymplanner_completion';
 const CUSTOM_EXERCISES_KEY = 'gymplanner_custom_exercises';
 const EXERCISE_DB_KEY      = 'gymplanner_exercise_db';
 const SESSION_TITLES_KEY   = 'gymplanner_session_titles';
+const MIGRATION_FLAG_KEY   = 'gymplanner_migrated_to_dates';
+const WORKOUT_MIGRATION_FLAG_KEY = 'gymplanner_workouts_migrated_to_dates';
 const PLANNER_LOCAL_KEYS = [
   SCHEDULE_KEY,
   WORKOUTS_KEY,
@@ -146,18 +155,132 @@ export function ensureAmPm(dayData) {
   return migrated;
 }
 
-// ─── Workouts (keyed by day name) ─────────────────────────────
+// ─── Workouts (now keyed by date) ─────────────────────────────
+// Run migration from day-based to date-based workouts on first load
+export function migrateWorkoutsToDateBased() {
+  const migrated = localStorage.getItem(WORKOUT_MIGRATION_FLAG_KEY);
+  if (migrated === 'true') return; // Already migrated
+
+  const workouts = safeLoad(WORKOUTS_KEY, {});
+  const hasOldFormat = Object.keys(workouts).some(key => 
+    /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/.test(key)
+  );
+
+  if (!hasOldFormat) {
+    localStorage.setItem(WORKOUT_MIGRATION_FLAG_KEY, 'true');
+    return; // No old data to migrate
+  }
+
+  console.log('[storage] Migrating workouts data to date-based format...');
+  
+  // Get current week's Monday
+  const currentWeekStart = getWeekStart(new Date());
+  const newWorkouts = {};
+
+  // Migrate old day-based workouts to current week's dates
+  for (const [dayName, dayData] of Object.entries(workouts)) {
+    if (/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/.test(dayName)) {
+      const date = getDateForDayInWeek(currentWeekStart, dayName);
+      const dateKey = formatDateKey(date);
+      newWorkouts[dateKey] = ensureAmPm(dayData);
+      console.log(`  Migrated ${dayName} → ${dateKey}`);
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(dayName)) {
+      // Already date-based, keep it
+      newWorkouts[dayName] = ensureAmPm(dayData);
+    }
+  }
+
+  localStorage.setItem(WORKOUTS_KEY, JSON.stringify(newWorkouts));
+  localStorage.setItem(WORKOUT_MIGRATION_FLAG_KEY, 'true');
+  console.log('[storage] Workout migration complete. Migrated to current week.');
+}
+
 export function loadWorkouts() {
   return safeLoad(WORKOUTS_KEY, {});
 }
 
-export function saveDayWorkout(day, dayData) {
+// Load workout for a specific date
+export function loadWorkoutByDate(date) {
+  const dateKey = formatDateKey(date);
   const all = loadWorkouts();
-  all[day] = dayData;
+  return ensureAmPm(all[dateKey]);
+}
+
+// Save workout for a specific date
+export function saveDayWorkout(dateOrDay, dayData) {
+  const all = loadWorkouts();
+  // Support both date objects and date strings
+  const key = dateOrDay instanceof Date || /^\d{4}-\d{2}-\d{2}$/.test(dateOrDay)
+    ? formatDateKey(dateOrDay)
+    : dateOrDay; // For backward compatibility during migration
+  all[key] = dayData;
   localStorage.setItem(WORKOUTS_KEY, JSON.stringify(all));
 }
 
+// Get workouts for a specific week
+export function getWorkoutsForWeek(weekStartDate) {
+  const weekDates = getWeekDates(weekStartDate);
+  const allWorkouts = loadWorkouts();
+  const weekWorkouts = {};
+
+  for (const date of weekDates) {
+    const dateKey = formatDateKey(date);
+    const dayName = getDayOfWeek(date);
+    weekWorkouts[dayName] = {
+      date: dateKey,
+      data: ensureAmPm(allWorkouts[dateKey])
+    };
+  }
+
+  return weekWorkouts;
+}
+
 // ─── Completion ───────────────────────────────────────────────
+// Run migration from day-based to date-based completion on first load
+export function migrateCompletionToDateBased() {
+  const migrated = localStorage.getItem(MIGRATION_FLAG_KEY);
+  if (migrated === 'true') return; // Already migrated
+
+  const completion = safeLoad(COMPLETION_KEY, {});
+  const hasOldFormat = Object.keys(completion).some(key => 
+    /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)_(am|pm)/.test(key)
+  );
+
+  if (!hasOldFormat) {
+    localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
+    return; // No old data to migrate
+  }
+
+  console.log('[storage] Migrating completion data to date-based format...');
+  
+  // Get previous week's Monday (the week that just ended)
+  // This is more logical since completion data is typically historical
+  const currentWeekStart = getWeekStart(new Date());
+  const previousWeekStart = new Date(currentWeekStart);
+  previousWeekStart.setDate(currentWeekStart.getDate() - 7);
+  
+  const newCompletion = {};
+
+  // Migrate old day-based keys to previous week's dates
+  for (const [key, value] of Object.entries(completion)) {
+    const match = key.match(/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)_(am|pm)/);
+    if (match) {
+      const [_, dayName, session] = match;
+      const date = getDateForDayInWeek(previousWeekStart, dayName);
+      const dateKey = formatDateKey(date);
+      newCompletion[`${dateKey}_${session}`] = value;
+      console.log(`  Migrated ${key} → ${dateKey}_${session}`);
+    } else if (/^\d{4}-\d{2}-\d{2}_(am|pm)/.test(key)) {
+      // Already date-based, keep it
+      newCompletion[key] = value;
+    }
+  }
+
+  localStorage.setItem(COMPLETION_KEY, JSON.stringify(newCompletion));
+  localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
+  console.log('[storage] Migration complete. Migrated to previous week (', formatDateKey(previousWeekStart), '- week that just ended).');
+}
+
 export function loadCompletion() {
   return normalizeCompletionMap(safeLoad(COMPLETION_KEY, {}));
 }
@@ -171,7 +294,7 @@ function normalizeCompletionMap(raw) {
   for (const [key, value] of Object.entries(raw)) {
     if (typeof key !== 'string') continue;
 
-    // Backward compatibility for server keys like "Monday_am_skipped": true
+    // Backward compatibility for old "day_session_skipped" keys
     const skippedMatch = key.match(/^(.*)_(am|pm)_skipped$/);
     if (skippedMatch) {
       if (isTruthy(value) || String(value).toLowerCase() === 'skipped') {
@@ -180,6 +303,7 @@ function normalizeCompletionMap(raw) {
       continue;
     }
 
+    // Accept both date-based (2026-03-10_am) and old day-based (Monday_am) keys
     if (!/(?:_am|_pm)$/.test(key)) continue;
 
     const lower = String(value).toLowerCase();
@@ -197,24 +321,75 @@ function normalizeCompletionMap(raw) {
 }
 
 // session: 'am' | 'pm'
-export function markDayComplete(day, session = 'am') {
+// date: Date object or ISO date string (YYYY-MM-DD)
+export function markDayComplete(date, session = 'am') {
+  const dateKey = formatDateKey(date);
   const all = loadCompletion();
-  all[`${day}_${session}`] = true;
+  all[`${dateKey}_${session}`] = true;
   localStorage.setItem(COMPLETION_KEY, JSON.stringify(all));
 }
 
-export function isDayComplete(day, session = 'am') {
-  const val = loadCompletion()[`${day}_${session}`];
+export function isDayComplete(date, session = 'am') {
+  const dateKey = formatDateKey(date);
+  const val = loadCompletion()[`${dateKey}_${session}`];
   return val === true || val === 'skipped';
 }
 
-export function isDaySkipped(day, session = 'am') {
-  return loadCompletion()[`${day}_${session}`] === 'skipped';
+export function isDaySkipped(date, session = 'am') {
+  const dateKey = formatDateKey(date);
+  return loadCompletion()[`${dateKey}_${session}`] === 'skipped';
 }
 
-export function markDaySkipped(day, session = 'am') {
+export function markDaySkipped(date, session = 'am') {
+  const dateKey = formatDateKey(date);
   const all = loadCompletion();
-  all[`${day}_${session}`] = 'skipped';
+  all[`${dateKey}_${session}`] = 'skipped';
+  localStorage.setItem(COMPLETION_KEY, JSON.stringify(all));
+}
+
+// Get completion data for a specific week
+export function getCompletionForWeek(weekStartDate) {
+  const weekDates = getWeekDates(weekStartDate);
+  const completion = loadCompletion();
+  const weekCompletion = {};
+
+  for (const date of weekDates) {
+    const dateKey = formatDateKey(date);
+    const dayName = getDayOfWeek(date);
+    
+    weekCompletion[dayName] = {
+      date: dateKey,
+      am: completion[`${dateKey}_am`],
+      pm: completion[`${dateKey}_pm`],
+    };
+  }
+
+  return weekCompletion;
+}
+
+// Get completion status for display (used by Data Console)
+export function getCompletionStatus(date, session) {
+  const dateKey = formatDateKey(date);
+  const val = loadCompletion()[`${dateKey}_${session}`];
+  if (val === true) return 'done';
+  if (val === 'skipped') return 'skipped';
+  return '';
+}
+
+// Set completion status from Data Console dropdown
+export function setCompletionStatus(date, session, status) {
+  const dateKey = formatDateKey(date);
+  const all = loadCompletion();
+  
+  if (status === 'done') {
+    all[`${dateKey}_${session}`] = true;
+  } else if (status === 'skipped') {
+    all[`${dateKey}_${session}`] = 'skipped';
+  } else {
+    // Remove the key if status is empty/none
+    delete all[`${dateKey}_${session}`];
+  }
+  
   localStorage.setItem(COMPLETION_KEY, JSON.stringify(all));
 }
 
@@ -407,22 +582,35 @@ export function saveDayWorkoutWithSync(day, dayData) {
   }
 }
 
-export function markDayCompleteWithSync(day, session = 'am') {
-  markDayComplete(day, session);
+export function markDayCompleteWithSync(date, session = 'am') {
+  markDayComplete(date, session);
 
   if (isCloudSyncReady()) {
-    saveCloudCompletionEntry(day, session, true).catch((err) =>
+    const dateKey = formatDateKey(date);
+    saveCloudCompletionEntry(dateKey, session, true).catch((err) =>
       console.warn('[storage] Cloud completion sync failed:', err)
     );
   }
 }
 
-export function markDaySkippedWithSync(day, session = 'am') {
-  markDaySkipped(day, session);
+export function markDaySkippedWithSync(date, session = 'am') {
+  markDaySkipped(date, session);
 
   if (isCloudSyncReady()) {
-    saveCloudCompletionEntry(day, session, 'skipped').catch((err) =>
+    const dateKey = formatDateKey(date);
+    saveCloudCompletionEntry(dateKey, session, 'skipped').catch((err) =>
       console.warn('[storage] Cloud skip sync failed:', err)
+    );
+  }
+}
+
+export function setCompletionStatusWithSync(date, session, status) {
+  setCompletionStatus(date, session, status);
+
+  if (isCloudSyncReady()) {
+    const completion = loadCompletion();
+    saveCloudCompletionMap(completion).catch((err) =>
+      console.warn('[storage] Cloud completion sync failed:', err)
     );
   }
 }

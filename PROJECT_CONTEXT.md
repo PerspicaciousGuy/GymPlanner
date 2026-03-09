@@ -24,10 +24,23 @@ Firestore path:
 
 - `gymplanner_schedule`
 - `gymplanner_workouts`
-- `gymplanner_completion`
+- `gymplanner_completion` (date-based format: `"2026-03-10_am": true`)
 - `gymplanner_custom_exercises`
 - `gymplanner_exercise_db`
 - `gymplanner_session_titles`
+- `gymplanner_migrated_to_dates` (migration flag)
+
+## Completion Tracking
+
+- **Date-based storage**: Completion data uses ISO date keys (`2026-03-10_am`) instead of day names
+- **Historical tracking**: All weeks are stored indefinitely, no automatic cleanup
+- **Week navigation**: Both Workout and Data Console pages have WeekPicker for browsing weeks
+- **Migration**: On first load, old day-based keys (`Monday_am`) are migrated to current week dates
+- **Week definition**: Monday-Sunday (hardcoded, using local browser timezone)
+- **Data format**: `{ "2026-03-10_am": true, "2026-03-10_pm": "skipped", ... }`
+  - `true` = completed
+  - `"skipped"` = skipped
+  - Missing key = not marked
 
 ## Important Files
 
@@ -35,11 +48,13 @@ Firestore path:
 - `src/hooks/useFirebaseAuth.js`: auth state, sign in/out helpers
 - `src/utils/cloudSync.js`: Firestore read/write helpers
 - `src/utils/storage.js`: local persistence plus cloud sync wrappers
+- `src/utils/dateUtils.js`: date and week calculation utilities (Monday-Sunday weeks)
 - `src/utils/exportWorkbook.js`: browser-side `.xlsx` export helpers
 - `src/pages/WorkoutSchedulerPage.jsx`: main workout page and sync bootstrap
 - `src/pages/DataConsolePage.jsx`: spreadsheet-style editing across planner datasets
 - `src/components/Navbar.jsx`: page navigation, auth actions, migration, local-clear/rehydrate actions
 - `src/components/WorkoutSection.jsx`: AM/PM workout flow with auto-switch and tab locking
+- `src/components/WeekPicker.jsx`: week navigation component with prev/next/today buttons
 - `firestore.rules`: security rules template for planner docs
 
 ## Sync Behavior

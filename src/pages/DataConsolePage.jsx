@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { DAYS, exerciseDatabase } from '../data/exerciseDatabase';
 import {
   defaultDayWorkout,
@@ -13,8 +13,18 @@ import {
   saveDayWorkoutWithSync,
   saveExerciseDbWithSync,
   saveSessionTitlesWithSync,
+  getCompletionForWeek,
+  setCompletionStatusWithSync,
 } from '../utils/storage';
 import { exportPlannerWorkbook } from '../utils/exportWorkbook';
+import { importPlannerWorkbook } from '../utils/importWorkbook';
+import { 
+  getWeekStart, 
+  formatDateCompact, 
+  formatDateKey,
+  getDayOfWeek,
+} from '../utils/dateUtils';
+import WeekPicker from '../components/WeekPicker';
 
 const TABS = [
   { key: 'schedule', label: 'Sessions' },
@@ -38,8 +48,16 @@ function hasWorkoutRowData(row) {
   return WORKOUT_FIELDS.some((key) => String(row?.[key] ?? '').trim() !== '');
 }
 
-function blankWorkoutGridRow(day = DAYS[0], session = 'am') {
+function blankWorkoutGridRow(dateOrDay = formatDateKey(new Date()), session = 'am') {
+  // If dateOrDay is a date string or Date object, extract the day name
+  const day = typeof dateOrDay === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateOrDay)
+    ? getDayOfWeek(new Date(dateOrDay))
+    : dateOrDay instanceof Date
+    ? getDayOfWeek(dateOrDay)
+    : dateOrDay;
+  
   return {
+    dateOrDay: dateOrDay,
     day,
     session,
     groupIndex: '1',
@@ -58,15 +76,20 @@ function blankWorkoutGridRow(day = DAYS[0], session = 'am') {
 function flattenWorkoutsForGrid(workoutsMap, { includeEmpty = false } = {}) {
   const rows = [];
 
-  for (const day of DAYS) {
-    const dayData = ensureAmPm(workoutsMap?.[day]);
+    // Workouts are now keyed by date (YYYY-MM-DD) instead of day names
+    for (const [dateKey, dayData] of Object.entries(workoutsMap)) {
+      const data = ensureAmPm(dayData);
+      const dayName = /^\d{4}-\d{2}-\d{2}$/.test(dateKey)
+        ? getDayOfWeek(new Date(dateKey))
+        : dateKey; // Fallback for old day-name keys during transition
 
     for (const session of ['am', 'pm']) {
-      const groups = dayData?.[session]?.groups ?? [];
+        const groups = data?.[session]?.groups ?? [];
       groups.forEach((group, groupIdx) => {
         (group.rows ?? []).forEach((row, rowIdx) => {
           const flatRow = {
-            day,
+              dateOrDay: dateKey,
+              day: dayName,
             session,
             groupIndex: String(groupIdx + 1),
             rowIndex: String(rowIdx + 1),
@@ -89,7 +112,8 @@ function flattenWorkoutsForGrid(workoutsMap, { includeEmpty = false } = {}) {
   }
 
   if (rows.length === 0) return [blankWorkoutGridRow()];
-  return rows;
+  // Sort by date descending (newest first)
+  return rows.sort((a, b) => b.dateOrDay.localeCompare(a.dateOrDay));
 }
 
 function buildInitialWorkoutRows() {
@@ -99,14 +123,8 @@ function buildInitialWorkoutRows() {
 function buildWorkoutsFromGrid(rows) {
   const workouts = {};
 
-  for (const day of DAYS) {
-    workouts[day] = defaultDayWorkout();
-    workouts[day].am = { groups: [] };
-    workouts[day].pm = { groups: [] };
-  }
-
   for (const row of rows) {
-    const day = DAYS.includes(row.day) ? row.day : DAYS[0];
+    const key = row.dateOrDay || row.day; // Use date if available, fall back to day
     const session = row.session === 'pm' ? 'pm' : 'am';
     const groupIndex = Math.max(1, Number.parseInt(String(row.groupIndex), 10) || 1);
     const rowIndex = Math.max(1, Number.parseInt(String(row.rowIndex), 10) || 1);
@@ -125,7 +143,11 @@ function buildWorkoutsFromGrid(rows) {
     const hasData = WORKOUT_FIELDS.some((key) => String(rowData[key]).trim() !== '');
     if (!hasData) continue;
 
-    const groups = workouts[day][session].groups;
+    if (!workouts[key]) {
+      workouts[key] = defaultDayWorkout();
+    }
+
+    const groups = workouts[key][session].groups;
     while (groups.length < groupIndex) {
       groups.push({ rows: [] });
     }
@@ -138,11 +160,12 @@ function buildWorkoutsFromGrid(rows) {
     group.rows[rowIndex - 1] = rowData;
   }
 
-  for (const day of DAYS) {
+  // Ensure at least one group with one row for each date/session
+  for (const key of Object.keys(workouts)) {
     for (const session of ['am', 'pm']) {
-      const groups = workouts[day][session].groups;
+      const groups = workouts[key][session].groups;
       if (groups.length === 0) {
-        workouts[day][session] = { groups: [defaultGroup()] };
+        workouts[key][session] = { groups: [defaultGroup()] };
         continue;
       }
 
@@ -204,7 +227,8 @@ export default function DataConsolePage() {
   const [workoutFilterSession, setWorkoutFilterSession] = useState('all');
   const [showAdvancedCols, setShowAdvancedCols] = useState(false);
 
-  const [completion, setCompletion] = useState(() => loadCompletion());
+  // Week state for Completion tab
+  const [selectedWeek, setSelectedWeek] = useState(() => getWeekStart(new Date()));
   const [completionSaved, setCompletionSaved] = useState(false);
 
   const [exerciseRows, setExerciseRows] = useState(() => {
@@ -214,6 +238,9 @@ export default function DataConsolePage() {
   const [exerciseSaved, setExerciseSaved] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [exportNote, setExportNote] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [importNote, setImportNote] = useState('');
+  const importInputRef = useRef(null);
 
   const flashSaved = (setter) => {
     setter(true);
@@ -253,8 +280,8 @@ export default function DataConsolePage() {
 
   const saveWorkoutGrid = () => {
     const workouts = buildWorkoutsFromGrid(workoutRows);
-    for (const day of DAYS) {
-      saveDayWorkoutWithSync(day, ensureAmPm(workouts[day]));
+    for (const [key, data] of Object.entries(workouts)) {
+      saveDayWorkoutWithSync(key, ensureAmPm(data));
     }
     setWorkoutRows(flattenWorkoutsForGrid(workouts));
     flashSaved(setWorkoutsSaved);
@@ -268,23 +295,13 @@ export default function DataConsolePage() {
       return dayOk && sessionOk;
     });
 
-  const setCompletionCell = (day, session, status) => {
-    const key = `${day}_${session}`;
-    setCompletion((prev) => {
-      const next = { ...prev };
-      if (status === '') {
-        delete next[key];
-      } else if (status === 'done') {
-        next[key] = true;
-      } else {
-        next[key] = 'skipped';
-      }
-      return next;
-    });
-  };
+  // Load completion for selected week
+  const weekCompletion = getCompletionForWeek(selectedWeek);
 
-  const saveCompletionGrid = () => {
-    saveCompletionWithSync(completion);
+  const setCompletionCell = (date, session, status) => {
+    setCompletionStatusWithSync(date, session, status);
+    // Force re-render by updating selectedWeek to same value
+    setSelectedWeek(new Date(selectedWeek));
     flashSaved(setCompletionSaved);
   };
 
@@ -315,7 +332,7 @@ export default function DataConsolePage() {
       exportPlannerWorkbook({
         sessionTitles,
         workoutRows,
-        completion,
+        completion: loadCompletion(),
         exerciseRows,
         mode: mode === 'all' ? 'all' : 'current',
         activeTab,
@@ -329,6 +346,53 @@ export default function DataConsolePage() {
     }
   };
 
+  const handleImportClick = () => {
+    if (importing) return;
+    importInputRef.current?.click();
+  };
+
+  const handleImportFile = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setImporting(true);
+      const parsed = await importPlannerWorkbook(file);
+
+      if (parsed.sessionTitles) {
+        saveSessionTitlesWithSync(parsed.sessionTitles);
+        setSessionTitles(parsed.sessionTitles);
+      }
+
+      if (parsed.workoutRows?.length) {
+        const workoutsMap = buildWorkoutsFromGrid(parsed.workoutRows);
+        for (const [key, data] of Object.entries(workoutsMap)) {
+          saveDayWorkoutWithSync(key, ensureAmPm(data));
+        }
+        setWorkoutRows(flattenWorkoutsForGrid(loadWorkouts()));
+      }
+
+      if (parsed.completion) {
+        saveCompletionWithSync(parsed.completion);
+        setSelectedWeek(new Date(selectedWeek));
+      }
+
+      if (parsed.exerciseRows) {
+        const db = buildDbFromRows(parsed.exerciseRows);
+        saveExerciseDbWithSync(db);
+        setExerciseRows(flattenDbRows(db));
+      }
+
+      setImportNote('Import complete');
+    } catch {
+      setImportNote('Import failed');
+    } finally {
+      setImporting(false);
+      event.target.value = '';
+      setTimeout(() => setImportNote(''), 2400);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -339,6 +403,20 @@ export default function DataConsolePage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleImportFile}
+            className="hidden"
+          />
+          <button
+            onClick={handleImportClick}
+            disabled={importing}
+            className="px-4 py-2 rounded text-sm font-semibold border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-60"
+          >
+            {importing ? 'Importing...' : 'Import Data (.xlsx)'}
+          </button>
           <button
             onClick={() => handleExport('current')}
             disabled={exporting}
@@ -353,6 +431,7 @@ export default function DataConsolePage() {
           >
             Export All Tabs (.xlsx)
           </button>
+          {importNote && <span className="text-xs text-blue-700">{importNote}</span>}
           {exportNote && <span className="text-xs text-emerald-700">{exportNote}</span>}
         </div>
       </div>
@@ -495,11 +574,12 @@ export default function DataConsolePage() {
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className={`${showAdvancedCols ? 'min-w-[1550px]' : 'min-w-[1280px]'} bg-white text-sm`}>
+            <table className={`${showAdvancedCols ? 'min-w-[1700px]' : 'min-w-[1400px]'} bg-white text-sm`}>
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-3 py-2 text-left font-semibold text-gray-600 w-12">#</th>
                   <th className="px-3 py-2 text-left font-semibold text-gray-600 w-36">Day</th>
+                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-32">Date</th>
                   <th className="px-3 py-2 text-left font-semibold text-gray-600 w-24">Session</th>
                   {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-28">GroupIndex</th>}
                   {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-28">RowIndex</th>}
@@ -519,15 +599,28 @@ export default function DataConsolePage() {
                   <tr key={`workout-row-${idx}`}>
                     <td className="px-3 py-2 text-gray-500">{visibleIdx + 1}</td>
                     <td className="px-3 py-2">
-                      <select
+                      <input
                         value={row.day}
-                        onChange={(e) => updateWorkoutRow(idx, 'day', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-full bg-white"
-                      >
-                        {DAYS.map((day) => (
-                          <option key={day} value={day}>{day}</option>
-                        ))}
-                      </select>
+                        readOnly
+                        className="border border-gray-300 rounded px-2 py-1 w-full bg-gray-50"
+                        title="Day name is auto-calculated from date"
+                      />
+                    </td>
+                    <td className="px-3 py-2">
+                      <input
+                        type="date"
+                        value={row.dateOrDay || ''}
+                        onChange={(e) => {
+                          const newDate = e.target.value;
+                          updateWorkoutRow(idx, 'dateOrDay', newDate);
+                          // Update day name based on date
+                          if (newDate) {
+                            const dayName = getDayOfWeek(newDate);
+                            updateWorkoutRow(idx, 'day', dayName);
+                          }
+                        }}
+                        className="border border-gray-300 rounded px-2 py-1 w-full"
+                      />
                     </td>
                     <td className="px-3 py-2">
                       <select
@@ -644,47 +737,60 @@ export default function DataConsolePage() {
 
       {activeTab === 'completion' && (
         <div className="flex flex-col gap-4">
+          <WeekPicker 
+            currentWeekStart={selectedWeek} 
+            onWeekChange={setSelectedWeek} 
+          />
+          
           <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
             <table className="min-w-full bg-white text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600 w-40">Day</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-600 w-32">Date</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600">AM</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-600">PM</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {DAYS.map((day) => (
-                  <tr key={day}>
-                    <td className="px-4 py-2 font-medium text-gray-800">{day}</td>
-                    {['am', 'pm'].map((session) => (
-                      <td key={session} className="px-4 py-2">
-                        <select
-                          value={completionStatus(completion[`${day}_${session}`])}
-                          onChange={(e) => setCompletionCell(day, session, e.target.value)}
-                          className="border border-gray-300 rounded px-3 py-1.5 bg-white"
-                        >
-                          <option value="">None</option>
-                          <option value="done">Done</option>
-                          <option value="skipped">Skipped</option>
-                        </select>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                {DAYS.map((day) => {
+                  const dayData = weekCompletion[day];
+                  const dateDisplay = dayData ? formatDateCompact(dayData.date) : '';
+                  const dateKey = dayData ? dayData.date : null;
+                  
+                  return (
+                    <tr key={day}>
+                      <td className="px-4 py-2 font-medium text-gray-800">{day}</td>
+                      <td className="px-4 py-2 text-gray-600 text-xs">{dateDisplay}</td>
+                      {['am', 'pm'].map((session) => {
+                        const value = dayData?.[session];
+                        const status = value === true ? 'done' : value === 'skipped' ? 'skipped' : '';
+                        
+                        return (
+                          <td key={session} className="px-4 py-2">
+                            <select
+                              value={status}
+                              onChange={(e) => setCompletionCell(dateKey, session, e.target.value)}
+                              className="border border-gray-300 rounded px-3 py-1.5 bg-white"
+                              disabled={!dateKey}
+                            >
+                              <option value="">None</option>
+                              <option value="done">Done</option>
+                              <option value="skipped">Skipped</option>
+                            </select>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={saveCompletionGrid}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded text-sm"
-            >
-              Save Completion
-            </button>
             {completionSaved && (
-              <span className="text-green-600 text-sm font-medium">Saved completion</span>
+              <span className="text-green-600 text-sm font-medium">✓ Saved completion</span>
             )}
           </div>
         </div>

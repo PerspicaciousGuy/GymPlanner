@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import WorkoutSchedulerPage from './pages/WorkoutSchedulerPage';
 import DataConsolePage from './pages/DataConsolePage';
 import useFirebaseAuth from './hooks/useFirebaseAuth';
+import { migrateCompletionToDateBased, migrateWorkoutsToDateBased } from './utils/storage';
 
 export default function App() {
   const [activePage, setActivePage] = useState('workout');
@@ -10,6 +11,12 @@ export default function App() {
   const authState = useFirebaseAuth();
   const syncScope = authState.user?.uid || (authState.isConfigured ? 'signed-out' : 'local');
   const syncKey = `${syncScope}:${syncNonce}`;
+
+  // Run migrations on app load
+  useEffect(() => {
+    migrateCompletionToDateBased();
+    migrateWorkoutsToDateBased();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
