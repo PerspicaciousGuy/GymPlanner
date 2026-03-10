@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { clearLocalDataAndRehydrateFromCloud, migrateLocalDataToCloud } from '../utils/storage';
+import {
+  clearLocalDataAndRehydrateFromCloud,
+  migrateLocalDataToCloud,
+} from '../utils/storage';
 
 export default function Navbar({ activePage, onNavigate, authState, onDataRefreshed }) {
   const [showLogin, setShowLogin] = useState(false);
@@ -65,10 +68,10 @@ export default function Navbar({ activePage, onNavigate, authState, onDataRefres
       setBusy(true);
       const result = await clearLocalDataAndRehydrateFromCloud();
       if (result.ok) {
-        setMigrationNote('Local data removed and reloaded from cloud');
+        setMigrationNote('Local cache cleared and reloaded from cloud');
         onDataRefreshed?.();
       } else if (result.reason === 'not-authenticated') {
-        setMigrationNote('Sign in first to remove local data');
+        setMigrationNote('Sign in first to clear local cache');
       } else {
         setMigrationNote('Failed to reload from cloud after local clear');
       }
@@ -81,46 +84,52 @@ export default function Navbar({ activePage, onNavigate, authState, onDataRefres
 
   return (
     <nav className="bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
-        <span className="text-2xl">💪</span>
-        <span className="text-xl font-bold text-blue-700 tracking-tight">GymPlanner</span>
-        <span className="ml-2 text-sm text-gray-400 font-medium">Daily Workout Scheduler</span>
-        <div className="ml-auto flex items-center gap-2">
-          <button className={navBtn('workout')} onClick={() => onNavigate('workout')}>
-            Workout
-          </button>
-          <button className={navBtn('data')} onClick={() => onNavigate('data')}>
-            Data
-          </button>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0 flex items-center gap-2">
+            <span className="text-xl">💪</span>
+            <span className="text-2xl sm:text-xl font-bold text-blue-700 tracking-tight">GymPlanner</span>
+            <span className="hidden sm:inline text-sm text-gray-400 font-medium">Daily Workout Scheduler</span>
+          </div>
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            <button className={navBtn('workout')} onClick={() => onNavigate('workout')}>
+              Workout
+            </button>
+            <button className={navBtn('data')} onClick={() => onNavigate('data')}>
+              Data
+            </button>
+          </div>
         </div>
 
         {!canCloud && (
-          <span className="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded">
-            Cloud: not configured
-          </span>
+          <div className="mt-2">
+            <span className="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded inline-flex">
+              Cloud: not configured
+            </span>
+          </div>
         )}
 
         {canCloud && user && (
-          <div className="ml-auto flex items-center gap-2 text-sm">
-            <span className="text-gray-500 max-w-44 truncate">{user.email}</span>
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+            <span className="text-gray-500 max-w-28 sm:max-w-44 truncate">{user.email}</span>
             <button
               onClick={handleMigrate}
               disabled={busy}
-              className="px-3 py-1.5 rounded font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60"
+              className="px-2.5 sm:px-3 py-1.5 rounded font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60"
             >
               Migrate Local to Cloud
             </button>
             <button
               onClick={() => setConfirmingClear((v) => !v)}
               disabled={busy}
-              className="px-3 py-1.5 rounded font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+              className="px-2.5 sm:px-3 py-1.5 rounded font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
             >
-              Remove Local Data
+              Clear Local Cache
             </button>
             <button
               onClick={handleLogout}
               disabled={busy}
-              className="px-3 py-1.5 rounded font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-60"
+              className="px-2.5 sm:px-3 py-1.5 rounded font-semibold text-gray-600 hover:bg-gray-100 disabled:opacity-60"
             >
               Sign Out
             </button>
@@ -128,8 +137,8 @@ export default function Navbar({ activePage, onNavigate, authState, onDataRefres
         )}
 
         {canCloud && user && confirmingClear && (
-          <div className="w-full flex justify-end gap-2 text-sm">
-            <span className="text-red-700 font-medium">Clear local cache now?</span>
+          <div className="mt-2 w-full flex flex-wrap items-center justify-end gap-2 text-xs sm:text-sm">
+            <span className="text-red-700 font-medium">Clear local cache and reload cloud data now?</span>
             <button
               onClick={handleClearLocal}
               disabled={busy}
@@ -148,7 +157,7 @@ export default function Navbar({ activePage, onNavigate, authState, onDataRefres
         )}
 
         {canCloud && !user && (
-          <div className="ml-auto flex items-center gap-2 flex-wrap">
+          <div className="mt-2 flex items-center gap-2 flex-wrap">
             <button
               onClick={() => {
                 authState?.clearError?.();

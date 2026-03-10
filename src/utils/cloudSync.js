@@ -52,6 +52,13 @@ export async function saveCloudDayWorkout(day, dayData) {
   return true;
 }
 
+export async function saveCloudWorkoutsMap(workoutsMap) {
+  const ref = getPlannerDoc('workouts');
+  if (!ref) return false;
+  await setDoc(ref, workoutsMap || {}, { merge: false });
+  return true;
+}
+
 export async function saveCloudCompletionEntry(day, session, value) {
   const ref = getPlannerDoc('completion');
   if (!ref) return false;

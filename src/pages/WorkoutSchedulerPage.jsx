@@ -37,13 +37,13 @@ function AccordionSection({ section, defaultOpen, syncToken }) {
     <div className="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-gray-50 transition-colors gap-3"
+        className="w-full flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-white hover:bg-gray-50 transition-colors gap-2 sm:gap-3"
       >
         <div className="flex items-center gap-3 flex-wrap">
           {badgeEl && badgeEl}
           <div className="flex flex-col items-start">
-            <div className="flex items-baseline gap-2">
-              <span className="text-base font-bold text-gray-800">{section.dayName}</span>
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-sm sm:text-base font-bold text-gray-800">{section.dayName}</span>
               <span className="text-xs text-gray-500">{formatDateDisplay(section.date)}</span>
             </div>
             {section.muscleGroup && (
@@ -60,7 +60,7 @@ function AccordionSection({ section, defaultOpen, syncToken }) {
       </button>
 
       {open && (
-        <div className="border-t border-gray-100 px-5 py-6 bg-white">
+        <div className="border-t border-gray-100 px-3 sm:px-5 py-4 sm:py-6 bg-white">
           <WorkoutSection
             date={section.date}
             dayName={section.dayName}

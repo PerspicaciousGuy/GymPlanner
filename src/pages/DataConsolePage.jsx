@@ -13,6 +13,7 @@ import {
   saveDayWorkoutWithSync,
   saveExerciseDbWithSync,
   saveSessionTitlesWithSync,
+  saveWorkoutsMapWithSync,
   getCompletionForWeek,
   setCompletionStatusWithSync,
 } from '../utils/storage';
@@ -23,6 +24,7 @@ import {
   formatDateCompact, 
   formatDateKey,
   getDayOfWeek,
+  getDateForDayInWeek,
 } from '../utils/dateUtils';
 import WeekPicker from '../components/WeekPicker';
 
@@ -48,16 +50,23 @@ function hasWorkoutRowData(row) {
   return WORKOUT_FIELDS.some((key) => String(row?.[key] ?? '').trim() !== '');
 }
 
+function normalizeWorkoutDateKey(value) {
+  if (value instanceof Date) return formatDateKey(value);
+  const raw = String(value || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  if (DAYS.includes(raw)) {
+    return formatDateKey(getDateForDayInWeek(getWeekStart(new Date()), raw));
+  }
+  return '';
+}
+
 function blankWorkoutGridRow(dateOrDay = formatDateKey(new Date()), session = 'am') {
+  const dateKey = normalizeWorkoutDateKey(dateOrDay) || formatDateKey(new Date());
   // If dateOrDay is a date string or Date object, extract the day name
-  const day = typeof dateOrDay === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateOrDay)
-    ? getDayOfWeek(new Date(dateOrDay))
-    : dateOrDay instanceof Date
-    ? getDayOfWeek(dateOrDay)
-    : dateOrDay;
+  const day = getDayOfWeek(dateKey);
   
   return {
-    dateOrDay: dateOrDay,
+    dateOrDay: dateKey,
     day,
     session,
     groupIndex: '1',
@@ -76,12 +85,12 @@ function blankWorkoutGridRow(dateOrDay = formatDateKey(new Date()), session = 'a
 function flattenWorkoutsForGrid(workoutsMap, { includeEmpty = false } = {}) {
   const rows = [];
 
-    // Workouts are now keyed by date (YYYY-MM-DD) instead of day names
-    for (const [dateKey, dayData] of Object.entries(workoutsMap)) {
+    // Workouts are keyed by date; convert legacy day keys to current-week dates for display.
+    for (const [dateOrDayKey, dayData] of Object.entries(workoutsMap)) {
+      const dateKey = normalizeWorkoutDateKey(dateOrDayKey);
+      if (!dateKey) continue;
       const data = ensureAmPm(dayData);
-      const dayName = /^\d{4}-\d{2}-\d{2}$/.test(dateKey)
-        ? getDayOfWeek(new Date(dateKey))
-        : dateKey; // Fallback for old day-name keys during transition
+      const dayName = getDayOfWeek(new Date(dateKey));
 
     for (const session of ['am', 'pm']) {
         const groups = data?.[session]?.groups ?? [];
@@ -124,7 +133,8 @@ function buildWorkoutsFromGrid(rows) {
   const workouts = {};
 
   for (const row of rows) {
-    const key = row.dateOrDay || row.day; // Use date if available, fall back to day
+    const key = normalizeWorkoutDateKey(row.dateOrDay || row.day);
+    if (!key) continue;
     const session = row.session === 'pm' ? 'pm' : 'am';
     const groupIndex = Math.max(1, Number.parseInt(String(row.groupIndex), 10) || 1);
     const rowIndex = Math.max(1, Number.parseInt(String(row.rowIndex), 10) || 1);
@@ -262,12 +272,15 @@ export default function DataConsolePage() {
 
   const addWorkoutGridRow = () => {
     setWorkoutRows((prev) => {
-      const fallbackDay = workoutFilterDay === 'all' ? DAYS[0] : workoutFilterDay;
       const fallbackSession = workoutFilterSession === 'all' ? 'am' : workoutFilterSession;
-      const last = prev[prev.length - 1] || blankWorkoutGridRow(fallbackDay, fallbackSession);
+      const last = prev[prev.length - 1] || blankWorkoutGridRow(formatDateKey(new Date()), fallbackSession);
+      const dateKey = normalizeWorkoutDateKey(last.dateOrDay) || formatDateKey(new Date());
       const day = workoutFilterDay === 'all' ? last.day : workoutFilterDay;
       const session = workoutFilterSession === 'all' ? last.session : workoutFilterSession;
-      return [...prev, blankWorkoutGridRow(day, session)];
+      const rowDate = workoutFilterDay === 'all'
+        ? dateKey
+        : formatDateKey(getDateForDayInWeek(getWeekStart(new Date()), day));
+      return [...prev, blankWorkoutGridRow(rowDate, session)];
     });
   };
 
@@ -280,9 +293,8 @@ export default function DataConsolePage() {
 
   const saveWorkoutGrid = () => {
     const workouts = buildWorkoutsFromGrid(workoutRows);
-    for (const [key, data] of Object.entries(workouts)) {
-      saveDayWorkoutWithSync(key, ensureAmPm(data));
-    }
+    // Save the full workouts map so removed rows/dates are deleted from storage.
+    saveWorkoutsMapWithSync(workouts);
     setWorkoutRows(flattenWorkoutsForGrid(workouts));
     flashSaved(setWorkoutsSaved);
   };

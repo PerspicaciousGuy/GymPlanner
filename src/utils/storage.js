@@ -9,6 +9,7 @@ import {
   saveCloudExerciseDb,
   saveCloudSchedule,
   saveCloudSessionTitles,
+  saveCloudWorkoutsMap,
 } from './cloudSync.js';
 import {
   formatDateKey,
@@ -34,6 +35,8 @@ const PLANNER_LOCAL_KEYS = [
   CUSTOM_EXERCISES_KEY,
   EXERCISE_DB_KEY,
   SESSION_TITLES_KEY,
+  MIGRATION_FLAG_KEY,
+  WORKOUT_MIGRATION_FLAG_KEY,
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────
@@ -44,6 +47,31 @@ function safeLoad(key, fallback) {
   } catch {
     return fallback;
   }
+}
+
+const LEGACY_DAY_KEY_REGEX = /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/;
+const DATE_KEY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+function normalizeWorkoutsMap(rawWorkouts) {
+  const normalized = {};
+  const currentWeekStart = getWeekStart(new Date());
+
+  for (const [key, dayData] of Object.entries(rawWorkouts || {})) {
+    if (DATE_KEY_REGEX.test(key)) {
+      normalized[key] = ensureAmPm(dayData);
+      continue;
+    }
+
+    if (LEGACY_DAY_KEY_REGEX.test(key)) {
+      const date = getDateForDayInWeek(currentWeekStart, key);
+      const dateKey = formatDateKey(date);
+      if (!normalized[dateKey]) {
+        normalized[dateKey] = ensureAmPm(dayData);
+      }
+    }
+  }
+
+  return normalized;
 }
 
 // ─── Schedule ─────────────────────────────────────────────────
@@ -127,6 +155,29 @@ export async function clearLocalDataAndRehydrateFromCloud() {
   return { ok: true };
 }
 
+export async function clearAllDataLocalAndCloud() {
+  if (!isCloudSyncReady()) {
+    return { ok: false, reason: 'not-authenticated' };
+  }
+
+  try {
+    // Overwrite each cloud planner document with an empty payload.
+    await Promise.all([
+      saveCloudSchedule({}),
+      saveCloudWorkoutsMap({}),
+      saveCloudCompletionMap({}),
+      saveCloudExerciseDb({}),
+      saveCloudSessionTitles({}),
+    ]);
+
+    clearPlannerLocalData();
+    return { ok: true };
+  } catch (err) {
+    console.warn('[storage] Failed to clear cloud data:', err);
+    return { ok: false, reason: 'cloud-clear-failed' };
+  }
+}
+
 // ─── Per-row / group defaults ─────────────────────────────────
 export function defaultRow() {
   return { muscle: '', subMuscle: '', exercise: '', sets: '', reps: '', weight: '', dropSets: '', dropWeight: '' };
@@ -196,7 +247,19 @@ export function migrateWorkoutsToDateBased() {
 }
 
 export function loadWorkouts() {
-  return safeLoad(WORKOUTS_KEY, {});
+  const raw = safeLoad(WORKOUTS_KEY, {});
+  const normalized = normalizeWorkoutsMap(raw);
+
+  // Keep local cache canonical (date-keyed) to avoid blank dates in Data Console.
+  if (JSON.stringify(raw) !== JSON.stringify(normalized)) {
+    localStorage.setItem(WORKOUTS_KEY, JSON.stringify(normalized));
+  }
+
+  return normalized;
+}
+
+export function saveWorkoutsMap(workoutsMap) {
+  localStorage.setItem(WORKOUTS_KEY, JSON.stringify(workoutsMap || {}));
 }
 
 // Load workout for a specific date
@@ -540,20 +603,23 @@ export async function syncPlannerData() {
     }
 
     if (workouts && typeof workouts === 'object') {
-      const mergedWorkouts = { ...loadWorkouts(), ...workouts };
+      const normalizedRemoteWorkouts = normalizeWorkoutsMap(workouts);
+      const mergedWorkouts = { ...loadWorkouts(), ...normalizedRemoteWorkouts };
       localStorage.setItem(WORKOUTS_KEY, JSON.stringify(mergedWorkouts));
+
+      // If cloud still has legacy day keys, rewrite cloud with canonical date keys.
+      const hadLegacyKeys = Object.keys(workouts).some((key) => LEGACY_DAY_KEY_REGEX.test(key));
+      if (hadLegacyKeys) {
+        saveCloudWorkoutsMap(normalizedRemoteWorkouts).catch((err) =>
+          console.warn('[storage] Cloud workout key normalization failed:', err)
+        );
+      }
     }
 
     if (completion && typeof completion === 'object') {
-      const localCompletion = loadCompletion();
       const remoteCompletion = normalizeCompletionMap(completion);
-      const mergedCompletion = { ...localCompletion, ...remoteCompletion };
-      for (const [key, value] of Object.entries(localCompletion)) {
-        if (value === 'skipped' && mergedCompletion[key] === true) {
-          mergedCompletion[key] = 'skipped';
-        }
-      }
-      localStorage.setItem(COMPLETION_KEY, JSON.stringify(mergedCompletion));
+      // Treat cloud as source of truth during sync so deleted keys stay deleted.
+      localStorage.setItem(COMPLETION_KEY, JSON.stringify(remoteCompletion));
     }
 
     if (isValidDb(exerciseDb)) {
@@ -578,6 +644,17 @@ export function saveDayWorkoutWithSync(day, dayData) {
   if (isCloudSyncReady()) {
     saveCloudDayWorkout(day, dayData).catch((err) =>
       console.warn('[storage] Cloud workout sync failed:', err)
+    );
+  }
+}
+
+// Save the entire workouts object so deleted rows/dates are removed as well.
+export function saveWorkoutsMapWithSync(workoutsMap) {
+  saveWorkoutsMap(workoutsMap);
+
+  if (isCloudSyncReady()) {
+    saveCloudWorkoutsMap(workoutsMap || {}).catch((err) =>
+      console.warn('[storage] Cloud workouts map sync failed:', err)
     );
   }
 }
