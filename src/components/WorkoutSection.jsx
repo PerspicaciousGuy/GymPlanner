@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import ExerciseGroup from './ExerciseGroup';
-import { saveDayWorkoutWithSync, markDayCompleteWithSync, markDaySkippedWithSync, isDayComplete, isDaySkipped, ensureAmPm, defaultSession, defaultGroup, loadSessionTitles } from '../utils/storage';
+import { saveDayWorkoutWithSync, markDayCompleteWithSync, markDaySkippedWithSync, isDayComplete, isDaySkipped, ensureAmPm, defaultSession, defaultGroup, loadSessionTitles, saveSessionTitlesWithSync } from '../utils/storage';
 
 export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken, onWorkoutChanged }) {
   // For backward compatibility: if date is not provided but day is, use day as dayName
@@ -9,14 +9,20 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const [dayData, setDayData] = useState(() => ensureAmPm(initialData));
   const [activeSession, setActiveSession] = useState('am');
   const [saveFlash, setSaveFlash] = useState(false);
+  const [titleSaveFlash, setTitleSaveFlash] = useState(false);
   const [amDone, setAmDone] = useState(() => isDayComplete(date || day, 'am') && !isDaySkipped(date || day, 'am'));
   const [pmDone, setPmDone] = useState(() => isDayComplete(date || day, 'pm') && !isDaySkipped(date || day, 'pm'));
   const [amSkipped, setAmSkipped] = useState(() => isDaySkipped(date || day, 'am'));
   const [pmSkipped, setPmSkipped] = useState(() => isDaySkipped(date || day, 'pm'));
+  const [sessionTitlesState, setSessionTitlesState] = useState(() => loadSessionTitles());
 
   useEffect(() => {
     setDayData(ensureAmPm(initialData));
   }, [initialData]);
+
+  useEffect(() => {
+    setSessionTitlesState(loadSessionTitles());
+  }, [syncToken]);
 
   useEffect(() => {
     const dateOrDay = date || day;
@@ -93,6 +99,23 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     }));
   };
 
+  const handleSessionTitleChange = (session, value) => {
+    setSessionTitlesState((prev) => ({
+      ...prev,
+      [session]: {
+        ...prev[session],
+        [day]: value,
+      },
+    }));
+  };
+
+  const handleSessionTitleSave = () => {
+    saveSessionTitlesWithSync(sessionTitlesState);
+    onWorkoutChanged?.();
+    setTitleSaveFlash(true);
+    setTimeout(() => setTitleSaveFlash(false), 1800);
+  };
+
   const handleDeleteGroup = (groupIdx) => {
     setDayData((prev) => {
       const sessionData = { ...prev[activeSession] };
@@ -110,9 +133,8 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Today</span>
   );
 
-  const sessionTitles = loadSessionTitles();
-  const amTitle = sessionTitles.am[day] || '';
-  const pmTitle = sessionTitles.pm[day] || '';
+  const amTitle = sessionTitlesState.am?.[day] || '';
+  const pmTitle = sessionTitlesState.pm?.[day] || '';
   const sessionDone = activeSession === 'am' ? amDone : pmDone;
   const sessionSkipped = activeSession === 'am' ? amSkipped : pmSkipped;
   const bothDone = (amDone || amSkipped) && (pmDone || pmSkipped);
@@ -194,6 +216,25 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                 )}
               </button>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              {activeSession.toUpperCase()} Title
+            </span>
+            <input
+              value={activeSession === 'am' ? amTitle : pmTitle}
+              onChange={(e) => handleSessionTitleChange(activeSession, e.target.value)}
+              onBlur={handleSessionTitleSave}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.currentTarget.blur();
+                }
+              }}
+              placeholder={`Enter ${activeSession.toUpperCase()} session title`}
+              className="border border-gray-300 rounded px-2.5 py-1.5 bg-white text-gray-700 text-sm min-w-[260px]"
+            />
+            {titleSaveFlash && <span className="text-green-600 font-medium text-xs">Saved title</span>}
           </div>
 
           {/* Exercise groups for active session */}
