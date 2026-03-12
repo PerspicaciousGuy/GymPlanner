@@ -13,7 +13,7 @@ import {
 } from '../utils/dateUtils';
 import WeekPicker from '../components/WeekPicker';
 
-function AccordionSection({ section, defaultOpen, syncToken }) {
+function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged }) {
   const [open, setOpen] = useState(defaultOpen);
 
   // Only show context badges (TODAY/TOMORROW/MISSED) when viewing current week
@@ -69,6 +69,7 @@ function AccordionSection({ section, defaultOpen, syncToken }) {
             isTomorrow={section.isTomorrow}
             initialData={section.data}
             syncToken={syncToken}
+            onWorkoutChanged={onWorkoutChanged}
             hideBadge
           />
         </div>
@@ -79,6 +80,7 @@ function AccordionSection({ section, defaultOpen, syncToken }) {
 
 export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
   const [selectedWeek, setSelectedWeek] = useState(() => getWeekStart(new Date()));
+  const [plannerRefreshNonce, setPlannerRefreshNonce] = useState(0);
   
   const today = getToday();
   const yesterday = getYesterday();
@@ -171,7 +173,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
         };
       });
     }
-  }, [syncState, selectedWeek, today, yesterday, tomorrow]);
+  }, [syncState, selectedWeek, today, yesterday, tomorrow, plannerRefreshNonce]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col gap-4">
@@ -199,6 +201,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
           section={s}
           defaultOpen={s.defaultOpen}
           syncToken={syncState}
+          onWorkoutChanged={() => setPlannerRefreshNonce((value) => value + 1)}
         />
       ))}
     </div>

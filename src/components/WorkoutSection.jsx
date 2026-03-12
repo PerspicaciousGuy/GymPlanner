@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import ExerciseGroup from './ExerciseGroup';
 import { saveDayWorkoutWithSync, markDayCompleteWithSync, markDaySkippedWithSync, isDayComplete, isDaySkipped, ensureAmPm, defaultSession, defaultGroup, loadSessionTitles } from '../utils/storage';
 
-export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken }) {
+export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken, onWorkoutChanged }) {
   // For backward compatibility: if date is not provided but day is, use day as dayName
   const day = dayName || date;
   
@@ -50,6 +50,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
 
   const handleSave = () => {
     saveDayWorkoutWithSync(date || day, dayData);
+    onWorkoutChanged?.();
     setSaveFlash(true);
     setTimeout(() => setSaveFlash(false), 2000);
   };
@@ -57,6 +58,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const handleComplete = () => {
     saveDayWorkoutWithSync(date || day, dayData);
     markDayCompleteWithSync(date || day, activeSession);
+    onWorkoutChanged?.();
     setDayData((prev) => ({ ...prev, [activeSession]: defaultSession() }));
     if (activeSession === 'am') {
       setAmDone(true);
@@ -70,6 +72,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
 
   const handleSkip = () => {
     markDaySkippedWithSync(date || day, activeSession);
+    onWorkoutChanged?.();
     if (activeSession === 'am') {
       setAmDone(false);
       setAmSkipped(true);

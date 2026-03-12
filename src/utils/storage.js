@@ -68,6 +68,15 @@ function normalizeWorkoutsMap(rawWorkouts) {
       if (!normalized[dateKey]) {
         normalized[dateKey] = ensureAmPm(dayData);
       }
+      continue;
+    }
+
+    const parsedDate = new Date(key);
+    if (!Number.isNaN(parsedDate.getTime())) {
+      const dateKey = formatDateKey(parsedDate);
+      if (!normalized[dateKey]) {
+        normalized[dateKey] = ensureAmPm(dayData);
+      }
     }
   }
 
@@ -642,7 +651,10 @@ export function saveDayWorkoutWithSync(day, dayData) {
   saveDayWorkout(day, dayData);
 
   if (isCloudSyncReady()) {
-    saveCloudDayWorkout(day, dayData).catch((err) =>
+    const dateKey = day instanceof Date || DATE_KEY_REGEX.test(day)
+      ? formatDateKey(day)
+      : day;
+    saveCloudDayWorkout(dateKey, dayData).catch((err) =>
       console.warn('[storage] Cloud workout sync failed:', err)
     );
   }
