@@ -1,5 +1,13 @@
-import { useState } from 'react';
-import { getMuscleGroupKeys, getSubMusclesForMuscle, getExercisesForSubMuscle, addExerciseWithSync, removeExerciseWithSync } from '../utils/storage';
+import { useEffect, useMemo, useState } from 'react';
+import { formatDateCompact } from '../utils/dateUtils';
+import {
+  getMuscleGroupKeys,
+  getSubMusclesForMuscle,
+  getExercisesForSubMuscle,
+  addExerciseWithSync,
+  removeExerciseWithSync,
+  findPreviousExerciseEntry,
+} from '../utils/storage';
 
 const selectCls =
   'w-full border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-50 disabled:text-gray-400';
@@ -15,18 +23,46 @@ const inputCls =
  *   row      – { muscle, subMuscle, exercise, sets, reps, weight }
  *   onChange – (updatedRow) => void
  */
-export default function ExerciseRow({ row, onChange, onDelete }) {
+export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, onDelete }) {
   const { muscle, subMuscle, exercise, sets, reps, weight, dropSets, dropWeight } = row;
 
   const [isAdding, setIsAdding] = useState(false);
   const [newExName, setNewExName] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [appliedHistoryDate, setAppliedHistoryDate] = useState('');
 
   const muscleGroupKeys = getMuscleGroupKeys();
   const subMuscles = muscle ? getSubMusclesForMuscle(muscle) : [];
   const allExercises = muscle && subMuscle ? getExercisesForSubMuscle(muscle, subMuscle) : [];
 
   const set = (patch) => onChange({ ...row, ...patch });
+
+  const previousEntry = useMemo(
+    () => findPreviousExerciseEntry({ exercise, beforeDate: workoutDate, session: sessionKey }),
+    [exercise, workoutDate, sessionKey]
+  );
+
+  const hasCurrentTrackedValues = [sets, reps, weight, dropSets, dropWeight].some(
+    (value) => String(value || '').trim() !== ''
+  );
+
+  const applyPreviousValues = (entry) => {
+    if (!entry) return;
+    set({
+      sets: entry.row.sets,
+      reps: entry.row.reps,
+      weight: entry.row.weight,
+      dropSets: entry.row.dropSets,
+      dropWeight: entry.row.dropWeight,
+    });
+    setAppliedHistoryDate(entry.date);
+  };
+
+  useEffect(() => {
+    if (!exercise) {
+      setAppliedHistoryDate('');
+    }
+  }, [exercise]);
 
   const handleMuscleChange = (value) =>
     set({ muscle: value, subMuscle: '', exercise: '' });
@@ -39,7 +75,20 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
       setIsAdding(true);
       setNewExName('');
     } else {
-      set({ exercise: value });
+      const entry = findPreviousExerciseEntry({ exercise: value, beforeDate: workoutDate, session: sessionKey });
+      const nextPatch = { exercise: value };
+      const canAutoFill = entry && !hasCurrentTrackedValues;
+      if (canAutoFill) {
+        nextPatch.sets = entry.row.sets;
+        nextPatch.reps = entry.row.reps;
+        nextPatch.weight = entry.row.weight;
+        nextPatch.dropSets = entry.row.dropSets;
+        nextPatch.dropWeight = entry.row.dropWeight;
+        setAppliedHistoryDate(entry.date);
+      } else {
+        setAppliedHistoryDate('');
+      }
+      set(nextPatch);
     }
   };
 
@@ -70,7 +119,20 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
 
   const handleCancelDelete = () => setConfirmingDelete(false);
 
+  const previousSummary = previousEntry
+    ? [
+        previousEntry.row.sets && `${previousEntry.row.sets} sets`,
+        previousEntry.row.reps && `${previousEntry.row.reps} reps`,
+        previousEntry.row.weight && `${previousEntry.row.weight} kg`,
+        previousEntry.row.dropSets && `${previousEntry.row.dropSets} drop`,
+        previousEntry.row.dropWeight && `${previousEntry.row.dropWeight} drop kg`,
+      ].filter(Boolean).join(' • ')
+    : '';
+
+  const showHistoryRow = previousEntry && previousSummary;
+
   return (
+    <>
     <tr className="hover:bg-gray-50 transition-colors align-top">
       {/* Muscle Group */}
       <td className="px-3 py-2 min-w-[140px]">
@@ -230,5 +292,28 @@ export default function ExerciseRow({ row, onChange, onDelete }) {
       </td>
 
     </tr>
+    {showHistoryRow && (
+      <tr className="bg-blue-50/60">
+        <td colSpan={9} className="px-3 py-2 text-xs text-blue-800">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>
+              {appliedHistoryDate === previousEntry.date ? 'Prefilled from' : 'Last time:'} {formatDateCompact(previousEntry.date)}
+              {previousEntry.session ? ` (${previousEntry.session.toUpperCase()})` : ''}
+              {' '}• {previousSummary}
+            </span>
+            {appliedHistoryDate !== previousEntry.date && (
+              <button
+                onClick={() => applyPreviousValues(previousEntry)}
+                className="font-semibold text-blue-700 hover:text-blue-800 underline underline-offset-2"
+                type="button"
+              >
+                Use previous values
+              </button>
+            )}
+          </div>
+        </td>
+      </tr>
+    )}
+    </>
   );
 }

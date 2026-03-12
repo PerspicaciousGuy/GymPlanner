@@ -307,6 +307,68 @@ export function getWorkoutsForWeek(weekStartDate) {
   return weekWorkouts;
 }
 
+function hasTrackedWorkoutValues(row) {
+  return ['sets', 'reps', 'weight', 'dropSets', 'dropWeight'].some(
+    (field) => String(row?.[field] ?? '').trim() !== ''
+  );
+}
+
+export function findPreviousExerciseEntry({ exercise, beforeDate, session }) {
+  const exerciseName = String(exercise || '').trim().toLowerCase();
+  if (!exerciseName) return null;
+
+  const beforeDateKey = formatDateKey(beforeDate);
+  const targetWeekday = getDayOfWeek(beforeDate);
+  const buckets = [null, null, null, null];
+
+  const workoutEntries = Object.entries(loadWorkouts())
+    .filter(([dateKey]) => DATE_KEY_REGEX.test(dateKey) && dateKey < beforeDateKey)
+    .sort(([dateA], [dateB]) => dateB.localeCompare(dateA));
+
+  for (const [dateKey, dayData] of workoutEntries) {
+    const normalizedDay = ensureAmPm(dayData);
+
+    for (const sessionKey of ['am', 'pm']) {
+      const groups = normalizedDay?.[sessionKey]?.groups ?? [];
+
+      for (const group of groups) {
+        for (const row of group.rows ?? []) {
+          const rowExercise = String(row?.exercise || '').trim().toLowerCase();
+          if (rowExercise !== exerciseName || !hasTrackedWorkoutValues(row)) continue;
+
+          const isSameWeekday = getDayOfWeek(dateKey) === targetWeekday;
+          const isSameSession = sessionKey === session;
+          const bucketIndex = isSameWeekday && isSameSession
+            ? 0
+            : isSameSession
+            ? 1
+            : isSameWeekday
+            ? 2
+            : 3;
+
+          if (!buckets[bucketIndex]) {
+            buckets[bucketIndex] = {
+              date: dateKey,
+              session: sessionKey,
+              row: {
+                sets: row.sets || '',
+                reps: row.reps || '',
+                weight: row.weight || '',
+                dropSets: row.dropSets || '',
+                dropWeight: row.dropWeight || '',
+              },
+            };
+          }
+        }
+      }
+    }
+
+    if (buckets[0]) break;
+  }
+
+  return buckets.find(Boolean) || null;
+}
+
 // ─── Completion ───────────────────────────────────────────────
 // Run migration from day-based to date-based completion on first load
 export function migrateCompletionToDateBased() {

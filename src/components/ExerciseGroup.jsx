@@ -9,8 +9,12 @@ const COLS = ['Muscle Group', 'Sub Muscle', 'Exercise', 'Sets', 'Reps', 'Weight 
  *   groupIndex  – 0-based
  *   group       – { rows: [row, row, row] }
  *   onChange    – (updatedGroup) => void
+ *   onDeleteGroup - () => void
+ *   groupCount  – total groups in the current session
+ *   workoutDate – active workout date
+ *   sessionKey  – active session ('am' | 'pm')
  */
-export default function ExerciseGroup({ groupIndex, group, onChange }) {
+export default function ExerciseGroup({ groupIndex, group, onChange, onDeleteGroup, groupCount = 1, workoutDate, sessionKey }) {
   const handleRowChange = (rowIdx, updatedRow) => {
     const updatedRows = group.rows.map((r, i) => (i === rowIdx ? updatedRow : r));
     onChange({ ...group, rows: updatedRows });
@@ -24,14 +28,25 @@ export default function ExerciseGroup({ groupIndex, group, onChange }) {
     onChange({ ...group, rows: [...group.rows, defaultRow()] });
   };
 
+  const canDeleteGroup = groupCount > 1 && typeof onDeleteGroup === 'function';
+
   // Badge: show distinct exercises selected in this group
   const exercises = group.rows.map((r) => r.exercise).filter(Boolean);
   const badge = exercises.length > 0 ? exercises.join(', ') : null;
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-      <div className="bg-gray-50 border-b border-gray-200 px-4 py-2 flex items-center">
+      <div className="bg-gray-50 border-b border-gray-200 px-4 py-2 flex items-center justify-between gap-2">
         <span className="font-semibold text-gray-700">Group {groupIndex + 1}</span>
+        {canDeleteGroup && (
+          <button
+            onClick={onDeleteGroup}
+            className="text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+            title="Delete this entire group"
+          >
+            Delete Group
+          </button>
+        )}
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
@@ -62,6 +77,8 @@ export default function ExerciseGroup({ groupIndex, group, onChange }) {
               <ExerciseRow
                 key={rowIdx}
                 row={row}
+                workoutDate={workoutDate}
+                sessionKey={sessionKey}
                 onChange={(updated) => handleRowChange(rowIdx, updated)}
                 onDelete={() => handleDeleteRow(rowIdx)}
               />

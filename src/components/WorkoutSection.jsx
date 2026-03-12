@@ -93,6 +93,15 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     }));
   };
 
+  const handleDeleteGroup = (groupIdx) => {
+    setDayData((prev) => {
+      const sessionData = { ...prev[activeSession] };
+      const nextGroups = sessionData.groups.filter((_, idx) => idx !== groupIdx);
+      sessionData.groups = nextGroups.length > 0 ? nextGroups : [defaultGroup()];
+      return { ...prev, [activeSession]: sessionData };
+    });
+  };
+
   const badge = isMissed ? (
     <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Missed Workout</span>
   ) : isTomorrow ? (
@@ -193,7 +202,11 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
               key={idx}
               groupIndex={idx}
               group={group}
+              groupCount={groups.length}
+              workoutDate={date || day}
+              sessionKey={activeSession}
               onChange={(updated) => handleGroupChange(idx, updated)}
+              onDeleteGroup={() => handleDeleteGroup(idx)}
             />
           ))}
 
