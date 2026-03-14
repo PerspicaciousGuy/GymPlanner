@@ -14,7 +14,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Save,
-  Grid
+  Grid,
+  Calendar,
+  X
 } from 'lucide-react';
 import { DAYS, exerciseDatabase } from '../data/exerciseDatabase';
 import {
@@ -253,6 +255,7 @@ export default function DataConsolePage({ hideSidebar }) {
   const [workoutsSaved, setWorkoutsSaved] = useState(false);
   const [workoutFilterDay, setWorkoutFilterDay] = useState('all');
   const [workoutFilterSession, setWorkoutFilterSession] = useState('all');
+  const [workoutFilterDate, setWorkoutFilterDate] = useState('');
   const [showAdvancedCols, setShowAdvancedCols] = useState(false);
 
   // Week state for Completion tab
@@ -348,7 +351,13 @@ export default function DataConsolePage({ hideSidebar }) {
     .filter(({ row }) => {
       const dayOk = workoutFilterDay === 'all' || row.day === workoutFilterDay;
       const sessionOk = workoutFilterSession === 'all' || row.session === workoutFilterSession;
-      return dayOk && sessionOk;
+      const dateOk = !workoutFilterDate || row.dateOrDay === workoutFilterDate;
+      const q = searchQuery.toLowerCase();
+      const searchMatch = !q || 
+        (row.exercise || '').toLowerCase().includes(q) ||
+        (row.muscle || '').toLowerCase().includes(q) ||
+        (row.subMuscle || '').toLowerCase().includes(q);
+      return dayOk && sessionOk && dateOk && searchMatch;
     });
 
   // Load completion for selected week
@@ -584,6 +593,31 @@ export default function DataConsolePage({ hideSidebar }) {
             <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
               {activeTab === 'workouts' && (
                 <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+                    <div 
+                      onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}
+                      className="flex items-center gap-1.5 px-2 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 transition-all focus-within:ring-2 focus-within:ring-indigo-500/10 focus-within:border-indigo-500 cursor-pointer"
+                    >
+                      <Calendar size={12} className="text-slate-400 shrink-0" />
+                      <input
+                        type="date"
+                        value={workoutFilterDate}
+                        onFocus={(e) => e.target.showPicker?.()}
+                        onChange={(e) => setWorkoutFilterDate(e.target.value)}
+                        className="bg-transparent py-1.5 text-[10px] md:text-xs font-bold text-slate-700 focus:outline-none w-24 md:w-28 cursor-pointer"
+                      />
+                      {workoutFilterDate && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setWorkoutFilterDate('');
+                          }}
+                          className="p-0.5 hover:bg-slate-200 text-slate-400 hover:text-slate-600 rounded-md transition-all shrink-0"
+                          title="Clear Date"
+                        >
+                          <X size={12} strokeWidth={3} />
+                        </button>
+                      )}
+                    </div>
                   <select
                     value={workoutFilterDay}
                     onChange={(e) => setWorkoutFilterDay(e.target.value)}

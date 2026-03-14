@@ -23,3 +23,10 @@
   @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
 }
 
+
+/* Hide native date picker icons for cleaner custom UI */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-inner-spin-button {
+  display: none;
+  -webkit-appearance: none;
+}
