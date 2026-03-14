@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { ChevronDown, Calendar, AlertCircle, CheckCircle2, Clock, RefreshCw } from 'lucide-react';
 import WorkoutSection from '../components/WorkoutSection';
 import { loadSessionTitles, loadWorkoutByDate, isDayComplete, ensureAmPm, syncPlannerData } from '../utils/storage';
 import { 
@@ -16,51 +17,60 @@ import WeekPicker from '../components/WeekPicker';
 function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged }) {
   const [open, setOpen] = useState(defaultOpen);
 
-  // Only show context badges (TODAY/TOMORROW/MISSED) when viewing current week
   const badgeEl = section.showContextBadge ? (
     section.isMissed ? (
-      <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-        Missed
-      </span>
+      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-100 animate-pulse">
+        <AlertCircle size={10} strokeWidth={3} />
+        <span className="text-[10px] font-bold uppercase tracking-wider">Missed</span>
+      </div>
     ) : section.isTomorrow ? (
-      <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-        Tomorrow
-      </span>
+      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+        <Clock size={10} strokeWidth={3} />
+        <span className="text-[10px] font-bold uppercase tracking-wider">Upcoming</span>
+      </div>
     ) : (
-      <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-        Today
-      </span>
+      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm shadow-indigo-100">
+        <CheckCircle2 size={10} strokeWidth={3} />
+        <span className="text-[10px] font-bold uppercase tracking-wider">Today</span>
+      </div>
     )
   ) : null;
 
   return (
-    <div className="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div className={`overflow-hidden transition-all duration-300 ${open ? 'mb-3 md:mb-4 shadow-xl shadow-slate-200/50' : 'mb-2'}`}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-white hover:bg-gray-50 transition-colors gap-2 sm:gap-3"
+        className={`w-full flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 bg-white border border-slate-200 hover:border-indigo-200 transition-all group ${open ? 'rounded-t-2xl border-b-transparent' : 'rounded-2xl shadow-sm hover:shadow-md'}`}
       >
-        <div className="flex items-center gap-3 flex-wrap">
-          {badgeEl && badgeEl}
-          <div className="flex flex-col items-start">
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-sm sm:text-base font-bold text-gray-800">{section.dayName}</span>
-              <span className="text-xs text-gray-500">{formatDateDisplay(section.date)}</span>
-            </div>
-            {section.muscleGroup && (
-              <span className="text-gray-400 font-normal text-sm">— {section.muscleGroup}</span>
-            )}
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex flex-col items-start min-w-[80px] md:min-w-[100px]">
+            <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${open ? 'text-indigo-600' : 'text-slate-400'}`}>
+              {section.dayName}
+            </span>
+            <span className="text-[9px] md:text-[10px] font-bold text-slate-400">{formatDateDisplay(section.date)}</span>
           </div>
+          
+          <div className="w-px h-6 md:h-8 bg-slate-100 mx-0.5 md:mx-1 hidden xs:block" />
+          
+          <div className="scale-90 md:scale-100 origin-left">
+            {badgeEl}
+          </div>
+
+          {section.muscleGroup && (
+            <span className="text-slate-400 font-bold text-[10px] md:text-[11px] hidden sm:block truncate max-w-[150px]">
+              — {section.muscleGroup}
+            </span>
+          )}
         </div>
-        <svg
-          className={`w-5 h-5 text-gray-400 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
+        
+        <div className={`p-1.5 rounded-lg bg-slate-50 text-slate-400 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-all ${open ? 'rotate-180' : ''}`}>
+          <ChevronDown size={14} strokeWidth={3} />
+        </div>
       </button>
 
       {open && (
-        <div className="border-t border-gray-100 px-3 sm:px-5 py-4 sm:py-6 bg-white">
+        <div className="bg-white border-x border-b border-slate-200 rounded-b-2xl px-3 md:px-4 py-4 md:py-5 animate-in slide-in-from-top-2 duration-300">
+
           <WorkoutSection
             date={section.date}
             dayName={section.dayName}
@@ -86,14 +96,12 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
   const yesterday = getYesterday();
   const tomorrow = getTomorrow();
 
-  // 'loading' while sync is in-flight, 'ok' on success, 'offline' on failure
   const [syncState, setSyncState] = useState('loading');
 
   useEffect(() => {
     syncPlannerData().then((ok) => setSyncState(ok ? 'ok' : 'offline'));
   }, [syncKey]);
 
-  // Re-derive sections each time syncState or selectedWeek changes
   const sections = useMemo(() => {
     const titles = loadSessionTitles();
 
@@ -107,29 +115,23 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
     const currentWeekStart = getWeekStart(new Date());
     const isCurrentWeek = currentWeekStart.getTime() === selectedWeek.getTime();
 
-    // If current week, show today/yesterday/tomorrow context
-    // If different week, show all 7 days of that week
     if (isCurrentWeek) {
       const yesterdayName = getDayOfWeek(yesterday);
       const todayName = getDayOfWeek(today);
       const tomorrowName = getDayOfWeek(tomorrow);
 
-      const yesterdayMuscle = '';
       const yesterdayMissed =
         hasPlannedTraining(yesterdayName) &&
         !isDayComplete(yesterday, 'am') &&
         !isDayComplete(yesterday, 'pm');
-      const todayMuscle = '';
-      const tomorrowMuscle = '';
       
       const list = [];
       if (yesterdayMissed) {
         list.push({ 
           date: yesterday, 
           dayName: yesterdayName, 
-          muscleGroup: yesterdayMuscle, 
+          muscleGroup: '', 
           isMissed: true,  
-          isTomorrow: false,
           showContextBadge: true,
           defaultOpen: true,
           data: loadWorkoutByDate(yesterday)
@@ -138,9 +140,8 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
       list.push({ 
         date: today, 
         dayName: todayName, 
-        muscleGroup: todayMuscle, 
+        muscleGroup: '', 
         isMissed: false, 
-        isTomorrow: false,
         showContextBadge: true,
         defaultOpen: true,
         data: loadWorkoutByDate(today)
@@ -148,7 +149,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
       list.push({ 
         date: tomorrow, 
         dayName: tomorrowName, 
-        muscleGroup: tomorrowMuscle, 
+        muscleGroup: '', 
         isMissed: false, 
         isTomorrow: true,
         showContextBadge: true,
@@ -157,7 +158,6 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
       });
       return list;
     } else {
-      // Show all 7 days of the selected week
       const weekDates = getWeekDates(selectedWeek);
       return weekDates.map((date) => {
         const dayName = getDayOfWeek(date);
@@ -176,34 +176,48 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
   }, [syncState, selectedWeek, today, yesterday, tomorrow, plannerRefreshNonce]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col gap-4">
-      <div className="mb-2">
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">Workout Scheduler</h1>
-        <p className="text-gray-500 text-sm">
-          {formatDateDisplay(new Date())}
-        </p>
-        {syncState === 'loading' && (
-          <p className="text-xs text-blue-500 mt-1 animate-pulse">⟳ Syncing planner data…</p>
-        )}
-        {syncState === 'offline' && (
-          <p className="text-xs text-amber-500 mt-1">⚠ Offline — showing local data</p>
-        )}
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-1">Training Hub</h1>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+              Today is {formatDateDisplay(new Date())}
+            </span>
+            {syncState === 'loading' && (
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 animate-pulse">
+                <RefreshCw size={10} className="animate-spin" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Syncing</span>
+              </div>
+            )}
+            {syncState === 'offline' && (
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">
+                <AlertCircle size={10} />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Offline Mode</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <WeekPicker 
+          currentWeekStart={selectedWeek} 
+          onWeekChange={setSelectedWeek} 
+          compact
+        />
       </div>
 
-      <WeekPicker 
-        currentWeekStart={selectedWeek} 
-        onWeekChange={setSelectedWeek} 
-      />
-
-      {sections.map((s) => (
-        <AccordionSection
-          key={s.date.getTime()}
-          section={s}
-          defaultOpen={s.defaultOpen}
-          syncToken={syncState}
-          onWorkoutChanged={() => setPlannerRefreshNonce((value) => value + 1)}
-        />
-      ))}
+      <div className="flex flex-col">
+        {sections.map((s) => (
+          <AccordionSection
+            key={s.date.getTime()}
+            section={s}
+            defaultOpen={s.defaultOpen}
+            syncToken={syncState}
+            onWorkoutChanged={() => setPlannerRefreshNonce((value) => value + 1)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
+

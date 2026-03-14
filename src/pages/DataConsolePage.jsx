@@ -1,4 +1,21 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { 
+  Plus, 
+  Trash2, 
+  Download, 
+  Upload, 
+  Search, 
+  Filter, 
+  Settings2,
+  LayoutGrid,
+  Boxes,
+  CheckCircle2,
+  Database,
+  ChevronLeft,
+  ChevronRight,
+  Save,
+  Grid
+} from 'lucide-react';
 import { DAYS, exerciseDatabase } from '../data/exerciseDatabase';
 import {
   defaultDayWorkout,
@@ -225,8 +242,9 @@ function completionStatus(val) {
   return '';
 }
 
-export default function DataConsolePage() {
+export default function DataConsolePage({ hideSidebar }) {
   const [activeTab, setActiveTab] = useState('schedule');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [sessionTitles, setSessionTitles] = useState(() => loadSessionTitles());
   const [titlesSaved, setTitlesSaved] = useState(false);
@@ -246,6 +264,32 @@ export default function DataConsolePage() {
     return flattenDbRows(db);
   });
   const [exerciseSaved, setExerciseSaved] = useState(false);
+  const [exercisePage, setExercisePage] = useState(1);
+  const EXERCISES_PER_PAGE = 25;
+
+  // Reset pagination when search query changes
+  useEffect(() => {
+    setExercisePage(1);
+  }, [searchQuery]);
+
+  const filteredExerciseRows = exerciseRows
+    .map((row, idx) => ({ row, idx }))
+    .filter(({ row }) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        (row.muscle || '').toLowerCase().includes(q) ||
+        (row.subMuscle || '').toLowerCase().includes(q) ||
+        (row.exercise || '').toLowerCase().includes(q)
+      );
+    });
+
+  const totalExercisePages = Math.ceil(filteredExerciseRows.length / EXERCISES_PER_PAGE) || 1;
+  const paginatedExerciseRows = filteredExerciseRows.slice(
+    (exercisePage - 1) * EXERCISES_PER_PAGE,
+    exercisePage * EXERCISES_PER_PAGE
+  );
+
   const [exporting, setExporting] = useState(false);
   const [exportNote, setExportNote] = useState('');
   const [importing, setImporting] = useState(false);
@@ -324,7 +368,9 @@ export default function DataConsolePage() {
   };
 
   const addExerciseRow = () => {
-    setExerciseRows((prev) => [...prev, { muscle: '', subMuscle: '', exercise: '' }]);
+    setExerciseRows((prev) => [{ muscle: '', subMuscle: '', exercise: '' }, ...prev]);
+    setExercisePage(1);
+    setSearchQuery(''); // Clear search so the new row is visible
   };
 
   const removeExerciseRow = (idx) => {
@@ -405,478 +451,543 @@ export default function DataConsolePage() {
     }
   };
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-1">Data Console</h1>
-          <p className="text-sm text-gray-500">
-            Spreadsheet-style editable tables for all planner data.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <input
-            ref={importInputRef}
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleImportFile}
-            className="hidden"
-          />
-          <button
-            onClick={handleImportClick}
-            disabled={importing}
-            className="px-4 py-2 rounded text-sm font-semibold border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-60"
-          >
-            {importing ? 'Importing...' : 'Import Data (.xlsx)'}
-          </button>
-          <button
-            onClick={() => handleExport('current')}
-            disabled={exporting}
-            className="px-4 py-2 rounded text-sm font-semibold border border-emerald-300 text-emerald-700 hover:bg-emerald-50 disabled:opacity-60"
-          >
-            {exporting ? 'Exporting...' : 'Export Current Tab (.xlsx)'}
-          </button>
-          <button
-            onClick={() => handleExport('all')}
-            disabled={exporting}
-            className="px-4 py-2 rounded text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-60"
-          >
-            Export All Tabs (.xlsx)
-          </button>
-          {importNote && <span className="text-xs text-blue-700">{importNote}</span>}
-          {exportNote && <span className="text-xs text-emerald-700">{exportNote}</span>}
-        </div>
-      </div>
 
-      <div className="border-b border-gray-200 overflow-x-auto">
-        <div className="flex min-w-max gap-1">
+
+  return (
+    <div className={`flex flex-col gap-6 ${!hideSidebar ? 'min-h-screen bg-[#f8fafc]' : ''}`}>
+      {!hideSidebar && (
+        <aside className="fixed left-0 top-0 bottom-0 w-20 lg:w-24 bg-white border-r border-slate-200 flex flex-col items-center py-8 gap-10 z-50">
+          <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('schedule')}>
+            <div className={`p-3 rounded-xl transition-all ${activeTab === 'schedule' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+              <LayoutGrid size={24} />
+            </div>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'schedule' ? 'text-indigo-600' : 'text-slate-400'}`}>Sessions</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('workouts')}>
+            <div className={`p-3 rounded-xl transition-all ${activeTab === 'workouts' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+              <Boxes size={24} />
+            </div>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'workouts' ? 'text-indigo-600' : 'text-slate-400'}`}>Workouts</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('completion')}>
+            <div className={`p-3 rounded-xl transition-all ${activeTab === 'completion' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+              <CheckCircle2 size={24} />
+            </div>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'completion' ? 'text-indigo-600' : 'text-slate-400'}`}>Completion</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('exerciseDb')}>
+            <div className={`p-3 rounded-xl transition-all ${activeTab === 'exerciseDb' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+              <Database size={24} />
+            </div>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'exerciseDb' ? 'text-indigo-600' : 'text-slate-400'}`}>Exercise DB</span>
+          </div>
+        </aside>
+      )}
+
+      {/* Main Content */}
+      <main className={`flex-1 flex flex-col min-w-0 ${!hideSidebar ? 'md:pl-24 py-6 md:py-10 px-4 md:pr-8' : 'px-4 py-6 md:py-10'}`}>
+
+
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 md:mb-6">
+          <div className="flex-1">
+            <h1 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">Data Console</h1>
+            <p className="text-[10px] md:text-xs text-slate-400 font-medium">Configure workouts, sessions, and database.</p>
+          </div>
+          
+          <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleImportFile}
+              className="hidden"
+            />
+            <button
+              onClick={handleImportClick}
+              disabled={importing}
+              className="group flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold text-[10px] md:text-xs hover:bg-slate-50 transition-all shadow-sm shrink-0"
+              title="Import Data"
+            >
+              <Upload size={14} className="text-slate-400 group-hover:text-indigo-600 transition-colors" />
+              <span className="hidden xs:inline">Import</span>
+            </button>
+            <button
+              onClick={() => handleExport('current')}
+              disabled={exporting}
+              className="flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-[10px] md:text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 shrink-0"
+              title="Export Data"
+            >
+              <Download size={14} />
+              <span className="hidden xs:inline">Export</span>
+            </button>
+            <div className="hidden xs:block w-px h-6 bg-slate-100 mx-0.5 md:mx-1" />
+            <button
+              onClick={() => setShowAdvancedCols(!showAdvancedCols)}
+              className="flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold text-[10px] md:text-xs hover:bg-slate-50 transition-all shadow-sm shrink-0"
+              title="Display Options"
+            >
+              <Settings2 size={14} className="text-slate-400" />
+              <span className="hidden xs:inline">Display</span>
+            </button>
+          </div>
+        </div>
+
+
+        {/* Tab Navigation */}
+        <div className="flex items-center gap-4 md:gap-6 border-b border-slate-100 mb-4 md:mb-6 px-1 overflow-x-auto scrollbar-none whitespace-nowrap">
           {TABS.map((tab) => (
             <button
               key={tab.key}
-              className={tabClass(tab.key)}
               onClick={() => setActiveTab(tab.key)}
+              className={`pb-3 px-1 text-[11px] md:text-xs font-bold transition-all relative shrink-0 ${
+                activeTab === tab.key 
+                  ? 'text-indigo-600' 
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
             >
               {tab.label}
+              {activeTab === tab.key && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />
+              )}
             </button>
           ))}
         </div>
-      </div>
 
-      {activeTab === 'schedule' && (
-        <div className="flex flex-col gap-4">
-          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className="min-w-full bg-white text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600 w-40">Day</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">AM Session Title</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">PM Session Title</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {DAYS.map((day) => (
-                  <tr key={day}>
-                    <td className="px-4 py-2 font-medium text-gray-800">{day}</td>
-                    <td className="px-4 py-2">
-                      <input
-                        value={sessionTitles.am?.[day] || ''}
-                        onChange={(e) =>
-                          setSessionTitles((prev) => ({
-                            ...prev,
-                            am: { ...prev.am, [day]: e.target.value },
-                          }))
-                        }
-                        className="border border-gray-300 rounded px-3 py-1.5 bg-white text-gray-800 w-full min-w-72"
-                        placeholder="AM title"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <input
-                        value={sessionTitles.pm?.[day] || ''}
-                        onChange={(e) =>
-                          setSessionTitles((prev) => ({
-                            ...prev,
-                            pm: { ...prev.pm, [day]: e.target.value },
-                          }))
-                        }
-                        className="border border-gray-300 rounded px-3 py-1.5 bg-white text-gray-800 w-full min-w-72"
-                        placeholder="PM title"
-                      />
-                    </td>
+        <div className="bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col min-h-0">
+          {/* Table Toolbar */}
+          <div className="px-3 md:px-4 py-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
+            <div className="flex-1 w-full sm:max-w-xs relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
+              <input 
+                type="text"
+                placeholder={`Search ${activeTab === 'schedule' ? 'sessions' : 'data'}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-1.5 md:py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] md:text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium"
+              />
+            </div>
+            
+            <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+              {activeTab === 'workouts' && (
+                <div className="flex items-center gap-2 flex-1 sm:flex-initial">
+                  <select
+                    value={workoutFilterDay}
+                    onChange={(e) => setWorkoutFilterDay(e.target.value)}
+                    className="flex-1 sm:flex-initial border border-slate-200 rounded-lg px-2 md:px-3 py-1.5 text-[10px] md:text-xs bg-slate-50 font-bold text-slate-700 focus:outline-none transition-all"
+                  >
+                    <option value="all">Day</option>
+                    {DAYS.map((day) => (
+                      <option key={day} value={day}>{day}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={workoutFilterSession}
+                    onChange={(e) => setWorkoutFilterSession(e.target.value)}
+                    className="flex-1 sm:flex-initial border border-slate-200 rounded-lg px-2 md:px-3 py-1.5 text-[10px] md:text-xs bg-slate-50 font-bold text-slate-700 focus:outline-none transition-all"
+                  >
+                    <option value="all">Ses</option>
+                    <option value="am">AM</option>
+                    <option value="pm">PM</option>
+                  </select>
+                  <button
+                    onClick={addWorkoutGridRow}
+                    className="p-1.5 rounded-lg border border-dashed border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors shrink-0"
+                    title="Add Row"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+              )}
+
+              {activeTab === 'completion' && (
+                <WeekPicker 
+                  currentWeekStart={selectedWeek} 
+                  onWeekChange={setSelectedWeek} 
+                  compact
+                />
+              )}
+              {activeTab === 'exerciseDb' && (
+                <button
+                  onClick={addExerciseRow}
+                  className="flex items-center gap-1.5 rounded-lg border border-dashed border-indigo-200 px-3 py-1.5 text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors"
+                >
+                  <Plus size={14} />
+                  New Exercise
+                </button>
+              )}
+              <button className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+                <Filter size={14} />
+                Filter
+              </button>
+            </div>
+          </div>
+
+          {activeTab === 'schedule' && (
+            <div className="flex-1 overflow-auto scrollbar-none">
+              <table className="min-w-[600px] w-full text-xs border-collapse">
+                <thead className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Day</th>
+                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">AM Session Title</th>
+                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">PM Session Title</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {DAYS.map((day) => (
+                    <tr key={day} className="group hover:bg-slate-50/50 transition-colors">
+                      <td className="px-4 py-3 font-bold text-slate-700 italic">{day}</td>
+                      <td className="px-4 py-2">
+                        <input
+                          value={sessionTitles.am?.[day] || ''}
+                          onChange={(e) =>
+                            setSessionTitles((prev) => ({
+                              ...prev,
+                              am: { ...prev.am, [day]: e.target.value },
+                            }))
+                          }
+                          className="w-full px-3 py-1.5 bg-transparent border border-transparent rounded-lg text-slate-700 focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium placeholder:text-slate-300"
+                          placeholder="e.g. Upper Body"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          value={sessionTitles.pm?.[day] || ''}
+                          onChange={(e) =>
+                            setSessionTitles((prev) => ({
+                              ...prev,
+                              pm: { ...prev.pm, [day]: e.target.value },
+                            }))
+                          }
+                          className="w-full px-3 py-1.5 bg-transparent border border-transparent rounded-lg text-slate-700 focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium placeholder:text-slate-300"
+                          placeholder="e.g. Cardio + Core"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                saveSessionTitlesWithSync(sessionTitles);
-                flashSaved(setTitlesSaved);
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded text-sm"
-            >
-              Save Session Titles
-            </button>
-            {titlesSaved && (
-              <span className="text-green-600 text-sm font-medium">Saved session titles</span>
-            )}
-          </div>
-        </div>
-      )}
+          {activeTab === 'workouts' && (
+            <div className="flex-1 overflow-auto">
+              <table className="min-w-[1000px] w-full text-xs border-collapse">
+                <thead className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                  <tr>
+                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-10">#</th>
+                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-24">Day</th>
+                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-32">Date</th>
+                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20">Session</th>
+                    {showAdvancedCols && <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16">Group</th>}
+                    {showAdvancedCols && <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16">Row</th>}
+                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Muscle</th>
+                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Sub Muscle</th>
+                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-80">Exercise</th>
+                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16 text-center">Sets</th>
+                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16 text-center">Reps</th>
+                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20 text-center">Weight</th>
+                    <th className="px-3 py-3 text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 w-12">Del</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {visibleWorkoutRows.map(({ row, idx }, visibleIdx) => (
+                    <tr key={`workout-row-${idx}`} className="group hover:bg-slate-50/50 transition-colors">
+                      <td className="px-3 py-2 text-slate-300 font-bold text-[10px]">{visibleIdx + 1}</td>
+                      <td className="px-3 py-2">
+                        <span className="text-slate-700 font-bold italic text-[11px]">{row.day}</span>
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          type="date"
+                          value={row.dateOrDay || ''}
+                          onChange={(e) => {
+                            const newDate = e.target.value;
+                            updateWorkoutRow(idx, 'dateOrDay', newDate);
+                            if (newDate) {
+                              const dayName = getDayOfWeek(newDate);
+                              updateWorkoutRow(idx, 'day', dayName);
+                            }
+                          }}
+                          className="w-full px-2 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] focus:bg-white focus:border-slate-200 transition-all outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <select
+                          value={row.session}
+                          onChange={(e) => updateWorkoutRow(idx, 'session', e.target.value)}
+                          className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[10px] font-bold uppercase focus:bg-white focus:border-slate-200"
+                        >
+                          <option value="am">AM</option>
+                          <option value="pm">PM</option>
+                        </select>
+                      </td>
+                      {showAdvancedCols && (
+                        <td className="px-3 py-2">
+                          <input
+                            value={String(row.groupIndex)}
+                            onChange={(e) => updateWorkoutRow(idx, 'groupIndex', e.target.value)}
+                            className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[10px] text-center focus:bg-white focus:border-slate-200 outline-none"
+                          />
+                        </td>
+                      )}
+                      {showAdvancedCols && (
+                        <td className="px-3 py-2">
+                          <input
+                            value={String(row.rowIndex)}
+                            onChange={(e) => updateWorkoutRow(idx, 'rowIndex', e.target.value)}
+                            className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[10px] text-center focus:bg-white focus:border-slate-200 outline-none"
+                          />
+                        </td>
+                      )}
+                      <td className="px-3 py-2">
+                        <input
+                          value={row.muscle}
+                          onChange={(e) => updateWorkoutRow(idx, 'muscle', e.target.value)}
+                          className="w-full px-2 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          value={row.subMuscle}
+                          onChange={(e) => updateWorkoutRow(idx, 'subMuscle', e.target.value)}
+                          className="w-full px-2 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          value={row.exercise}
+                          onChange={(e) => updateWorkoutRow(idx, 'exercise', e.target.value)}
+                          className="w-full px-2 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] font-bold focus:bg-white focus:border-slate-200 outline-none"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          value={row.sets}
+                          onChange={(e) => updateWorkoutRow(idx, 'sets', e.target.value)}
+                          className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          value={row.reps}
+                          onChange={(e) => updateWorkoutRow(idx, 'reps', e.target.value)}
+                          className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <input
+                          value={row.weight}
+                          onChange={(e) => updateWorkoutRow(idx, 'weight', e.target.value)}
+                          className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-indigo-600 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
+                        />
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <button
+                          onClick={() => removeWorkoutGridRow(idx)}
+                          className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
-      {activeTab === 'workouts' && (
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3 flex-wrap">
-            <label className="text-sm font-medium text-gray-700">
-              Day
-              <select
-                value={workoutFilterDay}
-                onChange={(e) => setWorkoutFilterDay(e.target.value)}
-                className="ml-2 border border-gray-300 rounded px-3 py-1.5 bg-white"
+          {activeTab === 'completion' && (
+            <div className="flex-1 overflow-auto scrollbar-none">
+              <table className="min-w-[600px] w-full text-xs border-collapse">
+                <thead className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Day</th>
+                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Date</th>
+                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">AM Status</th>
+                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">PM Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {DAYS.map((day) => {
+                    const dayData = weekCompletion[day];
+                    const dateDisplay = dayData ? formatDateCompact(dayData.date) : '';
+                    const dateKey = dayData ? dayData.date : null;
+                    
+                    return (
+                      <tr key={day} className="group hover:bg-slate-50/50 transition-colors">
+                        <td className="px-4 py-3 font-bold text-slate-700 italic">{day}</td>
+                        <td className="px-4 py-3 text-slate-400 font-bold text-[10px] uppercase tracking-tight">{dateDisplay}</td>
+                        {['am', 'pm'].map((session) => {
+                          const value = dayData?.[session];
+                          const status = value === true ? 'done' : value === 'skipped' ? 'skipped' : '';
+                          
+                          return (
+                            <td key={session} className="px-4 py-2">
+                              <select
+                                value={status}
+                                onChange={(e) => setCompletionCell(dateKey, session, e.target.value)}
+                                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border underline-offset-2 transition-all focus:outline-none ${
+                                  status === 'done' 
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
+                                    : status === 'skipped'
+                                    ? 'bg-amber-50 text-amber-700 border-amber-100'
+                                    : 'bg-transparent text-slate-300 border-transparent hover:border-slate-100'
+                                }`}
+                                disabled={!dateKey}
+                              >
+                                <option value="">PENDING</option>
+                                <option value="done">DONE</option>
+                                <option value="skipped">SKIPPED</option>
+                              </select>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {activeTab === 'exerciseDb' && (
+            <div className="flex-1 overflow-auto scrollbar-none relative">
+              <table className="min-w-[700px] w-full text-xs border-collapse">
+                <thead className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-1/4">Muscle</th>
+                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-1/4">Sub Muscle</th>
+                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Exercise</th>
+                    <th className="px-4 py-3 text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {paginatedExerciseRows.map(({ row, idx }) => (
+                    <tr key={`${row.muscle}-${row.subMuscle}-${row.exercise}-${idx}`} className="group hover:bg-slate-50/50 transition-colors">
+                      <td className="px-4 py-2">
+                        <input
+                          value={row.muscle}
+                          onChange={(e) => updateExerciseRow(idx, 'muscle', e.target.value)}
+                          className="w-full px-3 py-1.5 bg-transparent border border-transparent rounded-lg text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          value={row.subMuscle}
+                          onChange={(e) => updateExerciseRow(idx, 'subMuscle', e.target.value)}
+                          className="w-full px-3 py-1.5 bg-transparent border border-transparent rounded-lg text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none"
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          value={row.exercise}
+                          onChange={(e) => updateExerciseRow(idx, 'exercise', e.target.value)}
+                          className="w-full px-3 py-1.5 bg-transparent border border-transparent rounded-lg text-slate-700 text-[11px] font-bold focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none"
+                        />
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        <button
+                          onClick={() => removeExerciseRow(idx)}
+                          className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {/* Table Footer */}
+          <footer className="px-4 py-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              {activeTab === 'exerciseDb' ? (
+                <>Showing {Math.min(EXERCISES_PER_PAGE, filteredExerciseRows.length)} of {filteredExerciseRows.length} Exercises</>
+              ) : activeTab === 'workouts' ? (
+                <>Displaying {visibleWorkoutRows.length} training entries</>
+              ) : activeTab === 'schedule' ? (
+                <>Full 7-day training week</>
+              ) : (
+                <>Training completion status</>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button 
+                onClick={() => setExercisePage(p => Math.max(1, p - 1))}
+                disabled={activeTab !== 'exerciseDb' || exercisePage === 1}
+                className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 disabled:opacity-30 transition-all shadow-sm bg-white"
               >
-                <option value="all">All</option>
-                {DAYS.map((day) => (
-                  <option key={day} value={day}>{day}</option>
-                ))}
-              </select>
-            </label>
-            <label className="text-sm font-medium text-gray-700">
-              Session
-              <select
-                value={workoutFilterSession}
-                onChange={(e) => setWorkoutFilterSession(e.target.value)}
-                className="ml-2 border border-gray-300 rounded px-3 py-1.5 bg-white"
+                <ChevronLeft size={16} />
+              </button>
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-white text-indigo-600 font-bold text-[10px] border border-slate-200 rounded-lg shadow-sm">
+                {activeTab === 'exerciseDb' ? (
+                  <>
+                    <span>{exercisePage}</span>
+                    <span className="text-slate-300">/</span>
+                    <span>{totalExercisePages}</span>
+                  </>
+                ) : (
+                  <span>1</span>
+                )}
+              </div>
+              <button 
+                onClick={() => setExercisePage(p => Math.min(totalExercisePages, p + 1))}
+                disabled={activeTab !== 'exerciseDb' || exercisePage === totalExercisePages}
+                className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 disabled:opacity-30 transition-all shadow-sm bg-white"
               >
-                <option value="all">All</option>
-                <option value="am">AM</option>
-                <option value="pm">PM</option>
-              </select>
-            </label>
-            <button
-              onClick={() => setShowAdvancedCols((v) => !v)}
-              className="border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-medium px-4 py-2 rounded"
-            >
-              {showAdvancedCols ? 'Hide Advanced' : 'Show Advanced'}
-            </button>
-            <button
-              onClick={addWorkoutGridRow}
-              className="border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 text-sm font-medium px-4 py-2 rounded"
-            >
-              Add Workout Row
-            </button>
-            <button
-              onClick={saveWorkoutGrid}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded text-sm"
-            >
-              Save Workouts Grid
-            </button>
-            {workoutsSaved && (
-              <span className="text-green-600 text-sm font-medium">Saved workouts</span>
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </footer>
+
+          {/* Action Footer */}
+          <div className="flex items-center gap-4 mt-2">
+            {activeTab === 'schedule' && (
+              <button
+                onClick={() => {
+                  saveSessionTitlesWithSync(sessionTitles);
+                  flashSaved(setTitlesSaved);
+                }}
+                className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 text-xs"
+              >
+                <Save size={14} />
+                Save Session Titles
+              </button>
             )}
-            <span className="text-xs text-gray-500">
-              Showing {visibleWorkoutRows.length} of {workoutRows.length} rows
-            </span>
-            {!showAdvancedCols && (
-              <span className="text-xs text-gray-400">
-                Group/Row index columns are hidden in basic view.
+            {activeTab === 'workouts' && (
+              <button
+                onClick={saveWorkoutGrid}
+                className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 text-xs"
+              >
+                <Save size={14} />
+                Save Workouts
+              </button>
+            )}
+            {activeTab === 'exerciseDb' && (
+              <button
+                onClick={saveExerciseGrid}
+                className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 text-xs"
+              >
+                <Save size={14} />
+                Save Changes
+              </button>
+            )}
+            
+            {(titlesSaved || workoutsSaved || exerciseSaved || completionSaved) && (
+              <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest animate-pulse">
+                ✓ Saved to Local & Cloud
               </span>
             )}
           </div>
-
-          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className={`${showAdvancedCols ? 'min-w-[1700px]' : 'min-w-[1400px]'} bg-white text-sm`}>
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-12">#</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-36">Day</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-32">Date</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-24">Session</th>
-                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-28">GroupIndex</th>}
-                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-28">RowIndex</th>}
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-40">Muscle</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-40">SubMuscle</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-52">Exercise</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-24">Sets</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-24">Reps</th>
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-24">Weight</th>
-                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-24">DropSets</th>}
-                  {showAdvancedCols && <th className="px-3 py-2 text-left font-semibold text-gray-600 w-28">DropWeight</th>}
-                  <th className="px-3 py-2 text-left font-semibold text-gray-600 w-20">Row</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {visibleWorkoutRows.map(({ row, idx }, visibleIdx) => (
-                  <tr key={`workout-row-${idx}`}>
-                    <td className="px-3 py-2 text-gray-500">{visibleIdx + 1}</td>
-                    <td className="px-3 py-2">
-                      <input
-                        value={row.day}
-                        readOnly
-                        className="border border-gray-300 rounded px-2 py-1 w-full bg-gray-50"
-                        title="Day name is auto-calculated from date"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        type="date"
-                        value={row.dateOrDay || ''}
-                        onChange={(e) => {
-                          const newDate = e.target.value;
-                          updateWorkoutRow(idx, 'dateOrDay', newDate);
-                          // Update day name based on date
-                          if (newDate) {
-                            const dayName = getDayOfWeek(newDate);
-                            updateWorkoutRow(idx, 'day', dayName);
-                          }
-                        }}
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <select
-                        value={row.session}
-                        onChange={(e) => updateWorkoutRow(idx, 'session', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-full bg-white"
-                      >
-                        <option value="am">AM</option>
-                        <option value="pm">PM</option>
-                      </select>
-                    </td>
-                    {showAdvancedCols && (
-                      <td className="px-3 py-2">
-                        <input
-                          value={row.groupIndex}
-                          onChange={(e) => updateWorkoutRow(idx, 'groupIndex', e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 w-full"
-                          inputMode="numeric"
-                        />
-                      </td>
-                    )}
-                    {showAdvancedCols && (
-                      <td className="px-3 py-2">
-                        <input
-                          value={row.rowIndex}
-                          onChange={(e) => updateWorkoutRow(idx, 'rowIndex', e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 w-full"
-                          inputMode="numeric"
-                        />
-                      </td>
-                    )}
-                    <td className="px-3 py-2">
-                      <input
-                        value={row.muscle}
-                        onChange={(e) => updateWorkoutRow(idx, 'muscle', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        value={row.subMuscle}
-                        onChange={(e) => updateWorkoutRow(idx, 'subMuscle', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        value={row.exercise}
-                        onChange={(e) => updateWorkoutRow(idx, 'exercise', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        value={row.sets}
-                        onChange={(e) => updateWorkoutRow(idx, 'sets', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        value={row.reps}
-                        onChange={(e) => updateWorkoutRow(idx, 'reps', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        value={row.weight}
-                        onChange={(e) => updateWorkoutRow(idx, 'weight', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
-                      />
-                    </td>
-                    {showAdvancedCols && (
-                      <td className="px-3 py-2">
-                        <input
-                          value={row.dropSets}
-                          onChange={(e) => updateWorkoutRow(idx, 'dropSets', e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 w-full"
-                        />
-                      </td>
-                    )}
-                    {showAdvancedCols && (
-                      <td className="px-3 py-2">
-                        <input
-                          value={row.dropWeight}
-                          onChange={(e) => updateWorkoutRow(idx, 'dropWeight', e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 w-full"
-                        />
-                      </td>
-                    )}
-                    <td className="px-3 py-2">
-                      <button
-                        onClick={() => removeWorkoutGridRow(idx)}
-                        className="text-red-600 hover:text-red-700 text-xs font-semibold"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {visibleWorkoutRows.length === 0 && (
-                  <tr>
-                    <td colSpan={showAdvancedCols ? 14 : 10} className="px-4 py-6 text-center text-sm text-gray-500">
-                      No rows match this filter. Add a workout row or switch filters.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
         </div>
-      )}
-
-      {activeTab === 'completion' && (
-        <div className="flex flex-col gap-4">
-          <WeekPicker 
-            currentWeekStart={selectedWeek} 
-            onWeekChange={setSelectedWeek} 
-          />
-          
-          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className="min-w-full bg-white text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600 w-40">Day</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600 w-32">Date</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">AM</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">PM</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {DAYS.map((day) => {
-                  const dayData = weekCompletion[day];
-                  const dateDisplay = dayData ? formatDateCompact(dayData.date) : '';
-                  const dateKey = dayData ? dayData.date : null;
-                  
-                  return (
-                    <tr key={day}>
-                      <td className="px-4 py-2 font-medium text-gray-800">{day}</td>
-                      <td className="px-4 py-2 text-gray-600 text-xs">{dateDisplay}</td>
-                      {['am', 'pm'].map((session) => {
-                        const value = dayData?.[session];
-                        const status = value === true ? 'done' : value === 'skipped' ? 'skipped' : '';
-                        
-                        return (
-                          <td key={session} className="px-4 py-2">
-                            <select
-                              value={status}
-                              onChange={(e) => setCompletionCell(dateKey, session, e.target.value)}
-                              className="border border-gray-300 rounded px-3 py-1.5 bg-white"
-                              disabled={!dateKey}
-                            >
-                              <option value="">None</option>
-                              <option value="done">Done</option>
-                              <option value="skipped">Skipped</option>
-                            </select>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {completionSaved && (
-              <span className="text-green-600 text-sm font-medium">✓ Saved completion</span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'exerciseDb' && (
-        <div className="flex flex-col gap-4">
-          <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-            <table className="min-w-full bg-white text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">Muscle</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">Sub Muscle</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600">Exercise</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-600 w-16">Row</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {exerciseRows.map((row, idx) => (
-                  <tr key={`${row.muscle}-${row.subMuscle}-${row.exercise}-${idx}`}>
-                    <td className="px-4 py-2">
-                      <input
-                        value={row.muscle}
-                        onChange={(e) => updateExerciseRow(idx, 'muscle', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-44"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <input
-                        value={row.subMuscle}
-                        onChange={(e) => updateExerciseRow(idx, 'subMuscle', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-44"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <input
-                        value={row.exercise}
-                        onChange={(e) => updateExerciseRow(idx, 'exercise', e.target.value)}
-                        className="border border-gray-300 rounded px-2 py-1 w-64"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <button
-                        onClick={() => removeExerciseRow(idx)}
-                        className="text-red-600 hover:text-red-700 text-xs font-semibold"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex items-center gap-3 flex-wrap">
-            <button
-              onClick={addExerciseRow}
-              className="border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 text-sm font-medium px-4 py-2 rounded"
-            >
-              Add Exercise Row
-            </button>
-            <button
-              onClick={saveExerciseGrid}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded text-sm"
-            >
-              Save Exercise DB
-            </button>
-            {exerciseSaved && (
-              <span className="text-green-600 text-sm font-medium">Saved exercise DB</span>
-            )}
-          </div>
-        </div>
-      )}
+      </main>
     </div>
   );
 }
+

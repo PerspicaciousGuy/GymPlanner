@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Trash2, Check, X, AlertCircle, History, Plus } from 'lucide-react';
 import { formatDateCompact } from '../utils/dateUtils';
 import {
   getMuscleGroupKeys,
@@ -10,10 +11,10 @@ import {
 } from '../utils/storage';
 
 const selectCls =
-  'w-full border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-50 disabled:text-gray-400';
+  'w-full border border-slate-200 rounded-lg px-2 py-1 bg-transparent text-slate-700 text-[11px] font-bold focus:bg-white focus:border-indigo-200 outline-none transition-all disabled:opacity-30';
 
 const inputCls =
-  'w-full border border-gray-300 rounded px-2 py-1.5 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400';
+  'w-full border border-slate-200 rounded-lg px-2 py-1 bg-transparent text-slate-700 text-[11px] font-bold focus:bg-white focus:border-indigo-200 outline-none transition-all placeholder:text-slate-300';
 
 /**
  * ExerciseRow — one full row of the exercise table.
@@ -133,15 +134,15 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
 
   return (
     <>
-    <tr className="hover:bg-gray-50 transition-colors align-top">
+    <tr className="hover:bg-slate-50/50 transition-colors group/row">
       {/* Muscle Group */}
-      <td className="px-3 py-2 min-w-[140px]">
+      <td className="px-3 py-1.5 min-w-[130px]">
         <select
           value={muscle}
           onChange={(e) => handleMuscleChange(e.target.value)}
           className={selectCls}
         >
-          <option value="">— Select —</option>
+          <option value="">— Muscle —</option>
           {muscleGroupKeys.map((mg) => (
             <option key={mg} value={mg}>
               {mg}
@@ -151,14 +152,14 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
       </td>
 
       {/* Sub Muscle */}
-      <td className="px-3 py-2 min-w-[140px]">
+      <td className="px-3 py-1.5 min-w-[130px]">
         <select
           value={subMuscle}
           onChange={(e) => handleSubMuscleChange(e.target.value)}
           className={selectCls}
           disabled={!muscle}
         >
-          <option value="">— Select —</option>
+          <option value="">— Sub —</option>
           {subMuscles.map((sm) => (
             <option key={sm} value={sm}>
               {sm}
@@ -168,9 +169,9 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
       </td>
 
       {/* Exercise */}
-      <td className="px-3 py-2 min-w-[220px]">
+      <td className="px-3 py-1.5 min-w-[200px]">
         {isAdding ? (
-          <div className="flex gap-1 items-center">
+          <div className="flex gap-1 items-center px-1">
             <input
               type="text"
               autoFocus
@@ -180,24 +181,18 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
                 if (e.key === 'Enter') handleConfirmNew();
                 if (e.key === 'Escape') handleCancelNew();
               }}
-              placeholder="New exercise name…"
-              className={inputCls + ' flex-1'}
+              placeholder="Name..."
+              className={inputCls + ' !bg-white !border-indigo-200'}
             />
-            <button onClick={handleConfirmNew} className="text-green-600 hover:text-green-800 font-bold px-1 text-sm" title="Confirm">✓</button>
-            <button onClick={handleCancelNew} className="text-red-400 hover:text-red-600 px-1 text-sm" title="Cancel">✕</button>
+            <button onClick={handleConfirmNew} className="p-1 text-emerald-500 hover:bg-emerald-50 rounded" title="Confirm"><Check size={12} strokeWidth={3} /></button>
+            <button onClick={handleCancelNew} className="p-1 text-slate-400 hover:bg-slate-100 rounded" title="Cancel"><X size={12} strokeWidth={3} /></button>
           </div>
         ) : confirmingDelete ? (
-          <div className="flex flex-col gap-1 rounded border border-red-300 bg-red-50 px-2 py-1.5 text-sm">
-            <span className="text-red-700 font-medium leading-snug">Delete <span className="font-semibold">"{exercise}"</span> from database?</span>
-            <div className="flex gap-2">
-              <button
-                onClick={handleConfirmDelete}
-                className="flex-1 rounded bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1 transition-colors"
-              >Delete</button>
-              <button
-                onClick={handleCancelDelete}
-                className="flex-1 rounded border border-gray-300 hover:bg-gray-100 text-gray-600 text-xs font-semibold py-1 transition-colors"
-              >Cancel</button>
+          <div className="flex items-center justify-between rounded-lg border border-red-100 bg-red-50 px-2 py-0.5 animate-in fade-in duration-200">
+            <span className="text-red-700 font-bold text-[10px] uppercase truncate max-w-[100px]">Delete "{exercise}"?</span>
+            <div className="flex gap-1 shrink-0">
+              <button onClick={handleConfirmDelete} className="text-red-600 hover:bg-red-100 p-0.5 rounded"><Check size={10} strokeWidth={3} /></button>
+              <button onClick={handleCancelDelete} className="text-slate-500 hover:bg-white p-0.5 rounded"><X size={10} strokeWidth={3} /></button>
             </div>
           </div>
         ) : (
@@ -205,109 +200,112 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
             <select
               value={exercise}
               onChange={(e) => handleExerciseChange(e.target.value)}
-              className={selectCls + ' flex-1'}
+              className={selectCls + ' flex-1 !text-indigo-600'}
               disabled={!subMuscle}
             >
-              <option value="">— Select —</option>
+              <option value="">— Exercise —</option>
               {allExercises.map((ex) => (
                 <option key={ex} value={ex}>
                   {ex}
                 </option>
               ))}
-              {subMuscle && <option value="__ADD_NEW__">＋ Add new exercise…</option>}
+              {subMuscle && <option value="__ADD_NEW__" className="text-indigo-600 font-bold italic">＋ NEW EXERCISE</option>}
             </select>
             {exercise && (
               <button
                 onClick={handleDeleteExercise}
-                className="text-red-300 hover:text-red-600 px-1 text-base shrink-0 transition-colors"
-                title="Delete exercise from database"
-              >🗑</button>
+                className="opacity-0 group-hover/row:opacity-100 p-1 text-slate-300 hover:text-red-500 transition-all rounded shadow-sm hover:shadow-md"
+                title="Remove from DB"
+              ><Trash2 size={12} /></button>
             )}
           </div>
         )}
       </td>
 
       {/* Sets */}
-      <td className="px-3 py-2 min-w-[90px]">
+      <td className="px-3 py-1.5 min-w-[70px]">
         <input
           type="text"
           value={sets}
           onChange={(e) => set({ sets: e.target.value })}
-          placeholder="e.g. 4"
-          className={inputCls}
+          placeholder="0"
+          className={inputCls + ' text-center'}
         />
       </td>
 
       {/* Reps */}
-      <td className="px-3 py-2 min-w-[90px]">
+      <td className="px-3 py-1.5 min-w-[70px]">
         <input
           type="text"
           value={reps}
           onChange={(e) => set({ reps: e.target.value })}
-          placeholder="e.g. 10"
-          className={inputCls}
+          placeholder="0"
+          className={inputCls + ' text-center'}
         />
       </td>
 
-      {/* Weight (kg) */}
-      <td className="px-3 py-2 min-w-[120px]">
+      {/* Weight */}
+      <td className="px-3 py-1.5 min-w-[90px]">
         <input
           type="text"
           value={weight}
           onChange={(e) => set({ weight: e.target.value })}
-          placeholder="kg"
-          className={inputCls}
+          placeholder="0"
+          className={inputCls + ' text-center !text-indigo-600'}
         />
       </td>
 
       {/* Drop Set */}
-      <td className="px-3 py-2 min-w-[100px]">
+      <td className="px-3 py-1.5 min-w-[80px]">
         <input
           type="text"
           value={dropSets}
           onChange={(e) => set({ dropSets: e.target.value })}
-          placeholder="e.g. 2"
-          className={inputCls}
+          placeholder="0"
+          className={inputCls + ' text-center !text-slate-400 font-medium'}
         />
       </td>
 
-      {/* Drop Weight (kg) */}
-      <td className="px-3 py-2 min-w-[140px]">
+      {/* Drop Weight */}
+      <td className="px-3 py-1.5 min-w-[100px]">
         <input
           type="text"
           value={dropWeight}
           onChange={(e) => set({ dropWeight: e.target.value })}
-          placeholder="kg"
-          className={inputCls}
+          placeholder="0"
+          className={inputCls + ' text-center !text-slate-400 font-medium'}
         />
       </td>
 
       {/* Delete Row */}
-      <td className="px-2 py-2 text-center">
+      <td className="px-2 py-1.5 text-center">
         <button
           onClick={onDelete}
-          className="text-gray-300 hover:text-red-500 transition-colors text-xl leading-none"
+          className="p-1 rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"
           title="Remove row"
-        >×</button>
+        ><Trash2 size={13} /></button>
       </td>
-
     </tr>
+    
     {showHistoryRow && (
-      <tr className="bg-blue-50/60">
-        <td colSpan={9} className="px-3 py-2 text-xs text-blue-800">
+      <tr className="bg-slate-50/30">
+        <td colSpan={9} className="px-3 py-1 text-[10px] text-slate-400 italic">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span>
-              {appliedHistoryDate === previousEntry.date ? 'Prefilled from' : 'Last time:'} {formatDateCompact(previousEntry.date)}
-              {previousEntry.session ? ` (${previousEntry.session.toUpperCase()})` : ''}
-              {' '}• {previousSummary}
-            </span>
+            <div className="flex items-center gap-1">
+              <History size={10} className="text-slate-300" />
+              <span>
+                {appliedHistoryDate === previousEntry.date ? 'Pre-filled from' : 'Last activity:'} {formatDateCompact(previousEntry.date)}
+                {previousEntry.session ? ` (${previousEntry.session.toUpperCase()})` : ''}
+                {' '}• {previousSummary}
+              </span>
+            </div>
             {appliedHistoryDate !== previousEntry.date && (
               <button
                 onClick={() => applyPreviousValues(previousEntry)}
-                className="font-semibold text-blue-700 hover:text-blue-800 underline underline-offset-2"
+                className="font-bold text-indigo-500 hover:text-indigo-700 uppercase tracking-tighter hover:underline"
                 type="button"
               >
-                Use previous values
+                APPLY LAST VALUES
               </button>
             )}
           </div>

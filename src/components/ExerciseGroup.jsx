@@ -1,19 +1,9 @@
+import { Plus, Trash2, Layers } from 'lucide-react';
 import { defaultRow } from '../utils/storage';
 import ExerciseRow from './ExerciseRow';
 
-const COLS = ['Muscle Group', 'Sub Muscle', 'Exercise', 'Sets', 'Reps', 'Weight (kg)', 'Drop Set', 'Drop Weight (kg)', ''];
+const COLS = ['Muscle Group', 'Sub Muscle', 'Exercise', 'Sets', 'Reps', 'Weight', 'Drop Set', 'Drop Weight', ''];
 
-/**
- * ExerciseGroup — one group card with 3 exercise rows.
- * Props:
- *   groupIndex  – 0-based
- *   group       – { rows: [row, row, row] }
- *   onChange    – (updatedGroup) => void
- *   onDeleteGroup - () => void
- *   groupCount  – total groups in the current session
- *   workoutDate – active workout date
- *   sessionKey  – active session ('am' | 'pm')
- */
 export default function ExerciseGroup({ groupIndex, group, onChange, onDeleteGroup, groupCount = 1, workoutDate, sessionKey }) {
   const handleRowChange = (rowIdx, updatedRow) => {
     const updatedRows = group.rows.map((r, i) => (i === rowIdx ? updatedRow : r));
@@ -30,41 +20,50 @@ export default function ExerciseGroup({ groupIndex, group, onChange, onDeleteGro
 
   const canDeleteGroup = groupCount > 1 && typeof onDeleteGroup === 'function';
 
-  // Badge: show distinct exercises selected in this group
-  const exercises = group.rows.map((r) => r.exercise).filter(Boolean);
-  const badge = exercises.length > 0 ? exercises.join(', ') : null;
-
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-      <div className="bg-gray-50 border-b border-gray-200 px-4 py-2 flex items-center justify-between gap-2">
-        <span className="font-semibold text-gray-700">Group {groupIndex + 1}</span>
+    <div className="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden group/card">
+      <div className="bg-slate-50/50 border-b border-slate-100 px-4 py-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className="bg-indigo-50 text-indigo-600 p-1 rounded-lg">
+            <Layers size={12} strokeWidth={3} />
+          </div>
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Exercise Group {groupIndex + 1}</span>
+        </div>
+        
         {canDeleteGroup && (
           <button
             onClick={onDeleteGroup}
-            className="text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded transition-colors"
+            className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold text-red-500 hover:bg-red-50 rounded-lg transition-all"
             title="Delete this entire group"
           >
-            Delete Group
+            <Trash2 size={12} />
+            <span>Remove Group</span>
           </button>
         )}
       </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-          <thead className="border-b border-gray-100 bg-gray-50">
-            <tr>
+
+      <div className="overflow-x-auto scrollbar-none relative">
+        <div className="sm:hidden absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />
+        <div className="sm:hidden flex items-center justify-end px-4 py-1.5 bg-slate-50 border-b border-slate-100 italic text-[9px] text-slate-400 font-medium">
+          Swipe right to see details →
+        </div>
+        <table className="min-w-full text-xs border-collapse">
+
+          <thead>
+            <tr className="bg-white border-b border-slate-50">
               {COLS.map((col, i) => (
                 <th
                   key={i}
-                  className={`px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap${
-                    col === 'Muscle Group'       ? ' min-w-[140px]'
-                    : col === 'Sub Muscle'       ? ' min-w-[140px]'
-                    : col === 'Exercise'         ? ' min-w-[220px]'
-                    : col === 'Sets'             ? ' min-w-[90px]'
-                    : col === 'Reps'             ? ' min-w-[90px]'
-                    : col === 'Weight (kg)'      ? ' min-w-[120px]'
-                    : col === 'Drop Set'         ? ' min-w-[100px]'
-                    : col === 'Drop Weight (kg)' ? ' min-w-[140px]'
-                    : ' w-8'
+                  className={`px-3 py-2 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 whitespace-nowrap ${
+                    col === 'Muscle Group'       ? 'min-w-[130px]'
+                    : col === 'Sub Muscle'       ? 'min-w-[130px]'
+                    : col === 'Exercise'         ? 'min-w-[200px]'
+                    : col === 'Sets'             ? 'min-w-[70px] text-center'
+                    : col === 'Reps'             ? 'min-w-[70px] text-center'
+                    : col === 'Weight'           ? 'min-w-[90px] text-center'
+                    : col === 'Drop Set'         ? 'min-w-[80px] text-center'
+                    : col === 'Drop Weight'      ? 'min-w-[100px] text-center'
+                    : 'w-10'
                   }`}
                 >
                   {col}
@@ -72,7 +71,7 @@ export default function ExerciseGroup({ groupIndex, group, onChange, onDeleteGro
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-slate-50">
             {group.rows.map((row, rowIdx) => (
               <ExerciseRow
                 key={rowIdx}
@@ -86,14 +85,17 @@ export default function ExerciseGroup({ groupIndex, group, onChange, onDeleteGro
           </tbody>
         </table>
       </div>
-      <div className="px-4 py-2 border-t border-gray-100">
+      
+      <div className="px-4 py-1.5 bg-slate-50/10 border-t border-slate-50">
         <button
           onClick={handleAddRow}
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors"
+          className="flex items-center gap-2 text-indigo-500 hover:text-indigo-700 text-[10px] font-bold uppercase tracking-widest transition-colors py-1 px-2 rounded-lg hover:bg-indigo-50"
         >
-          <span className="text-base leading-none">+</span> Add Row
+          <Plus size={12} strokeWidth={3} />
+          <span>Add Row</span>
         </button>
       </div>
     </div>
   );
 }
+
