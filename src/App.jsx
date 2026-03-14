@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { LayoutGrid, Calendar, Database, LogIn, LogOut, Cloud, Trash2, RefreshCw } from 'lucide-react';
+import { LayoutGrid, Calendar, Database, LogIn, LogOut, Cloud, Trash2, RefreshCw, BarChart3 } from 'lucide-react';
 
 import Navbar from './components/Navbar';
 import WorkoutSchedulerPage from './pages/WorkoutSchedulerPage';
 import DataConsolePage from './pages/DataConsolePage';
+import AnalyticsPage from './pages/AnalyticsPage';
+
 import useFirebaseAuth from './hooks/useFirebaseAuth';
 import { migrateCompletionToDateBased, migrateWorkoutsToDateBased } from './utils/storage';
 
@@ -52,6 +54,17 @@ export default function App() {
             </div>
             <span className="text-[10px] font-bold uppercase tracking-wider">Console</span>
           </button>
+
+          <button 
+            onClick={() => setActivePage('analytics')}
+            className={`flex flex-col items-center gap-1 group cursor-pointer transition-all ${activePage === 'analytics' ? 'text-indigo-600 scale-105' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <div className={`p-3 rounded-xl transition-all ${activePage === 'analytics' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-transparent'}`}>
+              <BarChart3 size={20} strokeWidth={2.5} />
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Insights</span>
+          </button>
+
         </nav>
 
         <div className="flex flex-col items-center gap-4">
@@ -77,10 +90,11 @@ export default function App() {
 
         <main className="flex-1 overflow-auto">
           <div className="p-3 sm:p-4 lg:p-6 mx-auto w-full max-w-[1600px]">
-            {activePage === 'workout'
-              ? <WorkoutSchedulerPage syncKey={syncKey} />
-              : <DataConsolePage key={`data-${syncKey}`} hideSidebar />}
+            {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} />}
+            {activePage === 'data' && <DataConsolePage key={`data-${syncKey}`} hideSidebar />}
+            {activePage === 'analytics' && <AnalyticsPage />}
           </div>
+
         </main>
       </div>
 
@@ -105,6 +119,17 @@ export default function App() {
           </div>
           <span className="text-[10px] font-bold uppercase tracking-widest">Console</span>
         </button>
+
+        <button 
+          onClick={() => setActivePage('analytics')}
+          className={`flex flex-col items-center gap-1.5 transition-all ${activePage === 'analytics' ? 'text-indigo-600' : 'text-slate-400'}`}
+        >
+          <div className={`p-2 rounded-xl scale-110 ${activePage === 'analytics' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : ''}`}>
+            <BarChart3 size={20} strokeWidth={2.5} />
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-widest">Insights</span>
+        </button>
+
 
         <div className="relative">
           <button 

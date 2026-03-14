@@ -518,12 +518,22 @@ export default function DataConsolePage({ hideSidebar }) {
             <button
               onClick={() => handleExport('current')}
               disabled={exporting}
-              className="flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-[10px] md:text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 shrink-0"
-              title="Export Data"
+              className="flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold text-[10px] md:text-xs hover:bg-slate-50 transition-all shadow-sm shrink-0"
+              title="Export Current Tab"
             >
-              <Download size={14} />
+              <Download size={14} className="text-slate-400" />
               <span className="hidden xs:inline">Export</span>
             </button>
+            <button
+              onClick={() => handleExport('all')}
+              disabled={exporting}
+              className="flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-[10px] md:text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 shrink-0"
+              title="Export All Data"
+            >
+              <Database size={14} />
+              <span className="hidden xs:inline">Export All</span>
+            </button>
+
             <div className="hidden xs:block w-px h-6 bg-slate-100 mx-0.5 md:mx-1" />
             <button
               onClick={() => setShowAdvancedCols(!showAdvancedCols)}
