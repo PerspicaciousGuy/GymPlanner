@@ -31,15 +31,13 @@ const selectCls =
 const inputCls =
   'w-full border border-slate-200 rounded-lg px-2 py-1 bg-transparent text-slate-700 text-[11px] font-bold focus:bg-white focus:border-indigo-200 outline-none transition-all placeholder:text-slate-300';
 
+import { Stepper } from './ui/stepper';
+
 /**
- * ExerciseRow — one full row of the exercise table.
- * Columns: Muscle Group | Sub Muscle | Exercise | Sets | Reps | Weight
- *
- * Props:
- *   row      – { muscle, subMuscle, exercise, sets, reps, weight }
- *   onChange – (updatedRow) => void
+ * ExerciseRow — one full row or card of the exercise logger.
+ * Handles both Desktop (tr) and Mobile (card) layouts.
  */
-export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, onDelete }) {
+export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, onDelete, layout = 'row' }) {
   const { muscle, subMuscle, exercise, sets, reps, weight, dropSets, dropWeight } = row;
 
   const [isAdding, setIsAdding] = useState(false);
@@ -151,6 +149,205 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
     : '';
 
   const showHistoryRow = previousEntry && previousSummary;
+
+  if (layout === 'card') {
+    return (
+      <TooltipProvider>
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <div className="p-4 bg-white border-b border-slate-50 last:border-b-0 space-y-4 group/card relative">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 space-y-3">
+                  {/* Muscle & Sub Selection */}
+                  <div className="flex gap-2">
+                    <select
+                      value={muscle}
+                      onChange={(e) => handleMuscleChange(e.target.value)}
+                      className={selectCls + " !text-[10px] h-8"}
+                    >
+                      <option value="">— Muscle —</option>
+                      {muscleGroupKeys.map((mg) => (
+                        <option key={mg} value={mg}>{mg}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={subMuscle}
+                      onChange={(e) => handleSubMuscleChange(e.target.value)}
+                      className={selectCls + " !text-[10px] h-8"}
+                      disabled={!muscle}
+                    >
+                      <option value="">— Sub —</option>
+                      {subMuscles.map((sm) => (
+                        <option key={sm} value={sm}>{sm}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Exercise Selection */}
+                  {isAdding ? (
+                    <div className="flex gap-1 items-center bg-indigo-50/30 p-1 rounded-xl border border-indigo-100">
+                      <input
+                        type="text"
+                        autoFocus
+                        value={newExName}
+                        onChange={(e) => setNewExName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleConfirmNew();
+                          if (e.key === 'Escape') handleCancelNew();
+                        }}
+                        placeholder="New exercise name..."
+                        className={inputCls + ' !bg-white !border-indigo-200 !text-sm h-9'}
+                      />
+                      <button onClick={handleConfirmNew} className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg"><Check size={18} strokeWidth={3} /></button>
+                      <button onClick={handleCancelNew} className="p-2 text-slate-400 hover:bg-slate-100 rounded-lg"><X size={18} strokeWidth={3} /></button>
+                    </div>
+                  ) : confirmingDelete ? (
+                    <div className="flex items-center justify-between rounded-xl border border-red-100 bg-red-50 p-2 animate-in slide-in-from-top-1 duration-200">
+                      <span className="text-red-700 font-bold text-xs uppercase">Delete "{exercise}"?</span>
+                      <div className="flex gap-2">
+                        <button onClick={handleConfirmDelete} className="bg-red-500 text-white p-1.5 rounded-lg shadow-sm"><Check size={14} strokeWidth={3} /></button>
+                        <button onClick={handleCancelDelete} className="bg-white text-slate-500 border border-red-100 p-1.5 rounded-lg shadow-sm"><X size={14} strokeWidth={3} /></button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 items-center">
+                      <select
+                        value={exercise}
+                        onChange={(e) => handleExerciseChange(e.target.value)}
+                        className={selectCls + ' flex-1 !text-indigo-600 !text-sm h-10 shadow-sm border-slate-100'}
+                        disabled={!subMuscle}
+                      >
+                        <option value="">— Select Exercise —</option>
+                        {allExercises.map((ex) => (
+                          <option key={ex} value={ex}>{ex}</option>
+                        ))}
+                        {subMuscle && <option value="__ADD_NEW__" className="text-indigo-600 font-bold italic">＋ ADD NEW EXERCISE</option>}
+                      </select>
+                      {exercise && (
+                        <button onClick={handleDeleteExercise} className="p-2 text-slate-300 hover:text-red-500 transition-all">
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={onDelete}
+                  className="p-2 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all border border-transparent hover:border-red-100"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+
+              {/* Logging Controls - Stacked for better readability */}
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Sets x Reps</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={sets}
+                      onChange={(e) => set({ sets: e.target.value })}
+                      placeholder="0"
+                      className={inputCls + ' text-center h-12 !text-base !font-black !w-20 shadow-sm border-slate-100'}
+                    />
+                    <span className="text-slate-300 font-bold text-lg">×</span>
+                    <Stepper 
+                      value={reps} 
+                      onChange={(v) => set({ reps: v })} 
+                      className="flex-1 h-12" 
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Weight (kg)</label>
+                  <Stepper 
+                    value={weight} 
+                    onChange={(v) => set({ weight: v })} 
+                    className="h-12" 
+                    step={2.5}
+                    placeholder="0"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1 text-slate-300">Drop Set (Sets x Weight)</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={dropSets}
+                      onChange={(e) => set({ dropSets: e.target.value })}
+                      placeholder="0"
+                      className={inputCls + ' text-center h-12 !text-base !font-black !w-20 !text-slate-400 !border-slate-100'}
+                    />
+                    <span className="text-slate-200 font-bold text-lg">×</span>
+                    <Stepper 
+                      value={dropWeight} 
+                      onChange={(v) => set({ dropWeight: v })} 
+                      className="flex-1 h-12 !border-slate-100" 
+                      placeholder="0"
+                      step={2.5}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Enhanced Visual Separator between cards */}
+              <div className="absolute bottom-0 left-4 right-4 h-[1px] bg-slate-100" />
+
+              {/* History Badge for Card */}
+              {showHistoryRow && (
+                <div className="mt-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100/50 space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
+                      <History size={12} className="text-slate-300" />
+                      <span>{formatDateCompact(previousEntry.date)}: {previousSummary}</span>
+                    </div>
+                    {occurrenceCount > 0 && (
+                      <div className="bg-indigo-50 text-indigo-600 font-black px-1.5 py-0.5 rounded text-[8px] uppercase tracking-tighter">
+                        Done {occurrenceCount}x before
+                      </div>
+                    )}
+                  </div>
+                  {appliedHistoryDate !== previousEntry.date && (
+                    <button
+                      onClick={() => applyPreviousValues(previousEntry)}
+                      className="w-full py-1.5 bg-white border border-indigo-100 text-indigo-600 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-indigo-50 transition-colors"
+                    >
+                      Apply Last Values
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </ContextMenuTrigger>
+          <ContextMenuContent className="w-56 rounded-xl shadow-xl border-slate-200">
+            <ContextMenuItem 
+              onClick={() => onChange({ ...row, sets: '', reps: '', weight: '', dropSets: '', dropWeight: '' })}
+              className="flex items-center gap-2 text-xs font-bold text-slate-600 focus:text-indigo-600 focus:bg-indigo-50 rounded-lg cursor-pointer"
+            >
+              <Eraser size={14} /> Clear All Values
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem 
+              onClick={() => onChange({ ...row, id: crypto.randomUUID() })} 
+              className="flex items-center gap-2 text-xs font-bold text-slate-600 focus:text-indigo-600 focus:bg-indigo-50 rounded-lg cursor-pointer"
+            >
+              <Copy size={14} /> Duplicate Row
+            </ContextMenuItem>
+            <ContextMenuItem className="flex items-center gap-2 text-xs font-bold text-slate-600 focus:text-indigo-600 focus:bg-indigo-50 rounded-lg cursor-pointer">
+              <MoveRight size={14} /> Move to {sessionKey === 'am' ? 'PM' : 'AM'} Session
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      </TooltipProvider>
+    );
+  }
 
   return (
     <TooltipProvider>

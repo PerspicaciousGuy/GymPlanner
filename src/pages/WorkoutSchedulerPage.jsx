@@ -13,16 +13,18 @@ import {
   isSameDay 
 } from '../utils/dateUtils';
 import WeekPicker from '../components/WeekPicker';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged }) {
   const [open, setOpen] = useState(defaultOpen && !section.isFullyComplete);
 
   // Sync open state with defaultOpen prop (e.g. when navigating from history)
   useEffect(() => {
-    if (defaultOpen) {
+    // Only force open if defaultOpen is true AND the day isn't already complete
+    if (defaultOpen && !section.isFullyComplete) {
       setOpen(true);
     }
-  }, [defaultOpen]);
+  }, [defaultOpen, section.isFullyComplete]);
 
   // Auto-collapse when day becomes fully complete
   useEffect(() => {
@@ -77,27 +79,40 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
           )}
         </div>
         
-        <div className={`p-1.5 rounded-lg bg-slate-50 text-slate-400 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-all ${open ? 'rotate-180' : ''}`}>
+        <motion.div 
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          className="p-1.5 rounded-lg bg-slate-50 text-slate-400 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-all"
+        >
           <ChevronDown size={14} strokeWidth={3} />
-        </div>
+        </motion.div>
       </button>
 
-      {open && (
-        <div className="bg-white border-x border-b border-slate-200 rounded-b-2xl px-3 md:px-4 py-4 md:py-5 animate-in slide-in-from-top-2 duration-300">
-
-          <WorkoutSection
-            date={section.date}
-            dayName={section.dayName}
-            muscleGroup={section.muscleGroup}
-            isMissed={section.isMissed}
-            isTomorrow={section.isTomorrow}
-            initialData={section.data}
-            syncToken={syncToken}
-            onWorkoutChanged={onWorkoutChanged}
-            hideBadge
-          />
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="bg-white border-x border-b border-slate-200 rounded-b-2xl overflow-hidden"
+          >
+            <div className="px-3 md:px-4 py-4 md:py-5">
+              <WorkoutSection
+                date={section.date}
+                dayName={section.dayName}
+                muscleGroup={section.muscleGroup}
+                isMissed={section.isMissed}
+                isTomorrow={section.isTomorrow}
+                initialData={section.data}
+                syncToken={syncToken}
+                onWorkoutChanged={onWorkoutChanged}
+                hideBadge
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
