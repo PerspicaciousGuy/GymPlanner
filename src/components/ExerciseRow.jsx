@@ -142,7 +142,6 @@ const ExerciseRow = memo(function ExerciseRow({ row, workoutDate, sessionKey, on
 
   const previousSummary = previousEntry
     ? [
-        previousEntry.row.sets && `${previousEntry.row.sets} sets`,
         previousEntry.row.reps && `${previousEntry.row.reps} reps`,
         previousEntry.row.weight && `${previousEntry.row.weight} kg`,
         previousEntry.row.dropSets && `${previousEntry.row.dropSets} drop`,
