@@ -20,10 +20,12 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { loadSettings, updateSetting } from '../utils/settings';
 import { formatDateKey } from '../utils/dateUtils';
+import LoginDialog from '../components/LoginDialog';
 
 export default function ProfilePage({ authState, onDataRefreshed }) {
   const [settings, setSettings] = useState(loadSettings());
   const [busy, setBusy] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const user = authState?.user;
 
   const handleToggleUnits = (checked) => {
@@ -57,6 +59,13 @@ export default function ProfilePage({ authState, onDataRefreshed }) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
+      {/* Auth Modal */}
+      <LoginDialog 
+        open={loginOpen} 
+        onOpenChange={setLoginOpen} 
+        authState={authState} 
+      />
+
       {/* Header Profile Section */}
       <div className="bg-white rounded-[2rem] border border-slate-200 p-8 shadow-sm flex flex-col md:flex-row items-center gap-8 text-center md:text-left relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/50 rounded-full -mr-16 -mt-16 blur-3xl" />
@@ -89,7 +98,11 @@ export default function ProfilePage({ authState, onDataRefreshed }) {
               <LogOut size={16} className="mr-2" /> Sign Out
             </Button>
           ) : (
-            <Button variant="outline" className="rounded-2xl border-slate-200 text-indigo-600 font-black uppercase tracking-widest text-[10px] h-11 hover:bg-indigo-50">
+            <Button 
+              variant="outline" 
+              onClick={() => setLoginOpen(true)}
+              className="rounded-2xl border-slate-200 text-indigo-600 font-black uppercase tracking-widest text-[10px] h-11 hover:bg-indigo-50"
+            >
               Sign In to Sync
             </Button>
           )}
