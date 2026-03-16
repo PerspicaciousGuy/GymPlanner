@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback, memo } from 'react';
 import { Trash2, Check, X, AlertCircle, History, Plus } from 'lucide-react';
 import { formatDateCompact } from '../utils/dateUtils';
 import {
@@ -31,13 +31,15 @@ const selectCls =
 const inputCls =
   'w-full border border-slate-200 rounded-lg px-2 py-1 bg-transparent text-slate-700 text-[11px] font-bold focus:bg-white focus:border-indigo-200 outline-none transition-all placeholder:text-slate-300';
 
+const MUSCLE_GROUP_KEYS = getMuscleGroupKeys();
+
 import { Stepper } from './ui/stepper';
 
 /**
  * ExerciseRow — one full row or card of the exercise logger.
  * Handles both Desktop (tr) and Mobile (card) layouts.
  */
-export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, onDelete, layout = 'row' }) {
+const ExerciseRow = memo(function ExerciseRow({ row, workoutDate, sessionKey, onChange, onDelete, layout = 'row' }) {
   const { muscle, subMuscle, exercise, sets, reps, weight, dropSets, dropWeight } = row;
 
   const [isAdding, setIsAdding] = useState(false);
@@ -45,11 +47,11 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [appliedHistoryDate, setAppliedHistoryDate] = useState('');
 
-  const muscleGroupKeys = getMuscleGroupKeys();
-  const subMuscles = muscle ? getSubMusclesForMuscle(muscle) : [];
-  const allExercises = muscle && subMuscle ? getExercisesForSubMuscle(muscle, subMuscle) : [];
+  const muscleGroupKeys = MUSCLE_GROUP_KEYS;
+  const subMuscles = useMemo(() => muscle ? getSubMusclesForMuscle(muscle) : [], [muscle]);
+  const allExercises = useMemo(() => muscle && subMuscle ? getExercisesForSubMuscle(muscle, subMuscle) : [], [muscle, subMuscle]);
 
-  const set = (patch) => onChange({ ...row, ...patch });
+  const set = useCallback((patch) => onChange({ ...row, ...patch }), [row, onChange]);
 
   const previousEntry = useMemo(
     () => findPreviousExerciseEntry({ exercise, beforeDate: workoutDate, session: sessionKey }),
@@ -247,7 +249,7 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
                   <div className="flex items-center gap-3">
                     <input
                       type="text"
-                      inputMode="numeric"
+                      inputMode="text"
                       value={sets}
                       onChange={(e) => set({ sets: e.target.value })}
                       placeholder="0"
@@ -275,11 +277,11 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1 text-slate-300">Drop Set (Sets x Weight)</label>
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1 text-slate-300">Drop Set (Reps x Weight)</label>
                   <div className="flex items-center gap-3">
                     <input
                       type="text"
-                      inputMode="numeric"
+                      inputMode="text"
                       value={dropSets}
                       onChange={(e) => set({ dropSets: e.target.value })}
                       placeholder="0"
@@ -577,4 +579,6 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
       </ContextMenu>
     </TooltipProvider>
   );
-}
+});
+
+export default ExerciseRow;

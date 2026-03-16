@@ -3,18 +3,29 @@ import { Button } from './button';
 import { cn } from '@/lib/utils';
 
 export function Stepper({ value, onChange, placeholder = "0", className, step = 1, min = 0 }) {
-  const numValue = parseFloat(value) || 0;
+  const parseParts = (val) => {
+    const s = String(val || "");
+    const match = s.match(/^([\d.]+)?(\s*.*)$/);
+    return {
+      num: parseFloat(match?.[1]) || 0,
+      suffix: match?.[2] || ""
+    };
+  };
 
   const handleMinus = (e) => {
     e.stopPropagation();
-    const next = Math.max(min, numValue - step);
-    onChange(String(next));
+    const { num, suffix } = parseParts(value);
+    const next = Math.max(min, num - step);
+    const out = suffix ? `${next}${suffix}` : String(next);
+    onChange(out);
   };
 
   const handlePlus = (e) => {
     e.stopPropagation();
-    const next = numValue + step;
-    onChange(String(next));
+    const { num, suffix } = parseParts(value);
+    const next = num + step;
+    const out = suffix ? `${next}${suffix}` : String(next);
+    onChange(out);
   };
 
   return (
@@ -31,7 +42,7 @@ export function Stepper({ value, onChange, placeholder = "0", className, step = 
       
       <input
         type="text"
-        inputMode="decimal"
+        inputMode="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { 
   Plus, 
   Save, 
@@ -119,16 +119,16 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     return () => clearTimeout(timer);
   }, [dayData, date, day, isDirty]);
 
-  const handleGroupChange = (groupIdx, updatedGroup) => {
+  const handleGroupChange = useCallback((groupIdx, updatedGroup) => {
     setIsDirty(true);
     setDayData((prev) => {
       const s = { ...prev[activeSession] };
       s.groups = s.groups.map((g, i) => (i === groupIdx ? updatedGroup : g));
       return { ...prev, [activeSession]: s };
     });
-  };
+  }, [activeSession]);
 
-  const handleAddGroup = () => {
+  const handleAddGroup = useCallback(() => {
     setIsDirty(true);
     setDayData((prev) => ({
       ...prev,
@@ -137,7 +137,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
         groups: [...prev[activeSession].groups, defaultGroup()],
       },
     }));
-  };
+  }, [activeSession]);
 
   const handleSessionTitleChange = (session, value) => {
     setSessionTitlesState((prev) => ({
@@ -156,7 +156,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     setTimeout(() => setTitleSaveFlash(false), 1800);
   };
 
-  const handleDeleteGroup = (groupIdx) => {
+  const handleDeleteGroup = useCallback((groupIdx) => {
     setIsDirty(true);
     setDayData((prev) => {
       const sessionData = { ...prev[activeSession] };
@@ -164,7 +164,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
       sessionData.groups = nextGroups.length > 0 ? nextGroups : [defaultGroup()];
       return { ...prev, [activeSession]: sessionData };
     });
-  };
+  }, [activeSession]);
 
   const amTitle = sessionTitlesState.am?.[day] || '';
   const pmTitle = sessionTitlesState.pm?.[day] || '';

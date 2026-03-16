@@ -1,27 +1,27 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import { Plus, Trash2, Layers, ChevronDown } from 'lucide-react';
 import { defaultRow } from '../utils/storage';
 import ExerciseRow from './ExerciseRow';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const COLS = ['Muscle Group', 'Sub Muscle', 'Exercise', 'Sets', 'Reps', 'Weight', 'Drop Set', 'Drop Weight', ''];
+const COLS = ['Muscle Group', 'Sub Muscle', 'Exercise', 'Sets', 'Reps', 'Weight', 'Drop Reps', 'Drop Weight', ''];
 
-export default function ExerciseGroup({ groupIndex, group, onChange, onDeleteGroup, groupCount = 1, workoutDate, sessionKey }) {
+const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange, onDeleteGroup, groupCount = 1, workoutDate, sessionKey }) {
   const [isOpen, setIsOpen] = useState(true);
 
-  const handleRowChange = (rowIdx, updatedRow) => {
+  const handleRowChange = useCallback((rowIdx, updatedRow) => {
     const updatedRows = group.rows.map((r, i) => (i === rowIdx ? updatedRow : r));
     onChange({ ...group, rows: updatedRows });
-  };
+  }, [group, onChange]);
 
-  const handleDeleteRow = (rowIdx) => {
+  const handleDeleteRow = useCallback((rowIdx) => {
     onChange({ ...group, rows: group.rows.filter((_, i) => i !== rowIdx) });
-  };
+  }, [group, onChange]);
 
-  const handleAddRow = () => {
+  const handleAddRow = useCallback(() => {
     onChange({ ...group, rows: [...group.rows, defaultRow()] });
     if (!isOpen) setIsOpen(true);
-  };
+  }, [group, onChange, isOpen]);
 
   const canDeleteGroup = groupCount > 1 && typeof onDeleteGroup === 'function';
 
@@ -142,12 +142,12 @@ export default function ExerciseGroup({ groupIndex, group, onChange, onDeleteGro
                 <AnimatePresence mode="popLayout">
                   {group.rows.map((row, rowIdx) => (
                     <motion.div 
-                      key={row.id || rowIdx} 
-                      layout
-                      initial={{ opacity: 0, x: -20 }}
+                      key={row.id || `${groupIndex}-${rowIdx}`} 
+                      layout="position"
+                      initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.8 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
                       className="px-2"
                     >
                       <ExerciseRow
@@ -188,5 +188,7 @@ export default function ExerciseGroup({ groupIndex, group, onChange, onDeleteGro
       </AnimatePresence>
     </div>
   );
-}
+});
+
+export default ExerciseGroup;
 
