@@ -16,8 +16,22 @@ import {
   Save,
   Grid,
   Calendar,
-  X
+  X,
+  ArrowUpDown,
+  MoreHorizontal
 } from 'lucide-react';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { DAYS, exerciseDatabase } from '../data/exerciseDatabase';
 import {
   defaultDayWorkout,
@@ -581,12 +595,11 @@ export default function DataConsolePage({ hideSidebar }) {
           <div className="px-3 md:px-4 py-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
             <div className="flex-1 w-full sm:max-w-xs relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
-              <input 
-                type="text"
+              <Input 
                 placeholder={`Search ${activeTab === 'schedule' ? 'sessions' : 'data'}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-1.5 md:py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] md:text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium"
+                className="pl-9 h-9 bg-slate-50 border-slate-200 rounded-xl text-[11px] md:text-xs focus-visible:ring-indigo-500/10 focus-visible:border-indigo-500 transition-all font-medium"
               />
             </div>
             
@@ -595,7 +608,7 @@ export default function DataConsolePage({ hideSidebar }) {
                 <div className="flex items-center gap-2 flex-1 sm:flex-initial">
                     <div 
                       onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}
-                      className="flex items-center gap-1.5 px-2 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 transition-all focus-within:ring-2 focus-within:ring-indigo-500/10 focus-within:border-indigo-500 cursor-pointer"
+                      className="flex items-center gap-1.5 px-2 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 focus-within:ring-2 focus-within:ring-indigo-500/10 focus-within:border-indigo-500 cursor-pointer"
                     >
                       <Calendar size={12} className="text-slate-400 shrink-0" />
                       <input
@@ -603,7 +616,7 @@ export default function DataConsolePage({ hideSidebar }) {
                         value={workoutFilterDate}
                         onFocus={(e) => e.target.showPicker?.()}
                         onChange={(e) => setWorkoutFilterDate(e.target.value)}
-                        className="bg-transparent py-1.5 text-[10px] md:text-xs font-bold text-slate-700 focus:outline-none w-24 md:w-28 cursor-pointer"
+                        className="bg-transparent py-1.5 text-[10px] md:text-xs font-bold text-slate-700 focus:outline-none w-24 md:w-28 cursor-pointer h-7"
                       />
                       {workoutFilterDate && (
                         <button 
@@ -672,20 +685,20 @@ export default function DataConsolePage({ hideSidebar }) {
 
           {activeTab === 'schedule' && (
             <div className="flex-1 overflow-auto scrollbar-none">
-              <table className="min-w-[600px] w-full text-xs border-collapse">
-                <thead className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Day</th>
-                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">AM Session Title</th>
-                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">PM Session Title</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
+              <Table className="min-w-[600px]">
+                <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                  <TableRow className="hover:bg-transparent border-none">
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Day</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">AM Session Title</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">PM Session Title</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-slate-50">
                   {DAYS.map((day) => (
-                    <tr key={day} className="group hover:bg-slate-50/50 transition-colors">
-                      <td className="px-4 py-3 font-bold text-slate-700 italic">{day}</td>
-                      <td className="px-4 py-2">
-                        <input
+                    <TableRow key={day} className="group hover:bg-slate-50/50 transition-colors border-none">
+                      <TableCell className="px-4 py-3 font-bold text-slate-700 italic">{day}</TableCell>
+                      <TableCell className="px-4 py-2">
+                        <Input
                           value={sessionTitles.am?.[day] || ''}
                           onChange={(e) =>
                             setSessionTitles((prev) => ({
@@ -693,12 +706,12 @@ export default function DataConsolePage({ hideSidebar }) {
                               am: { ...prev.am, [day]: e.target.value },
                             }))
                           }
-                          className="w-full px-3 py-1.5 bg-transparent border border-transparent rounded-lg text-slate-700 focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium placeholder:text-slate-300"
+                          className="h-9 bg-transparent border-transparent rounded-lg text-slate-700 focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
                           placeholder="e.g. Upper Body"
                         />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
+                      </TableCell>
+                      <TableCell className="px-4 py-2">
+                        <Input
                           value={sessionTitles.pm?.[day] || ''}
                           onChange={(e) =>
                             setSessionTitles((prev) => ({
@@ -706,46 +719,46 @@ export default function DataConsolePage({ hideSidebar }) {
                               pm: { ...prev.pm, [day]: e.target.value },
                             }))
                           }
-                          className="w-full px-3 py-1.5 bg-transparent border border-transparent rounded-lg text-slate-700 focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium placeholder:text-slate-300"
+                          className="h-9 bg-transparent border-transparent rounded-lg text-slate-700 focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
                           placeholder="e.g. Cardio + Core"
                         />
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
 
           {activeTab === 'workouts' && (
             <div className="flex-1 overflow-auto">
-              <table className="min-w-[1000px] w-full text-xs border-collapse">
-                <thead className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
-                  <tr>
-                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-10">#</th>
-                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-24">Day</th>
-                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-32">Date</th>
-                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20">Session</th>
-                    {showAdvancedCols && <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16">Group</th>}
-                    {showAdvancedCols && <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16">Row</th>}
-                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Muscle</th>
-                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Sub Muscle</th>
-                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-80">Exercise</th>
-                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16 text-center">Sets</th>
-                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16 text-center">Reps</th>
-                    <th className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20 text-center">Weight</th>
-                    <th className="px-3 py-3 text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 w-12">Del</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
+              <Table className="min-w-[1000px]">
+                <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                  <TableRow className="hover:bg-transparent border-none">
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-10">#</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-24">Day</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-32">Date</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20">Session</TableHead>
+                    {showAdvancedCols && <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16">Group</TableHead>}
+                    {showAdvancedCols && <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16">Row</TableHead>}
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Muscle</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Sub Muscle</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-80">Exercise</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16 text-center">Sets</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16 text-center">Reps</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20 text-center">Weight</TableHead>
+                    <TableHead className="px-3 py-3 text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 w-12">Del</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-slate-50">
                   {visibleWorkoutRows.map(({ row, idx }, visibleIdx) => (
-                    <tr key={`workout-row-${idx}`} className="group hover:bg-slate-50/50 transition-colors">
-                      <td className="px-3 py-2 text-slate-300 font-bold text-[10px]">{visibleIdx + 1}</td>
-                      <td className="px-3 py-2">
+                    <TableRow key={`workout-row-${idx}`} className="group hover:bg-slate-50/50 transition-colors border-none">
+                      <TableCell className="px-3 py-2 text-slate-300 font-bold text-[10px]">{visibleIdx + 1}</TableCell>
+                      <TableCell className="px-3 py-2">
                         <span className="text-slate-700 font-bold italic text-[11px]">{row.day}</span>
-                      </td>
-                      <td className="px-3 py-2">
-                        <input
+                      </TableCell>
+                      <TableCell className="px-3 py-2">
+                        <Input
                           type="date"
                           value={row.dateOrDay || ''}
                           onChange={(e) => {
@@ -756,10 +769,10 @@ export default function DataConsolePage({ hideSidebar }) {
                               updateWorkoutRow(idx, 'day', dayName);
                             }
                           }}
-                          className="w-full px-2 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] focus:bg-white focus:border-slate-200 transition-all outline-none"
+                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] focus:bg-white focus:border-slate-200 transition-all"
                         />
-                      </td>
-                      <td className="px-3 py-2">
+                      </TableCell>
+                      <TableCell className="px-3 py-2">
                         <select
                           value={row.session}
                           onChange={(e) => updateWorkoutRow(idx, 'session', e.target.value)}
@@ -768,183 +781,188 @@ export default function DataConsolePage({ hideSidebar }) {
                           <option value="am">AM</option>
                           <option value="pm">PM</option>
                         </select>
-                      </td>
+                      </TableCell>
                       {showAdvancedCols && (
-                        <td className="px-3 py-2">
-                          <input
+                        <TableCell className="px-3 py-2">
+                          <Input
                             value={String(row.groupIndex)}
                             onChange={(e) => updateWorkoutRow(idx, 'groupIndex', e.target.value)}
-                            className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[10px] text-center focus:bg-white focus:border-slate-200 outline-none"
+                            className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[10px] text-center focus:bg-white focus:border-slate-200"
                           />
-                        </td>
+                        </TableCell>
                       )}
                       {showAdvancedCols && (
-                        <td className="px-3 py-2">
-                          <input
+                        <TableCell className="px-3 py-2">
+                          <Input
                             value={String(row.rowIndex)}
                             onChange={(e) => updateWorkoutRow(idx, 'rowIndex', e.target.value)}
-                            className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[10px] text-center focus:bg-white focus:border-slate-200 outline-none"
+                            className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[10px] text-center focus:bg-white focus:border-slate-200"
                           />
-                        </td>
+                        </TableCell>
                       )}
-                      <td className="px-3 py-2">
-                        <input
+                      <TableCell className="px-3 py-2">
+                        <Input
                           value={row.muscle}
                           onChange={(e) => updateWorkoutRow(idx, 'muscle', e.target.value)}
-                          className="w-full px-2 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 outline-none"
+                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200"
                         />
-                      </td>
-                      <td className="px-3 py-2">
-                        <input
+                      </TableCell>
+                      <TableCell className="px-3 py-2">
+                        <Input
                           value={row.subMuscle}
                           onChange={(e) => updateWorkoutRow(idx, 'subMuscle', e.target.value)}
-                          className="w-full px-2 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 outline-none"
+                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200"
                         />
-                      </td>
-                      <td className="px-3 py-2">
-                        <input
+                      </TableCell>
+                      <TableCell className="px-3 py-2">
+                        <Input
                           value={row.exercise}
                           onChange={(e) => updateWorkoutRow(idx, 'exercise', e.target.value)}
-                          className="w-full px-2 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] font-bold focus:bg-white focus:border-slate-200 outline-none"
+                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] font-bold focus:bg-white focus:border-slate-200"
                         />
-                      </td>
-                      <td className="px-3 py-2">
-                        <input
+                      </TableCell>
+                      <TableCell className="px-3 py-2">
+                        <Input
                           value={row.sets}
                           onChange={(e) => updateWorkoutRow(idx, 'sets', e.target.value)}
-                          className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
+                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
                         />
-                      </td>
-                      <td className="px-3 py-2">
-                        <input
+                      </TableCell>
+                      <TableCell className="px-3 py-2">
+                        <Input
                           value={row.reps}
                           onChange={(e) => updateWorkoutRow(idx, 'reps', e.target.value)}
-                          className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
+                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
                         />
-                      </td>
-                      <td className="px-3 py-2">
-                        <input
+                      </TableCell>
+                      <TableCell className="px-3 py-2">
+                        <Input
                           value={row.weight}
                           onChange={(e) => updateWorkoutRow(idx, 'weight', e.target.value)}
-                          className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-indigo-600 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
+                          className="h-8 bg-transparent border-transparent rounded-md text-indigo-600 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
                         />
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <button
+                      </TableCell>
+                      <TableCell className="px-3 py-2 text-center">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => removeWorkoutGridRow(idx)}
                           className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
                         >
                           <Trash2 size={14} />
-                        </button>
-                      </td>
-                    </tr>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
 
           {activeTab === 'completion' && (
             <div className="flex-1 overflow-auto scrollbar-none">
-              <table className="min-w-[600px] w-full text-xs border-collapse">
-                <thead className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Day</th>
-                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Date</th>
-                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">AM Status</th>
-                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">PM Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
+              <Table className="min-w-[600px]">
+                <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                  <TableRow className="hover:bg-transparent border-none">
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Day</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Date</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">AM Status</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">PM Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-slate-50">
                   {DAYS.map((day) => {
                     const dayData = weekCompletion[day];
                     const dateDisplay = dayData ? formatDateCompact(dayData.date) : '';
                     const dateKey = dayData ? dayData.date : null;
                     
                     return (
-                      <tr key={day} className="group hover:bg-slate-50/50 transition-colors">
-                        <td className="px-4 py-3 font-bold text-slate-700 italic">{day}</td>
-                        <td className="px-4 py-3 text-slate-400 font-bold text-[10px] uppercase tracking-tight">{dateDisplay}</td>
+                      <TableRow key={day} className="group hover:bg-slate-50/50 transition-colors border-none">
+                        <TableCell className="px-4 py-3 font-bold text-slate-700 italic">{day}</TableCell>
+                        <TableCell className="px-4 py-3 text-slate-400 font-bold text-[10px] uppercase tracking-tight">{dateDisplay}</TableCell>
                         {['am', 'pm'].map((session) => {
                           const value = dayData?.[session];
                           const status = value === true ? 'done' : value === 'skipped' ? 'skipped' : '';
                           
                           return (
-                            <td key={session} className="px-4 py-2">
+                            <TableCell key={session} className="px-4 py-2">
                               <select
                                 value={status}
                                 onChange={(e) => setCompletionCell(dateKey, session, e.target.value)}
-                                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border underline-offset-2 transition-all focus:outline-none ${
+                                className={cn(
+                                  "px-3 py-1.5 rounded-lg text-[10px] font-bold border underline-offset-2 transition-all focus:outline-none",
                                   status === 'done' 
-                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
                                     : status === 'skipped'
-                                    ? 'bg-amber-50 text-amber-700 border-amber-100'
-                                    : 'bg-transparent text-slate-300 border-transparent hover:border-slate-100'
-                                }`}
+                                    ? "bg-amber-50 text-amber-700 border-amber-100"
+                                    : "bg-transparent text-slate-300 border-transparent hover:border-slate-100"
+                                )}
                                 disabled={!dateKey}
                               >
                                 <option value="">PENDING</option>
                                 <option value="done">DONE</option>
                                 <option value="skipped">SKIPPED</option>
                               </select>
-                            </td>
+                            </TableCell>
                           );
                         })}
-                      </tr>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
 
           {activeTab === 'exerciseDb' && (
             <div className="flex-1 overflow-auto scrollbar-none relative">
-              <table className="min-w-[700px] w-full text-xs border-collapse">
-                <thead className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-1/4">Muscle</th>
-                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-1/4">Sub Muscle</th>
-                    <th className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Exercise</th>
-                    <th className="px-4 py-3 text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
+              <Table className="min-w-[700px]">
+                <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                  <TableRow className="hover:bg-transparent border-none">
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-1/4">Muscle</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-1/4">Sub Muscle</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Exercise</TableHead>
+                    <TableHead className="px-4 py-3 text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="divide-y divide-slate-50">
                   {paginatedExerciseRows.map(({ row, idx }) => (
-                    <tr key={`${row.muscle}-${row.subMuscle}-${row.exercise}-${idx}`} className="group hover:bg-slate-50/50 transition-colors">
-                      <td className="px-4 py-2">
-                        <input
+                    <TableRow key={`${row.muscle}-${row.subMuscle}-${row.exercise}-${idx}`} className="group hover:bg-slate-50/50 transition-colors border-none">
+                      <TableCell className="px-4 py-2">
+                        <Input
                           value={row.muscle}
                           onChange={(e) => updateExerciseRow(idx, 'muscle', e.target.value)}
-                          className="w-full px-3 py-1.5 bg-transparent border border-transparent rounded-lg text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none"
+                          className="h-8 bg-transparent border-transparent rounded-lg text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all"
                         />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
+                      </TableCell>
+                      <TableCell className="px-4 py-2">
+                        <Input
                           value={row.subMuscle}
                           onChange={(e) => updateExerciseRow(idx, 'subMuscle', e.target.value)}
-                          className="w-full px-3 py-1.5 bg-transparent border border-transparent rounded-lg text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none"
+                          className="h-8 bg-transparent border-transparent rounded-lg text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all"
                         />
-                      </td>
-                      <td className="px-4 py-2">
-                        <input
+                      </TableCell>
+                      <TableCell className="px-4 py-2">
+                        <Input
                           value={row.exercise}
                           onChange={(e) => updateExerciseRow(idx, 'exercise', e.target.value)}
-                          className="w-full px-3 py-1.5 bg-transparent border border-transparent rounded-lg text-slate-700 text-[11px] font-bold focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all outline-none"
+                          className="h-8 bg-transparent border-transparent rounded-lg text-slate-700 text-[11px] font-bold focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all"
                         />
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        <button
+                      </TableCell>
+                      <TableCell className="px-4 py-2 text-center">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => removeExerciseRow(idx)}
                           className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
                         >
                           <Trash2 size={15} />
-                        </button>
-                      </td>
-                    </tr>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
           {/* Table Footer */}
@@ -991,42 +1009,42 @@ export default function DataConsolePage({ hideSidebar }) {
           </footer>
 
           {/* Action Footer */}
-          <div className="flex items-center gap-4 mt-2">
+          <div className="flex items-center gap-4 mt-6 px-4 pb-6">
             {activeTab === 'schedule' && (
-              <button
+              <Button
                 onClick={() => {
                   saveSessionTitlesWithSync(sessionTitles);
                   flashSaved(setTitlesSaved);
                 }}
-                className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 text-xs"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-8 shadow-lg shadow-indigo-100"
               >
-                <Save size={14} />
+                <Save size={16} className="mr-2" />
                 Save Session Titles
-              </button>
+              </Button>
             )}
             {activeTab === 'workouts' && (
-              <button
+              <Button
                 onClick={saveWorkoutGrid}
-                className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 text-xs"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-8 shadow-lg shadow-indigo-100"
               >
-                <Save size={14} />
+                <Save size={16} className="mr-2" />
                 Save Workouts
-              </button>
+              </Button>
             )}
             {activeTab === 'exerciseDb' && (
-              <button
+              <Button
                 onClick={saveExerciseGrid}
-                className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 text-xs"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-8 shadow-lg shadow-indigo-100"
               >
-                <Save size={14} />
+                <Save size={16} className="mr-2" />
                 Save Changes
-              </button>
+              </Button>
             )}
             
             {(titlesSaved || workoutsSaved || exerciseSaved || completionSaved) && (
-              <span className="text-emerald-500 text-[10px] font-bold uppercase tracking-widest animate-pulse">
-                ✓ Saved to Local & Cloud
-              </span>
+              <Badge variant="outline" className="text-emerald-500 border-emerald-200 bg-emerald-50/50 animate-pulse font-bold px-3 py-1">
+                ✓ SAVED TO CLOUD
+              </Badge>
             )}
           </div>
         </div>

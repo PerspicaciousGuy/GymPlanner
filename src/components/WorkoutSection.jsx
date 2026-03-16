@@ -15,6 +15,9 @@ import {
 } from 'lucide-react';
 import ExerciseGroup from './ExerciseGroup';
 import { saveDayWorkoutWithSync, markDayCompleteWithSync, markDaySkippedWithSync, isDayComplete, isDaySkipped, ensureAmPm, defaultSession, defaultGroup, loadSessionTitles, saveSessionTitlesWithSync } from '../utils/storage';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken, onWorkoutChanged, initialSession = 'am' }) {
   const day = dayName || date;
@@ -150,11 +153,11 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     const isActive = activeSession === session;
     const isLocked = done || skipped;
     
-    return `
-      flex items-center gap-2 px-3 md:px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-all relative shrink-0
-      ${isActive ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600'}
-      ${isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
-    `;
+    return cn(
+      "flex items-center gap-2 px-3 md:px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-all relative shrink-0 outline-none",
+      isActive ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600',
+      isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+    );
   };
 
   return (
@@ -173,17 +176,17 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
         </div>
       )}
 
-      {/* Sub-tabs for AM/PM */}
+       {/* Sub-tabs for AM/PM */}
       <div className="flex items-center gap-1 md:gap-2 border-b border-slate-50 mb-1 overflow-x-auto scrollbar-none">
         <button className={tabCls('am', amDone, amSkipped)} onClick={() => setActiveSession('am')}>
-          {activeSession === 'am' ? <Sun size={14} className="text-indigo-600" /> : <Sun size={14} />}
+          <Sun size={14} className={cn(activeSession === 'am' ? "text-indigo-600" : "text-slate-400")} />
           <span>AM Session</span>
           {amDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
           {amSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
           {activeSession === 'am' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />}
         </button>
         <button className={tabCls('pm', pmDone, pmSkipped)} onClick={() => setActiveSession('pm')}>
-          {activeSession === 'pm' ? <Moon size={14} className="text-indigo-600" /> : <Moon size={14} />}
+          <Moon size={14} className={cn(activeSession === 'pm' ? "text-indigo-600" : "text-slate-400")} />
           <span>PM Session</span>
           {pmDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
           {pmSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
@@ -193,15 +196,15 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
 
       <div className="flex items-center gap-4 group">
         <div className="flex-1 relative">
-          <Tag size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-400 transition-colors" />
-          <input
+          <Tag size={12} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-400 transition-colors z-10" />
+          <Input
             value={activeSession === 'am' ? amTitle : pmTitle}
             onChange={(e) => handleSessionTitleChange(activeSession, e.target.value)}
             onBlur={handleSessionTitleSave}
             onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
             placeholder="What are we training?"
-            readOnly={sessionDone || sessionSkipped}
-            className={`w-full pl-9 pr-4 py-2 bg-slate-50/50 border border-slate-100 rounded-xl text-xs font-bold text-slate-700 placeholder:text-slate-300 focus:bg-white focus:border-indigo-200 outline-none transition-all ${sessionDone || sessionSkipped ? 'cursor-default' : ''}`}
+            disabled={sessionDone || sessionSkipped}
+            className="w-full pl-9 bg-slate-50/50 border-slate-100 rounded-xl text-xs font-bold text-slate-700 placeholder:text-slate-300 focus-visible:bg-white focus-visible:border-indigo-200 transition-all h-9"
           />
         </div>
         {titleSaveFlash && (
@@ -224,16 +227,17 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
           />
         ))}
                {!sessionDone && !sessionSkipped && (
-            <button
-              onClick={handleAddGroup}
-              className="group self-start flex items-center gap-2 px-4 py-2 border border-dashed border-indigo-100 rounded-xl text-indigo-500 hover:bg-indigo-50 hover:border-indigo-200 transition-all text-xs font-bold"
-            >
-              <div className="w-5 h-5 rounded-lg bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                <Plus size={12} strokeWidth={3} />
-              </div>
-              New Exercise Group
-            </button>
-          )}
+             <Button
+               variant="ghost"
+               onClick={handleAddGroup}
+               className="group self-start h-10 border border-dashed border-indigo-100 rounded-xl text-indigo-500 hover:bg-indigo-50 hover:border-indigo-200 transition-all text-xs font-bold p-0 pr-4 overflow-hidden"
+             >
+               <div className="w-10 h-full bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                 <Plus size={14} strokeWidth={3} />
+               </div>
+               <span className="ml-3">New Exercise Group</span>
+             </Button>
+           )}
 
           {/* Action Footer */}
           <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
@@ -249,40 +253,42 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
               </div>
             ) : (
               <div className="flex items-center gap-2 flex-wrap">
-                <button 
+                <Button 
+                  variant="outline"
                   onClick={handleSave} 
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold text-[10px] uppercase rounded-lg hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
+                  className="h-9 gap-2 px-4 bg-white border-slate-200 text-slate-700 font-bold text-[10px] uppercase rounded-lg hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
                 >
                   <Save size={14} /> Save Progress
-                </button>
+                </Button>
                 {isConfirmingFinish ? (
-                  <button 
+                  <Button 
                     onClick={() => {
                       handleComplete();
                       setIsConfirmingFinish(false);
                     }} 
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white font-bold text-[10px] uppercase rounded-lg hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 animate-in fade-in zoom-in-95 duration-200"
+                    className="h-9 gap-2 px-4 bg-emerald-600 text-white font-bold text-[10px] uppercase rounded-lg hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 animate-in fade-in zoom-in-95 duration-200"
                   >
                     <CheckCircle2 size={14} /> Confirm Finish
-                  </button>
+                  </Button>
                 ) : (
-                  <button 
+                  <Button 
                     onClick={() => {
                       setIsConfirmingFinish(true);
                       setTimeout(() => setIsConfirmingFinish(false), 3000);
                     }} 
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-bold text-[10px] uppercase rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                    className="h-9 gap-2 px-4 bg-indigo-600 text-white font-bold text-[10px] uppercase rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
                   >
                     <CheckCircle size={14} /> Finish Session
-                  </button>
+                  </Button>
                 )}
                 <div className="w-px h-6 bg-slate-100 mx-1" />
-                <button 
+                <Button 
+                  variant="ghost"
                   onClick={handleSkip} 
-                  className="flex items-center gap-2 px-4 py-2 text-slate-400 font-bold text-[10px] uppercase rounded-lg hover:text-slate-900 transition-all"
+                  className="h-9 px-4 text-slate-400 font-bold text-[10px] uppercase rounded-lg hover:text-slate-900 transition-all"
                 >
                   Skip
-                </button>
+                </Button>
                 {saveFlash && <span className="text-emerald-500 font-bold text-[10px] animate-pulse">✓ Saved</span>}
               </div>
             )}

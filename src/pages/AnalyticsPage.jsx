@@ -34,7 +34,20 @@ import {
   Zap
 } from 'lucide-react';
 import { loadWorkouts, loadCompletion } from '../utils/storage';
-import { formatDateDisplay } from '../utils/dateUtils';
+import { formatDateDisplay, formatDateKey } from '../utils/dateUtils';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+import {
+  Tooltip as ShadTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+import { Button } from "@/components/ui/button";
 
 const COLORS = ['#4f46e5', '#818cf8', '#c7d2fe', '#6366f1', '#4338ca', '#3730a3'];
 
@@ -63,7 +76,7 @@ export default function AnalyticsPage() {
       startDate.setFullYear(today.getFullYear() - 1);
     }
     
-    const startDateString = startDate.toISOString().split('T')[0];
+    const startDateString = formatDateKey(startDate);
     
     // Previous period for trends
     let prevStartDate = new Date(startDate);
@@ -78,7 +91,7 @@ export default function AnalyticsPage() {
       prevStartDate = new Date(0); // All time has no previous period
     }
     
-    const prevStartStr = prevStartDate.toISOString().split('T')[0];
+    const prevStartStr = formatDateKey(prevStartDate);
     const prevEndStr = startDateString;
 
     // Process Volume over time
@@ -240,7 +253,7 @@ export default function AnalyticsPage() {
           }
         });
         const link = document.createElement('a');
-        link.download = `GymPlanner-Insights-${timeRange}-${new Date().toISOString().split('T')[0]}.jpg`;
+        link.download = `GymPlanner-Insights-${timeRange}-${formatDateKey(new Date())}.jpg`;
         link.href = dataUrl;
         link.click();
       } catch (error) {
@@ -263,24 +276,26 @@ export default function AnalyticsPage() {
         </div>
         
         <div className="flex items-center gap-2">
-          <select 
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-          >
-            <option value="30d">Last 30 Days</option>
-            <option value="90d">Last 3 Months</option>
-            <option value="1y">This Year</option>
-            <option value="all">All Time</option>
-          </select>
-          <button 
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-[140px] h-9 bg-white border-slate-200 text-[11px] font-bold text-slate-600 rounded-lg">
+              <SelectValue placeholder="Time Range" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl border-slate-200">
+              <SelectItem value="30d" className="text-xs font-semibold">Last 30 Days</SelectItem>
+              <SelectItem value="90d" className="text-xs font-semibold">Last 3 Months</SelectItem>
+              <SelectItem value="1y" className="text-xs font-semibold">This Year</SelectItem>
+              <SelectItem value="all" className="text-xs font-semibold">All Time</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Button 
             onClick={handleExportImage}
             disabled={isExporting}
-            className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 h-9 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold px-4 shadow-lg shadow-indigo-100"
           >
-            {isExporting ? <Activity size={14} className="animate-spin" /> : <Share2 size={14} />}
+            {isExporting ? <Activity size={14} className="animate-spin text-white" /> : <Share2 size={14} />}
             <span className="hidden sm:inline">Snapshot</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -292,30 +307,34 @@ export default function AnalyticsPage() {
             value={`${(analyticsData.totalVolume / 1000).toFixed(1)}t`} 
             subtitle={timeRange === 'all' ? "Tonnage lifted (lifetime)" : "Tonnage this period"}
             trend={analyticsData.volumeTrend}
-            icon={<BarChart3 className="text-indigo-600" size={20} />}
-            color="bg-indigo-50"
+            icon={<BarChart3 size={20} />}
+            iconColor="text-indigo-600"
+            bgColor="bg-indigo-50"
           />
           <StatCard 
             title="Consistency" 
             value={`${analyticsData.completedSessions}`} 
             subtitle={timeRange === 'all' ? "Sessions completed (lifetime)" : "Sessions this period"}
             trend={analyticsData.sessionsTrend}
-            icon={<TrendingUp className="text-emerald-600" size={20} />}
-            color="bg-emerald-50"
+            icon={<TrendingUp size={20} />}
+            iconColor="text-emerald-600"
+            bgColor="bg-emerald-50"
           />
           <StatCard 
             title="Intensity" 
             value="8.4" 
             subtitle="Avg RPE (Est.)"
-            icon={<Flame className="text-orange-600" size={20} />}
-            color="bg-orange-50"
+            icon={<Flame size={20} />}
+            iconColor="text-orange-600"
+            bgColor="bg-orange-50"
           />
           <StatCard 
             title="Achievements" 
             value={analyticsData.volumeHistory.length ? "12" : "0"} 
             subtitle="Personal Records"
-            icon={<Trophy className="text-amber-600" size={20} />}
-            color="bg-amber-50"
+            icon={<Trophy size={20} />}
+            iconColor="text-amber-600"
+            bgColor="bg-amber-50"
           />
         </div>
 
@@ -516,16 +535,17 @@ export default function AnalyticsPage() {
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Individual exercise progression</p>
             </div>
             
-            <select 
-              value={exerciseFilter}
-              onChange={(e) => setExerciseFilter(e.target.value)}
-              className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none"
-            >
-              <option value="All">Select Exercise</option>
-              {analyticsData.exerciseList.map(name => (
-                <option key={name} value={name}>{name}</option>
-              ))}
-            </select>
+            <Select value={exerciseFilter} onValueChange={setExerciseFilter}>
+              <SelectTrigger className="w-[180px] h-9 bg-slate-50 border-slate-200 text-xs font-bold text-slate-700 rounded-xl">
+                <SelectValue placeholder="Select Exercise" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-slate-200">
+                <SelectItem value="All" className="text-xs font-semibold">Select Exercise</SelectItem>
+                {analyticsData.exerciseList.map(name => (
+                  <SelectItem key={name} value={name} className="text-xs font-semibold">{name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {exerciseFilter === 'All' ? (
@@ -576,27 +596,34 @@ export default function AnalyticsPage() {
 
 
 
-function StatCard({ title, value, subtitle, icon, color, trend }) {
+function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend }) {
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
-      <div className={`absolute top-0 right-0 p-8 rotate-12 translate-x-4 -translate-y-4 opacity-5 bg-indigo-600 rounded-full group-hover:scale-110 transition-transform`} />
-      <div className="flex items-start justify-between relative">
-        <div className={`p-3 rounded-2xl ${color} transition-transform group-hover:scale-110`}>
-          {icon}
-        </div>
-        {trend !== undefined && trend !== null && (
-          <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${trend >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-            {trend >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-            {Math.abs(trend)}%
+    <Card className="rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-all group overflow-hidden relative border-none ring-1 ring-slate-200/60">
+      <div className={cn(
+        "absolute top-0 right-0 p-8 rotate-12 translate-x-4 -translate-y-4 opacity-5 bg-indigo-600 rounded-full group-hover:scale-110 transition-transform"
+      )} />
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between relative">
+          <div className={cn("p-3 rounded-2xl transition-transform group-hover:scale-110", bgColor, iconColor)}>
+            {icon}
           </div>
-        )}
-      </div>
-      <div className="mt-4">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{title}</p>
-        <h2 className="text-2xl font-black text-slate-800 mt-1">{value}</h2>
-        <p className="text-[10px] text-slate-400 font-medium mt-1">{subtitle}</p>
-      </div>
-    </div>
+          {trend !== undefined && trend !== null && (
+            <div className={cn(
+              "flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold",
+              trend >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+            )}>
+              {trend >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+              {Math.abs(trend)}%
+            </div>
+          )}
+        </div>
+        <div className="mt-4">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{title}</p>
+          <h2 className="text-2xl font-black text-slate-800 mt-1">{value}</h2>
+          <p className="text-[10px] text-slate-400 font-medium mt-1">{subtitle}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

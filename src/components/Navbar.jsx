@@ -6,11 +6,41 @@ import {
   LogIn, 
   Database, 
   User, 
-  ShieldCheck, 
   AlertCircle,
   ChevronDown,
-  RefreshCw
+  RefreshCw,
+  Settings,
+  Shield
 } from 'lucide-react';
+
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import {
   clearLocalDataAndRehydrateFromCloud,
@@ -101,133 +131,112 @@ export default function Navbar({ activePage, onNavigate, authState, onDataRefres
           )}
 
           {canCloud && user ? (
-            <div className="relative">
-              <button 
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 pl-1.5 md:pl-2 pr-1 py-1 rounded-full bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-all group"
-              >
-                <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-white flex items-center justify-center text-slate-400 group-hover:text-indigo-600 border border-slate-100 shadow-sm transition-colors">
-                  <User size={12} className="md:size-14" />
-                </div>
-                <span className="hidden md:inline-block text-xs font-bold text-slate-700 max-w-[120px] truncate">{user.email}</span>
-                <ChevronDown size={12} className={`text-slate-400 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
-              </button>
-
-
-              {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl border border-slate-200 shadow-xl shadow-slate-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="px-4 py-2 border-b border-slate-50 mb-1">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account & Cloud</p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="h-9 px-2 pl-1.5 rounded-full bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-all hover:text-slate-900"
+                >
+                  <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm">
+                    <User size={12} />
                   </div>
-                  <button 
-                    onClick={handleMigrate}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors"
-                  >
-                    <Cloud size={16} /> Sync Local and Cloud
-                  </button>
-                  <button 
-                    onClick={() => setConfirmingClear(true)}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-red-500 transition-colors"
-                  >
-                    <RefreshCw size={16} /> Re-sync from Cloud
-                  </button>
-
-                  <button 
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-2 mt-1 border-t border-slate-50 pt-2 text-xs font-semibold text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-                  >
-                    <LogOut size={16} /> Sign Out
-                  </button>
-                </div>
-              )}
-            </div>
+                  <span className="hidden md:inline-block text-xs font-bold text-slate-700 max-w-[120px] truncate ml-2 mr-1">{user.email}</span>
+                  <ChevronDown size={12} className="text-slate-400" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 mt-1 rounded-xl shadow-xl border-slate-200">
+                <DropdownMenuLabel className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pt-3">Account & Cloud</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-slate-50" />
+                <DropdownMenuItem onClick={handleMigrate} className="gap-3 text-xs font-semibold text-slate-600 focus:text-indigo-600 focus:bg-indigo-50/50 cursor-pointer py-2.5">
+                  <Cloud size={16} /> Sync Local and Cloud
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setConfirmingClear(true)} className="gap-3 text-xs font-semibold text-slate-600 focus:text-red-600 focus:bg-red-50/50 cursor-pointer py-2.5">
+                  <RefreshCw size={16} /> Re-sync from Cloud
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-slate-50" />
+                <DropdownMenuItem onClick={handleLogout} className="gap-3 text-xs font-semibold text-slate-400 focus:text-slate-900 focus:bg-slate-50 cursor-pointer py-2.5">
+                  <LogOut size={16} /> Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setShowLogin(!showLogin)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+            <>
+              <Button 
+                onClick={() => setShowLogin(true)}
+                className="bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 rounded-xl px-4 py-2"
               >
-                <LogIn size={15} /> Sign In
-              </button>
+                <LogIn size={15} className="mr-2" /> Sign In
+              </Button>
               
-              {showLogin && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-                  <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-slate-900 mb-1">Welcome Back</h3>
-                      <p className="text-slate-500 text-sm mb-6 font-medium">Connect your local workout data to the cloud.</p>
-                      
-                      <div className="space-y-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Email</label>
-                          <input 
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="your@email.com"
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Password</label>
-                          <input 
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
-                          />
-                        </div>
-                        <button 
-                          onClick={handleLogin}
-                          disabled={busy}
-                          className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 disabled:opacity-50 mt-2"
-                        >
-                          {busy ? 'Signing In...' : 'Sign In Now'}
-                        </button>
-                        <button 
-                          onClick={() => setShowLogin(false)}
-                          className="w-full py-3 text-slate-400 font-bold text-xs hover:text-slate-600 transition-all"
-                        >
-                          Cancel
-                        </button>
-                      </div>
+              <Dialog open={showLogin} onOpenChange={setShowLogin}>
+                <DialogContent className="max-w-sm rounded-2xl border-slate-200 p-6">
+                  <DialogHeader className="space-y-1">
+                    <DialogTitle className="text-xl font-bold text-slate-900">Welcome Back</DialogTitle>
+                    <DialogDescription className="text-slate-500 text-sm font-medium">
+                      Connect your local workout data to the cloud.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Email</Label>
+                      <Input 
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="your@email.com"
+                        className="bg-slate-50 border-slate-200 rounded-xl focus-visible:ring-indigo-500/10 focus-visible:border-indigo-500"
+                      />
                     </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Password</Label>
+                      <Input 
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="bg-slate-50 border-slate-200 rounded-xl focus-visible:ring-indigo-500/10 focus-visible:border-indigo-500"
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleLogin}
+                      disabled={busy}
+                      className="w-full h-11 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 mt-2"
+                    >
+                      {busy ? 'Signing In...' : 'Sign In Now'}
+                    </Button>
                   </div>
-                </div>
-              )}
-            </div>
+                </DialogContent>
+              </Dialog>
+            </>
           )}
         </div>
       </div>
 
-      {confirmingClear && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className="bg-white rounded-3xl border border-red-100 shadow-2xl max-w-md w-full p-8 text-center animate-in zoom-in-95 duration-200">
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+      <AlertDialog open={confirmingClear} onOpenChange={setConfirmingClear}>
+        <AlertDialogContent className="rounded-2xl max-w-md border-red-50 p-8">
+          <AlertDialogHeader className="items-center text-center">
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
               <AlertCircle size={32} />
             </div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-2">Are you sure?</h3>
-            <p className="text-slate-500 font-medium mb-8 leading-relaxed">
+            <AlertDialogTitle className="text-2xl font-bold text-slate-900">Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-500 font-medium leading-relaxed mt-2">
               This will clear your local cached data and replace it with your cloud data. Make sure you've synced any local changes first!
-            </p>
-            <div className="flex flex-col gap-3">
-              <button 
-                onClick={handleClearLocal}
-                className="w-full py-4 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 transition-all shadow-lg shadow-red-100"
-              >
-                Yes, Clear and Reload
-              </button>
-              <button 
-                onClick={() => setConfirmingClear(false)}
-                className="w-full py-4 text-slate-400 font-bold hover:text-slate-600 transition-all"
-              >
-                No, Keep my data
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-col gap-3 mt-6">
+            <AlertDialogAction 
+              onClick={handleClearLocal}
+              className="w-full py-6 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 shadow-lg shadow-red-100"
+            >
+              Yes, Clear and Reload
+            </AlertDialogAction>
+            <AlertDialogCancel className="w-full py-6 text-slate-400 font-bold hover:text-slate-600 border-none hover:bg-transparent">
+              No, Keep my data
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </header>
   );
 }

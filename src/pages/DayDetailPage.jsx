@@ -3,11 +3,11 @@ import { ChevronLeft, Calendar as CalendarIcon, Weight, Layers, Zap, List, Layou
 import WorkoutSection from '../components/WorkoutSection';
 import WorkoutLogView from '../components/WorkoutLogView';
 import MuscleMap from '../components/MuscleMap';
-import { formatDateDisplay } from '../utils/dateUtils';
+import { formatDateDisplay, formatDateKey } from '../utils/dateUtils';
 import { loadWorkoutByDate } from '../utils/storage';
 
 export default function DayDetailPage({ date, onBack, syncKey }) {
-  const dateStr = date.toISOString().split('T')[0];
+  const dateStr = formatDateKey(date);
   const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [viewMode, setViewMode] = useState('activity'); // 'activity' | 'grid'

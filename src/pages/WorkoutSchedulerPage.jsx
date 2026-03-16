@@ -15,7 +15,14 @@ import {
 import WeekPicker from '../components/WeekPicker';
 
 function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState(defaultOpen && !section.isFullyComplete);
+
+  // Auto-collapse when day becomes fully complete
+  useEffect(() => {
+    if (section.isFullyComplete && open) {
+      setOpen(false);
+    }
+  }, [section.isFullyComplete]);
 
   const badgeEl = section.showContextBadge ? (
     section.isMissed ? (
@@ -127,6 +134,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
       
       const list = [];
       if (yesterdayMissed) {
+        const yesterdayComplete = isDayComplete(yesterday, 'am') && isDayComplete(yesterday, 'pm');
         list.push({ 
           date: yesterday, 
           dayName: yesterdayName, 
@@ -134,9 +142,12 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
           isMissed: true,  
           showContextBadge: true,
           defaultOpen: true,
+          isFullyComplete: yesterdayComplete,
           data: loadWorkoutByDate(yesterday)
         });
       }
+      
+      const todayComplete = isDayComplete(today, 'am') && isDayComplete(today, 'pm');
       list.push({ 
         date: today, 
         dayName: todayName, 
@@ -144,8 +155,11 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
         isMissed: false, 
         showContextBadge: true,
         defaultOpen: true,
+        isFullyComplete: todayComplete,
         data: loadWorkoutByDate(today)
       });
+
+      const tomorrowComplete = isDayComplete(tomorrow, 'am') && isDayComplete(tomorrow, 'pm');
       list.push({ 
         date: tomorrow, 
         dayName: tomorrowName, 
@@ -154,6 +168,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
         isTomorrow: true,
         showContextBadge: true,
         defaultOpen: false,
+        isFullyComplete: tomorrowComplete,
         data: loadWorkoutByDate(tomorrow)
       });
       return list;
@@ -161,6 +176,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
       const weekDates = getWeekDates(selectedWeek);
       return weekDates.map((date) => {
         const dayName = getDayOfWeek(date);
+        const isFullyComplete = isDayComplete(date, 'am') && isDayComplete(date, 'pm');
         return {
           date,
           dayName,
@@ -169,6 +185,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
           isTomorrow: false,
           showContextBadge: false,
           defaultOpen: false,
+          isFullyComplete,
           data: loadWorkoutByDate(date)
         };
       });

@@ -1,4 +1,10 @@
 import { useMemo } from 'react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Simplified SVG Paths for Human Muscle Groups
 // FRONT VIEW
@@ -61,17 +67,25 @@ export default function MuscleMap({ muscles = [], size = 180 }) {
         
         {Object.entries(paths).map(([name, d]) => {
           const isActive = activeSegments.has(name);
+          const displayName = name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' ');
+          
           return (
-            <path
-              key={name}
-              d={d}
-              fill={isActive ? "#4f46e5" : "transparent"}
-              fillOpacity={isActive ? 0.8 : 0}
-              stroke={isActive ? "#4338ca" : "#f1f5f9"}
-              strokeWidth={isActive ? 1.5 : 1}
-              className="transition-all duration-700 ease-out"
-              style={{ filter: isActive ? "drop-shadow(0 0 4px rgba(79, 70, 229, 0.4))" : "none" }}
-            />
+            <Tooltip key={name} delayDuration={50}>
+              <TooltipTrigger asChild>
+                <path
+                  d={d}
+                  fill={isActive ? "#4f46e5" : "transparent"}
+                  fillOpacity={isActive ? 0.8 : 0}
+                  stroke={isActive ? "#4338ca" : "#f1f5f9"}
+                  strokeWidth={isActive ? 1.5 : 1}
+                  className="transition-all duration-700 ease-out cursor-help"
+                  style={{ filter: isActive ? "drop-shadow(0 0 4px rgba(79, 70, 229, 0.4))" : "none" }}
+                />
+              </TooltipTrigger>
+              <TooltipContent className="rounded-lg bg-slate-900 text-white text-[10px] font-bold border-none px-2 py-1 shadow-xl">
+                {displayName}
+              </TooltipContent>
+            </Tooltip>
           );
         })}
       </svg>
@@ -79,10 +93,12 @@ export default function MuscleMap({ muscles = [], size = 180 }) {
   );
 
   return (
-    <div className="flex items-center justify-center gap-4 md:gap-12 py-4 bg-slate-50/50 rounded-3xl border border-slate-100/50">
-      {renderView(FRONT_MUSCLE_PATHS, "Front")}
-      <div className="w-px h-24 bg-slate-200 hidden sm:block" />
-      {renderView(BACK_MUSCLE_PATHS, "Back")}
-    </div>
+    <TooltipProvider>
+      <div className="flex items-center justify-center gap-4 md:gap-12 py-4 bg-slate-50/50 rounded-3xl border border-slate-100/50">
+        {renderView(FRONT_MUSCLE_PATHS, "Front")}
+        <div className="w-px h-24 bg-slate-200 hidden sm:block" />
+        {renderView(BACK_MUSCLE_PATHS, "Back")}
+      </div>
+    </TooltipProvider>
   );
 }
