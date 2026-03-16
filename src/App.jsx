@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
-import { LayoutGrid, Calendar, Database, LogIn, LogOut, Cloud, Trash2, RefreshCw, BarChart3 } from 'lucide-react';
+import { LayoutGrid, Calendar, LogIn, LogOut, Cloud, Trash2, RefreshCw, BarChart3, History } from 'lucide-react';
 
 import Navbar from './components/Navbar';
 import WorkoutSchedulerPage from './pages/WorkoutSchedulerPage';
 import DataConsolePage from './pages/DataConsolePage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import HistoryPage from './pages/HistoryPage';
+import DayDetailPage from './pages/DayDetailPage';
 
 import useFirebaseAuth from './hooks/useFirebaseAuth';
 import { migrateCompletionToDateBased, migrateWorkoutsToDateBased } from './utils/storage';
 
 export default function App() {
   const [activePage, setActivePage] = useState('workout');
+  const [selectedHistoryDate, setSelectedHistoryDate] = useState(null);
   const [syncNonce, setSyncNonce] = useState(0);
   const authState = useFirebaseAuth();
   const syncScope = authState.user?.uid || (authState.isConfigured ? 'signed-out' : 'local');
@@ -21,6 +24,11 @@ export default function App() {
     migrateCompletionToDateBased();
     migrateWorkoutsToDateBased();
   }, []);
+
+  const handleDateSelect = (date) => {
+    setSelectedHistoryDate(date);
+    setActivePage('dayDetail');
+  };
 
   return (
 
@@ -43,6 +51,16 @@ export default function App() {
               <Calendar size={20} strokeWidth={2.5} />
             </div>
             <span className="text-[10px] font-bold uppercase tracking-wider">Workout</span>
+          </button>
+
+          <button 
+            onClick={() => setActivePage('history')}
+            className={`flex flex-col items-center gap-1 group cursor-pointer transition-all ${activePage === 'history' ? 'text-indigo-600 scale-105' : 'text-slate-400 hover:text-slate-600'}`}
+          >
+            <div className={`p-3 rounded-xl transition-all ${activePage === 'history' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-transparent'}`}>
+              <History size={20} strokeWidth={2.5} />
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider">History</span>
           </button>
 
           <button 
@@ -91,6 +109,8 @@ export default function App() {
         <main className="flex-1 overflow-auto">
           <div className="p-3 sm:p-4 lg:p-6 mx-auto w-full max-w-[1600px]">
             {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} />}
+            {activePage === 'history' && <HistoryPage onDateSelect={handleDateSelect} />}
+            {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('history')} syncKey={syncKey} />}
             {activePage === 'data' && <DataConsolePage key={`data-${syncKey}`} hideSidebar />}
             {activePage === 'analytics' && <AnalyticsPage />}
           </div>
@@ -108,6 +128,16 @@ export default function App() {
             <Calendar size={20} strokeWidth={2.5} />
           </div>
           <span className="text-[10px] font-bold uppercase tracking-widest">Training</span>
+        </button>
+
+        <button 
+          onClick={() => setActivePage('history')}
+          className={`flex flex-col items-center gap-1.5 transition-all ${activePage === 'history' ? 'text-indigo-600' : 'text-slate-400'}`}
+        >
+          <div className={`p-2 rounded-xl scale-110 ${activePage === 'history' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : ''}`}>
+            <History size={20} strokeWidth={2.5} />
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-widest">History</span>
         </button>
 
         <button 
@@ -130,13 +160,12 @@ export default function App() {
           <span className="text-[10px] font-bold uppercase tracking-widest">Insights</span>
         </button>
 
-
         <div className="relative">
           <button 
             className="flex flex-col items-center gap-1.5 text-slate-400"
             onClick={() => setSyncNonce(n => n + 1)}
           >
-            <div className="p-2 bg-slate-50 border border-slate-100 rounded-xl relative">
+            <div className={`p-2 bg-slate-50 border border-slate-100 rounded-xl relative ${activePage === 'none' ? 'bg-indigo-600 text-white' : ''}`}>
               <RefreshCw size={20} strokeWidth={2.5} />
               <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${syncScope.startsWith('local') ? 'bg-amber-400' : 'bg-emerald-400'}`} />
             </div>

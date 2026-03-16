@@ -229,3 +229,44 @@ export function getTomorrow() {
 export function isSameDay(date1, date2) {
   return formatDateKey(date1) === formatDateKey(date2);
 }
+
+/**
+ * Get all dates to be displayed in a 7-column month grid
+ * Includes leading/trailing days from adjacent months
+ * Monday-Sunday layout
+ */
+export function getMonthCalendarDays(date) {
+  const d = date instanceof Date ? new Date(date) : new Date(date);
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  
+  // First day of the month
+  const firstDayOfMonth = new Date(year, month, 1);
+  // Monday of the week containing the 1st
+  const startOfCalendar = getWeekStart(firstDayOfMonth);
+  
+  const dates = [];
+  const calendarDate = new Date(startOfCalendar);
+  
+  // Create a 6-week grid (42 days) to ensure consistency in height
+  for (let i = 0; i < 42; i++) {
+    dates.push(new Date(calendarDate));
+    calendarDate.setDate(calendarDate.getDate() + 1);
+  }
+  
+  return dates;
+}
+
+export function getPreviousMonth(date) {
+  const d = new Date(date);
+  d.setDate(1); // Set to 1st to avoid end-of-month overflow
+  d.setMonth(d.getMonth() - 1);
+  return d;
+}
+
+export function getNextMonth(date) {
+  const d = new Date(date);
+  d.setDate(1);
+  d.setMonth(d.getMonth() + 1);
+  return d;
+}
