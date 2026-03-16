@@ -8,6 +8,7 @@ import {
   addExerciseWithSync,
   removeExerciseWithSync,
   findPreviousExerciseEntry,
+  getExerciseOccurrenceCount,
 } from '../utils/storage';
 import {
   Tooltip,
@@ -60,6 +61,11 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
   const hasCurrentTrackedValues = [sets, reps, weight, dropSets, dropWeight].some(
     (value) => String(value || '').trim() !== ''
   );
+
+  const occurrenceCount = useMemo(() => {
+    if (!exercise || !reps || !weight) return 0;
+    return getExerciseOccurrenceCount({ exercise, reps, weight, beforeDate: workoutDate });
+  }, [exercise, reps, weight, workoutDate]);
 
   const applyPreviousValues = (entry) => {
     if (!entry) return;
@@ -333,6 +339,11 @@ export default function ExerciseRow({ row, workoutDate, sessionKey, onChange, on
                     {' '}• {previousSummary}
                   </span>
                 </div>
+                {occurrenceCount > 0 && (
+                  <div className="flex items-center gap-1 bg-indigo-50/50 text-indigo-500 font-black px-1.5 py-0.5 rounded text-[8px] uppercase tracking-tighter shadow-sm border border-indigo-100/30">
+                    Done {occurrenceCount}x before
+                  </div>
+                )}
                 {appliedHistoryDate !== previousEntry.date && (
                   <button
                     onClick={() => applyPreviousValues(previousEntry)}

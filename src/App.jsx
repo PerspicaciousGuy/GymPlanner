@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import useFirebaseAuth from './hooks/useFirebaseAuth';
-import { migrateCompletionToDateBased, migrateWorkoutsToDateBased } from './utils/storage';
+import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isDayComplete } from './utils/storage';
 
 export default function App() {
   const [activePage, setActivePage] = useState('workout');
@@ -30,7 +30,12 @@ export default function App() {
 
   const handleDateSelect = (date) => {
     setSelectedHistoryDate(date);
-    setActivePage('dayDetail');
+    const complete = isDayComplete(date, 'am') && isDayComplete(date, 'pm');
+    if (complete) {
+      setActivePage('dayDetail');
+    } else {
+      setActivePage('workout');
+    }
   };
 
   return (
@@ -56,11 +61,16 @@ export default function App() {
             <Button
               key={item.id}
               variant="ghost"
-              onClick={() => setActivePage(item.id)}
+              onClick={() => {
+                setActivePage(item.id);
+                if (item.id === 'workout') {
+                  setSelectedHistoryDate(null);
+                }
+              }}
               className={cn(
                 "w-14 h-14 flex-col gap-1 p-0 rounded-xl transition-all",
-                activePage === item.id 
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 hover:text-white" 
+                activePage === item.id
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 hover:text-white"
                   : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
               )}
             >
@@ -99,7 +109,7 @@ export default function App() {
 
         <main className="flex-1 overflow-auto">
           <div className="p-3 sm:p-4 lg:p-6 mx-auto w-full max-w-[1600px]">
-            {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} />}
+            {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} targetDate={selectedHistoryDate} />}
             {activePage === 'history' && <HistoryPage onDateSelect={handleDateSelect} />}
             {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('history')} syncKey={syncKey} />}
             {activePage === 'data' && <DataConsolePage key={`data-${syncKey}`} hideSidebar />}

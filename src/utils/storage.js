@@ -369,6 +369,46 @@ export function findPreviousExerciseEntry({ exercise, beforeDate, session }) {
   return buckets.find(Boolean) || null;
 }
 
+/**
+ * Counts how many times an exercise has been recorded with specific weight and reps.
+ * @param {string} exercise - Exercise name (case-insensitive)
+ * @param {string|number} reps - Target reps
+ * @param {string|number} weight - Target weight
+ * @param {Date|string} beforeDate - Date to count before (exclusive)
+ * @returns {number}
+ */
+export function getExerciseOccurrenceCount({ exercise, reps, weight, beforeDate }) {
+  const exName = String(exercise || '').trim().toLowerCase();
+  const targetReps = String(reps || '').trim();
+  const targetWeight = String(weight || '').trim();
+
+  if (!exName || !targetReps || !targetWeight) return 0;
+
+  const beforeDateKey = beforeDate ? formatDateKey(beforeDate) : '9999-99-99';
+  const workoutEntries = Object.entries(loadWorkouts())
+    .filter(([dateKey]) => DATE_KEY_REGEX.test(dateKey) && dateKey < beforeDateKey);
+
+  let count = 0;
+  for (const [_, dayData] of workoutEntries) {
+    const normalizedDay = ensureAmPm(dayData);
+    for (const sessionKey of ['am', 'pm']) {
+      const groups = normalizedDay?.[sessionKey]?.groups ?? [];
+      for (const group of groups) {
+        for (const row of group.rows ?? []) {
+          const rowEx = String(row?.exercise || '').trim().toLowerCase();
+          const rowReps = String(row?.reps || '').trim();
+          const rowWeight = String(row?.weight || '').trim();
+
+          if (rowEx === exName && rowReps === targetReps && rowWeight === targetWeight) {
+            count++;
+          }
+        }
+      }
+    }
+  }
+  return count;
+}
+
 // ─── Completion ───────────────────────────────────────────────
 // Run migration from day-based to date-based completion on first load
 export function migrateCompletionToDateBased() {

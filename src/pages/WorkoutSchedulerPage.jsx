@@ -17,6 +17,13 @@ import WeekPicker from '../components/WeekPicker';
 function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged }) {
   const [open, setOpen] = useState(defaultOpen && !section.isFullyComplete);
 
+  // Sync open state with defaultOpen prop (e.g. when navigating from history)
+  useEffect(() => {
+    if (defaultOpen) {
+      setOpen(true);
+    }
+  }, [defaultOpen]);
+
   // Auto-collapse when day becomes fully complete
   useEffect(() => {
     if (section.isFullyComplete && open) {
@@ -95,9 +102,18 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
   );
 }
 
-export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
-  const [selectedWeek, setSelectedWeek] = useState(() => getWeekStart(new Date()));
+export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = null }) {
+  const [selectedWeek, setSelectedWeek] = useState(() => getWeekStart(targetDate || new Date()));
   const [plannerRefreshNonce, setPlannerRefreshNonce] = useState(0);
+
+  // Update selected week and expand when targetDate changes (e.g. from History)
+  useEffect(() => {
+    if (targetDate) {
+      setSelectedWeek(getWeekStart(targetDate));
+    } else {
+      setSelectedWeek(getWeekStart(new Date()));
+    }
+  }, [targetDate]);
   
   const today = getToday();
   const yesterday = getYesterday();
@@ -122,7 +138,8 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
     const currentWeekStart = getWeekStart(new Date());
     const isCurrentWeek = currentWeekStart.getTime() === selectedWeek.getTime();
 
-    if (isCurrentWeek) {
+    // Only show focused view (Yesterday/Today/Tomorrow) if it's the current week AND no specific date was targeted
+    if (isCurrentWeek && !targetDate) {
       const yesterdayName = getDayOfWeek(yesterday);
       const todayName = getDayOfWeek(today);
       const tomorrowName = getDayOfWeek(tomorrow);
@@ -141,7 +158,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
           muscleGroup: '', 
           isMissed: true,  
           showContextBadge: true,
-          defaultOpen: true,
+          defaultOpen: targetDate ? isSameDay(yesterday, targetDate) : true,
           isFullyComplete: yesterdayComplete,
           data: loadWorkoutByDate(yesterday)
         });
@@ -154,7 +171,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
         muscleGroup: '', 
         isMissed: false, 
         showContextBadge: true,
-        defaultOpen: true,
+        defaultOpen: targetDate ? isSameDay(today, targetDate) : true,
         isFullyComplete: todayComplete,
         data: loadWorkoutByDate(today)
       });
@@ -167,14 +184,14 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
         isMissed: false, 
         isTomorrow: true,
         showContextBadge: true,
-        defaultOpen: false,
+        defaultOpen: targetDate ? isSameDay(tomorrow, targetDate) : false,
         isFullyComplete: tomorrowComplete,
         data: loadWorkoutByDate(tomorrow)
       });
       return list;
     } else {
       const weekDates = getWeekDates(selectedWeek);
-      return weekDates.map((date) => {
+      const list = weekDates.map((date) => {
         const dayName = getDayOfWeek(date);
         const isFullyComplete = isDayComplete(date, 'am') && isDayComplete(date, 'pm');
         return {
@@ -184,11 +201,18 @@ export default function WorkoutSchedulerPage({ syncKey = 'local' }) {
           isMissed: false,
           isTomorrow: false,
           showContextBadge: false,
-          defaultOpen: false,
+          defaultOpen: targetDate ? isSameDay(date, targetDate) : false,
           isFullyComplete,
           data: loadWorkoutByDate(date)
         };
       });
+
+      // If a specific date was targeted, only show THAT date
+      if (targetDate) {
+        return list.filter(s => isSameDay(s.date, targetDate));
+      }
+
+      return list;
     }
   }, [syncState, selectedWeek, today, yesterday, tomorrow, plannerRefreshNonce]);
 
