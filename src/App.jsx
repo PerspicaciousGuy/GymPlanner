@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { LayoutGrid, Calendar, LogIn, LogOut, Cloud, Trash2, RefreshCw, BarChart3, History, User } from 'lucide-react';
+import { Sparkles, Calendar, LogIn, LogOut, Cloud, Trash2, RefreshCw, BarChart3, History, User } from 'lucide-react';
 
 import Navbar from './components/Navbar';
 import WorkoutSchedulerPage from './pages/WorkoutSchedulerPage';
-import DataConsolePage from './pages/DataConsolePage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import HistoryPage from './pages/HistoryPage';
 import DayDetailPage from './pages/DayDetailPage';
 import ProfilePage from './pages/ProfilePage';
+import RoutinesPage from './pages/RoutinesPage';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -49,21 +49,21 @@ export default function App() {
 
   return (
 
-    <div className="flex flex-col md:flex-row min-h-screen bg-[#f8fafc]">
+    <div className="flex flex-col md:flex-row min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
       {/* Sidebar for Desktop */}
-      <aside className="hidden md:flex w-20 lg:w-24 bg-white border-r border-slate-200 flex-col items-center py-8 gap-10 sticky top-0 h-screen z-50">
+      <aside className="hidden md:flex w-20 lg:w-24 bg-card border-r border-border flex-col items-center py-8 gap-10 sticky top-0 h-screen z-50 shadow-2xl">
         <div className="flex flex-col items-center gap-1">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
-            <span className="text-xl font-bold">G</span>
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
+            <span className="text-xl font-bold tracking-tighter">G</span>
           </div>
-          <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-tighter">Planner</span>
+          <span className="text-[10px] font-black text-primary uppercase tracking-tighter">Planner</span>
         </div>
 
         <nav className="flex flex-col gap-6 flex-1">
           {[
             { id: 'workout', name: 'Training', icon: Calendar },
             { id: 'history', name: 'History', icon: History },
-            { id: 'data', name: 'Console', icon: LayoutGrid },
+            { id: 'routines', name: 'Routines', icon: Sparkles },
             { id: 'analytics', name: 'Insights', icon: BarChart3 },
             { id: 'profile', name: 'Profile', icon: User },
           ].map((item) => (
@@ -77,14 +77,14 @@ export default function App() {
                 }
               }}
               className={cn(
-                "w-14 h-14 flex-col gap-1 p-0 rounded-xl transition-all",
+                "w-14 h-14 flex-col gap-1 p-0 rounded-2xl transition-all duration-300",
                 activePage === item.id
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 hover:text-white"
-                  : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                  ? "bg-primary text-primary-foreground shadow-[0_0_20px_rgba(212,255,0,0.2)] hover:bg-primary/90 hover:text-primary-foreground scale-110 active:scale-95"
+                  : "text-slate-500 hover:bg-white/5 hover:text-primary"
               )}
             >
-              <item.icon size={20} strokeWidth={2.5} />
-              <span className="text-[9px] font-extrabold uppercase tracking-tighter">{item.name}</span>
+              <item.icon size={20} strokeWidth={activePage === item.id ? 3 : 2} />
+              <span className="text-[9px] font-black uppercase tracking-tighter">{item.name}</span>
             </Button>
           ))}
         </nav>
@@ -95,12 +95,12 @@ export default function App() {
             variant="outline" 
             size="icon"
             onClick={() => setSyncNonce(n => n + 1)}
-            className="rounded-xl p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all border border-slate-100"
+            className="rounded-xl p-2 text-slate-500 hover:bg-white/5 hover:text-primary transition-all border-border shadow-sm"
           >
             <RefreshCw size={18} />
           </Button>
           
-          <Button variant="outline" size="icon" className="shadow-xs border-indigo-100 text-indigo-600 hover:bg-indigo-50 rounded-xl">
+          <Button variant="outline" size="icon" className="shadow-xs border-primary/20 text-primary hover:bg-primary/10 rounded-xl">
             <Cloud size={18} />
           </Button>
         </div>
@@ -118,23 +118,23 @@ export default function App() {
 
         <main className="flex-1 overflow-auto">
           <div className="p-3 sm:p-4 lg:p-6 mx-auto w-full max-w-[1600px]">
-            {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} targetDate={selectedHistoryDate} />}
-            {activePage === 'history' && <HistoryPage onDateSelect={handleDateSelect} />}
-            {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('history')} syncKey={syncKey} />}
-            {activePage === 'data' && <DataConsolePage key={`data-${syncKey}`} hideSidebar />}
-            {activePage === 'analytics' && <AnalyticsPage />}
-            {activePage === 'profile' && <ProfilePage authState={authState} onDataRefreshed={() => setSyncNonce(n => n + 1)} />}
+            { activePage === 'workout' && <WorkoutSchedulerPage syncKey={ syncKey } targetDate={ selectedHistoryDate } /> }
+            { activePage === 'history' && <HistoryPage onDateSelect={ handleDateSelect } /> }
+            { activePage === 'dayDetail' && <DayDetailPage date={ selectedHistoryDate } onBack={ () => setActivePage('history') } syncKey={ syncKey } /> }
+            { activePage === 'routines' && <RoutinesPage /> }
+            { activePage === 'analytics' && <AnalyticsPage /> }
+            { activePage === 'profile' && <ProfilePage authState={ authState } onDataRefreshed={ () => setSyncNonce(n => n + 1) } /> }
           </div>
 
         </main>
       </div>
 
       {/* Bottom Navigation for Mobile */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-slate-200 px-2 flex items-center justify-around z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.03)] backdrop-blur-lg bg-white/90">
+      <nav className="md:hidden fixed bottom-6 left-4 right-4 h-20 bg-card/95 border border-white/5 rounded-[2rem] px-2 flex items-center justify-around z-50 shadow-2xl backdrop-blur-xl">
         {[
           { id: 'workout', name: 'Training', icon: Calendar },
           { id: 'history', name: 'History', icon: History },
-          { id: 'data', name: 'Console', icon: LayoutGrid },
+          { id: 'routines', name: 'Routines', icon: Sparkles },
           { id: 'analytics', name: 'Insights', icon: BarChart3 },
           { id: 'profile', name: 'Profile', icon: User },
         ].map((item) => (
@@ -143,15 +143,15 @@ export default function App() {
             variant="ghost"
             onClick={() => setActivePage(item.id)}
             className={cn(
-              "flex-col gap-1.5 h-16 w-16 px-0 transition-all",
-              activePage === item.id ? "text-indigo-600" : "text-slate-400"
+              "flex-col gap-1.5 h-16 w-16 px-0 transition-all active:scale-90",
+              activePage === item.id ? "text-primary" : "text-slate-500"
             )}
           >
             <div className={cn(
-              "p-2 rounded-xl transition-all",
-              activePage === item.id ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200" : "bg-transparent"
+              "p-2.5 rounded-2xl transition-all duration-300",
+              activePage === item.id ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110" : "bg-transparent hover:bg-white/5"
             )}>
-              <item.icon size={20} strokeWidth={2.5} />
+              <item.icon size={20} strokeWidth={activePage === item.id ? 3 : 2} />
             </div>
             <span className="text-[8px] font-black uppercase tracking-tight">{item.name}</span>
           </Button>

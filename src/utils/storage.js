@@ -26,6 +26,7 @@ const COMPLETION_KEY       = 'gymplanner_completion';
 const CUSTOM_EXERCISES_KEY = 'gymplanner_custom_exercises';
 const EXERCISE_DB_KEY      = 'gymplanner_exercise_db';
 const SESSION_TITLES_KEY   = 'gymplanner_session_titles';
+const TEMPLATES_KEY        = 'gymplanner_templates';
 const MIGRATION_FLAG_KEY   = 'gymplanner_migrated_to_dates';
 const WORKOUT_MIGRATION_FLAG_KEY = 'gymplanner_workouts_migrated_to_dates';
 const PLANNER_LOCAL_KEYS = [
@@ -35,6 +36,7 @@ const PLANNER_LOCAL_KEYS = [
   CUSTOM_EXERCISES_KEY,
   EXERCISE_DB_KEY,
   SESSION_TITLES_KEY,
+  TEMPLATES_KEY,
   MIGRATION_FLAG_KEY,
   WORKOUT_MIGRATION_FLAG_KEY,
 ];
@@ -92,7 +94,7 @@ export function saveSchedule(schedule) {
 }
 
 export function loadSessionTitles() {
-  const raw = safeLoad(SESSION_TITLES_KEY, null);
+  const raw = safeLoad(SESSION_TITLES_KEY, { am: {}, pm: {} }) || { am: {}, pm: {} };
   const am = { ...AM_TITLES, ...(raw?.am ?? {}) };
   const pm = { ...PM_TITLES, ...(raw?.pm ?? {}) };
   return { am, pm };
@@ -603,6 +605,45 @@ export function saveCustomExercise(muscle, subMuscle, name) {
     all[muscle][subMuscle].push(name);
     localStorage.setItem(CUSTOM_EXERCISES_KEY, JSON.stringify(all));
   }
+}
+
+// ─── Workout Templates ────────────────────────────────────────
+export function loadTemplates() {
+  const res = safeLoad(TEMPLATES_KEY, []);
+  return Array.isArray(res) ? res : [];
+}
+
+export function saveTemplate(name, groups) {
+  const templates = loadTemplates();
+  const newTemplate = {
+    id: crypto.randomUUID(),
+    name,
+    groups: groups ? JSON.parse(JSON.stringify(groups)) : [], // Deep clone to avoid references
+    createdAt: new Date().toISOString()
+  };
+  templates.push(newTemplate);
+  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+  return newTemplate;
+}
+
+export function updateTemplate(id, name, groups) {
+  const templates = loadTemplates();
+  const idx = templates.findIndex(t => t.id === id);
+  if (idx === -1) return null;
+  
+  templates[idx] = {
+    ...templates[idx],
+    name,
+    groups: groups ? JSON.parse(JSON.stringify(groups)) : [],
+    updatedAt: new Date().toISOString()
+  };
+  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+  return templates[idx];
+}
+
+export function deleteTemplate(id) {
+  const templates = loadTemplates().filter(t => t.id !== id);
+  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
 }
 
 // ─── Exercise Database ────────────────────────────────────────

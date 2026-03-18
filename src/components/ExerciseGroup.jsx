@@ -35,27 +35,27 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
   const hasMore = group.rows.filter(r => r.exercise).length > 2;
 
   return (
-    <div className="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden group/card">
+    <div className="bg-card border border-white/5 rounded-3xl shadow-xl hover:shadow-2xl transition-all overflow-hidden group/card relative">
       <div 
-        className="bg-slate-50/50 border-b border-slate-100 px-4 py-2 flex items-center justify-between gap-2 cursor-pointer hover:bg-slate-100/50 transition-colors group/header"
+        className="bg-white/5 border-b border-white/5 px-5 py-3 flex items-center justify-between gap-2 cursor-pointer hover:bg-white/10 transition-all group/header"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <div className="flex items-center gap-2">
-          <div className="bg-indigo-50 text-indigo-600 p-1 rounded-lg group-hover/header:bg-indigo-100 transition-colors">
-            <Layers size={12} strokeWidth={3} />
+        <div className="flex items-center gap-3">
+          <div className="bg-primary/10 text-primary p-1.5 rounded-xl group-hover/header:bg-primary/20 transition-all shadow-[0_0_10px_rgba(212,255,0,0.1)]">
+            <Layers size={14} strokeWidth={3} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
-              Exercise Group {groupIndex + 1}
+            <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] leading-tight group-hover/header:text-slate-200 transition-colors">
+              Performance Block {groupIndex + 1}
             </span>
             {!isOpen && (
               <motion.span 
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-[9px] text-indigo-400 font-bold uppercase tracking-tight leading-tight"
+                className="text-[10px] text-primary/80 font-black uppercase tracking-widest leading-tight mt-0.5 italic"
               >
-                {group.rows.length} {group.rows.length === 1 ? 'Exercise' : 'Exercises'} 
-                {exercisesSummary && <span className="text-slate-300 ml-1">• {exercisesSummary}{hasMore ? '...' : ''}</span>}
+                {group.rows.length} {group.rows.length === 1 ? 'LOAD' : 'LOADS'} 
+                {exercisesSummary && <span className="text-slate-600 ml-1 font-bold">• {exercisesSummary}{hasMore ? '...' : ''}</span>}
               </motion.span>
             )}
           </div>
@@ -68,18 +68,18 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
                 e.stopPropagation();
                 onDeleteGroup();
               }}
-              className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold text-red-500 hover:bg-red-50 rounded-lg transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20"
               title="Delete this entire group"
             >
               <Trash2 size={12} />
-              <span className="hidden xs:inline">Remove</span>
+              <span className="hidden xs:inline">Prune Block</span>
             </button>
           )}
 
           <motion.div 
             animate={{ rotate: isOpen ? 0 : -90 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="text-slate-400 group-hover/header:text-indigo-600 transition-colors"
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="text-slate-500 group-hover/header:text-primary transition-colors"
           >
             <ChevronDown size={14} strokeWidth={3} />
           </motion.div>
@@ -100,11 +100,11 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
               <div className="hidden sm:block overflow-x-auto scrollbar-none">
                 <table className="min-w-full text-xs border-collapse">
                   <thead>
-                    <tr className="bg-white border-b border-slate-50">
+                    <tr className="bg-white/2 border-b border-white/5">
                       {COLS.map((col, i) => (
                         <th
                           key={i}
-                          className={`px-3 py-2 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 whitespace-nowrap ${
+                          className={`px-3 py-3 text-left font-black text-[9px] uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap ${
                             col === 'Muscle Group'       ? 'min-w-[130px]'
                             : col === 'Sub Muscle'       ? 'min-w-[130px]'
                             : col === 'Exercise'         ? 'min-w-[200px]'
@@ -121,7 +121,7 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="divide-y divide-white/5">
                     {group.rows.map((row, rowIdx) => (
                       <ExerciseRow
                         key={rowIdx}
@@ -160,7 +160,7 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
                       />
                       {/* Distinctive spacer line between cards */}
                       {rowIdx < group.rows.length - 1 && (
-                        <div className="mt-4 border-b-2 border-slate-100 mx-4" />
+                        <div className="mt-4 border-b border-white/5 mx-6" />
                       )}
                     </motion.div>
                   ))}
@@ -174,13 +174,13 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
               </div>
             </div>
             
-            <div className="px-4 py-1.5 bg-slate-50/10 border-t border-slate-50">
+            <div className="px-5 py-3 bg-white/2 border-t border-white/5">
               <button
                 onClick={handleAddRow}
-                className="flex items-center gap-2 text-indigo-500 hover:text-indigo-700 text-[10px] font-bold uppercase tracking-widest transition-colors py-1 px-2 rounded-lg hover:bg-indigo-50"
+                className="flex items-center gap-2 text-primary hover:text-primary/80 text-[10px] font-black uppercase tracking-[0.2em] transition-all py-1.5 px-3 rounded-xl hover:bg-primary/10 border border-transparent hover:border-primary/20"
               >
-                <Plus size={12} strokeWidth={3} />
-                <span>Add Row</span>
+                <Plus size={14} strokeWidth={4} />
+                <span>Append Data Load</span>
               </button>
             </div>
           </motion.div>
