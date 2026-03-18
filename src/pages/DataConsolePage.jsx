@@ -280,6 +280,19 @@ export default function DataConsolePage({ hideSidebar }) {
     const db = loadExerciseDb() || exerciseDatabase;
     return flattenDbRows(db);
   });
+  const [dbVersion, setDbVersion] = useState(0);
+
+  useEffect(() => {
+    const handleDbChange = () => setDbVersion((v) => v + 1);
+    window.addEventListener('gymplanner_db_changed', handleDbChange);
+    return () => window.removeEventListener('gymplanner_db_changed', handleDbChange);
+  }, []);
+
+  useEffect(() => {
+    const db = loadExerciseDb() || exerciseDatabase;
+    setExerciseRows(flattenDbRows(db));
+  }, [dbVersion]);
+
   const [exerciseSaved, setExerciseSaved] = useState(false);
   const [exercisePage, setExercisePage] = useState(1);
   const EXERCISES_PER_PAGE = 25;

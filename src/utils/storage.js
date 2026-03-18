@@ -612,6 +612,7 @@ export function loadExerciseDb() {
 
 export function saveExerciseDbCache(db) {
   localStorage.setItem(EXERCISE_DB_KEY, JSON.stringify(db));
+  window.dispatchEvent(new CustomEvent('gymplanner_db_changed'));
 }
 
 export function saveExerciseDbWithSync(db) {

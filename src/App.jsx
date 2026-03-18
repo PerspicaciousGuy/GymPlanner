@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 import useFirebaseAuth from './hooks/useFirebaseAuth';
 import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isDayComplete } from './utils/storage';
+import { scheduleTomorrowSummary } from './utils/notificationService';
 
 export default function App() {
   const [activePage, setActivePage] = useState('workout');
@@ -26,6 +27,14 @@ export default function App() {
   useEffect(() => {
     migrateCompletionToDateBased();
     migrateWorkoutsToDateBased();
+    
+    // Check for tomorrow's workout reminder
+    // Small delay to ensure storage is ready and main UI is rendered
+    const timer = setTimeout(() => {
+      scheduleTomorrowSummary();
+    }, 2000);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const handleDateSelect = (date) => {

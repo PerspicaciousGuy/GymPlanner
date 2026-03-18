@@ -46,10 +46,21 @@ const ExerciseRow = memo(function ExerciseRow({ row, workoutDate, sessionKey, on
   const [newExName, setNewExName] = useState('');
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [appliedHistoryDate, setAppliedHistoryDate] = useState('');
+  const [dbVersion, setDbVersion] = useState(0);
 
-  const muscleGroupKeys = MUSCLE_GROUP_KEYS;
-  const subMuscles = useMemo(() => muscle ? getSubMusclesForMuscle(muscle) : [], [muscle]);
-  const allExercises = useMemo(() => muscle && subMuscle ? getExercisesForSubMuscle(muscle, subMuscle) : [], [muscle, subMuscle]);
+  useEffect(() => {
+    const handleDbChange = () => setDbVersion((v) => v + 1);
+    window.addEventListener('gymplanner_db_changed', handleDbChange);
+    return () => window.removeEventListener('gymplanner_db_changed', handleDbChange);
+  }, []);
+
+  const muscleGroupKeys = useMemo(() => getMuscleGroupKeys(), [dbVersion]);
+  const subMuscles = useMemo(() => {
+    return muscle ? getSubMusclesForMuscle(muscle) : [];
+  }, [muscle, dbVersion]);
+  const allExercises = useMemo(() => {
+    return muscle && subMuscle ? getExercisesForSubMuscle(muscle, subMuscle) : [];
+  }, [muscle, subMuscle, dbVersion]);
 
   const set = useCallback((patch) => onChange({ ...row, ...patch }), [row, onChange]);
 
