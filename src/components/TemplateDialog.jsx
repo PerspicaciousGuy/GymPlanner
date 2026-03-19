@@ -54,121 +54,121 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[94vw] max-w-md rounded-[3.5rem] border-white/5 shadow-2xl p-0 overflow-hidden bg-card/95 backdrop-blur-2xl border">
-        <DialogHeader className="p-10 pb-12 bg-primary text-primary-foreground relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-72 h-72 bg-white/20 rounded-full blur-3xl opacity-40 shadow-2xl" />
-          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-56 h-56 bg-black/10 rounded-full blur-2xl" />
+      <DialogContent className="w-[92vw] max-w-md rounded-[2.5rem] border-none shadow-[0_24px_48px_-12px_rgba(79,70,229,0.18)] p-0 overflow-hidden bg-white/98 backdrop-blur-md">
+        <DialogHeader className="p-8 pb-10 bg-indigo-500 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-white/10 rounded-full blur-2xl" />
+          <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 bg-indigo-400/20 rounded-full blur-xl" />
           
           <div className="relative z-10">
-            <div className="flex items-center gap-6 mb-5">
-              <div className="bg-black/10 p-4 rounded-3xl backdrop-blur-lg border border-white/10 shadow-2xl">
-                <Sparkles size={32} className="text-primary-foreground drop-shadow-lg" strokeWidth={3} />
+            <div className="flex items-center gap-4 mb-3">
+              <div className="bg-white/20 p-2.5 rounded-2xl backdrop-blur-sm border border-white/10">
+                <Sparkles size={22} className="text-white drop-shadow-sm" />
               </div>
-              <DialogTitle className="text-4xl font-black tracking-tighter leading-none italic uppercase">
-                {mode === 'save' ? 'Snapshot' : 'Recall'}
+              <DialogTitle className="text-3xl font-black tracking-tight leading-none">
+                {mode === 'save' ? 'Save Routine' : 'Load Routine'}
               </DialogTitle>
             </div>
-            <DialogDescription className="text-primary-foreground/80 font-black text-[11px] uppercase tracking-[0.3em] leading-relaxed max-w-[85%]">
+            <DialogDescription className="text-indigo-50/90 font-semibold text-sm leading-relaxed max-w-[90%]">
               {mode === 'save' 
-                ? 'Finalize structural integrity into a permanent protocol.' 
-                : 'Inject a master architecture into the current session.'}
+                ? 'Capture your current session setup into a reusable elite protocol.' 
+                : 'Choose a master routine to instantly pre-fill your training session.'}
             </DialogDescription>
           </div>
         </DialogHeader>
 
-        <div className="p-10 -mt-8 relative z-20 space-y-10 max-h-[60vh] overflow-y-auto scrollbar-none">
+        <div className="p-6 -mt-6 relative z-20 space-y-6 max-h-[60vh] overflow-y-auto scrollbar-none">
           {mode === 'save' ? (
-            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-700">
-              <div className="space-y-4">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] px-3 flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_#d4ff00]" />
-                  PROTOCOL DESIGNATION
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="space-y-3">
+                <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-1 flex items-center gap-2">
+                  <div className="w-1 h-1 rounded-full bg-indigo-500" />
+                  Routine Identity
                 </label>
                 <div className="relative group">
                   <Input 
                     autoFocus
-                    placeholder="IDENTIFY PROGRAM..." 
+                    placeholder="e.g. Hypertrophy: Lower A" 
                     value={templateName}
                     onChange={(e) => setTemplateName(e.target.value)}
-                    className="h-20 rounded-[2.5rem] border-white/5 bg-white/5 font-black text-foreground text-2xl focus-visible:bg-white/10 focus-visible:border-primary/40 transition-all shadow-inner px-8 italic uppercase tracking-tighter"
+                    className="h-14 rounded-2xl border-slate-100 bg-slate-50/50 focus-visible:bg-white focus-visible:border-indigo-400 focus-visible:ring-indigo-500/10 transition-all font-black text-slate-800 text-base shadow-sm group-hover:shadow-md"
                   />
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-300 uppercase tracking-widest pointer-events-none group-focus-within:text-indigo-400 transition-colors">
+                    Required
+                  </div>
                 </div>
               </div>
               
-              <div className="bg-white/2 rounded-[3.2rem] p-10 border border-white/5 flex items-start gap-8 shadow-2xl relative overflow-hidden group/alert">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl opacity-20 -mr-16 -mt-16" />
-                <div className="bg-primary p-4 rounded-3xl shadow-[0_10px_20px_rgba(212,255,0,0.3)] text-primary-foreground shrink-0 scale-110">
-                  <Dumbbell size={28} strokeWidth={3} />
+              <div className="bg-indigo-50/50 rounded-[2rem] p-5 border border-indigo-100/50 flex items-start gap-4">
+                <div className="bg-white p-2.5 rounded-xl shadow-sm border border-indigo-50 text-indigo-500 shrink-0">
+                  <Dumbbell size={20} />
                 </div>
-                <div className="pt-2">
-                  <p className="text-[12px] font-black text-foreground uppercase tracking-[0.2em] mb-2 italic">Architecture Summary</p>
-                  <p className="text-[11px] text-slate-500 font-black leading-relaxed uppercase tracking-widest opacity-80">
-                    Establishing <span className="text-primary">{currentGroups.length} STRUCTURAL BLOCKS</span> with primary benchmarks and elite load vectors.
+                <div>
+                  <p className="text-[11px] font-black text-slate-800 uppercase tracking-wider mb-1">Session Summary</p>
+                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
+                    Will preserve <span className="text-indigo-600 font-bold">{currentGroups.length} exercise {currentGroups.length === 1 ? 'group' : 'groups'}</span> with all target sets, reps, and load benchmarks.
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-8 animate-in fade-in duration-700">
+            <div className="space-y-6 animate-in fade-in duration-500">
               <div className="relative group">
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-primary transition-all duration-300" size={18} strokeWidth={3} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
                 <Input 
-                  placeholder="IDENTIFY PROTOCOL..." 
+                  placeholder="Search your library..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-14 h-16 rounded-[2rem] border-white/5 bg-white/5 text-[11px] font-black uppercase tracking-widest transition-all focus-visible:bg-white/10 focus-visible:border-primary/30 focus-visible:ring-primary/5 shadow-2xl placeholder:text-slate-700 italic"
+                  className="pl-12 h-12 rounded-2xl border-slate-100 bg-slate-50/50 hover:bg-slate-50 text-xs font-bold transition-all focus-visible:bg-white focus-visible:border-indigo-400 focus-visible:ring-indigo-500/10 shadow-sm"
                 />
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredTemplates.length === 0 ? (
-                  <div className="py-20 text-center space-y-6">
+                  <div className="py-16 text-center space-y-4">
                     <div className="relative inline-block">
-                      <div className="absolute inset-0 bg-primary/10 rounded-full blur-2xl animate-pulse" />
-                      <div className="relative bg-card w-24 h-24 rounded-[3rem] shadow-2xl border border-white/5 flex items-center justify-center mx-auto text-slate-700 rotate-12 transition-transform hover:rotate-0 duration-500">
-                        <Dumbbell size={36} strokeWidth={3} />
+                      <div className="absolute inset-0 bg-indigo-100 rounded-full blur-xl opacity-50" />
+                      <div className="relative bg-white w-20 h-20 rounded-[2rem] shadow-xl border border-slate-50 flex items-center justify-center mx-auto text-slate-200">
+                        <Dumbbell size={32} strokeWidth={1.5} />
                       </div>
                     </div>
-                    <div className="max-w-[80%] mx-auto">
-                      <p className="text-xl font-black text-foreground tracking-tighter uppercase italic">Repository Empty</p>
-                      <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.3em] mt-3 leading-relaxed">
-                        No protocols identified. Finalize a session to populate master storage.
-                      </p>
+                    <div>
+                      <p className="text-sm font-black text-slate-800 tracking-tight">No Routines Found</p>
+                      <p className="text-[11px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1">Save a workout session as a routine to see it here</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-4 pb-4">
+                  <div className="grid grid-cols-1 gap-3">
                     {filteredTemplates.map((t) => (
                       <button
                         key={t.id}
                         onClick={() => onSelect(t)}
-                        className="w-full p-8 rounded-[3rem] border border-white/5 bg-white/2 shadow-2xl hover:border-primary/20 hover:bg-white/5 transition-all flex items-center justify-between group relative overflow-hidden active:scale-[0.985]"
+                        className="w-full p-5 rounded-[2rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] hover:border-indigo-100 hover:bg-indigo-50/20 hover:shadow-xl hover:shadow-indigo-500/5 transition-all flex items-center justify-between group relative overflow-hidden active:scale-[0.98]"
                       >
-                        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-48 h-48 bg-primary/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/0 to-indigo-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
                         
-                        <div className="text-left relative z-10 space-y-2">
-                          <p className="font-black text-foreground text-xl tracking-tighter uppercase italic group-hover:text-primary transition-colors">{t.name}</p>
-                          <div className="flex items-center gap-5">
-                            <span className="text-[9px] text-slate-600 font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                              <Calendar size={12} className="text-slate-800" /> {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'UNKNOWN'}
+                        <div className="text-left relative z-10">
+                          <p className="font-black text-slate-800 text-[15px] tracking-tight group-hover:text-indigo-600 transition-colors">{t.name}</p>
+                          <div className="flex items-center gap-4 mt-1.5">
+                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                              <Calendar size={12} className="text-slate-300" /> {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'Unknown Date'}
                             </span>
-                            <div className="w-1.5 h-1.5 rounded-full bg-slate-800 group-hover:bg-primary shadow-[0_0_8px_rgba(212,255,0,0.5)] transition-all" />
-                            <span className="text-[9px] text-primary font-black uppercase tracking-[0.3em] px-3 py-1 bg-primary/10 rounded-xl border border-primary/20">
-                              {(t.groups || []).length} COMPONENTS
+                            <div className="w-1 h-1 rounded-full bg-slate-200" />
+                            <span className="text-[10px] text-indigo-500 font-black uppercase tracking-[0.1em] px-2 py-0.5 bg-indigo-50 rounded-full border border-indigo-100/50">
+                              {(t.groups || []).length} Sections
                             </span>
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-3 relative z-10">
+                        <div className="flex items-center gap-2 relative z-10">
                           <div 
                             onClick={(e) => handleDelete(t.id, e)}
-                            className="p-3 text-slate-700 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 duration-300"
-                            title="Purge Protocol"
+                            className="p-2.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"
+                            title="Delete Routine"
                           >
-                            <Trash2 size={18} strokeWidth={3} />
+                            <Trash2 size={16} />
                           </div>
-                          <div className="p-4 bg-white/5 border border-white/5 text-slate-700 rounded-3xl group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all shadow-xl group-hover:shadow-primary/20 group-hover:rotate-0 -rotate-12 group-hover:scale-110 duration-500">
-                            <ChevronRight size={20} strokeWidth={4} />
+                          <div className="p-3 bg-slate-50 text-slate-400 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm group-hover:shadow-indigo-200 group-hover:rotate-0 -rotate-12">
+                            <ChevronRight size={18} strokeWidth={3} />
                           </div>
                         </div>
                       </button>
@@ -180,31 +180,31 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
           )}
         </div>
 
-        <DialogFooter className="p-10 bg-white/2 border-t border-white/5 relative z-30 flex-row items-center gap-5">
+        <DialogFooter className="p-6 bg-white border-t border-slate-50 relative z-30">
           {mode === 'save' ? (
-            <>
+            <div className="flex gap-4 w-full">
               <Button 
                 variant="ghost" 
                 onClick={() => onOpenChange(false)}
-                className="flex-1 h-16 rounded-[1.8rem] font-black text-slate-600 uppercase tracking-[0.4em] text-[10px] hover:bg-white/5 hover:text-white transition-all border border-white/5 bg-white/2 italic shadow-inner"
+                className="flex-1 h-11 rounded-2xl font-black text-slate-400 uppercase tracking-[0.2em] text-[10px] hover:bg-slate-50 hover:text-slate-600 transition-all border border-slate-100"
               >
-                Abort
+                Dismiss
               </Button>
               <Button 
                 onClick={handleSave}
                 disabled={!templateName.trim()}
-                className="flex-[2] h-16 rounded-[1.8rem] bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-[0.4em] text-[11px] shadow-[0_15px_30px_rgba(212,255,0,0.2)] hover:shadow-[0_20px_40px_rgba(212,255,0,0.3)] transition-all transform active:scale-95 italic"
+                className="flex-[1.5] h-11 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-indigo-100 hover:shadow-indigo-200 transition-all border-b-4 border-indigo-800 active:border-b-0 active:translate-y-1"
               >
-                Establish Protocol
+                Save Routine
               </Button>
-            </>
+            </div>
           ) : (
             <Button 
               variant="outline" 
               onClick={() => onOpenChange(false)}
-              className="w-full h-16 rounded-[1.8rem] font-black text-slate-600 border-white/5 bg-white/2 uppercase tracking-[0.4em] text-[11px] hover:bg-white/5 hover:text-white transition-all shadow-xl italic"
+              className="w-full h-11 rounded-2xl font-black text-slate-400 border-slate-200 uppercase tracking-[0.2em] text-[10px] hover:bg-slate-50 hover:text-slate-600 transition-all shadow-sm"
             >
-              Close Hub
+              Close Window
             </Button>
           )}
         </DialogFooter>

@@ -8,20 +8,32 @@ import HistoryPage from './pages/HistoryPage';
 import DayDetailPage from './pages/DayDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import RoutinesPage from './pages/RoutinesPage';
+import EditRoutinePage from './pages/EditRoutinePage';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import useFirebaseAuth from './hooks/useFirebaseAuth';
 import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isDayComplete } from './utils/storage';
 import { scheduleTomorrowSummary } from './utils/notificationService';
+import { loadSettings } from './utils/settings';
 
 export default function App() {
   const [activePage, setActivePage] = useState('workout');
   const [selectedHistoryDate, setSelectedHistoryDate] = useState(null);
+  const [editRoutineId, setEditRoutineId] = useState(null);
   const [syncNonce, setSyncNonce] = useState(0);
   const authState = useFirebaseAuth();
   const syncScope = authState.user?.uid || (authState.isConfigured ? 'signed-out' : 'local');
   const syncKey = `${syncScope}:${syncNonce}`;
+
+  const [settings, setSettings] = useState(() => {
+    const s = loadSettings();
+    if (typeof document !== 'undefined') {
+      if (s.theme === 'dark') document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    }
+    return s;
+  });
 
   // Run migrations on app load
   useEffect(() => {
@@ -29,13 +41,21 @@ export default function App() {
     migrateWorkoutsToDateBased();
     
     // Check for tomorrow's workout reminder
-    // Small delay to ensure storage is ready and main UI is rendered
     const timer = setTimeout(() => {
       scheduleTomorrowSummary();
     }, 2000);
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Theme Sync
+  useEffect(() => {
+    if (settings.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [settings.theme]);
 
   const handleDateSelect = (date) => {
     setSelectedHistoryDate(date);
@@ -49,14 +69,14 @@ export default function App() {
 
   return (
 
-    <div className="flex flex-col md:flex-row min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
+    <div className="flex flex-col md:flex-row min-h-screen bg-background">
       {/* Sidebar for Desktop */}
-      <aside className="hidden md:flex w-20 lg:w-24 bg-card border-r border-border flex-col items-center py-8 gap-10 sticky top-0 h-screen z-50 shadow-2xl">
+      <aside className="hidden md:flex w-20 lg:w-24 bg-white border-r border-slate-200 flex-col items-center py-8 gap-10 sticky top-0 h-screen z-50">
         <div className="flex flex-col items-center gap-1">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
-            <span className="text-xl font-bold tracking-tighter">G</span>
+          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+            <span className="text-xl font-bold">G</span>
           </div>
-          <span className="text-[10px] font-black text-primary uppercase tracking-tighter">Planner</span>
+          <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-tighter">Planner</span>
         </div>
 
         <nav className="flex flex-col gap-6 flex-1">
@@ -77,14 +97,14 @@ export default function App() {
                 }
               }}
               className={cn(
-                "w-14 h-14 flex-col gap-1 p-0 rounded-2xl transition-all duration-300",
+                "w-14 h-14 flex-col gap-1 p-0 rounded-xl transition-all",
                 activePage === item.id
-                  ? "bg-primary text-primary-foreground shadow-[0_0_20px_rgba(212,255,0,0.2)] hover:bg-primary/90 hover:text-primary-foreground scale-110 active:scale-95"
-                  : "text-slate-500 hover:bg-white/5 hover:text-primary"
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 hover:text-white"
+                  : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
               )}
             >
-              <item.icon size={20} strokeWidth={activePage === item.id ? 3 : 2} />
-              <span className="text-[9px] font-black uppercase tracking-tighter">{item.name}</span>
+              <item.icon size={20} strokeWidth={2.5} />
+              <span className="text-[9px] font-extrabold uppercase tracking-tighter">{item.name}</span>
             </Button>
           ))}
         </nav>
@@ -95,12 +115,12 @@ export default function App() {
             variant="outline" 
             size="icon"
             onClick={() => setSyncNonce(n => n + 1)}
-            className="rounded-xl p-2 text-slate-500 hover:bg-white/5 hover:text-primary transition-all border-border shadow-sm"
+            className="rounded-xl p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all border border-slate-100"
           >
             <RefreshCw size={18} />
           </Button>
           
-          <Button variant="outline" size="icon" className="shadow-xs border-primary/20 text-primary hover:bg-primary/10 rounded-xl">
+          <Button variant="outline" size="icon" className="shadow-xs border-indigo-100 text-indigo-600 hover:bg-indigo-50 rounded-xl">
             <Cloud size={18} />
           </Button>
         </div>
@@ -121,16 +141,17 @@ export default function App() {
             { activePage === 'workout' && <WorkoutSchedulerPage syncKey={ syncKey } targetDate={ selectedHistoryDate } /> }
             { activePage === 'history' && <HistoryPage onDateSelect={ handleDateSelect } /> }
             { activePage === 'dayDetail' && <DayDetailPage date={ selectedHistoryDate } onBack={ () => setActivePage('history') } syncKey={ syncKey } /> }
-            { activePage === 'routines' && <RoutinesPage /> }
+            { activePage === 'routines' && <RoutinesPage onEdit={(id) => { setEditRoutineId(id); setActivePage('edit-routine'); }} /> }
+            { activePage === 'edit-routine' && <EditRoutinePage routineId={editRoutineId} onBack={() => setActivePage('routines')} /> }
             { activePage === 'analytics' && <AnalyticsPage /> }
-            { activePage === 'profile' && <ProfilePage authState={ authState } onDataRefreshed={ () => setSyncNonce(n => n + 1) } /> }
+            { activePage === 'profile' && <ProfilePage authState={ authState } onDataRefreshed={ () => setSyncNonce(n => n + 1) } onSettingsChange={ setSettings } /> }
           </div>
 
         </main>
       </div>
 
-      {/* Bottom Navigation for Mobile */}
-      <nav className="md:hidden fixed bottom-6 left-4 right-4 h-20 bg-card/95 border border-white/5 rounded-[2rem] px-2 flex items-center justify-around z-50 shadow-2xl backdrop-blur-xl">
+      {/* Floating Bottom Navigation for Mobile */}
+      <nav className="md:hidden fixed bottom-6 left-6 right-6 h-[72px] bg-card/90 backdrop-blur-xl border border-border/50 px-3 flex items-center justify-around z-50 rounded-full shadow-2xl transition-all duration-300">
         {[
           { id: 'workout', name: 'Training', icon: Calendar },
           { id: 'history', name: 'History', icon: History },
@@ -143,17 +164,22 @@ export default function App() {
             variant="ghost"
             onClick={() => setActivePage(item.id)}
             className={cn(
-              "flex-col gap-1.5 h-16 w-16 px-0 transition-all active:scale-90",
-              activePage === item.id ? "text-primary" : "text-slate-500"
+              "flex flex-col items-center justify-center gap-1 h-14 w-14 px-0 transition-all rounded-full",
+              activePage === item.id ? "text-primary" : "text-muted-foreground hover:text-foreground"
             )}
           >
             <div className={cn(
-              "p-2.5 rounded-2xl transition-all duration-300",
-              activePage === item.id ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110" : "bg-transparent hover:bg-white/5"
+              "p-2 rounded-full transition-all duration-300",
+              activePage === item.id ? "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(212,255,0,0.3)] scale-110" : "bg-transparent"
             )}>
-              <item.icon size={20} strokeWidth={activePage === item.id ? 3 : 2} />
+              <item.icon size={18} strokeWidth={activePage === item.id ? 2.5 : 2} />
             </div>
-            <span className="text-[8px] font-black uppercase tracking-tight">{item.name}</span>
+            <span className={cn(
+              "text-[8px] font-black uppercase tracking-tight",
+              activePage === item.id ? "text-primary opacity-100 scale-105" : "text-muted-foreground opacity-60"
+            )}>
+              {item.name}
+            </span>
           </Button>
         ))}
       </nav>

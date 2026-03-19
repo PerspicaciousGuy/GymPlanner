@@ -23,7 +23,6 @@ import {
   Dumbbell,
   Pencil
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Dialog, 
   DialogContent, 
@@ -504,35 +503,42 @@ export default function DataConsolePage({ hideSidebar }) {
 
 
   return (
-    <div className={`flex flex-col gap-6 ${!hideSidebar ? 'min-h-screen bg-background' : ''}`}>
+    <div className={`flex flex-col gap-6 ${!hideSidebar ? 'min-h-screen bg-[#f8fafc]' : ''}`}>
       {!hideSidebar && (
-        <aside className="fixed left-0 top-0 bottom-0 w-20 lg:w-26 bg-card border-r border-white/5 flex flex-col items-center py-10 gap-12 z-50">
-          <div className="flex flex-col items-center gap-2 group cursor-pointer" onClick={() => setActiveTab('schedule')}>
-            <div className={`p-4 rounded-[1.5rem] transition-all duration-500 scale-110 ${activeTab === 'schedule' ? 'bg-primary text-primary-foreground shadow-[0_0_30px_rgba(212,255,0,0.3)]' : 'text-slate-700 hover:text-primary hover:bg-white/5 shadow-inner'}`}>
-              <LayoutGrid size={24} strokeWidth={3} />
+        <aside className="fixed left-0 top-0 bottom-0 w-20 lg:w-24 bg-white border-r border-slate-200 flex flex-col items-center py-8 gap-10 z-50">
+          <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('schedule')}>
+            <div className={`p-3 rounded-xl transition-all ${activeTab === 'schedule' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+              <LayoutGrid size={24} />
             </div>
-            <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${activeTab === 'schedule' ? 'text-primary' : 'text-slate-600'}`}>Clock</span>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'schedule' ? 'text-indigo-600' : 'text-slate-400'}`}>Sessions</span>
           </div>
 
-          <div className="flex flex-col items-center gap-2 group cursor-pointer" onClick={() => setActiveTab('workouts')}>
-            <div className={`p-4 rounded-[1.5rem] transition-all duration-500 scale-110 ${activeTab === 'workouts' ? 'bg-primary text-primary-foreground shadow-[0_0_30px_rgba(212,255,0,0.3)]' : 'text-slate-700 hover:text-primary hover:bg-white/5 shadow-inner'}`}>
-              <Boxes size={24} strokeWidth={3} />
+          <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('workouts')}>
+            <div className={`p-3 rounded-xl transition-all ${activeTab === 'workouts' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+              <Boxes size={24} />
             </div>
-            <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${activeTab === 'workouts' ? 'text-primary' : 'text-slate-600'}`}>Matrix</span>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'workouts' ? 'text-indigo-600' : 'text-slate-400'}`}>Workouts</span>
           </div>
 
-          <div className="flex flex-col items-center gap-2 group cursor-pointer" onClick={() => setActiveTab('completion')}>
-            <div className={`p-4 rounded-[1.5rem] transition-all duration-500 scale-110 ${activeTab === 'completion' ? 'bg-primary text-primary-foreground shadow-[0_0_30px_rgba(212,255,0,0.3)]' : 'text-slate-700 hover:text-primary hover:bg-white/5 shadow-inner'}`}>
-              <CheckCircle2 size={24} strokeWidth={3} />
+          <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('completion')}>
+            <div className={`p-3 rounded-xl transition-all ${activeTab === 'completion' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+              <CheckCircle2 size={24} />
             </div>
-            <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${activeTab === 'completion' ? 'text-primary' : 'text-slate-600'}`}>Status</span>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'completion' ? 'text-indigo-600' : 'text-slate-400'}`}>Completion</span>
           </div>
 
-          <div className="flex flex-col items-center gap-2 group cursor-pointer" onClick={() => setActiveTab('exerciseDb')}>
-            <div className={`p-4 rounded-[1.5rem] transition-all duration-500 scale-110 ${activeTab === 'exerciseDb' ? 'bg-primary text-primary-foreground shadow-[0_0_30px_rgba(212,255,0,0.3)]' : 'text-slate-700 hover:text-primary hover:bg-white/5 shadow-inner'}`}>
-              <Database size={24} strokeWidth={3} />
+          <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('exerciseDb')}>
+            <div className={`p-3 rounded-xl transition-all ${activeTab === 'exerciseDb' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+              <Database size={24} />
             </div>
-            <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${activeTab === 'exerciseDb' ? 'text-primary' : 'text-slate-600'}`}>Library</span>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'exerciseDb' ? 'text-indigo-600' : 'text-slate-400'}`}>Exercise DB</span>
+          </div>
+          
+          <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('templates')}>
+            <div className={`p-3 rounded-xl transition-all ${activeTab === 'templates' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+              <Sparkles size={24} />
+            </div>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'templates' ? 'text-indigo-600' : 'text-slate-400'}`}>Routines</span>
           </div>
         </aside>
       )}
@@ -544,8 +550,8 @@ export default function DataConsolePage({ hideSidebar }) {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 md:mb-6">
           <div className="flex-1">
-            <h1 className="text-3xl font-black text-foreground tracking-tighter uppercase italic">Terminal</h1>
-            <p className="text-[11px] text-slate-500 font-black uppercase tracking-[0.4em]">Master Data Architecture & Protocol Controls.</p>
+            <h1 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">Data Console</h1>
+            <p className="text-[10px] md:text-xs text-slate-400 font-medium">Configure workouts, sessions, and database.</p>
           </div>
           
           <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
@@ -559,11 +565,11 @@ export default function DataConsolePage({ hideSidebar }) {
             <button
               onClick={handleImportClick}
               disabled={importing}
-              className="group flex items-center gap-3 px-4 py-2.5 rounded-[1.25rem] border border-white/5 bg-white/5 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all shadow-xl shrink-0"
+              className="group flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold text-[10px] md:text-xs hover:bg-slate-50 transition-all shadow-sm shrink-0"
               title="Import Data"
             >
-              <Upload size={16} className="text-slate-600 group-hover:text-primary transition-all duration-300" strokeWidth={3} />
-              <span className="hidden xs:inline">Ingest</span>
+              <Upload size={14} className="text-slate-400 group-hover:text-indigo-600 transition-colors" />
+              <span className="hidden xs:inline">Import</span>
             </button>
             <button
               onClick={() => handleExport('current')}
@@ -577,11 +583,11 @@ export default function DataConsolePage({ hideSidebar }) {
             <button
               onClick={() => handleExport('all')}
               disabled={exporting}
-              className="flex items-center gap-3 px-5 py-3 rounded-[1.25rem] bg-primary text-primary-foreground font-black text-[10px] uppercase tracking-[0.2em] hover:bg-primary/90 transition-all shadow-[0_10px_30px_rgba(212,255,0,0.2)] shrink-0 italic"
+              className="flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-[10px] md:text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 shrink-0"
               title="Export All Data"
             >
-              <Database size={16} strokeWidth={3} />
-              <span className="hidden xs:inline">Finalize Dump</span>
+              <Database size={14} />
+              <span className="hidden xs:inline">Export All</span>
             </button>
 
             <div className="hidden xs:block w-px h-6 bg-slate-100 mx-0.5 md:mx-1" />
@@ -598,41 +604,37 @@ export default function DataConsolePage({ hideSidebar }) {
 
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-4 md:gap-8 border-b border-white/5 mb-6 md:mb-8 px-2 overflow-x-auto scrollbar-none whitespace-nowrap">
+        <div className="flex items-center gap-4 md:gap-6 border-b border-slate-100 mb-4 md:mb-6 px-1 overflow-x-auto scrollbar-none whitespace-nowrap">
           {TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`pb-4 px-1 text-[11px] md:text-[13px] font-black uppercase tracking-[0.25em] transition-all relative shrink-0 ${
+              className={`pb-3 px-1 text-[11px] md:text-xs font-bold transition-all relative shrink-0 ${
                 activeTab === tab.key 
-                  ? 'text-primary' 
-                  : 'text-slate-600 hover:text-slate-400'
+                  ? 'text-indigo-600' 
+                  : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               {tab.label}
               {activeTab === tab.key && (
-                <motion.div 
-                  layoutId="activeTabUnderline"
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-full shadow-[0_0_15px_#d4ff00]" 
-                />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />
               )}
             </button>
           ))}
         </div>
 
-        <div className="bg-card rounded-3xl border border-white/5 shadow-2xl overflow-hidden flex-1 flex flex-col min-h-0 relative">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl opacity-20 -mr-48 -mt-48 pointer-events-none" />
+        <div className="bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col min-h-0">
           {/* Table Toolbar */}
-            <div className="px-5 py-4 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/2 backdrop-blur-md">
-              <div className="flex-1 w-full sm:max-w-md relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-primary transition-colors duration-300" size={16} />
-                <Input 
-                  placeholder={`IDENTIFY ${activeTab.toUpperCase()} DATA...`}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12 bg-white/5 border-white/5 rounded-2xl text-[11px] focus-visible:ring-primary/10 focus-visible:border-primary/20 transition-all font-black uppercase tracking-widest placeholder:text-slate-700"
-                />
-              </div>
+          <div className="px-3 md:px-4 py-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
+            <div className="flex-1 w-full sm:max-w-xs relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
+              <Input 
+                placeholder={`Search ${activeTab === 'schedule' ? 'sessions' : 'data'}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 bg-slate-50 border-slate-200 rounded-xl text-[11px] md:text-xs focus-visible:ring-indigo-500/10 focus-visible:border-indigo-500 transition-all font-medium"
+              />
+            </div>
             
             <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
               {activeTab === 'workouts' && (
@@ -683,10 +685,10 @@ export default function DataConsolePage({ hideSidebar }) {
                   </select>
                   <button
                     onClick={addWorkoutGridRow}
-                    className="p-2 rounded-xl border border-dashed border-primary/30 text-primary hover:bg-primary/10 transition-all shrink-0 hover:scale-110 active:scale-95 shadow-xl bg-primary/5"
+                    className="p-1.5 rounded-lg border border-dashed border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors shrink-0"
                     title="Add Row"
                   >
-                    <Plus size={18} strokeWidth={3} />
+                    <Plus size={16} />
                   </button>
                 </div>
               )}
@@ -701,10 +703,10 @@ export default function DataConsolePage({ hideSidebar }) {
               {activeTab === 'exerciseDb' && (
                 <button
                   onClick={addExerciseRow}
-                  className="flex items-center gap-3 rounded-xl border border-dashed border-primary/30 bg-primary/5 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-xl hover:scale-105 active:scale-95 italic"
+                  className="flex items-center gap-1.5 rounded-lg border border-dashed border-indigo-200 px-3 py-1.5 text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors"
                 >
-                  <Plus size={16} strokeWidth={3} />
-                  INITIALIZE LOAD
+                  <Plus size={14} />
+                  New Exercise
                 </button>
               )}
               <button className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
@@ -715,13 +717,13 @@ export default function DataConsolePage({ hideSidebar }) {
           </div>
 
           {activeTab === 'schedule' && (
-            <div className="flex-1 overflow-auto scrollbar-none relative z-10">
+            <div className="flex-1 overflow-auto scrollbar-none">
               <Table className="min-w-[600px]">
-                <TableHeader className="sticky top-0 bg-card/80 backdrop-blur-xl border-b border-white/5 z-10">
-                  <TableRow className="hover:bg-transparent border-none h-16">
-                    <TableHead className="px-6 py-4 text-left font-black text-[10px] uppercase tracking-[0.4em] text-slate-600 w-48">AXIS / DAY</TableHead>
-                    <TableHead className="px-6 py-4 text-left font-black text-[10px] uppercase tracking-[0.4em] text-slate-600">ALPHA SESSION [AM]</TableHead>
-                    <TableHead className="px-6 py-4 text-left font-black text-[10px] uppercase tracking-[0.4em] text-slate-600">OMEGA SESSION [PM]</TableHead>
+                <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                  <TableRow className="hover:bg-transparent border-none">
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Day</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">AM Session Title</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">PM Session Title</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-slate-50">
@@ -737,8 +739,8 @@ export default function DataConsolePage({ hideSidebar }) {
                               am: { ...prev.am, [day]: e.target.value },
                             }))
                           }
-                          className="h-10 bg-white/2 border-white/5 rounded-xl text-foreground focus:bg-white/5 focus:border-primary/20 focus:ring-4 focus:ring-primary/5 transition-all font-black uppercase tracking-tight italic"
-                          placeholder="ASSIGN PROTOCOL..."
+                          className="h-9 bg-transparent border-transparent rounded-lg text-slate-700 focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
+                          placeholder="e.g. Upper Body"
                         />
                       </TableCell>
                       <TableCell className="px-4 py-2">
@@ -762,23 +764,23 @@ export default function DataConsolePage({ hideSidebar }) {
           )}
 
           {activeTab === 'workouts' && (
-            <div className="flex-1 overflow-auto relative z-10">
-              <Table className="min-w-[1200px]">
-                <TableHeader className="sticky top-0 bg-card/80 backdrop-blur-xl border-b border-white/5 z-10">
-                  <TableRow className="hover:bg-transparent border-none h-16">
-                    <TableHead className="px-4 py-4 text-left font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-12">#</TableHead>
-                    <TableHead className="px-4 py-4 text-left font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-28">AXIS</TableHead>
-                    <TableHead className="px-4 py-4 text-left font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-36">TIMESTAMP</TableHead>
-                    <TableHead className="px-4 py-4 text-left font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-24">PHASE</TableHead>
-                    {showAdvancedCols && <TableHead className="px-3 py-4 text-left font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-16">GRP</TableHead>}
-                    {showAdvancedCols && <TableHead className="px-3 py-4 text-left font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-16">ROW</TableHead>}
-                    <TableHead className="px-4 py-4 text-left font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-48">MUSCLE GROUP</TableHead>
-                    <TableHead className="px-4 py-4 text-left font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-48">SUB-CALIBRATION</TableHead>
-                    <TableHead className="px-4 py-4 text-left font-black text-[10px] uppercase tracking-[0.3em] text-slate-600">EXERCISE / LOAD</TableHead>
-                    <TableHead className="px-4 py-4 text-center font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-20">SETS</TableHead>
-                    <TableHead className="px-4 py-4 text-center font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-20">REPS</TableHead>
-                    <TableHead className="px-4 py-4 text-center font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-24">MASS</TableHead>
-                    <TableHead className="px-4 py-4 text-center font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 w-16">X</TableHead>
+            <div className="flex-1 overflow-auto">
+              <Table className="min-w-[1000px]">
+                <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                  <TableRow className="hover:bg-transparent border-none">
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-10">#</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-24">Day</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-32">Date</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20">Session</TableHead>
+                    {showAdvancedCols && <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16">Group</TableHead>}
+                    {showAdvancedCols && <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16">Row</TableHead>}
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Muscle</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Sub Muscle</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-80">Exercise</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16 text-center">Sets</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16 text-center">Reps</TableHead>
+                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20 text-center">Weight</TableHead>
+                    <TableHead className="px-3 py-3 text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 w-12">Del</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-slate-50">
@@ -807,10 +809,10 @@ export default function DataConsolePage({ hideSidebar }) {
                         <select
                           value={row.session}
                           onChange={(e) => updateWorkoutRow(idx, 'session', e.target.value)}
-                          className="w-full px-2 py-1.5 bg-white/2 border border-white/5 rounded-xl text-slate-400 text-[10px] font-black uppercase focus:bg-white/5 focus:border-primary/20"
+                          className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[10px] font-bold uppercase focus:bg-white focus:border-slate-200"
                         >
-                          <option value="am" className="bg-card">AM</option>
-                          <option value="pm" className="bg-card">PM</option>
+                          <option value="am">AM</option>
+                          <option value="pm">PM</option>
                         </select>
                       </TableCell>
                       {showAdvancedCols && (
@@ -849,7 +851,7 @@ export default function DataConsolePage({ hideSidebar }) {
                         <Input
                           value={row.exercise}
                           onChange={(e) => updateWorkoutRow(idx, 'exercise', e.target.value)}
-                          className="h-9 bg-white/2 border-white/5 rounded-xl text-foreground text-[11px] font-black uppercase focus:bg-white/5 focus:border-primary/20"
+                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] font-bold focus:bg-white focus:border-slate-200"
                         />
                       </TableCell>
                       <TableCell className="px-3 py-2">
@@ -870,7 +872,7 @@ export default function DataConsolePage({ hideSidebar }) {
                         <Input
                           value={row.weight}
                           onChange={(e) => updateWorkoutRow(idx, 'weight', e.target.value)}
-                          className="h-9 bg-white/2 border-white/5 rounded-xl text-primary text-[11px] text-center font-black italic focus:bg-white/5 focus:border-primary/20"
+                          className="h-8 bg-transparent border-transparent rounded-md text-indigo-600 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
                         />
                       </TableCell>
                       <TableCell className="px-3 py-2 text-center">
@@ -878,9 +880,9 @@ export default function DataConsolePage({ hideSidebar }) {
                           variant="ghost"
                           size="icon-sm"
                           onClick={() => removeWorkoutGridRow(idx)}
-                          className="p-1.5 text-slate-700 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                          className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
                         >
-                          <Trash2 size={15} strokeWidth={3} />
+                          <Trash2 size={14} />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -895,10 +897,10 @@ export default function DataConsolePage({ hideSidebar }) {
               <Table className="min-w-[600px]">
                 <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
                   <TableRow className="hover:bg-transparent border-none">
-                    <TableHead className="px-6 py-4 text-left font-black text-[10px] uppercase tracking-[0.4em] text-slate-600 w-48">AXIS / DAY</TableHead>
-                    <TableHead className="px-6 py-4 text-left font-black text-[10px] uppercase tracking-[0.4em] text-slate-600 w-48">TIMESTAMP</TableHead>
-                    <TableHead className="px-6 py-4 text-left font-black text-[10px] uppercase tracking-[0.4em] text-slate-600">ALPHA STATUS</TableHead>
-                    <TableHead className="px-6 py-4 text-left font-black text-[10px] uppercase tracking-[0.4em] text-slate-600">OMEGA STATUS</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Day</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Date</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">AM Status</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">PM Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-slate-50">
@@ -908,31 +910,32 @@ export default function DataConsolePage({ hideSidebar }) {
                     const dateKey = dayData ? dayData.date : null;
                     
                     return (
-                      <TableRow key={day} className="group hover:bg-white/2 transition-all border-none h-16">
-                        <TableCell className="px-6 py-4 font-black text-foreground italic uppercase tracking-tighter">{day}</TableCell>
-                        <TableCell className="px-6 py-4 text-slate-600 font-black text-[10px] uppercase tracking-[0.2em]">{dateDisplay}</TableCell>
+                      <TableRow key={day} className="group hover:bg-slate-50/50 transition-colors border-none">
+                        <TableCell className="px-4 py-3 font-bold text-slate-700 italic">{day}</TableCell>
+                        <TableCell className="px-4 py-3 text-slate-400 font-bold text-[10px] uppercase tracking-tight">{dateDisplay}</TableCell>
                         {['am', 'pm'].map((session) => {
                           const value = dayData?.[session];
                           const status = value === true ? 'done' : value === 'skipped' ? 'skipped' : '';
                           
                           return (
-                            <TableCell key={session} className="px-6 py-2">
+                            <TableCell key={session} className="px-4 py-2">
                               <select
+                                status={status}
                                 value={status}
                                 onChange={(e) => setCompletionCell(dateKey, session, e.target.value)}
                                 className={cn(
-                                  "px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all focus:outline-none italic",
+                                  "px-3 py-1.5 rounded-lg text-[10px] font-bold border underline-offset-2 transition-all focus:outline-none",
                                   status === 'done' 
-                                    ? "bg-primary/20 text-primary border-primary/20 shadow-[0_0_20px_rgba(212,255,0,0.2)]" 
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
                                     : status === 'skipped'
-                                    ? "bg-orange-500/20 text-orange-500 border-orange-500/20"
-                                    : "bg-white/5 text-slate-700 border-white/5 hover:bg-white/10 hover:text-slate-500"
+                                    ? "bg-amber-50 text-amber-700 border-amber-100"
+                                    : "bg-transparent text-slate-300 border-transparent hover:border-slate-100"
                                 )}
                                 disabled={!dateKey}
                               >
-                                <option value="" className="bg-card">PENDING</option>
-                                <option value="done" className="bg-card">OPTIMIZED</option>
-                                <option value="skipped" className="bg-card">BYPASSED</option>
+                                <option value="">PENDING</option>
+                                <option value="done">DONE</option>
+                                <option value="skipped">SKIPPED</option>
                               </select>
                             </TableCell>
                           );
@@ -946,14 +949,14 @@ export default function DataConsolePage({ hideSidebar }) {
           )}
 
           {activeTab === 'exerciseDb' && (
-            <div className="flex-1 overflow-auto scrollbar-none relative z-10">
+            <div className="flex-1 overflow-auto scrollbar-none relative">
               <Table className="min-w-[700px]">
-                <TableHeader className="sticky top-0 bg-card/80 backdrop-blur-xl border-b border-white/5 z-10">
-                  <TableRow className="hover:bg-transparent border-none h-16">
-                    <TableHead className="px-6 py-4 text-left font-black text-[10px] uppercase tracking-[0.4em] text-slate-600 w-1/4">PRIMARY AXIS</TableHead>
-                    <TableHead className="px-6 py-4 text-left font-black text-[10px] uppercase tracking-[0.4em] text-slate-600 w-1/4">SUB-CALIBRATION</TableHead>
-                    <TableHead className="px-6 py-4 text-left font-black text-[10px] uppercase tracking-[0.4em] text-slate-600">EXERCISE REPOSITORY</TableHead>
-                    <TableHead className="px-6 py-4 text-center font-black text-[10px] uppercase tracking-[0.4em] text-slate-600 w-24">OPS</TableHead>
+                <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                  <TableRow className="hover:bg-transparent border-none">
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-1/4">Muscle</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-1/4">Sub Muscle</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Exercise</TableHead>
+                    <TableHead className="px-4 py-3 text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-slate-50">
@@ -1110,86 +1113,86 @@ export default function DataConsolePage({ hideSidebar }) {
           )}
 
           {/* Table Footer */}
-          <footer className="px-6 py-4 bg-white/2 border-t border-white/5 flex items-center justify-between backdrop-blur-md">
-            <div className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">
+          <footer className="px-4 py-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               {activeTab === 'exerciseDb' ? (
-                <>METRICS: {Math.min(EXERCISES_PER_PAGE, filteredExerciseRows.length)} / {filteredExerciseRows.length} REPOSITORY ENTRIES</>
+                <>Showing {Math.min(EXERCISES_PER_PAGE, filteredExerciseRows.length)} of {filteredExerciseRows.length} Exercises</>
               ) : activeTab === 'workouts' ? (
-                <>METRICS: {visibleWorkoutRows.length} DATA VECTORS IDENTIFIED</>
+                <>Displaying {visibleWorkoutRows.length} training entries</>
               ) : activeTab === 'schedule' ? (
-                <>METRICS: 168 HOUR TEMPORAL ARCHITECTURE</>
+                <>Full 7-day training week</>
               ) : activeTab === 'templates' ? (
-                <>METRICS: {templateRows.length} PROTOCOLS ESTABLISHED</>
+                <>Managing {templateRows.length} saved routines</>
               ) : (
-                <>METRICS: GLOBAL PERFORMANCE STATUS</>
+                <>Training completion status</>
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
               <button 
                 onClick={() => setExercisePage(p => Math.max(1, p - 1))}
                 disabled={activeTab !== 'exerciseDb' || exercisePage === 1}
-                className="p-2 rounded-xl border border-white/5 text-slate-700 hover:text-primary hover:bg-primary/5 disabled:opacity-10 transition-all shadow-xl bg-card"
+                className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 disabled:opacity-30 transition-all shadow-sm bg-white"
               >
-                <ChevronLeft size={18} strokeWidth={3} />
+                <ChevronLeft size={16} />
               </button>
-              <div className="flex items-center gap-3 px-5 py-2 bg-primary/10 text-primary font-black text-[11px] border border-primary/20 rounded-xl shadow-[0_0_20px_rgba(212,255,0,0.1)] italic">
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-white text-indigo-600 font-bold text-[10px] border border-slate-200 rounded-lg shadow-sm">
                 {activeTab === 'exerciseDb' ? (
                   <>
                     <span>{exercisePage}</span>
-                    <span className="text-primary/30 font-light mx-1">|</span>
+                    <span className="text-slate-300">/</span>
                     <span>{totalExercisePages}</span>
                   </>
                 ) : (
-                  <span>01</span>
+                  <span>1</span>
                 )}
               </div>
               <button 
                 onClick={() => setExercisePage(p => Math.min(totalExercisePages, p + 1))}
                 disabled={activeTab !== 'exerciseDb' || exercisePage === totalExercisePages}
-                className="p-2 rounded-xl border border-white/5 text-slate-700 hover:text-primary hover:bg-primary/5 disabled:opacity-10 transition-all shadow-xl bg-card"
+                className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 disabled:opacity-30 transition-all shadow-sm bg-white"
               >
-                <ChevronRight size={18} strokeWidth={3} />
+                <ChevronRight size={16} />
               </button>
             </div>
           </footer>
 
           {/* Action Footer */}
-          <div className="flex items-center gap-6 mt-8 px-6 pb-10">
+          <div className="flex items-center gap-4 mt-6 px-4 pb-6">
             {activeTab === 'schedule' && (
               <Button
                 onClick={() => {
                   saveSessionTitlesWithSync(sessionTitles);
                   flashSaved(setTitlesSaved);
                 }}
-                className="h-16 bg-primary hover:bg-primary/90 text-primary-foreground font-black rounded-3xl px-10 shadow-[0_20px_40px_rgba(212,255,0,0.2)] uppercase text-[11px] tracking-[0.3em] transition-all transform active:scale-95"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-8 shadow-lg shadow-indigo-100"
               >
-                <Save size={18} className="mr-3" strokeWidth={3} />
-                COMMIT ARCHITECTURE
+                <Save size={16} className="mr-2" />
+                Save Session Titles
               </Button>
             )}
             {activeTab === 'workouts' && (
               <Button
                 onClick={saveWorkoutGrid}
-                className="h-16 bg-primary hover:bg-primary/90 text-primary-foreground font-black rounded-3xl px-10 shadow-[0_20px_40px_rgba(212,255,0,0.2)] uppercase text-[11px] tracking-[0.3em] transition-all transform active:scale-95"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-8 shadow-lg shadow-indigo-100"
               >
-                <Save size={18} className="mr-3" strokeWidth={3} />
-                SYNC MATRIX DATA
+                <Save size={16} className="mr-2" />
+                Save Workouts
               </Button>
             )}
             {activeTab === 'exerciseDb' && (
               <Button
                 onClick={saveExerciseGrid}
-                className="h-16 bg-primary hover:bg-primary/90 text-primary-foreground font-black rounded-3xl px-10 shadow-[0_20px_40px_rgba(212,255,0,0.2)] uppercase text-[11px] tracking-[0.3em] transition-all transform active:scale-95"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-8 shadow-lg shadow-indigo-100"
               >
-                <Save size={18} className="mr-3" strokeWidth={3} />
-                COMMIT REPOSITORY
+                <Save size={16} className="mr-2" />
+                Save Changes
               </Button>
             )}
             
             {(titlesSaved || workoutsSaved || exerciseSaved || completionSaved) && (
-              <Badge variant="outline" className="text-primary border-primary/20 bg-primary/10 animate-pulse font-black px-5 py-2 rounded-2xl uppercase text-[10px] tracking-[0.2em]">
-                ✓ INFRASTRUCTURE RESONATING [SYNCED]
+              <Badge variant="outline" className="text-emerald-500 border-emerald-200 bg-emerald-50/50 animate-pulse font-bold px-3 py-1">
+                ✓ SAVED TO CLOUD
               </Badge>
             )}
           </div>

@@ -49,7 +49,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-const COLORS = ['#4f46e5', '#818cf8', '#c7d2fe', '#6366f1', '#4338ca', '#3730a3'];
+const COLORS = ['var(--indigo-600)', 'var(--indigo-400)', 'var(--indigo-200)', 'var(--indigo-500)', 'var(--indigo-700)', 'var(--indigo-300)'];
 
 export default function AnalyticsPage() {
   const [exerciseFilter, setExerciseFilter] = useState('All');
@@ -269,15 +269,15 @@ export default function AnalyticsPage() {
       {/* Page Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+          <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
             Performance Insights
           </h1>
-          <p className="text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Data-driven training analysis</p>
+          <p className="text-[10px] md:text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">Data-driven training analysis</p>
         </div>
         
         <div className="flex items-center gap-2">
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[140px] h-9 bg-white border-slate-200 text-[11px] font-bold text-slate-600 rounded-lg">
+            <SelectTrigger className="w-[140px] h-9 bg-card border-border text-[11px] font-bold text-foreground rounded-lg">
               <SelectValue placeholder="Time Range" />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-slate-200">
@@ -299,7 +299,7 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      <div ref={dashboardRef} className="space-y-6 bg-[#f8fafc] p-1 -m-1 rounded-3xl">
+      <div ref={dashboardRef} className="space-y-6 bg-background p-1 -m-1 rounded-3xl">
         {/* Header Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard 
@@ -341,41 +341,41 @@ export default function AnalyticsPage() {
         {/* Dynamic Insights Highlights */}
         {analyticsData.volumeHistory.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-indigo-600 text-white rounded-2xl p-4 shadow-md flex items-start gap-3 relative overflow-hidden">
+            <div className="bg-indigo-600 text-indigo-950 dark:text-indigo-950 rounded-2xl p-4 shadow-md flex items-start gap-3 relative overflow-hidden ring-1 ring-white/10">
               <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-10 translate-x-10" />
-              <div className="p-2 bg-white/20 rounded-xl shrink-0 backdrop-blur-sm">
-                <Zap size={16} className="text-indigo-100" />
+              <div className="p-2 bg-black/10 rounded-xl shrink-0 backdrop-blur-sm">
+                <Zap size={16} className="text-indigo-900" />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest mb-1">Peak Performance</p>
+                <p className="text-[10px] font-bold text-indigo-900/60 uppercase tracking-widest mb-1">Peak Performance</p>
                 <p className="text-sm font-semibold leading-tight">
-                  Your highest volume was <span className="text-white font-black">{(analyticsData.insights.highestVolumeDay?.volume / 1000).toFixed(1)}t</span> on <span className="text-indigo-200 font-bold">{analyticsData.insights.highestVolumeDay?.displayDate}</span>.
+                  Your highest volume was <span className="text-black font-black">{(analyticsData.insights.highestVolumeDay?.volume / 1000).toFixed(1)}t</span> on <span className="text-indigo-900 font-bold">{analyticsData.insights.highestVolumeDay?.displayDate}</span>.
                 </p>
               </div>
             </div>
             
-            <div className="bg-emerald-600 text-white rounded-2xl p-4 shadow-md flex items-start gap-3 relative overflow-hidden">
+            <div className="bg-emerald-600 text-emerald-950 rounded-2xl p-4 shadow-md flex items-start gap-3 relative overflow-hidden ring-1 ring-white/10">
               <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-10 translate-x-10" />
-              <div className="p-2 bg-white/20 rounded-xl shrink-0 backdrop-blur-sm">
-                <Target size={16} className="text-emerald-100" />
+              <div className="p-2 bg-black/10 rounded-xl shrink-0 backdrop-blur-sm">
+                <Target size={16} className="text-emerald-900" />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-widest mb-1">Primary Focus</p>
+                <p className="text-[10px] font-bold text-emerald-900/60 uppercase tracking-widest mb-1">Primary Focus</p>
                 <p className="text-sm font-semibold leading-tight">
-                  <span className="text-white font-black">{analyticsData.insights.topMuscle?.name || 'Nothing'}</span> is your most trained muscle group with <span className="text-emerald-200 font-bold">{analyticsData.insights.topMuscle?.value || 0} sets</span>.
+                  <span className="text-black font-black">{analyticsData.insights.topMuscle?.name || 'Nothing'}</span> is your most trained muscle group with <span className="text-emerald-900 font-bold">{analyticsData.insights.topMuscle?.value || 0} sets</span>.
                 </p>
               </div>
             </div>
 
-            <div className="bg-amber-500 text-white rounded-2xl p-4 shadow-md flex items-start gap-3 relative overflow-hidden">
+            <div className="bg-amber-500 text-amber-950 rounded-2xl p-4 shadow-md flex items-start gap-3 relative overflow-hidden ring-1 ring-white/10">
               <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-10 translate-x-10" />
-              <div className="p-2 bg-white/20 rounded-xl shrink-0 backdrop-blur-sm">
-                <Award size={16} className="text-amber-100" />
+              <div className="p-2 bg-black/10 rounded-xl shrink-0 backdrop-blur-sm">
+                <Award size={16} className="text-amber-900" />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-amber-200 uppercase tracking-widest mb-1">Top Movement</p>
+                <p className="text-[10px] font-bold text-amber-900/60 uppercase tracking-widest mb-1">Top Movement</p>
                 <p className="text-sm font-semibold leading-tight">
-                  You've performed <span className="text-white font-black">{analyticsData.insights.topExercise?.name || 'Nothing'}</span> the most, recording <span className="text-amber-200 font-bold">{analyticsData.insights.topExercise?.count || 0} sessions</span>.
+                  You've performed <span className="text-black font-black">{analyticsData.insights.topExercise?.name || 'Nothing'}</span> the most, recording <span className="text-amber-900 font-bold">{analyticsData.insights.topExercise?.count || 0} sessions</span>.
                 </p>
               </div>
             </div>
@@ -384,21 +384,21 @@ export default function AnalyticsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Volume Chart */}
-          <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="lg:col-span-2 bg-card rounded-3xl border border-border p-6 shadow-sm hover:shadow-md transition-all">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
                   <Activity size={16} className="text-indigo-600" />
                   Training Volume Trend
                 </h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Total load per session over time</p>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Total load per session over time</p>
               </div>
             </div>
             {analyticsData.volumeHistory.length === 0 ? (
-              <div className="h-[300px] flex flex-col items-center justify-center text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+              <div className="h-[300px] flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
                 <Activity size={32} className="mb-2 opacity-20" />
                 <p className="text-[10px] font-bold uppercase tracking-widest mt-2">No volume data for this period</p>
-                <p className="text-[10px] text-slate-400 font-medium max-w-[200px] text-center mt-1">Log workouts and mark them as complete to see trends.</p>
+                <p className="text-[10px] text-muted-foreground font-medium max-w-[200px] text-center mt-1">Log workouts and mark them as complete to see trends.</p>
               </div>
             ) : (
               <div className="h-[300px] w-full">
@@ -406,32 +406,32 @@ export default function AnalyticsPage() {
                   <AreaChart data={analyticsData.volumeHistory} style={{ outline: 'none' }}>
                     <defs>
                       <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="var(--color-indigo-600)" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="var(--color-indigo-600)" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-slate-100)" strokeOpacity={0.5} />
                     <XAxis 
                       dataKey="displayDate" 
                       axisLine={false} 
                       tickLine={false} 
-                      tick={{fontSize: 10, fontWeight: 600, fill: '#94a3b8'}}
+                      tick={{fontSize: 10, fontWeight: 600, fill: 'var(--color-slate-400)'}}
                       dy={10}
                     />
                     <YAxis 
                       axisLine={false} 
                       tickLine={false} 
                       tickFormatter={(val) => `${(val / 1000).toFixed(1)}t`}
-                      tick={{fontSize: 10, fontWeight: 600, fill: '#94a3b8'}}
+                      tick={{fontSize: 10, fontWeight: 600, fill: 'var(--color-slate-400)'}}
                     />
                     <Tooltip 
                       content={<CustomVolumeTooltip />}
-                      cursor={{ stroke: '#c7d2fe', strokeWidth: 2, strokeDasharray: '5 5' }}
+                      cursor={{ stroke: 'var(--color-indigo-200)', strokeWidth: 2, strokeDasharray: '5 5' }}
                     />
                     <Area 
                       type="monotone" 
                       dataKey="volume" 
-                      stroke="#4f46e5" 
+                      stroke="var(--color-indigo-600)" 
                       strokeWidth={3}
                       fillOpacity={1} 
                       fill="url(#colorVolume)" 
@@ -444,16 +444,16 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Muscle Distribution */}
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="bg-card rounded-3xl border border-border p-6 shadow-sm hover:shadow-md transition-all">
             <div className="mb-6">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
                 <Target size={16} className="text-indigo-600" />
                 Body Focus
               </h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Muscle group distribution</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Muscle group distribution</p>
             </div>
             {analyticsData.muscleData.length === 0 ? (
-              <div className="h-[250px] flex flex-col items-center justify-center text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+              <div className="h-[250px] flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
                 <Target size={32} className="mb-2 opacity-20" />
                 <p className="text-[10px] font-bold uppercase tracking-widest">No muscle data yet</p>
               </div>
@@ -461,13 +461,13 @@ export default function AnalyticsPage() {
               <div className="h-[250px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart cx="50%" cy="50%" outerRadius="80%" data={analyticsData.muscleData.slice(0, 6)} style={{ outline: 'none' }}>
-                    <PolarGrid stroke="#f1f5f9" />
-                    <PolarAngleAxis dataKey="name" tick={{fontSize: 10, fontWeight: 700, fill: '#64748b'}} />
+                    <PolarGrid stroke="var(--color-slate-100)" strokeOpacity={0.5} />
+                    <PolarAngleAxis dataKey="name" tick={{fontSize: 10, fontWeight: 700, fill: 'var(--color-slate-500)'}} />
                     <Radar
                       name="Focus"
                       dataKey="value"
-                      stroke="#4f46e5"
-                      fill="#4f46e5"
+                      stroke="var(--color-indigo-600)"
+                      fill="var(--color-indigo-600)"
                       fillOpacity={0.5}
                     />
                   </RadarChart>
@@ -476,10 +476,10 @@ export default function AnalyticsPage() {
             )}
             <div className="mt-4 space-y-2">
               {analyticsData.muscleData.slice(0, 3).map((item, i) => (
-                <div key={item.name} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
+                <div key={item.name} className="flex items-center justify-between p-2 rounded-xl bg-muted/50 border border-border/50">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS[i]}} />
-                    <span className="text-[10px] font-bold text-slate-600 uppercase">{item.name}</span>
+                    <span className="text-[10px] font-bold text-foreground uppercase">{item.name}</span>
                   </div>
                   <span className="text-[10px] font-extrabold text-indigo-600">{item.value} Sets</span>
                 </div>
@@ -490,34 +490,34 @@ export default function AnalyticsPage() {
 
         {/* PR Board */}
         {analyticsData.personalRecords.length > 0 && (
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+          <div className="bg-card rounded-3xl border border-border p-6 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div>
-                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
                   <Trophy size={16} className="text-amber-500" />
                   Personal Records
                 </h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">All-time best lifts</p>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">All-time best lifts</p>
               </div>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {analyticsData.personalRecords.map((pr, idx) => (
-                <div key={idx} className="bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-200 p-4 relative overflow-hidden group hover:border-amber-200 hover:shadow-md transition-all">
+                <div key={idx} className="bg-gradient-to-br from-muted/50 to-card rounded-2xl border border-border p-4 relative overflow-hidden group hover:border-amber-500/30 hover:shadow-md transition-all">
                   <div className="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 group-hover:scale-110 group-hover:rotate-12 transition-all">
-                    <Trophy size={64} />
+                    <Trophy size={64} className="text-foreground" />
                   </div>
-                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 truncate pr-6" title={pr.name}>
+                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-2 truncate pr-6" title={pr.name}>
                     {pr.name}
                   </p>
                   <div className="flex items-end gap-1 mb-1">
-                    <span className="text-2xl font-black text-slate-800 leading-none">{pr.weight}</span>
-                    <span className="text-xs font-bold text-slate-400 mb-0.5">kg</span>
+                    <span className="text-2xl font-black text-foreground leading-none">{pr.weight}</span>
+                    <span className="text-xs font-bold text-muted-foreground mb-0.5">kg</span>
                   </div>
-                  <div className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-slate-100 rounded text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                  <div className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-muted rounded text-[9px] font-bold text-muted-foreground uppercase tracking-wider">
                     <History size={8} /> {pr.reps} Reps
                   </div>
-                  <p className="text-[9px] font-semibold text-slate-400 mt-3">{formatDateDisplay(pr.date)}</p>
+                  <p className="text-[9px] font-semibold text-muted-foreground mt-3">{formatDateDisplay(pr.date)}</p>
                 </div>
               ))}
             </div>
@@ -525,21 +525,21 @@ export default function AnalyticsPage() {
         )}
 
         {/* Exercise Evolution */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-card rounded-3xl border border-border p-6 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
                 <Dumbbell size={16} className="text-indigo-600" />
                 Strength Evolution
               </h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Individual exercise progression</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Individual exercise progression</p>
             </div>
             
             <Select value={exerciseFilter} onValueChange={setExerciseFilter}>
-              <SelectTrigger className="w-[180px] h-9 bg-slate-50 border-slate-200 text-xs font-bold text-slate-700 rounded-xl">
+              <SelectTrigger className="w-[180px] h-9 bg-muted/50 border-border text-xs font-bold text-foreground rounded-xl">
                 <SelectValue placeholder="Select Exercise" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-slate-200">
+              <SelectContent className="rounded-xl border-border">
                 <SelectItem value="All" className="text-xs font-semibold">Select Exercise</SelectItem>
                 {analyticsData.exerciseList.map(name => (
                   <SelectItem key={name} value={name} className="text-xs font-semibold">{name}</SelectItem>
@@ -549,7 +549,7 @@ export default function AnalyticsPage() {
           </div>
 
           {exerciseFilter === 'All' ? (
-            <div className="h-[200px] flex flex-col items-center justify-center text-slate-400 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+            <div className="h-[200px] flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
               <History size={32} className="mb-2 opacity-20" />
               <p className="text-[10px] font-bold uppercase tracking-widest">Select an exercise to view history</p>
             </div>
@@ -557,30 +557,30 @@ export default function AnalyticsPage() {
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={selectedExerciseData} style={{ outline: 'none' }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-slate-100)" strokeOpacity={0.5} />
                   <XAxis 
                     dataKey="date" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{fontSize: 10, fontWeight: 600, fill: '#94a3b8'}}
+                    tick={{fontSize: 10, fontWeight: 600, fill: 'var(--color-slate-400)'}}
                     tickFormatter={(val) => formatDateDisplay(val)}
                   />
                   <YAxis 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{fontSize: 10, fontWeight: 600, fill: '#94a3b8'}}
+                    tick={{fontSize: 10, fontWeight: 600, fill: 'var(--color-slate-400)'}}
                   />
                   <Tooltip 
                     labelFormatter={(val) => formatDateDisplay(val)}
-                    contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', padding: '12px'}}
+                    contentStyle={{borderRadius: '16px', border: 'none', backgroundColor: 'var(--color-white)', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', padding: '12px'}}
                   />
                   <Area 
                     type="stepAfter" 
                     dataKey="weight" 
-                    stroke="#4338ca" 
+                    stroke="var(--color-indigo-600)" 
                     strokeWidth={3}
                     fillOpacity={0.1} 
-                    fill="#4338ca"
+                    fill="var(--color-indigo-600)"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -598,9 +598,9 @@ export default function AnalyticsPage() {
 
 function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend }) {
   return (
-    <Card className="rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-all group overflow-hidden relative border-none ring-1 ring-slate-200/60">
+    <Card className="rounded-3xl bg-card border border-border shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
       <div className={cn(
-        "absolute top-0 right-0 p-8 rotate-12 translate-x-4 -translate-y-4 opacity-5 bg-indigo-600 rounded-full group-hover:scale-110 transition-transform"
+        "absolute top-0 right-0 p-8 rotate-12 translate-x-4 -translate-y-4 opacity-5 bg-primary rounded-full group-hover:scale-110 transition-transform"
       )} />
       <CardContent className="p-5">
         <div className="flex items-start justify-between relative">
@@ -610,7 +610,7 @@ function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend }) {
           {trend !== undefined && trend !== null && (
             <div className={cn(
               "flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold",
-              trend >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+              trend >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
             )}>
               {trend >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
               {Math.abs(trend)}%
@@ -618,9 +618,9 @@ function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend }) {
           )}
         </div>
         <div className="mt-4">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{title}</p>
-          <h2 className="text-2xl font-black text-slate-800 mt-1">{value}</h2>
-          <p className="text-[10px] text-slate-400 font-medium mt-1">{subtitle}</p>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{title}</p>
+          <h2 className="text-2xl font-black text-foreground mt-1">{value}</h2>
+          <p className="text-[10px] text-muted-foreground font-medium mt-1">{subtitle}</p>
         </div>
       </CardContent>
     </Card>
@@ -631,27 +631,27 @@ const CustomVolumeTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 max-w-[220px]">
-        <p className="text-xs font-black text-slate-800 mb-1">{data.displayDate}</p>
+      <div className="bg-card rounded-2xl shadow-xl border border-border p-4 max-w-[220px]">
+        <p className="text-xs font-black text-foreground mb-1">{data.displayDate}</p>
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-2 h-2 rounded-full bg-indigo-600" />
-          <p className="text-sm font-bold text-indigo-600">
-            {(data.volume / 1000).toFixed(1)} <span className="text-[10px] font-medium uppercase tracking-widest text-indigo-400">tons</span>
+          <div className="w-2 h-2 rounded-full bg-indigo-500" />
+          <p className="text-sm font-bold text-foreground">
+            {(data.volume / 1000).toFixed(1)} <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">tons</span>
           </p>
         </div>
         
         {data.exerciseCount > 0 && (
-          <div className="pt-3 border-t border-slate-50 space-y-2">
+          <div className="pt-3 border-t border-border space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                <Dumbbell size={10} /> Movements
+              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-1">
+                <Dumbbell size={10} /> MOVEMENTS
               </span>
-              <span className="text-xs font-black text-slate-700">{data.exerciseCount}</span>
+              <span className="text-xs font-black text-foreground">{data.exerciseCount}</span>
             </div>
             {data.muscles && data.muscles.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1">
                 {data.muscles.map((m, i) => (
-                  <span key={i} className="px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded text-[9px] font-bold uppercase tracking-wider">
+                  <span key={i} className="px-1.5 py-0.5 bg-muted text-foreground/80 rounded text-[9px] font-bold uppercase tracking-wider">
                     {m}
                   </span>
                 ))}

@@ -164,7 +164,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     saveSessionTitlesWithSync(sessionTitlesState);
     onWorkoutChanged?.();
     setTitleSaveFlash(true);
-    setTimeout(() => setTitleSaveFlash(false), 2000);
+    setTimeout(() => setTitleSaveFlash(false), 1800);
   };
 
   const handleDeleteGroup = useCallback((groupIdx) => {
@@ -206,56 +206,53 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     const isLocked = done || skipped;
     
     return cn(
-      "flex items-center gap-2 px-3 md:px-5 py-3 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] transition-all relative shrink-0 outline-none",
-      isActive ? 'text-primary drop-shadow-[0_0_8px_rgba(212,255,0,0.3)]' : 'text-slate-500 hover:text-slate-300',
-      isLocked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+      "flex items-center gap-2 px-3 md:px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-all relative shrink-0 outline-none",
+      isActive ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600',
+      isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
     );
   };
 
   return (
     <div className="flex flex-col gap-3 md:gap-4">
       {bothDone && (
-        <div className="bg-primary/5 border border-primary/20 rounded-[2.5rem] px-8 py-6 flex items-center gap-6 mb-8 shadow-[0_0_40px_rgba(212,255,0,0.08)] relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl opacity-30 -mr-24 -mt-24" />
-          <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-[0_0_30px_rgba(212,255,0,0.4)] scale-110 shrink-0">
-            <CheckCircle2 size={24} strokeWidth={4} />
+        <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-3 mb-2 md:mb-4">
+          <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-100">
+            <CheckCircle2 size={16} />
           </div>
           <div>
-            <p className="text-primary font-black text-sm uppercase tracking-[0.4em] italic mb-1">Architecture Calibrated</p>
-            <p className="text-slate-600 text-[10px] font-black uppercase tracking-[0.25em] flex items-center gap-3">
-              <span className={amDone ? "text-primary/70" : "text-slate-800"}>ALPHA: {amDone ? 'FINALIZED' : 'BYPASSED'}</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-white/5" />
-              <span className={pmDone ? "text-primary/70" : "text-slate-800"}>OMEGA: {pmDone ? 'FINALIZED' : 'BYPASSED'}</span>
+            <p className="text-emerald-900 font-bold text-[11px] md:text-xs">Training session finalized!</p>
+            <p className="text-emerald-600 text-[9px] md:text-[10px] font-medium uppercase tracking-tight mt-0.5">
+              AM {amDone ? '✓ COMPLETED' : '⏭ SKIPPED'} &nbsp;·&nbsp; PM {pmDone ? '✓ COMPLETED' : '⏭ SKIPPED'}
             </p>
           </div>
         </div>
       )}
 
       {/* Sub-tabs for AM/PM */}
-      <div className="flex items-center gap-2 border-b border-white/5 mb-4 overflow-x-auto scrollbar-none">
+      <div className="flex items-center gap-1 md:gap-2 border-b border-slate-50 mb-1 overflow-x-auto scrollbar-none">
         <button className={tabCls('am', amDone, amSkipped)} onClick={() => setActiveSession('am')}>
-          <Sun size={14} className={cn(activeSession === 'am' ? "text-primary shadow-[0_0_15px_#d4ff00]" : "text-slate-700")} strokeWidth={4} />
-          <span>Alpha Session</span>
-          {amDone && <CheckCircle size={10} className="text-primary ml-2 shadow-[0_0_10px_#d4ff00]" strokeWidth={4} />}
-          {amSkipped && <FastForward size={10} className="text-slate-800 ml-2" />}
+          <Sun size={14} className={cn(activeSession === 'am' ? "text-indigo-600" : "text-slate-400")} />
+          <span>AM Session</span>
+          {amDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
+          {amSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
           {activeSession === 'am' && (
             <motion.div 
               layoutId="activeSessionIndicator"
-              className="absolute bottom-0 left-0 right-0 h-1.5 bg-primary rounded-full shadow-[0_0_15px_#d4ff00]" 
-              transition={{ type: "spring", stiffness: 600, damping: 30 }}
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" 
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
             />
           )}
         </button>
         <button className={tabCls('pm', pmDone, pmSkipped)} onClick={() => setActiveSession('pm')}>
-          <Moon size={14} className={cn(activeSession === 'pm' ? "text-primary shadow-[0_0_15px_#d4ff00]" : "text-slate-700")} strokeWidth={4} />
-          <span>Omega Session</span>
-          {pmDone && <CheckCircle size={10} className="text-primary ml-2 shadow-[0_0_10px_#d4ff00]" strokeWidth={4} />}
-          {pmSkipped && <FastForward size={10} className="text-slate-800 ml-2" />}
+          <Moon size={14} className={cn(activeSession === 'pm' ? "text-indigo-600" : "text-slate-400")} />
+          <span>PM Session</span>
+          {pmDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
+          {pmSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
           {activeSession === 'pm' && (
             <motion.div 
               layoutId="activeSessionIndicator"
-              className="absolute bottom-0 left-0 right-0 h-1.5 bg-primary rounded-full shadow-[0_0_15px_#d4ff00]" 
-              transition={{ type: "spring", stiffness: 600, damping: 30 }}
+              className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" 
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
             />
           )}
         </button>
@@ -272,7 +269,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
         >
           <div className="flex items-center gap-4 group/session">
             <div className="flex-1 relative flex items-center">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/session:text-primary transition-colors z-20 pointer-events-none">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within/session:text-indigo-400 transition-colors z-20 pointer-events-none">
                 <Tag size={14} strokeWidth={2.5} />
               </div>
               <Input
@@ -287,14 +284,14 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                 }}
                 placeholder="Designate Training Protocol..."
                 disabled={sessionDone || sessionSkipped}
-                className="w-full pl-11 pr-24 bg-white/5 shadow-inner border-white/5 rounded-2xl text-[13px] font-black text-foreground placeholder:text-slate-600 focus-visible:bg-white/10 focus-visible:border-primary/20 focus-visible:ring-primary/5 transition-all h-14 italic tracking-tight"
+                className="w-full pl-11 pr-24 bg-slate-50 shadow-sm border-slate-100 rounded-[1.25rem] text-[13px] font-black text-slate-800 placeholder:text-slate-200 focus-visible:bg-white focus-visible:border-indigo-200 focus-visible:ring-indigo-500/5 transition-all h-12 italic"
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-20">
                 <Button
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "h-9 w-9 rounded-xl text-slate-500 hover:text-primary hover:bg-primary/10 transition-all border border-transparent hover:border-primary/20",
+                    "h-8 w-8 rounded-xl text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all border border-transparent hover:border-indigo-100",
                     (sessionDone || sessionSkipped) && "hidden"
                   )}
                   onClick={() => {
@@ -309,7 +306,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "h-9 w-9 rounded-xl text-slate-500 hover:text-primary hover:bg-primary/10 transition-all border border-transparent hover:border-primary/20",
+                    "h-8 w-8 rounded-xl text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all border border-transparent hover:border-indigo-100",
                     (sessionDone || sessionSkipped) && "hidden"
                   )}
                   onClick={() => {
@@ -323,8 +320,8 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
               </div>
             </div>
             {titleSaveFlash && (
-              <Badge variant="outline" className="text-primary font-black text-[9px] uppercase tracking-[0.3em] border-primary/20 bg-primary/10 animate-pulse h-8 px-4 rounded-xl shrink-0 italic">
-                Resonating
+              <Badge variant="outline" className="text-emerald-500 font-black text-[9px] uppercase tracking-widest border-emerald-100 bg-emerald-50/50 animate-in fade-in zoom-in-95 duration-300 h-6 shrink-0">
+                Synchronized
               </Badge>
             )}
           </div>
@@ -354,12 +351,12 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
               <Button
                 variant="ghost"
                 onClick={handleAddGroup}
-                className="group self-start h-12 border border-dashed border-white/10 rounded-2xl text-slate-400 hover:bg-white/5 hover:border-primary/30 transition-all text-xs font-black uppercase tracking-widest p-0 pr-6 overflow-hidden"
+                className="group self-start h-10 border border-dashed border-indigo-100 rounded-xl text-indigo-500 hover:bg-indigo-50 hover:border-indigo-200 transition-all text-xs font-bold p-0 pr-4 overflow-hidden"
               >
-                <div className="w-12 h-full bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all">
-                  <Plus size={16} strokeWidth={4} />
+                <div className="w-10 h-full bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                  <Plus size={14} strokeWidth={3} />
                 </div>
-                <span className="ml-4 tracking-[0.2em]">Add Performance Block</span>
+                <span className="ml-3">New Exercise Group</span>
               </Button>
             )}
           </div>
@@ -368,36 +365,36 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
 
       <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
         {sessionDone ? (
-          <div className="flex items-center gap-3 text-primary animate-pulse italic">
-            <CheckCircle size={16} strokeWidth={3} />
-            <span className="text-[11px] font-black uppercase tracking-[0.3em]">Protocol Finalized</span>
+          <div className="flex items-center gap-2 text-emerald-600">
+            <CheckCircle size={14} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Session Completed</span>
           </div>
         ) : sessionSkipped ? (
-          <div className="flex items-center gap-3 text-slate-700 italic">
-            <FastForward size={16} strokeWidth={3} />
-            <span className="text-[11px] font-black uppercase tracking-[0.3em]">Temporal Bypass</span>
+          <div className="flex items-center gap-2 text-slate-400">
+            <FastForward size={14} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Session Skipped</span>
           </div>
         ) : (
-          <div className="flex items-center gap-5 flex-wrap w-full">
+          <div className="flex items-center gap-2 flex-wrap w-full">
             {isConfirmingFinish ? (
-                <Button 
-                  onClick={() => {
-                    handleComplete();
-                    setIsConfirmingFinish(false);
-                  }} 
-                  className="h-14 gap-3 px-8 bg-primary text-primary-foreground font-black text-[11px] uppercase rounded-[1.25rem] hover:bg-primary/90 transition-all shadow-[0_15px_30px_rgba(212,255,0,0.3)] animate-in fade-in zoom-in-95 duration-200 tracking-[0.3em] italic"
-                >
-                  <CheckCircle2 size={18} strokeWidth={4} /> CONFIRM FINAL
-                </Button>
+              <Button 
+                onClick={() => {
+                  handleComplete();
+                  setIsConfirmingFinish(false);
+                }} 
+                className="h-9 gap-2 px-4 bg-emerald-600 text-white font-bold text-[10px] uppercase rounded-lg hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 animate-in fade-in zoom-in-95 duration-200"
+              >
+                <CheckCircle2 size={14} /> Confirm Finish
+              </Button>
             ) : (
               <Button 
                 onClick={() => {
                   setIsConfirmingFinish(true);
                   setTimeout(() => setIsConfirmingFinish(false), 3000);
                 }} 
-                className="h-14 gap-3 px-8 bg-primary text-primary-foreground font-black text-[11px] uppercase rounded-[1.25rem] hover:bg-primary/90 transition-all shadow-[0_15px_30px_rgba(212,255,0,0.2)] tracking-[0.3em] active:scale-95 italic"
+                className="h-9 gap-2 px-4 bg-indigo-600 text-white font-bold text-[10px] uppercase rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
               >
-                <CheckCircle size={18} strokeWidth={4} /> FINALIZE LOAD
+                <CheckCircle size={14} /> Finish Session
               </Button>
             )}
             
@@ -407,17 +404,17 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                 setShowTemplateDialog(true);
               }} 
               variant="outline"
-              className="h-14 gap-3 px-8 border-white/5 bg-white/5 text-primary-foreground font-black text-[11px] uppercase rounded-[1.25rem] hover:bg-white/10 hover:border-primary/20 transition-all shadow-2xl tracking-[0.3em] active:scale-95 italic"
+              className="h-9 gap-2 px-4 border-indigo-100 text-indigo-600 font-bold text-[10px] uppercase rounded-lg hover:bg-indigo-50 transition-all shadow-sm"
             >
-              <Sparkles size={18} strokeWidth={4} /> ARCHIVE DATA
+              <Sparkles size={14} /> Save as Routine
             </Button>
             
             <Button 
               variant="ghost"
               onClick={handleSkip} 
-              className="h-12 px-6 text-slate-700 font-black text-[10px] uppercase rounded-2xl hover:text-white hover:bg-white/5 transition-all tracking-[0.3em]"
+              className="h-9 px-4 text-slate-400 font-bold text-[10px] uppercase rounded-lg hover:text-slate-900 transition-all"
             >
-              BYPASS
+              Skip
             </Button>
 
             <div className="ml-auto flex items-center gap-2 h-7">
@@ -444,9 +441,9 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                       saveFlash ? "text-emerald-500 opacity-100" : "text-slate-300 opacity-40"
                     )}
                   >
-                    <CheckCircle2 size={12} strokeWidth={3} />
-                    <span className="text-[10px] font-black uppercase tracking-widest italic">
-                      {saveFlash ? "COMMITTED" : "AUTO-SYNC"}
+                    <CheckCircle2 size={10} />
+                    <span className="text-[9px] font-bold uppercase tracking-widest">
+                      {saveFlash ? "Changes Saved" : "Auto-saved"}
                     </span>
                   </motion.div>
                 )}

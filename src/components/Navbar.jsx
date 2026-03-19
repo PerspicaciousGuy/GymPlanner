@@ -42,22 +42,22 @@ export default function Navbar({ activePage, onNavigate, authState, onDataRefres
   };
 
   return (
-    <header className="bg-card/80 backdrop-blur-xl border-b border-white/5 h-14 md:h-16 shrink-0 z-40 sticky top-0 shadow-xl">
+    <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 h-14 md:h-16 shrink-0 z-40 sticky top-0">
       <div className="h-full px-4 md:px-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-xs md:text-sm font-black text-foreground uppercase tracking-widest whitespace-nowrap italic">
-              {activePage === 'workout' ? 'Training' : activePage === 'routines' ? 'Routines' : 'Console'}
+            <span className="text-xs md:text-sm font-bold text-slate-900 capitalize tracking-tight whitespace-nowrap">
+              {activePage === 'workout' ? 'Training' : 'Console'}
             </span>
-            <div className={`px-2.5 py-0.5 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-widest ${canCloud ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-white/5 text-slate-500 border border-white/10'}`}>
-              {canCloud ? 'System Active' : 'Local Node'}
+            <div className={`px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-wider ${canCloud ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
+              {canCloud ? 'Cloud' : 'Local'}
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
           {migrationNote && (
-            <span className="hidden sm:inline-block text-[10px] font-black text-primary animate-fade-in pr-4 border-r border-white/10 uppercase tracking-widest">
+            <span className="hidden sm:inline-block text-xs font-semibold text-indigo-600 animate-fade-in pr-4 border-r border-slate-100">
               {migrationNote}
             </span>
           )}
