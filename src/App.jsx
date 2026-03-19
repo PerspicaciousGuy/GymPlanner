@@ -39,12 +39,12 @@ export default function App() {
   useEffect(() => {
     migrateCompletionToDateBased();
     migrateWorkoutsToDateBased();
-    
+
     // Check for tomorrow's workout reminder
     const timer = setTimeout(() => {
       scheduleTomorrowSummary();
     }, 2000);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -111,15 +111,15 @@ export default function App() {
 
         <div className="flex flex-col items-center gap-3">
           <div className={`w-1.5 h-1.5 rounded-full transition-all ${syncScope.startsWith('local') ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]' : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]'}`} />
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="icon"
             onClick={() => setSyncNonce(n => n + 1)}
             className="rounded-xl p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all border border-slate-100"
           >
             <RefreshCw size={18} />
           </Button>
-          
+
           <Button variant="outline" size="icon" className="shadow-xs border-indigo-100 text-indigo-600 hover:bg-indigo-50 rounded-xl">
             <Cloud size={18} />
           </Button>
@@ -138,20 +138,24 @@ export default function App() {
 
         <main className="flex-1 overflow-auto">
           <div className="p-3 sm:p-4 lg:p-6 mx-auto w-full max-w-[1600px]">
-            { activePage === 'workout' && <WorkoutSchedulerPage syncKey={ syncKey } targetDate={ selectedHistoryDate } /> }
-            { activePage === 'history' && <HistoryPage onDateSelect={ handleDateSelect } /> }
-            { activePage === 'dayDetail' && <DayDetailPage date={ selectedHistoryDate } onBack={ () => setActivePage('history') } syncKey={ syncKey } /> }
-            { activePage === 'routines' && <RoutinesPage onEdit={(id) => { setEditRoutineId(id); setActivePage('edit-routine'); }} /> }
-            { activePage === 'edit-routine' && <EditRoutinePage routineId={editRoutineId} onBack={() => setActivePage('routines')} /> }
-            { activePage === 'analytics' && <AnalyticsPage /> }
-            { activePage === 'profile' && <ProfilePage authState={ authState } onDataRefreshed={ () => setSyncNonce(n => n + 1) } onSettingsChange={ setSettings } /> }
+            {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} targetDate={selectedHistoryDate} />}
+            {activePage === 'history' && <HistoryPage onDateSelect={handleDateSelect} />}
+            {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('history')} syncKey={syncKey} />}
+            {activePage === 'routines' && <RoutinesPage onEdit={(id) => { setEditRoutineId(id); setActivePage('edit-routine'); }} />}
+            {activePage === 'edit-routine' && <EditRoutinePage routineId={editRoutineId} onBack={() => setActivePage('routines')} />}
+            {activePage === 'analytics' && <AnalyticsPage />}
+            {activePage === 'profile' && <ProfilePage authState={authState} onDataRefreshed={() => setSyncNonce(n => n + 1)} onSettingsChange={setSettings} />}
           </div>
 
         </main>
       </div>
 
       {/* Floating Bottom Navigation for Mobile */}
-      <nav className="md:hidden fixed bottom-6 left-6 right-6 h-[72px] bg-card/90 backdrop-blur-xl border border-border/50 px-3 flex items-center justify-around z-50 rounded-full shadow-2xl transition-all duration-300">
+      <nav className="md:hidden fixed bottom-6 left-6 right-6 h-[72px] bg-white/20 dark:bg-black/40 border-t-[0.5px] border-white/50 dark:border-white/10 flex items-center justify-around z-[9999] rounded-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
+        style={{
+          backdropFilter: 'blur(30px) saturate(210%) contrast(110%)',
+          WebkitBackdropFilter: 'blur(30px) saturate(210%) contrast(110%)'
+        }}>
         {[
           { id: 'workout', name: 'Training', icon: Calendar },
           { id: 'history', name: 'History', icon: History },
