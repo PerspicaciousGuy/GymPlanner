@@ -54,7 +54,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-const COLORS = ['var(--indigo-600)', 'var(--indigo-400)', 'var(--indigo-200)', 'var(--indigo-500)', 'var(--indigo-700)', 'var(--indigo-300)'];
+const COLORS = ['oklch(0.91 0.23 108)', 'oklch(0.8 0.18 108)', 'oklch(0.7 0.15 108)', 'oklch(0.6 0.12 108)'];
 
 export default function AnalyticsPage() {
   const [exerciseFilter, setExerciseFilter] = useState('All');
@@ -270,27 +270,27 @@ export default function AnalyticsPage() {
   };
 
   useGSAP(() => {
+    // Reveal header cards with a cleaner, safer stagger
     gsap.from(".stat-card", {
-      y: 40,
+      y: 20,
       opacity: 0,
-      stagger: 0.1,
-      duration: 0.8,
-      ease: "back.out(1.7)",
-      scrollTrigger: {
-        trigger: ".stat-card",
-        start: "top 90%"
-      }
+      stagger: 0.05,
+      duration: 0.6,
+      ease: "power2.out",
+      clearProps: "all"
     });
 
+    // Animate charts on scroll
     gsap.from(".chart-container", {
-      y: 60,
+      y: 30,
       opacity: 0,
       stagger: 0.2,
-      duration: 1.2,
+      duration: 1,
       ease: "power3.out",
       scrollTrigger: {
         trigger: ".chart-container",
-        start: "top 85%"
+        start: "top 85%",
+        toggleActions: "play none none none"
       }
     });
   }, { scope: dashboardRef });
@@ -420,11 +420,11 @@ export default function AnalyticsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Volume Chart */}
-          <div className="lg:col-span-2 bg-card rounded-3xl border border-border p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="lg:col-span-2 bg-card rounded-3xl border border-border p-6 shadow-sm hover:shadow-md transition-all chart-container">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
-                  <Activity size={16} className="text-indigo-600" />
+                  <Activity size={16} className="text-primary" />
                   Training Volume Trend
                 </h3>
                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Total load per session over time</p>
@@ -437,13 +437,13 @@ export default function AnalyticsPage() {
                 <p className="text-[10px] text-muted-foreground font-medium max-w-[200px] text-center mt-1">Log workouts and mark them as complete to see trends.</p>
               </div>
             ) : (
-              <div className="h-[300px] w-full">
+              <div className="h-[300px] w-full min-w-0" style={{ minHeight: '300px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={analyticsData.volumeHistory} style={{ outline: 'none' }}>
                     <defs>
                       <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--color-indigo-600)" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="var(--color-indigo-600)" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-slate-100)" strokeOpacity={0.5} />
@@ -462,7 +462,7 @@ export default function AnalyticsPage() {
                     />
                     <Tooltip 
                       content={<CustomVolumeTooltip />}
-                      cursor={{ stroke: 'var(--color-indigo-200)', strokeWidth: 2, strokeDasharray: '5 5' }}
+                      cursor={{ stroke: 'var(--color-primary)', strokeWidth: 2, strokeDasharray: '5 5', opacity: 0.3 }}
                     />
                     <Area 
                       type="monotone" 
@@ -483,7 +483,7 @@ export default function AnalyticsPage() {
           <div className="bg-card rounded-3xl border border-border p-6 shadow-sm hover:shadow-md transition-all">
             <div className="mb-6">
               <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
-                <Target size={16} className="text-indigo-600" />
+                <Target size={16} className="text-primary" />
                 Body Focus
               </h3>
               <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Muscle group distribution</p>
@@ -494,7 +494,7 @@ export default function AnalyticsPage() {
                 <p className="text-[10px] font-bold uppercase tracking-widest">No muscle data yet</p>
               </div>
             ) : (
-              <div className="h-[250px] w-full">
+              <div className="h-[250px] w-full min-w-0" style={{ minHeight: '250px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart cx="50%" cy="50%" outerRadius="80%" data={analyticsData.muscleData.slice(0, 6)} style={{ outline: 'none' }}>
                     <PolarGrid stroke="var(--color-slate-100)" strokeOpacity={0.5} />
@@ -502,9 +502,9 @@ export default function AnalyticsPage() {
                     <Radar
                       name="Focus"
                       dataKey="value"
-                      stroke="var(--color-indigo-600)"
-                      fill="var(--color-indigo-600)"
-                      fillOpacity={0.5}
+                      stroke="var(--color-primary)"
+                      fill="var(--color-primary)"
+                      fillOpacity={0.4}
                     />
                   </RadarChart>
                 </ResponsiveContainer>
@@ -517,7 +517,7 @@ export default function AnalyticsPage() {
                     <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS[i]}} />
                     <span className="text-[10px] font-bold text-foreground uppercase">{item.name}</span>
                   </div>
-                  <span className="text-[10px] font-extrabold text-indigo-600">{item.value} Sets</span>
+                  <span className="text-[10px] font-extrabold text-primary">{item.value} Sets</span>
                 </div>
               ))}
             </div>
@@ -561,15 +561,15 @@ export default function AnalyticsPage() {
         )}
 
         {/* Exercise Evolution */}
-        <div className="bg-card rounded-3xl border border-border p-6 shadow-sm">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <div>
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
-                <Dumbbell size={16} className="text-indigo-600" />
-                Strength Evolution
-              </h3>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Individual exercise progression</p>
-            </div>
+          <div className="bg-card rounded-3xl border border-border p-6 shadow-sm chart-container">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+              <div>
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
+                  <Dumbbell size={16} className="text-primary" />
+                  Strength Evolution
+                </h3>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Individual exercise progression</p>
+              </div>
             
             <Select value={exerciseFilter} onValueChange={setExerciseFilter}>
               <SelectTrigger className="w-[180px] h-9 bg-muted/50 border-border text-xs font-bold text-foreground rounded-xl">
@@ -590,7 +590,7 @@ export default function AnalyticsPage() {
               <p className="text-[10px] font-bold uppercase tracking-widest">Select an exercise to view history</p>
             </div>
           ) : (
-            <div className="h-[300px] w-full">
+            <div className="h-[300px] w-full min-w-0" style={{ minHeight: '300px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={selectedExerciseData} style={{ outline: 'none' }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-slate-100)" strokeOpacity={0.5} />
@@ -613,10 +613,11 @@ export default function AnalyticsPage() {
                   <Area 
                     type="stepAfter" 
                     dataKey="weight" 
-                    stroke="var(--color-indigo-600)" 
+                    stroke="var(--color-primary)" 
                     strokeWidth={3}
-                    fillOpacity={0.1} 
-                    fill="var(--color-indigo-600)"
+                    fillOpacity={0.15} 
+                    fill="var(--color-primary)"
+                    animationDuration={1500}
                   />
                 </AreaChart>
               </ResponsiveContainer>
