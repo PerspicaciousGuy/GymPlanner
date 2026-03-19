@@ -13,6 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { loadTemplates, updateTemplate, getMuscleGroupKeys, getSubMusclesForMuscle, getExercisesForSubMuscle } from '../utils/storage';
 import { cn } from "@/lib/utils";
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const generateId = () => Math.random().toString(36).substr(2, 9);
 
 export default function EditRoutinePage({ routineId, onBack }) {
   const [name, setName] = useState('');
@@ -24,7 +29,13 @@ export default function EditRoutinePage({ routineId, onBack }) {
     const routine = templates.find(t => t.id === routineId);
     if (routine) {
       setName(routine.name || '');
-      setGroups(JSON.parse(JSON.stringify(routine.groups || [])));
+      const rawGroups = JSON.parse(JSON.stringify(routine.groups || []));
+      const groupsWithIds = rawGroups.map(g => ({
+        ...g,
+        id: g.id || generateId(),
+        rows: (g.rows || []).map(r => ({ ...r, id: r.id || generateId() }))
+      }));
+      setGroups(groupsWithIds);
     }
   }, [routineId]);
 
@@ -71,18 +82,37 @@ export default function EditRoutinePage({ routineId, onBack }) {
 
   const addRowToGroup = (gIdx) => {
     const next = [...groups];
-    next[gIdx].rows.push({ exercise: '', sets: '', reps: '', weight: '', muscle: '' });
+    next[gIdx].rows.push({ id: generateId(), exercise: '', sets: '', reps: '', weight: '', muscle: '' });
     setGroups(next);
   };
 
   const addGroup = () => {
-    setGroups([...groups, { rows: [{ exercise: '', sets: '', reps: '', weight: '', muscle: '' }] }]);
+    setGroups([...groups, { id: generateId(), rows: [{ id: generateId(), exercise: '', sets: '', reps: '', weight: '', muscle: '' }] }]);
   };
 
+  useGSAP(() => {
+    gsap.from(".edit-header > *", {
+      y: 30,
+      opacity: 0,
+      stagger: 0.1,
+      duration: 0.8,
+      ease: "power4.out"
+    });
+
+    gsap.from(".routine-section", {
+      y: 50,
+      opacity: 0,
+      stagger: 0.15,
+      duration: 1,
+      ease: "power3.out",
+      delay: 0.2
+    });
+  }, { scope: '.edit-page' });
+
   return (
-    <div className="max-w-3xl mx-auto pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-3xl mx-auto pb-24 edit-page">
       {/* Top Header/Action Bar */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 edit-header">
         <Button 
           variant="ghost" 
           onClick={onBack}
@@ -106,7 +136,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
 
       <div className="space-y-10">
         {/* Title Section */}
-        <div className="space-y-4">
+        <div className="space-y-4 edit-header">
           <Badge className="bg-primary/10 text-primary border-none font-black text-[9px] px-3 py-1 rounded-full uppercase tracking-widest">
             Routing Configuration
           </Badge>
@@ -139,8 +169,17 @@ export default function EditRoutinePage({ routineId, onBack }) {
           </div>
 
           <div className="space-y-6">
+            <AnimatePresence mode="popLayout">
             {groups.map((group, gIdx) => (
-              <div key={gIdx} className="border border-border rounded-[2.5rem] bg-card p-6 md:p-8 shadow-sm hover:border-primary/20 transition-all relative overflow-hidden group/card">
+              <motion.div 
+                key={group.id}
+                layout
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, height: 0, marginBottom: 0, transition: { duration: 0.2 } }}
+                transition={{ type: "spring", stiffness: 350, damping: 25, mass: 1 }}
+                className="border border-border rounded-[2.5rem] bg-card p-6 md:p-8 shadow-sm hover:border-primary/20 transition-all relative overflow-hidden group/card routine-section"
+              >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-muted/20 rounded-bl-[4rem] -mr-16 -mt-16 pointer-events-none" />
                 
                 <div className="flex items-center justify-between mb-6 relative z-10">
@@ -158,13 +197,22 @@ export default function EditRoutinePage({ routineId, onBack }) {
                 </div>
 
                 <div className="space-y-4 relative z-10">
+                  <AnimatePresence mode="popLayout">
                   {group.rows?.map((row, rIdx) => {
                     const muscleList = getMuscleGroupKeys();
                     const subMuscleList = row.muscle ? getSubMusclesForMuscle(row.muscle) : [];
                     const exerciseList = (row.muscle && row.subMuscle) ? getExercisesForSubMuscle(row.muscle, row.subMuscle) : [];
 
                     return (
-                    <div key={rIdx} className="bg-muted/20 rounded-[1.8rem] border border-border/40 p-3 md:p-4 space-y-3 group/row hover:border-primary/20 transition-all">
+                    <motion.div 
+                      key={row.id}
+                      layout
+                      initial={{ opacity: 0, x: -20, scale: 0.98 }}
+                      animate={{ opacity: 1, x: 0, scale: 1 }}
+                      exit={{ opacity: 0, x: 50, scale: 0.9, height: 0, marginBottom: 0, padding: 0 }}
+                      transition={{ type: "spring", stiffness: 450, damping: 30 }}
+                      className="bg-muted/20 rounded-[1.8rem] border border-border/40 p-3 md:p-4 space-y-3 group/row hover:border-primary/20 transition-all overflow-hidden"
+                    >
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
                         <div className="space-y-1">
                           <label className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest pl-2">Muscle Group</label>
@@ -232,8 +280,9 @@ export default function EditRoutinePage({ routineId, onBack }) {
                            <Trash2 size={14} />
                         </Button>
                       </div>
-                    </div>
+                    </motion.div>
                   ); })}
+                  </AnimatePresence>
                   
                   <Button 
                     variant="ghost" 
@@ -243,8 +292,9 @@ export default function EditRoutinePage({ routineId, onBack }) {
                     <Plus size={14} className="mr-2" /> Add Exercise to Section
                   </Button>
                 </div>
-              </div>
+              </motion.div>
             ))}
+            </AnimatePresence>
           </div>
         </div>
       </div>

@@ -10,9 +10,11 @@
   body {
     @apply antialiased selection:bg-blue-100 selection:text-blue-900 bg-background text-foreground;
   }
+
   * {
     @apply border-border outline-ring/50;
   }
+
   html {
     @apply font-sans;
   }
@@ -40,15 +42,19 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 /* Remove Recharts native outline */
-.recharts-wrapper:focus, 
+.recharts-wrapper:focus,
 .recharts-surface:focus,
 .recharts-layer:focus {
   outline: none !important;
 }
+
 .recharts-wrapper * {
   outline: none !important;
 }
-.recharts-surface, .recharts-responsive-container, svg.recharts-surface {
+
+.recharts-surface,
+.recharts-responsive-container,
+svg.recharts-surface {
   outline: none !important;
 }
 
@@ -59,7 +65,8 @@ input[type="date"]::-webkit-inner-spin-button {
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.585 0.233 277.117); /* Original Indigo */
+  --primary: oklch(0.585 0.233 277.117);
+  /* Original Indigo */
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -106,7 +113,7 @@ input[type="date"]::-webkit-inner-spin-button {
   --color-slate-700: #334155;
   --color-slate-800: #1e293b;
   --color-slate-900: #0f172a;
-  
+
   /* Modern Soft Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
@@ -116,22 +123,26 @@ input[type="date"]::-webkit-inner-spin-button {
 }
 
 .dark {
-  --background: oklch(0.12 0 0); /* Deep Charcoal */
+  --background: oklch(0.12 0 0);
+  /* Deep Charcoal */
   --foreground: oklch(0.98 0 0);
   --card: oklch(0.16 0 0);
   --card-foreground: oklch(0.98 0 0);
   --popover: oklch(0.16 0 0);
   --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.91 0.23 108); /* Electric Lime */
+  --primary: oklch(0.91 0.23 108);
+  /* Electric Lime */
   --primary-foreground: oklch(0.12 0 0);
   --secondary: oklch(0.25 0 0);
   --secondary-foreground: oklch(0.98 0 0);
   --muted: oklch(0.25 0 0);
-  --muted-foreground: oklch(0.8 0 0); /* Lighter muted text */
+  --muted-foreground: oklch(0.8 0 0);
+  /* Lighter muted text */
   --accent: oklch(0.25 0 0);
   --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.6 0.2 25);
-  --border: oklch(1 0 0 / 3%); /* Extremely soft borders */
+  --border: oklch(1 0 0 / 3%);
+  /* Extremely soft borders */
   --input: oklch(1 0 0 / 6%);
   --ring: oklch(0.91 0.23 108 / 30%);
   --sidebar: oklch(0.14 0 0);
@@ -145,7 +156,7 @@ input[type="date"]::-webkit-inner-spin-button {
 
   /* Dark Theme Specific Overrides (mapped to Lime/Charcoal) */
   --color-white: #121212;
-  --color-indigo-50: oklch(0.25 0.05 108 / 0.1); 
+  --color-indigo-50: oklch(0.25 0.05 108 / 0.1);
   --color-indigo-100: oklch(0.25 0.05 108 / 0.15);
   --color-indigo-200: oklch(0.3 0.06 108 / 0.2);
   --color-indigo-300: oklch(0.35 0.08 108 / 0.25);
@@ -153,15 +164,19 @@ input[type="date"]::-webkit-inner-spin-button {
   --color-indigo-500: #D4FF00;
   --color-indigo-600: #BBDD00;
   --color-indigo-700: #A5C200;
-  
+
   /* High-contrast Slate for readability in Dark Mode */
   --color-slate-50: #161617;
-  --color-slate-100: #1A1A1B; /* Softened borders */
-  --color-slate-200: #1E1E1F; /* Softened borders */
-  --color-slate-300: #8899A6; /* Better contrast for muted text */
-  --color-slate-400: #AAB8C2; /* Better contrast */
-  --color-slate-500: #CBD5E1; 
-  --color-slate-600: #E2E8F0; 
+  --color-slate-100: #1A1A1B;
+  /* Softened borders */
+  --color-slate-200: #1E1E1F;
+  /* Softened borders */
+  --color-slate-300: #8899A6;
+  /* Better contrast for muted text */
+  --color-slate-400: #AAB8C2;
+  /* Better contrast */
+  --color-slate-500: #CBD5E1;
+  --color-slate-600: #E2E8F0;
   --color-slate-700: #F1F5F9;
   --color-slate-800: #F8FAFC;
   --color-slate-900: #FFFFFF;
@@ -224,7 +239,7 @@ input[type="date"]::-webkit-inner-spin-button {
   --color-indigo-500: var(--color-indigo-500);
   --color-indigo-600: var(--color-indigo-600);
   --color-indigo-700: var(--color-indigo-700);
-  
+
   --color-slate-50: var(--color-slate-50);
   --color-slate-100: var(--color-slate-100);
   --color-slate-200: var(--color-slate-200);
@@ -235,7 +250,7 @@ input[type="date"]::-webkit-inner-spin-button {
   --color-slate-700: var(--color-slate-700);
   --color-slate-800: var(--color-slate-800);
   --color-slate-900: var(--color-slate-900);
-  
+
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);

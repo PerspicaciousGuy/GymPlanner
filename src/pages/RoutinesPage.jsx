@@ -53,33 +53,32 @@ export default function RoutinesPage({ onEdit }) {
           <p className="text-sm text-muted-foreground font-medium tracking-tight">Manage workout templates and session structures.</p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button 
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <Button
             onClick={handleCreateNew}
-            className="h-9 px-4 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/10 transition-all flex items-center gap-2"
+            className="h-10 sm:h-9 px-4 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/10 transition-all flex items-center justify-center gap-2 shrink-0"
           >
             <Plus size={14} strokeWidth={3} />
-            <span className="hidden sm:inline">New Routine</span>
-            <span className="sm:hidden">New</span>
+            <span>New Routine</span>
           </Button>
-          
-          <div className="flex items-center gap-3 bg-card p-1.5 rounded-xl border border-border shadow-sm backdrop-blur-sm">
-           <div className="relative group min-w-[200px] md:min-w-[220px]">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={14} />
-             <Input 
-               placeholder="Search..." 
-               value={searchQuery}
-               onChange={(e) => setSearchQuery(e.target.value)}
-               className="pl-9 h-9 rounded-lg border-border bg-muted/50 hover:bg-muted text-xs font-bold transition-all focus-visible:bg-card focus-visible:border-primary focus-visible:ring-primary/5 shadow-none"
-             />
-           </div>
-           <div className="h-6 w-[1px] bg-border mx-1" />
-           <div className="px-3 py-1.5 text-[9px] font-black text-muted-foreground uppercase tracking-widest bg-muted rounded-lg border border-border/50">
-             Templates: <span className="text-primary">{templateRows.length}</span>
-           </div>
+
+          <div className="flex flex-1 items-center gap-2 bg-card p-1.5 rounded-xl border border-border shadow-sm backdrop-blur-sm">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={14} />
+              <Input
+                placeholder="Search routines..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-8 rounded-lg border-border bg-muted/50 hover:bg-muted text-[11px] font-bold transition-all focus-visible:bg-card focus-visible:border-primary focus-visible:ring-primary/5 shadow-none"
+              />
+            </div>
+            <div className="hidden xs:flex h-6 w-[1px] bg-border mx-1" />
+            <div className="hidden xs:block px-3 py-1.5 text-[9px] font-black text-muted-foreground uppercase tracking-widest bg-muted rounded-lg border border-border/50 whitespace-nowrap">
+              <span className="text-primary">{templateRows.length}</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
       {templatesSaved && (
         <div className="fixed top-8 right-8 z-[100] animate-in slide-in-from-right-10 fade-in duration-300">
@@ -91,17 +90,17 @@ export default function RoutinesPage({ onEdit }) {
       )}
 
       {filteredTemplates.length === 0 ? (
-        <div className="py-32 text-center bg-card rounded-[3.5rem] border border-dashed border-border/60 shadow-inner group transition-all hover:bg-muted/30">
-          <div className="relative inline-block mb-8">
+        <div className="py-12 md:py-24 text-center bg-card rounded-[3.5rem] border border-dashed border-border/60 shadow-inner group transition-all hover:bg-muted/30">
+          <div className="relative inline-block mb-6">
             <div className="absolute inset-0 bg-primary/5 rounded-full blur-3xl opacity-40 animate-pulse" />
-            <div className="relative bg-card w-28 h-28 rounded-[3rem] flex items-center justify-center mx-auto text-muted-foreground shadow-2xl border border-border rotate-12 transition-transform group-hover:rotate-0">
-              <Sparkles size={48} strokeWidth={1.5} />
+            <div className="relative bg-card w-20 h-20 rounded-[2.5rem] flex items-center justify-center mx-auto text-muted-foreground shadow-2xl border border-border rotate-12 transition-transform group-hover:rotate-0">
+              <Sparkles size={32} strokeWidth={1.5} />
             </div>
           </div>
-          <div className="max-w-md mx-auto space-y-3">
-            <h3 className="text-2xl font-black text-foreground tracking-tight uppercase">Library Empty</h3>
-            <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest leading-relaxed">
-              No routines found match your search. Save active sessions as routines to build your library.
+          <div className="max-w-md mx-auto px-6 space-y-2">
+            <h3 className="text-xl font-black text-foreground uppercase italic tracking-tight">Library Empty</h3>
+            <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest leading-relaxed">
+              No routines found. Save active sessions as routines to build your library.
             </p>
           </div>
         </div>

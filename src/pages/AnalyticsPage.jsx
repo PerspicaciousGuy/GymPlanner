@@ -16,6 +16,11 @@ import {
   Pie,
   Cell
 } from 'recharts';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 import { 
   BarChart3, 
@@ -264,8 +269,34 @@ export default function AnalyticsPage() {
     }, 100);
   };
 
+  useGSAP(() => {
+    gsap.from(".stat-card", {
+      y: 40,
+      opacity: 0,
+      stagger: 0.1,
+      duration: 0.8,
+      ease: "back.out(1.7)",
+      scrollTrigger: {
+        trigger: ".stat-card",
+        start: "top 90%"
+      }
+    });
+
+    gsap.from(".chart-container", {
+      y: 60,
+      opacity: 0,
+      stagger: 0.2,
+      duration: 1.2,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: ".chart-container",
+        start: "top 85%"
+      }
+    });
+  }, { scope: dashboardRef });
+
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-500">
+    <div className="space-y-6 pb-12 animate-in fade-in duration-500 analytics-page">
       {/* Page Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -304,78 +335,83 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard 
             title="Total Volume" 
-            value={`${(analyticsData.totalVolume / 1000).toFixed(1)}t`} 
+            value={analyticsData.totalVolume / 1000} 
+            suffix="t"
             subtitle={timeRange === 'all' ? "Tonnage lifted (lifetime)" : "Tonnage this period"}
             trend={analyticsData.volumeTrend}
             icon={<BarChart3 size={20} />}
-            iconColor="text-indigo-600"
-            bgColor="bg-indigo-50"
+            iconColor="text-primary"
+            bgColor="bg-primary/10"
+            className="stat-card"
           />
           <StatCard 
             title="Consistency" 
-            value={`${analyticsData.completedSessions}`} 
+            value={analyticsData.completedSessions} 
             subtitle={timeRange === 'all' ? "Sessions completed (lifetime)" : "Sessions this period"}
             trend={analyticsData.sessionsTrend}
             icon={<TrendingUp size={20} />}
-            iconColor="text-emerald-600"
-            bgColor="bg-emerald-50"
+            iconColor="text-emerald-500"
+            bgColor="bg-emerald-500/10"
+            className="stat-card"
           />
           <StatCard 
             title="Intensity" 
-            value="8.4" 
+            value={8.4} 
             subtitle="Avg RPE (Est.)"
             icon={<Flame size={20} />}
-            iconColor="text-orange-600"
-            bgColor="bg-orange-50"
+            iconColor="text-orange-500"
+            bgColor="bg-orange-500/10"
+            className="stat-card"
           />
           <StatCard 
             title="Achievements" 
-            value={analyticsData.volumeHistory.length ? "12" : "0"} 
+            value={analyticsData.volumeHistory.length ? 12 : 0} 
             subtitle="Personal Records"
             icon={<Trophy size={20} />}
-            iconColor="text-amber-600"
-            bgColor="bg-amber-50"
+            iconColor="text-amber-500"
+            bgColor="bg-amber-500/10"
+            className="stat-card"
           />
         </div>
 
         {/* Dynamic Insights Highlights */}
         {analyticsData.volumeHistory.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-indigo-600 text-indigo-950 dark:text-indigo-950 rounded-2xl p-4 shadow-md flex items-start gap-3 relative overflow-hidden ring-1 ring-white/10">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-10 translate-x-10" />
-              <div className="p-2 bg-black/10 rounded-xl shrink-0 backdrop-blur-sm">
-                <Zap size={16} className="text-indigo-900" />
+            <div className="bg-primary/10 border border-primary/20 text-foreground rounded-2xl p-4 shadow-sm flex items-start gap-4 relative overflow-hidden group/insight transition-all hover:scale-[1.02] duration-300">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -translate-y-10 translate-x-10" />
+              <div className="p-2.5 bg-primary/20 rounded-xl shrink-0 backdrop-blur-sm group-hover/insight:scale-110 transition-transform">
+                <Zap size={18} className="text-primary-foreground fill-primary" />
               </div>
-              <div>
-                <p className="text-[10px] font-bold text-indigo-900/60 uppercase tracking-widest mb-1">Peak Performance</p>
-                <p className="text-sm font-semibold leading-tight">
-                  Your highest volume was <span className="text-black font-black">{(analyticsData.insights.highestVolumeDay?.volume / 1000).toFixed(1)}t</span> on <span className="text-indigo-900 font-bold">{analyticsData.insights.highestVolumeDay?.displayDate}</span>.
+              <div className="relative z-10">
+                <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-1.5 opacity-80">Peak Performance</p>
+                <p className="text-sm font-bold leading-snug tracking-tight">
+                  Your highest volume was <span className="text-primary font-black">{(analyticsData.insights.highestVolumeDay?.volume / 1000).toFixed(1)}t</span> on <span className="font-black underline decoration-primary/30 decoration-2 underline-offset-2">{analyticsData.insights.highestVolumeDay?.displayDate}</span>.
                 </p>
               </div>
             </div>
             
-            <div className="bg-emerald-600 text-emerald-950 rounded-2xl p-4 shadow-md flex items-start gap-3 relative overflow-hidden ring-1 ring-white/10">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-10 translate-x-10" />
-              <div className="p-2 bg-black/10 rounded-xl shrink-0 backdrop-blur-sm">
-                <Target size={16} className="text-emerald-900" />
+            <div className="bg-emerald-500/10 border border-emerald-500/20 text-foreground rounded-2xl p-4 shadow-sm flex items-start gap-4 relative overflow-hidden group/insight transition-all hover:scale-[1.02] duration-300">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -translate-y-10 translate-x-10" />
+              <div className="p-2.5 bg-emerald-500/20 rounded-xl shrink-0 backdrop-blur-sm group-hover/insight:scale-110 transition-transform">
+                <Target size={18} className="text-emerald-600" />
               </div>
-              <div>
-                <p className="text-[10px] font-bold text-emerald-900/60 uppercase tracking-widest mb-1">Primary Focus</p>
-                <p className="text-sm font-semibold leading-tight">
-                  <span className="text-black font-black">{analyticsData.insights.topMuscle?.name || 'Nothing'}</span> is your most trained muscle group with <span className="text-emerald-900 font-bold">{analyticsData.insights.topMuscle?.value || 0} sets</span>.
+              <div className="relative z-10">
+                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-1.5 opacity-80">Primary Focus</p>
+                <p className="text-sm font-bold leading-snug tracking-tight">
+                  <span className="font-black text-emerald-700">{analyticsData.insights.topMuscle?.name || 'Nothing'}</span> is your most trained muscle group with <span className="text-emerald-600 font-black">{analyticsData.insights.topMuscle?.value || 0} sets</span>.
                 </p>
               </div>
             </div>
 
-            <div className="bg-amber-500 text-amber-950 rounded-2xl p-4 shadow-md flex items-start gap-3 relative overflow-hidden ring-1 ring-white/10">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-10 translate-x-10" />
-              <div className="p-2 bg-black/10 rounded-xl shrink-0 backdrop-blur-sm">
-                <Award size={16} className="text-amber-900" />
+            <div className="bg-amber-500/10 border border-amber-500/20 text-foreground rounded-2xl p-4 shadow-sm flex items-start gap-4 relative overflow-hidden group/insight transition-all hover:scale-[1.02] duration-300">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl -translate-y-10 translate-x-10" />
+              <div className="p-2.5 bg-amber-500/20 rounded-xl shrink-0 backdrop-blur-sm group-hover/insight:scale-110 transition-transform">
+                <Award size={18} className="text-amber-600" />
               </div>
-              <div>
-                <p className="text-[10px] font-bold text-amber-900/60 uppercase tracking-widest mb-1">Top Movement</p>
-                <p className="text-sm font-semibold leading-tight">
-                  You've performed <span className="text-black font-black">{analyticsData.insights.topExercise?.name || 'Nothing'}</span> the most, recording <span className="text-amber-900 font-bold">{analyticsData.insights.topExercise?.count || 0} sessions</span>.
+              <div className="relative z-10">
+                <p className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-1.5 opacity-80">Top Movement</p>
+                <p className="text-sm font-bold leading-snug tracking-tight">
+                  You've performed <span className="font-black text-amber-700">{analyticsData.insights.topExercise?.name || 'Nothing'}</span> the most, recording <span className="text-amber-600 font-black">{analyticsData.insights.topExercise?.count || 0} sessions</span>.
                 </p>
               </div>
             </div>
@@ -431,7 +467,7 @@ export default function AnalyticsPage() {
                     <Area 
                       type="monotone" 
                       dataKey="volume" 
-                      stroke="var(--color-indigo-600)" 
+                      stroke="var(--primary)" 
                       strokeWidth={3}
                       fillOpacity={1} 
                       fill="url(#colorVolume)" 
@@ -596,14 +632,34 @@ export default function AnalyticsPage() {
 
 
 
-function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend }) {
+function GlowCounter({ value, suffix = "", decimals = 0 }) {
+  const countRef = useRef(null);
+  
+  useGSAP(() => {
+    const obj = { val: 0 };
+    gsap.to(obj, {
+      val: value,
+      duration: 1.5,
+      ease: "power2.out",
+      onUpdate: () => {
+        if (countRef.current) {
+          countRef.current.innerText = obj.val.toFixed(decimals) + suffix;
+        }
+      }
+    });
+  }, [value]);
+
+  return <span ref={countRef}>0</span>;
+}
+
+function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend, suffix = "", className }) {
   return (
-    <Card className="rounded-3xl bg-card border border-border shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+    <Card className={cn("rounded-3xl bg-card border border-border shadow-sm hover:shadow-md transition-all group overflow-hidden relative", className)}>
       <div className={cn(
         "absolute top-0 right-0 p-8 rotate-12 translate-x-4 -translate-y-4 opacity-5 bg-primary rounded-full group-hover:scale-110 transition-transform"
       )} />
       <CardContent className="p-5">
-        <div className="flex items-start justify-between relative">
+        <div className="flex items-start justify-between relative min-h-[48px]">
           <div className={cn("p-3 rounded-2xl transition-transform group-hover:scale-110", bgColor, iconColor)}>
             {icon}
           </div>
@@ -619,7 +675,9 @@ function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend }) {
         </div>
         <div className="mt-4">
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{title}</p>
-          <h2 className="text-2xl font-black text-foreground mt-1">{value}</h2>
+          <h2 className="text-2xl font-black text-foreground mt-1">
+            <GlowCounter value={value} suffix={suffix} decimals={suffix === 't' ? 1 : 0} />
+          </h2>
           <p className="text-[10px] text-muted-foreground font-medium mt-1">{subtitle}</p>
         </div>
       </CardContent>
