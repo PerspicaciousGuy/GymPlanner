@@ -1,13 +1,22 @@
 import { useMemo, useState, useEffect } from 'react';
 import { ChevronDown, Calendar, AlertCircle, CheckCircle2, Clock, RefreshCw } from 'lucide-react';
 import WorkoutSection from '../components/WorkoutSection';
-import { loadSessionTitles, loadWorkoutByDate, isDayComplete, ensureAmPm, syncPlannerData } from '../utils/storage';
+import { 
+  loadSessionTitles, 
+  loadWorkoutByDate, 
+  isDayComplete, 
+  ensureAmPm, 
+  syncPlannerData,
+  getEffectiveSessionTitle,
+  getDailyMetadata
+} from '../utils/storage';
 import { 
   getYesterday, 
   getToday, 
   getTomorrow, 
   getDayOfWeek, 
-  formatDateDisplay, 
+  formatDateDisplay,
+  formatDateCompact,
   getWeekStart,
   getWeekDates,
   isSameDay 
@@ -52,6 +61,18 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
     )
   ) : null;
 
+  const shiftedBadge = (section.isShifted || section.isShiftedFrom) ? (
+    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">
+      <RefreshCw size={10} strokeWidth={3} className="animate-spin-slow" />
+      <span className="text-[10px] font-bold uppercase tracking-wider">
+        {section.isShiftedFrom 
+          ? (section.shiftedToLabel ? `To ${section.shiftedToLabel}` : 'Shifted Out') 
+          : (section.shiftedFromLabel ? `From ${section.shiftedFromLabel}` : 'Shifted In')
+        }
+      </span>
+    </div>
+  ) : null;
+
   return (
     <div className={`overflow-hidden transition-all duration-300 ${open ? 'mb-3 md:mb-4 shadow-xl shadow-slate-200/50' : 'mb-2'}`}>
       <button
@@ -68,8 +89,9 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
           
           <div className="w-px h-6 md:h-8 bg-slate-100 mx-0.5 md:mx-1 hidden xs:block" />
           
-          <div className="scale-90 md:scale-100 origin-left">
+          <div className="scale-90 md:scale-100 origin-left flex items-center gap-2">
             {badgeEl}
+            {shiftedBadge}
           </div>
 
           {section.muscleGroup && (
@@ -143,10 +165,10 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
   const sections = useMemo(() => {
     const titles = loadSessionTitles();
 
-    const hasPlannedTraining = (dayName) => {
-      const am = (titles.am?.[dayName] || '').trim().toLowerCase();
-      const pm = (titles.pm?.[dayName] || '').trim().toLowerCase();
-      const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ');
+    const hasPlannedTraining = (date) => {
+      const am = getEffectiveSessionTitle(date, 'am').trim().toLowerCase();
+      const pm = getEffectiveSessionTitle(date, 'pm').trim().toLowerCase();
+      const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ') || txt.startsWith('rest ');
       return !(isOff(am) && isOff(pm));
     };
 
@@ -160,7 +182,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       const tomorrowName = getDayOfWeek(tomorrow);
 
       const yesterdayMissed =
-        hasPlannedTraining(yesterdayName) &&
+        hasPlannedTraining(yesterday) &&
         !isDayComplete(yesterday, 'am') &&
         !isDayComplete(yesterday, 'pm');
       
@@ -175,11 +197,19 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
           showContextBadge: true,
           defaultOpen: targetDate ? isSameDay(yesterday, targetDate) : true,
           isFullyComplete: yesterdayComplete,
-          data: loadWorkoutByDate(yesterday)
+          data: loadWorkoutByDate(yesterday),
+          isShifted: !!getDailyMetadata(yesterday, 'am').isShifted || !!getDailyMetadata(yesterday, 'pm').isShifted,
+          isShiftedFrom: !!getDailyMetadata(yesterday, 'am').isShiftedFrom || !!getDailyMetadata(yesterday, 'pm').isShiftedFrom,
+          shiftedFromLabel: (getDailyMetadata(yesterday, 'am').originalDate || getDailyMetadata(yesterday, 'pm').originalDate) 
+            ? `${getDayOfWeek(getDailyMetadata(yesterday, 'am').originalDate || getDailyMetadata(yesterday, 'pm').originalDate).slice(0,3)}, ${formatDateCompact(getDailyMetadata(yesterday, 'am').originalDate || getDailyMetadata(yesterday, 'pm').originalDate)}` : null,
+          shiftedToLabel: (getDailyMetadata(yesterday, 'am').shiftedToDate || getDailyMetadata(yesterday, 'pm').shiftedToDate) 
+            ? `${getDayOfWeek(getDailyMetadata(yesterday, 'am').shiftedToDate || getDailyMetadata(yesterday, 'pm').shiftedToDate).slice(0,3)}, ${formatDateCompact(getDailyMetadata(yesterday, 'am').shiftedToDate || getDailyMetadata(yesterday, 'pm').shiftedToDate)}` : null,
         });
       }
       
       const todayComplete = isDayComplete(today, 'am') && isDayComplete(today, 'pm');
+      const todayAmMeta = getDailyMetadata(today, 'am');
+      const todayPmMeta = getDailyMetadata(today, 'pm');
       list.push({ 
         date: today, 
         dayName: todayName, 
@@ -188,10 +218,18 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
         showContextBadge: true,
         defaultOpen: targetDate ? isSameDay(today, targetDate) : true,
         isFullyComplete: todayComplete,
-        data: loadWorkoutByDate(today)
+        data: loadWorkoutByDate(today),
+        isShifted: !!todayAmMeta.isShifted || !!todayPmMeta.isShifted,
+        isShiftedFrom: !!todayAmMeta.isShiftedFrom || !!todayPmMeta.isShiftedFrom,
+        shiftedFromLabel: (todayAmMeta.originalDate || todayPmMeta.originalDate) 
+          ? `${getDayOfWeek(todayAmMeta.originalDate || todayPmMeta.originalDate).slice(0,3)}, ${formatDateCompact(todayAmMeta.originalDate || todayPmMeta.originalDate)}` : null,
+        shiftedToLabel: (todayAmMeta.shiftedToDate || todayPmMeta.shiftedToDate) 
+          ? `${getDayOfWeek(todayAmMeta.shiftedToDate || todayPmMeta.shiftedToDate).slice(0,3)}, ${formatDateCompact(todayAmMeta.shiftedToDate || todayPmMeta.shiftedToDate)}` : null,
       });
 
       const tomorrowComplete = isDayComplete(tomorrow, 'am') && isDayComplete(tomorrow, 'pm');
+      const tomorrowAmMeta = getDailyMetadata(tomorrow, 'am');
+      const tomorrowPmMeta = getDailyMetadata(tomorrow, 'pm');
       list.push({ 
         date: tomorrow, 
         dayName: tomorrowName, 
@@ -201,7 +239,13 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
         showContextBadge: true,
         defaultOpen: targetDate ? isSameDay(tomorrow, targetDate) : false,
         isFullyComplete: tomorrowComplete,
-        data: loadWorkoutByDate(tomorrow)
+        data: loadWorkoutByDate(tomorrow),
+        isShifted: !!tomorrowAmMeta.isShifted || !!tomorrowPmMeta.isShifted,
+        isShiftedFrom: !!tomorrowAmMeta.isShiftedFrom || !!tomorrowPmMeta.isShiftedFrom,
+        shiftedFromLabel: (tomorrowAmMeta.originalDate || tomorrowPmMeta.originalDate) 
+          ? `${getDayOfWeek(tomorrowAmMeta.originalDate || tomorrowPmMeta.originalDate).slice(0,3)}, ${formatDateCompact(tomorrowAmMeta.originalDate || tomorrowPmMeta.originalDate)}` : null,
+        shiftedToLabel: (tomorrowAmMeta.shiftedToDate || tomorrowPmMeta.shiftedToDate) 
+          ? `${getDayOfWeek(tomorrowAmMeta.shiftedToDate || tomorrowPmMeta.shiftedToDate).slice(0,3)}, ${formatDateCompact(tomorrowAmMeta.shiftedToDate || tomorrowPmMeta.shiftedToDate)}` : null,
       });
       return list;
     } else {
@@ -209,6 +253,8 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       const list = weekDates.map((date) => {
         const dayName = getDayOfWeek(date);
         const isFullyComplete = isDayComplete(date, 'am') && isDayComplete(date, 'pm');
+        const amMeta = getDailyMetadata(date, 'am');
+        const pmMeta = getDailyMetadata(date, 'pm');
         return {
           date,
           dayName,
@@ -218,6 +264,12 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
           showContextBadge: false,
           defaultOpen: targetDate ? isSameDay(date, targetDate) : false,
           isFullyComplete,
+          isShifted: !!amMeta.isShifted || !!pmMeta.isShifted,
+          isShiftedFrom: !!amMeta.isShiftedFrom || !!pmMeta.isShiftedFrom,
+          shiftedFromLabel: (amMeta.originalDate || pmMeta.originalDate) 
+            ? `${getDayOfWeek(amMeta.originalDate || pmMeta.originalDate).slice(0,3)}, ${formatDateCompact(amMeta.originalDate || pmMeta.originalDate)}` : null,
+          shiftedToLabel: (amMeta.shiftedToDate || pmMeta.shiftedToDate) 
+            ? `${getDayOfWeek(amMeta.shiftedToDate || pmMeta.shiftedToDate).slice(0,3)}, ${formatDateCompact(amMeta.shiftedToDate || pmMeta.shiftedToDate)}` : null,
           data: loadWorkoutByDate(date)
         };
       });

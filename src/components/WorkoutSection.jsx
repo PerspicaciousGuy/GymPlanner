@@ -13,11 +13,27 @@ import {
   XCircle,
   AlertCircle,
   RefreshCw,
-  FolderOpen
+  FolderOpen,
+  ArrowRight
 } from 'lucide-react';
 import ExerciseGroup from './ExerciseGroup';
 import TemplateDialog from './TemplateDialog';
-import { saveDayWorkoutWithSync, markDayCompleteWithSync, markDaySkippedWithSync, isDayComplete, isDaySkipped, ensureAmPm, defaultSession, defaultGroup, loadSessionTitles, saveSessionTitlesWithSync } from '../utils/storage';
+import ShiftPicker from './ShiftPicker';
+import { 
+  saveDayWorkoutWithSync, 
+  markDayCompleteWithSync, 
+  markDaySkippedWithSync, 
+  isDayComplete, 
+  isDaySkipped, 
+  ensureAmPm, 
+  defaultSession, 
+  defaultGroup, 
+  loadSessionTitles, 
+  saveSessionTitlesWithSync,
+  getEffectiveSessionTitle,
+  saveDailyMetadata,
+  shiftWorkout
+} from '../utils/storage';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -37,9 +53,11 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const [pmDone, setPmDone] = useState(() => isDayComplete(date || workoutDateKey, 'pm') && !isDaySkipped(date || workoutDateKey, 'pm'));
   const [amSkipped, setAmSkipped] = useState(() => isDaySkipped(date || workoutDateKey, 'am'));
   const [pmSkipped, setPmSkipped] = useState(() => isDaySkipped(date || workoutDateKey, 'pm'));
-  const [sessionTitlesState, setSessionTitlesState] = useState(() => loadSessionTitles() || { am: {}, pm: {} });
+  const [amTitleState, setAmTitleState] = useState(() => getEffectiveSessionTitle(date || workoutDateKey, 'am'));
+  const [pmTitleState, setPmTitleState] = useState(() => getEffectiveSessionTitle(date || workoutDateKey, 'pm'));
   const [isConfirmingFinish, setIsConfirmingFinish] = useState(false);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [showShiftPicker, setShowShiftPicker] = useState(false);
   const [templateDialogMode, setTemplateDialogMode] = useState('load'); // 'load' or 'save'
 
   useEffect(() => {
@@ -47,8 +65,9 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   }, [initialData]);
 
   useEffect(() => {
-    setSessionTitlesState(loadSessionTitles());
-  }, [syncToken]);
+    setAmTitleState(getEffectiveSessionTitle(date || workoutDateKey, 'am'));
+    setPmTitleState(getEffectiveSessionTitle(date || workoutDateKey, 'pm'));
+  }, [date, workoutDateKey, syncToken]);
 
   useEffect(() => {
     const dateOrDay = date || workoutDateKey;
@@ -110,6 +129,16 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     }
   };
 
+  const handleShift = (targetDate, targetSession) => {
+    shiftWorkout(date || workoutDateKey, targetDate, activeSession, targetSession);
+    setShowShiftPicker(false);
+    onWorkoutChanged?.();
+    // Reset local state for source day
+    setDayData(ensureAmPm(null));
+    if (activeSession === 'am') setAmTitleState(`Rest (Shifted)`);
+    else setPmTitleState(`Rest (Shifted)`);
+  };
+
   // Debounced Auto-save
   useEffect(() => {
     // Skip auto-save on initial mount
@@ -147,21 +176,13 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   }, [activeSession]);
 
   const handleSessionTitleChange = (session, value) => {
-    setSessionTitlesState((prev) => {
-      const currentSession = prev?.[session] || {};
-      return {
-        ...prev,
-        [session]: {
-          ...currentSession,
-          [titleDayName]: value,
-        },
-      };
-    });
+    if (session === 'am') setAmTitleState(value);
+    else setPmTitleState(value);
   };
 
   const handleSessionTitleSave = () => {
-    if (!sessionTitlesState) return;
-    saveSessionTitlesWithSync(sessionTitlesState);
+    const value = activeSession === 'am' ? amTitleState : pmTitleState;
+    saveDailyMetadata(date || workoutDateKey, activeSession, { title: value });
     onWorkoutChanged?.();
     setTitleSaveFlash(true);
     setTimeout(() => setTitleSaveFlash(false), 1800);
@@ -183,19 +204,18 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
       s.groups = JSON.parse(JSON.stringify(template.groups));
       return { ...prev, [activeSession]: s };
     });
-    setSessionTitlesState((prev) => ({
-      ...prev,
-      [activeSession]: {
-        ...prev[activeSession],
-        [titleDayName]: template.name
-      }
-    }));
+    setAmTitleState(template.name); // If loading into AM
+    setPmTitleState(template.name); // Just in case, but usually we load into active
+    
+    // Save as daily override immediately
+    saveDailyMetadata(date || workoutDateKey, activeSession, { title: template.name });
+    
     setIsDirty(true);
     setShowTemplateDialog(false);
   };
 
-  const amTitle = sessionTitlesState?.am?.[titleDayName] || '';
-  const pmTitle = sessionTitlesState?.pm?.[titleDayName] || '';
+  const amTitle = amTitleState;
+  const pmTitle = pmTitleState;
   const sessionDone = activeSession === 'am' ? amDone : pmDone;
   const sessionSkipped = activeSession === 'am' ? amSkipped : pmSkipped;
   const bothDone = (amDone || amSkipped) && (pmDone || pmSkipped);
@@ -294,6 +314,18 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                     "h-8 w-8 rounded-xl text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all border border-transparent hover:border-indigo-100",
                     (sessionDone || sessionSkipped) && "hidden"
                   )}
+                  onClick={() => setShowShiftPicker(true)}
+                  title="Shift Workout"
+                >
+                  <ArrowRight size={16} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-8 w-8 rounded-xl text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all border border-transparent hover:border-indigo-100",
+                    (sessionDone || sessionSkipped) && "hidden"
+                  )}
                   onClick={() => {
                     setTemplateDialogMode('load');
                     setShowTemplateDialog(true);
@@ -332,6 +364,14 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
             mode={templateDialogMode}
             currentGroups={groups}
             onSelect={handleApplyTemplate}
+          />
+
+          <ShiftPicker
+            open={showShiftPicker}
+            onOpenChange={setShowShiftPicker}
+            sourceDate={date || workoutDateKey}
+            sourceSession={activeSession}
+            onShift={handleShift}
           />
 
           <div className="space-y-3">

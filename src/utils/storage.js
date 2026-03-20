@@ -27,6 +27,7 @@ const CUSTOM_EXERCISES_KEY = 'gymplanner_custom_exercises';
 const EXERCISE_DB_KEY      = 'gymplanner_exercise_db';
 const SESSION_TITLES_KEY   = 'gymplanner_session_titles';
 const TEMPLATES_KEY        = 'gymplanner_templates';
+const DAILY_METADATA_KEY   = 'gymplanner_daily_metadata';
 const MIGRATION_FLAG_KEY   = 'gymplanner_migrated_to_dates';
 const WORKOUT_MIGRATION_FLAG_KEY = 'gymplanner_workouts_migrated_to_dates';
 const PLANNER_LOCAL_KEYS = [
@@ -37,6 +38,7 @@ const PLANNER_LOCAL_KEYS = [
   EXERCISE_DB_KEY,
   SESSION_TITLES_KEY,
   TEMPLATES_KEY,
+  DAILY_METADATA_KEY,
   MIGRATION_FLAG_KEY,
   WORKOUT_MIGRATION_FLAG_KEY,
 ];
@@ -104,6 +106,84 @@ export function saveSessionTitles(titles) {
   const am = { ...AM_TITLES, ...(titles?.am ?? {}) };
   const pm = { ...PM_TITLES, ...(titles?.pm ?? {}) };
   localStorage.setItem(SESSION_TITLES_KEY, JSON.stringify({ am, pm }));
+}
+
+// ─── Daily Overrides (Date-specific metadata) ────────────────
+export function loadDailyMetadata() {
+  return safeLoad(DAILY_METADATA_KEY, {});
+}
+
+export function saveDailyMetadata(date, session, data) {
+  const dateKey = formatDateKey(date);
+  const all = loadDailyMetadata();
+  if (!all[dateKey]) all[dateKey] = { am: {}, pm: {} };
+  
+  all[dateKey][session] = {
+    ...(all[dateKey][session] || {}),
+    ...data
+  };
+  
+  localStorage.setItem(DAILY_METADATA_KEY, JSON.stringify(all));
+}
+
+export function getDailyMetadata(date, session) {
+  const dateKey = formatDateKey(date);
+  const all = loadDailyMetadata();
+  return all[dateKey]?.[session] || {};
+}
+
+/**
+ * Returns the session title for a specific date/session.
+ * Priorities: 
+ * 1. Daily Metadata Override
+ * 2. Global Session Title Template (Day of week)
+ * 3. Fallback to Empty
+ */
+export function getEffectiveSessionTitle(date, session) {
+  const override = getDailyMetadata(date, session);
+  if (override.title !== undefined && override.title !== null) {
+    return override.title;
+  }
+
+  const titles = loadSessionTitles();
+  const dayName = getDayOfWeek(date);
+  return titles[session]?.[dayName] || '';
+}
+
+/**
+ * Moves a session (title + exercises) from one date to another.
+ */
+export function shiftWorkout(fromDate, toDate, fromSession, toSession = null) {
+  const targetSession = toSession || fromSession;
+  
+  // 1. Get source data
+  const sourceTitle = getEffectiveSessionTitle(fromDate, fromSession);
+  const sourceWorkouts = loadWorkoutByDate(fromDate);
+  const sourceSessionData = sourceWorkouts[fromSession];
+
+  // 2. Save to destination
+  // Save Title
+  saveDailyMetadata(toDate, targetSession, { 
+    title: sourceTitle,
+    isShifted: true, 
+    originalDate: formatDateKey(fromDate)
+  });
+  
+  // Save Exercises
+  const targetWorkouts = loadWorkoutByDate(toDate);
+  targetWorkouts[targetSession] = JSON.parse(JSON.stringify(sourceSessionData));
+  saveDayWorkoutWithSync(toDate, targetWorkouts);
+
+  // 3. Update source (Mark as shifted/rest)
+  saveDailyMetadata(fromDate, fromSession, { 
+    title: `Rest (Shifted to ${formatDateKey(toDate)})`,
+    isShiftedFrom: true,
+    shiftedToDate: formatDateKey(toDate)
+  });
+  
+  // Clear source exercises
+  sourceWorkouts[fromSession] = defaultSession();
+  saveDayWorkoutWithSync(fromDate, sourceWorkouts);
 }
 
 export function saveSessionTitlesWithSync(titles) {
