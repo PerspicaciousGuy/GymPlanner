@@ -311,7 +311,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "h-8 w-8 rounded-xl text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all border border-transparent hover:border-indigo-100",
+                    "h-8 w-8 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-white hover:border-indigo-200 hover:shadow-sm transition-all border border-slate-100 bg-white/80",
                     (sessionDone || sessionSkipped) && "hidden"
                   )}
                   onClick={() => setShowShiftPicker(true)}
@@ -323,7 +323,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "h-8 w-8 rounded-xl text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all border border-transparent hover:border-indigo-100",
+                    "h-8 w-8 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-white hover:border-indigo-200 hover:shadow-sm transition-all border border-slate-100 bg-white/80",
                     (sessionDone || sessionSkipped) && "hidden"
                   )}
                   onClick={() => {
@@ -338,7 +338,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "h-8 w-8 rounded-xl text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all border border-transparent hover:border-indigo-100",
+                    "h-8 w-8 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-white hover:border-indigo-200 hover:shadow-sm transition-all border border-slate-100 bg-white/80",
                     (sessionDone || sessionSkipped) && "hidden"
                   )}
                   onClick={() => {
