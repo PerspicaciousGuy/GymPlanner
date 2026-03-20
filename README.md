@@ -1,69 +1,59 @@
 # GymPlanner
 
-GymPlanner is a daily workout scheduler with AM/PM planning, local-first persistence, and Firebase cloud sync for multi-device use.
+GymPlanner is a high-performance, daily workout scheduler with AM/PM planning, local-first persistence, and Firebase cloud sync. It features a modern "Liquid Glass" design language inspired by premium mobile interfaces.
 
-## Features
+## 🚀 Key Features
 
-- AM/PM session planning per day with independent completion state
-- AM complete/skip flow auto-advances to PM, and completed/skipped tabs are locked
-- Workout logging by group and row with editable exercise fields
-- Data Console with spreadsheet-style tabs for session titles, workouts, completion, and exercise DB
-- Data Console export to `.xlsx` with `Export Current Tab` and `Export All Tabs`
-- Local-first writes for responsive UI and offline resilience
-- Firebase Auth + Firestore sync when signed in
-- Cloud actions: sign in/out, migrate local data to cloud, and clear local cache then rehydrate from cloud
-- PWA support for installable mobile/desktop usage
+- **Workout Shifting**: Redistribute training sessions across the week. Move a missed workout to a future rest day with a single click.
+- **Daily Metadata Overrides**: Customize session titles for specific dates (e.g., "Max Effort Monday") without affecting the global weekly template.
+- **Liquid Glass UI**: Ultra-refined aesthetics with heavy backdrop blurs (`40px`), vibrant refraction, and floating specular elements.
+- **Detailed Training History**: Transparent "Shifted From/To" badges in the Training Hub provide clear chronological audit trails for adjusted schedules.
+- **AM/PM Precision**: Independent session planning with auto-advancing flows and locked completion states.
+- **Data Console**: Spreadsheet-style management for routines, exercises, and completion records with full `.xlsx` export.
+- **Local-First & Cloud-Synced**: Instant UI responsiveness with optional Firebase Auth + Firestore synchronization.
+- **PWA Support**: Fully installable on iOS, Android, and Desktop with offline resilience.
 
-## Tech Stack
+## 🛠 Tech Stack
 
 | Layer | Tech |
 |---|---|
-| Frontend | React + Vite + Tailwind CSS |
-| Cloud | Firebase Authentication + Firestore |
-| Local persistence | localStorage |
-| PWA | vite-plugin-pwa + Workbox |
+| **Frontend** | React + Vite + Tailwind CSS |
+| **Animation** | Framer Motion |
+| **Icons** | Lucide React |
+| **Cloud** | Firebase Auth + Firestore |
+| **Persistence** | LocalStorage + Synced Cloud Layer |
+| **PWA** | Vite PWA + Service Workers |
 
-## Getting Started
+## 📦 Getting Started
 
-```bash
-npm install
-copy .env.example .env
-npm run dev
-```
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-Dev server: `http://localhost:5173`
+2. **Configure Environment**:
+   Copy `.env.example` to `.env` and fill in your Firebase credentials.
+   ```bash
+   cp .env.example .env
+   ```
 
-## Environment Variables
+3. **Run Development Server**:
+   ```bash
+   npm run dev
+   ```
+   Access at: `http://localhost:5173`
 
-Set these values in `.env`:
+## ☁️ Firebase Integration
 
-```env
-VITE_FIREBASE_API_KEY=
-VITE_FIREBASE_AUTH_DOMAIN=
-VITE_FIREBASE_PROJECT_ID=
-VITE_FIREBASE_STORAGE_BUCKET=
-VITE_FIREBASE_MESSAGING_SENDER_ID=
-VITE_FIREBASE_APP_ID=
-```
+1. Create a Firebase project and a Web app.
+2. Enable **Email/Password** authentication.
+3. Deploy Firestore rules from `firestore.rules`.
+4. Use the **Migrate to Cloud** feature in the profile to seed your cloud database from local cache.
 
-## Firebase Setup
+## 📜 License
 
-1. Create a Firebase project and Web app.
-2. Copy the Web app config values into `.env`.
-3. Enable `Email/Password` in Firebase Authentication.
-4. Publish Firestore rules from `firestore.rules`.
+This project is licensed under the **MIT License**.
 
-## Cloud User Flow
+Copyright (c) 2026 GymPlanner Contributors
 
-1. Sign in using the shared account (or your own account) from the navbar.
-2. Use `Migrate Local to Cloud` once to seed Firestore from local data.
-3. Use `Remove Local Data` to clear local cache and reload from cloud.
-4. Verify data in both `Workout` and `Data` pages.
-
-## Build
-
-```bash
-npm run build
-```
-
-For detailed project context, see `PROJECT_CONTEXT.md`.
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, provided that the above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
