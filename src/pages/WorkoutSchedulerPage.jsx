@@ -23,6 +23,7 @@ import {
 } from '../utils/dateUtils';
 import WeekPicker from '../components/WeekPicker';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from "@/lib/utils";
 
 function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged }) {
   const [open, setOpen] = useState(defaultOpen && !section.isFullyComplete);
@@ -74,10 +75,18 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
   ) : null;
 
   return (
-    <div className={`overflow-hidden transition-all duration-300 ${open ? 'mb-3 md:mb-4 shadow-xl shadow-slate-200/50' : 'mb-2'}`}>
+    <div className={cn(
+      "overflow-hidden transition-all duration-500 rounded-[2rem] group/card",
+      open 
+        ? "mb-6 md:mb-8 shadow-[0_15px_45px_-12px_rgba(0,0,0,0.08)] bg-white border border-slate-100" 
+        : "mb-3 md:mb-4 border border-slate-100/50 bg-white/50 hover:bg-white hover:border-slate-200 shadow-sm"
+    )}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className={`w-full flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 bg-white border border-slate-200 hover:border-indigo-200 transition-all group ${open ? 'rounded-t-2xl border-b-transparent' : 'rounded-2xl shadow-sm hover:shadow-md'}`}
+        className={cn(
+          "w-full flex items-center justify-between px-4 md:px-6 py-4 md:py-5 bg-transparent transition-all",
+          open && "border-b border-slate-50/80"
+        )}
       >
         <div className="flex items-center gap-2 md:gap-4">
           <div className="flex flex-col items-start min-w-[80px] md:min-w-[100px]">
@@ -117,7 +126,7 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="bg-white border-x border-b border-slate-200 rounded-b-2xl overflow-hidden"
+            className="bg-transparent overflow-hidden"
           >
             <div className="px-3 md:px-4 py-4 md:py-5">
               <WorkoutSection
