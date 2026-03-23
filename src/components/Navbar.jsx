@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { 
   CloudOff, 
-  AlertCircle
+  AlertCircle,
+  RefreshCw,
+  Cloud
 } from 'lucide-react';
 
 import {
@@ -17,6 +19,7 @@ import {
 
 import {
   clearLocalDataAndRehydrateFromCloud,
+  syncPlannerData,
 } from '../utils/storage';
 
 export default function Navbar({ activePage, onNavigate, authState, onDataRefreshed, compact }) {
@@ -25,6 +28,23 @@ export default function Navbar({ activePage, onNavigate, authState, onDataRefres
   const [confirmingClear, setConfirmingClear] = useState(false);
 
   const canCloud = !!authState?.isConfigured;
+
+  const handleSync = async () => {
+    try {
+      setBusy(true);
+      setMigrationNote('Syncing...');
+      const ok = await syncPlannerData();
+      if (ok) {
+        setMigrationNote('Cloud Synced');
+        onDataRefreshed?.();
+      } else {
+        setMigrationNote('Offline - Local Only');
+      }
+    } finally {
+      setBusy(false);
+      setTimeout(() => setMigrationNote(''), 3000);
+    }
+  };
 
   const handleClearLocal = async () => {
     try {
@@ -52,6 +72,17 @@ export default function Navbar({ activePage, onNavigate, authState, onDataRefres
             <div className={`px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-wider ${canCloud ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'}`}>
               {canCloud ? 'Cloud' : 'Local'}
             </div>
+            {canCloud && (
+              <button
+                onClick={handleSync}
+                disabled={busy}
+                title="Force Sync with Cloud"
+                className={`flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-indigo-600 hover:bg-indigo-50 hover:border-indigo-100 transition-all shadow-sm ${busy ? 'opacity-50' : ''}`}
+              >
+                <RefreshCw size={10} className={busy ? 'animate-spin' : ''} />
+                Sync Now
+              </button>
+            )}
           </div>
         </div>
 
