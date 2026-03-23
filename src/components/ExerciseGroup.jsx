@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo, memo } from 'react';
-import { Plus, Trash2, Layers, ChevronDown } from 'lucide-react';
+import { useState, useCallback, useMemo, useEffect, memo } from 'react';
+import { Plus, Trash2, Layers, ChevronDown, X } from 'lucide-react';
 import { defaultRow } from '../utils/storage';
 import ExerciseRow from './ExerciseRow';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,6 +8,16 @@ const COLS = ['Muscle Group', 'Sub Muscle', 'Exercise', 'Sets', 'Reps', 'Weight'
 
 const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange, onDeleteGroup, groupCount = 1, workoutDate, sessionKey }) {
   const [isOpen, setIsOpen] = useState(true);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+
+  // Auto-reset confirmation state after 3 seconds
+  useEffect(() => {
+    let timer;
+    if (isConfirmingDelete) {
+      timer = setTimeout(() => setIsConfirmingDelete(false), 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [isConfirmingDelete]);
 
   const handleRowChange = useCallback((rowIdx, updatedRow) => {
     const updatedRows = group.rows.map((r, i) => (i === rowIdx ? updatedRow : r));
@@ -63,17 +73,54 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
         
         <div className="flex items-center gap-3">
           {canDeleteGroup && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteGroup();
-              }}
-              className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold text-red-500 hover:bg-red-50 rounded-lg transition-all"
-              title="Delete this entire group"
-            >
-              <Trash2 size={12} />
-              <span className="hidden xs:inline">Remove</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <AnimatePresence mode="wait">
+                {isConfirmingDelete ? (
+                  <motion.div 
+                    key="confirm"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="flex items-center gap-1.5"
+                  >
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteGroup();
+                      }}
+                      className="px-2 py-1 text-[10px] font-black text-white bg-red-500 rounded-lg shadow-sm shadow-red-100 hover:bg-red-600 transition-all uppercase tracking-tighter"
+                    >
+                      Confirm Delete
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsConfirmingDelete(false);
+                      }}
+                      className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+                    >
+                      <X size={12} strokeWidth={3} />
+                    </button>
+                  </motion.div>
+                ) : (
+                  <motion.button
+                    key="delete"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsConfirmingDelete(true);
+                    }}
+                    className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                    title="Delete this entire group"
+                  >
+                    <Trash2 size={12} />
+                    <span className="hidden xs:inline">Remove</span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
           )}
 
           <motion.div 
