@@ -123,58 +123,50 @@ svg.recharts-surface {
 }
 
 .dark {
-  --background: oklch(0.12 0 0);
-  /* Deep Charcoal */
+  --background: oklch(0.18 0.01 250); /* Deep Soft Charcoal */
   --foreground: oklch(0.98 0 0);
-  --card: oklch(0.16 0 0);
+  --card: oklch(0.22 0.015 250); /* Slightly lighter surface */
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.16 0 0);
+  --popover: oklch(0.22 0.015 250);
   --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.91 0.23 108);
-  /* Electric Lime */
-  --primary-foreground: oklch(0.12 0 0);
-  --secondary: oklch(0.25 0 0);
+  --primary: oklch(0.91 0.23 108); /* Electric Lime */
+  --primary-foreground: oklch(0.18 0 0);
+  --secondary: oklch(0.28 0.02 250);
   --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.25 0 0);
+  --muted: oklch(0.28 0.02 250);
   --muted-foreground: oklch(0.8 0 0);
-  /* Lighter muted text */
-  --accent: oklch(0.25 0 0);
+  --accent: oklch(0.28 0.02 250);
   --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.6 0.2 25);
-  --border: oklch(1 0 0 / 3%);
-  /* Extremely soft borders */
-  --input: oklch(1 0 0 / 6%);
+  --border: oklch(1 0 0 / 8%); /* Slightly more visible borders */
+  --input: oklch(1 0 0 / 12%);
   --ring: oklch(0.91 0.23 108 / 30%);
-  --sidebar: oklch(0.14 0 0);
+  --sidebar: oklch(0.2 0.01 250);
   --sidebar-foreground: oklch(0.98 0 0);
   --sidebar-primary: oklch(0.91 0.23 108);
-  --sidebar-primary-foreground: oklch(0.12 0 0);
-  --sidebar-accent: oklch(0.2 0 0);
+  --sidebar-primary-foreground: oklch(0.18 0 0);
+  --sidebar-accent: oklch(0.25 0.01 250);
   --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(1 0 0 / 3%);
+  --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.91 0.23 108 / 30%);
 
   /* Dark Theme Specific Overrides (mapped to Lime/Charcoal) */
-  --color-white: #121212;
-  --color-indigo-50: oklch(0.25 0.05 108 / 0.1);
-  --color-indigo-100: oklch(0.25 0.05 108 / 0.15);
-  --color-indigo-200: oklch(0.3 0.06 108 / 0.2);
-  --color-indigo-300: oklch(0.35 0.08 108 / 0.25);
-  --color-indigo-400: oklch(0.4 0.12 108 / 0.3);
+  --color-white: #1e1e20;
+  --color-indigo-50: oklch(0.28 0.05 108 / 0.1);
+  --color-indigo-100: oklch(0.28 0.05 108 / 0.15);
+  --color-indigo-200: oklch(0.32 0.06 108 / 0.2);
+  --color-indigo-300: oklch(0.38 0.08 108 / 0.25);
+  --color-indigo-400: oklch(0.42 0.12 108 / 0.3);
   --color-indigo-500: #D4FF00;
   --color-indigo-600: #BBDD00;
   --color-indigo-700: #A5C200;
 
   /* High-contrast Slate for readability in Dark Mode */
-  --color-slate-50: #161617;
-  --color-slate-100: #1A1A1B;
-  /* Softened borders */
-  --color-slate-200: #1E1E1F;
-  /* Softened borders */
+  --color-slate-50: #1a1a1c;
+  --color-slate-100: #222225;
+  --color-slate-200: #2a2a2e;
   --color-slate-300: #8899A6;
-  /* Better contrast for muted text */
   --color-slate-400: #AAB8C2;
-  /* Better contrast */
   --color-slate-500: #CBD5E1;
   --color-slate-600: #E2E8F0;
   --color-slate-700: #F1F5F9;
