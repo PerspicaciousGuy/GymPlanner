@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { 
   AreaChart, 
   Area, 
@@ -61,6 +61,12 @@ export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState('30d');
   const dashboardRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [refreshNonce, setRefreshNonce] = useState(0);
+
+  // Refresh data when navigating to analytics to ensure it catches latest workouts
+  useEffect(() => {
+    setRefreshNonce(n => n + 1);
+  }, []);
 
   const analyticsData = useMemo(() => {
     const workouts = loadWorkouts();
@@ -126,7 +132,10 @@ export default function AnalyticsPage() {
           if (isCurrentPeriod) completedSessions++;
           if (isPrevPeriod) prevCompletedSessions++;
 
-          const groups = dayData?.[session]?.groups || [];
+          const sess = dayData?.[session] || {};
+          const groups = sess.groups || [];
+          const standalone = sess.standaloneExercises || [];
+
           groups.forEach(group => {
             (group.rows || []).forEach(row => {
               const weight = parseFloat(row.weight) || 0;
@@ -139,6 +148,20 @@ export default function AnalyticsPage() {
                 if (row.muscle) dailyMuscles.add(row.muscle);
               }
             });
+          });
+
+          standalone.forEach(ex => {
+            if (ex.exercise) {
+              if (isCurrentPeriod) {
+                exerciseCount++;
+                if (ex.muscle) dailyMuscles.add(ex.muscle);
+              }
+              (ex.sets || []).forEach(set => {
+                const weight = parseFloat(set.weight) || 0;
+                const reps = parseInt(set.reps) || 0;
+                dayVolume += weight * reps; // Standing alone, each set row is individual
+              });
+            }
           });
         }
       });
@@ -164,12 +187,19 @@ export default function AnalyticsPage() {
     Object.entries(workouts).forEach(([date, day]) => {
       if (date < startDateString) return;
       ['am', 'pm'].forEach(session => {
-        (day[session]?.groups || []).forEach(group => {
+        const sess = day[session] || {};
+        (sess.groups || []).forEach(group => {
           (group.rows || []).forEach(row => {
             if (row.muscle) {
               muscleMap[row.muscle] = (muscleMap[row.muscle] || 0) + 1;
             }
           });
+        });
+        (sess.standaloneExercises || []).forEach(ex => {
+          if (ex.muscle) {
+            // Count each advanced exercise as a single entry in distribution
+            muscleMap[ex.muscle] = (muscleMap[ex.muscle] || 0) + 1;
+          }
         });
       });
     });
@@ -186,7 +216,8 @@ export default function AnalyticsPage() {
       if (date < startDateString) return;
       ['am', 'pm'].forEach(session => {
         const isDone = completion[`${date}_${session}`] === true;
-        (day[session]?.groups || []).forEach(group => {
+        const sess = day[session] || {};
+        (sess.groups || []).forEach(group => {
           (group.rows || []).forEach(row => {
             if (row.exercise && row.weight && isDone) {
               const name = row.exercise.trim();
@@ -199,6 +230,23 @@ export default function AnalyticsPage() {
               });
             }
           });
+        });
+        (sess.standaloneExercises || []).forEach(ex => {
+          if (ex.exercise && isDone) {
+            const name = ex.exercise.trim();
+            exerciseList.add(name);
+            if (!exerciseHistory[name]) exerciseHistory[name] = [];
+            
+            (ex.sets || []).forEach(set => {
+              if (set.weight && set.reps) {
+                exerciseHistory[name].push({
+                  date,
+                  weight: parseFloat(set.weight),
+                  reps: parseInt(set.reps)
+                });
+              }
+            });
+          }
         });
       });
     });
@@ -232,7 +280,7 @@ export default function AnalyticsPage() {
           .sort((a, b) => b.count - a.count)[0]
       }
     };
-  }, [timeRange]);
+  }, [timeRange, refreshNonce]);
 
   const selectedExerciseData = useMemo(() => {
     if (exerciseFilter === 'All') return [];

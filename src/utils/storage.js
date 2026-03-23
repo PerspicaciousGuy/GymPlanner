@@ -279,7 +279,7 @@ export function defaultGroup() {
 }
 
 export function defaultSession() {
-  return { groups: [defaultGroup(), defaultGroup()] };
+  return { groups: [defaultGroup(), defaultGroup()], standaloneExercises: [] };
 }
 
 // Each day now stores two independent sessions: am and pm
@@ -289,12 +289,24 @@ export function defaultDayWorkout() {
 
 // Migrate old single-session format to new am/pm format
 export function ensureAmPm(dayData) {
-  if (!dayData) return defaultDayWorkout();
-  if (dayData.am && dayData.pm) return dayData;
-  // Old format had a top-level `groups` array — migrate to am
-  const migrated = defaultDayWorkout();
-  if (dayData.groups) migrated.am.groups = dayData.groups;
-  return migrated;
+  const result = defaultDayWorkout();
+  
+  if (!dayData) return result;
+
+  // 1. If it's already in the am/pm format, merge them in to catch any new fields (like standaloneExercises)
+  if (dayData.am || dayData.pm) {
+    if (dayData.am) result.am = { ...result.am, ...dayData.am };
+    if (dayData.pm) result.pm = { ...result.pm, ...dayData.pm };
+    return result;
+  }
+
+  // 2. Legacy format: dayData itself was the session (back when there was only one per day)
+  if (dayData.groups) {
+    result.am.groups = dayData.groups;
+    if (dayData.standaloneExercises) result.am.standaloneExercises = dayData.standaloneExercises;
+  }
+
+  return result;
 }
 
 // ─── Workouts (now keyed by date) ─────────────────────────────

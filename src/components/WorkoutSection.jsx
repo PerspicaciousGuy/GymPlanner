@@ -17,6 +17,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import ExerciseGroup from './ExerciseGroup';
+import AdvancedExerciseCard from './AdvancedExerciseCard';
 import TemplateDialog from './TemplateDialog';
 import ShiftPicker from './ShiftPicker';
 import { 
@@ -28,6 +29,7 @@ import {
   ensureAmPm, 
   defaultSession, 
   defaultGroup, 
+  defaultRow,
   loadSessionTitles, 
   saveSessionTitlesWithSync,
   getEffectiveSessionTitle,
@@ -45,7 +47,17 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const workoutDateKey = (date instanceof Date) ? formatDateKey(date) : (dayName || date);
   const titleDayName = dayName || (date instanceof Date ? getDayOfWeek(date) : getDayOfWeek(new Date(date)));
   
-  const [dayData, setDayData] = useState(() => ensureAmPm(initialData));
+  const [templateDialogMode, setTemplateDialogMode] = useState('load'); // 'load' or 'save'
+
+  const ensureAdvanced = (data) => {
+    const d = ensureAmPm(data);
+    ['am', 'pm'].forEach(session => {
+      if (!d[session].standaloneExercises) d[session].standaloneExercises = [];
+    });
+    return d;
+  };
+
+  const [dayData, setDayData] = useState(() => ensureAdvanced(initialData));
   const [activeSession, setActiveSession] = useState(initialSession);
   const [saveFlash, setSaveFlash] = useState(false);
   const [titleSaveFlash, setTitleSaveFlash] = useState(false);
@@ -58,10 +70,9 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const [isConfirmingFinish, setIsConfirmingFinish] = useState(false);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [showShiftPicker, setShowShiftPicker] = useState(false);
-  const [templateDialogMode, setTemplateDialogMode] = useState('load'); // 'load' or 'save'
 
   useEffect(() => {
-    setDayData(ensureAmPm(initialData));
+    setDayData(ensureAdvanced(initialData));
   }, [initialData]);
 
   useEffect(() => {
@@ -105,7 +116,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     saveDayWorkoutWithSync(date || workoutDateKey, dayData);
     markDayCompleteWithSync(date || workoutDateKey, activeSession);
     onWorkoutChanged?.();
-    setDayData((prev) => ({ ...prev, [activeSession]: defaultSession() }));
+
     if (activeSession === 'am') {
       setAmDone(true);
       setAmSkipped(false);
@@ -175,6 +186,42 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     }));
   }, [activeSession]);
 
+  const handleAddExercise = useCallback(() => {
+    setIsDirty(true);
+    setDayData((prev) => {
+      const s = { ...prev[activeSession] };
+      const newEx = {
+        id: crypto.randomUUID(),
+        muscle: '',
+        subMuscle: '',
+        exercise: '',
+        totalSets: 1,
+        sets: [{ reps: '', weight: '' }],
+        isCollapsed: false
+      };
+      s.standaloneExercises = [...(s.standaloneExercises || []), newEx];
+      return { ...prev, [activeSession]: s };
+    });
+  }, [activeSession]);
+
+  const handleAdvancedExerciseChange = useCallback((exIdx, updatedEx) => {
+    setIsDirty(true);
+    setDayData((prev) => {
+      const s = { ...prev[activeSession] };
+      s.standaloneExercises = s.standaloneExercises.map((ex, i) => (i === exIdx ? updatedEx : ex));
+      return { ...prev, [activeSession]: s };
+    });
+  }, [activeSession]);
+
+  const handleDeleteAdvancedExercise = useCallback((exIdx) => {
+    setIsDirty(true);
+    setDayData((prev) => {
+      const s = { ...prev[activeSession] };
+      s.standaloneExercises = s.standaloneExercises.filter((_, i) => i !== exIdx);
+      return { ...prev, [activeSession]: s };
+    });
+  }, [activeSession]);
+
   const handleSessionTitleChange = (session, value) => {
     if (session === 'am') setAmTitleState(value);
     else setPmTitleState(value);
@@ -193,7 +240,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     setDayData((prev) => {
       const sessionData = { ...prev[activeSession] };
       const nextGroups = sessionData.groups.filter((_, idx) => idx !== groupIdx);
-      sessionData.groups = nextGroups.length > 0 ? nextGroups : [defaultGroup()];
+      sessionData.groups = nextGroups;
       return { ...prev, [activeSession]: sessionData };
     });
   }, [activeSession]);
@@ -214,12 +261,14 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     setShowTemplateDialog(false);
   };
 
-  const amTitle = amTitleState;
-  const pmTitle = pmTitleState;
+  const sessionData = dayData[activeSession] || { groups: [], standaloneExercises: [] };
+  const groups = sessionData.groups || [];
+  const standaloneExercises = sessionData.standaloneExercises || [];
   const sessionDone = activeSession === 'am' ? amDone : pmDone;
   const sessionSkipped = activeSession === 'am' ? amSkipped : pmSkipped;
+  const amTitle = amTitleState;
+  const pmTitle = pmTitleState;
   const bothDone = (amDone || amSkipped) && (pmDone || pmSkipped);
-  const groups = dayData[activeSession]?.groups ?? [];
 
   const tabCls = (session, done, skipped) => {
     const isActive = activeSession === session;
@@ -374,7 +423,20 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
             onShift={handleShift}
           />
 
-          <div className="space-y-3">
+          <div className="space-y-4">
+            {/* Standalone Advanced Exercises */}
+            {standaloneExercises.map((ex, idx) => (
+              <AdvancedExerciseCard
+                key={ex.id || idx}
+                index={idx}
+                exerciseData={ex}
+                workoutDate={date || workoutDateKey}
+                onChange={(updated) => handleAdvancedExerciseChange(idx, updated)}
+                onDelete={() => handleDeleteAdvancedExercise(idx)}
+              />
+            ))}
+
+            {/* Traditional Groups */}
             {groups.map((group, idx) => (
               <ExerciseGroup
                 key={idx}
@@ -388,16 +450,31 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
               />
             ))}
             {!sessionDone && !sessionSkipped && (
-              <Button
-                variant="ghost"
-                onClick={handleAddGroup}
-                className="group self-start h-10 border border-dashed border-indigo-100 rounded-xl text-indigo-500 hover:bg-indigo-50 hover:border-indigo-200 transition-all text-xs font-bold p-0 pr-4 overflow-hidden"
-              >
-                <div className="w-10 h-full bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                  <Plus size={14} strokeWidth={3} />
-                </div>
-                <span className="ml-3">New Exercise Group</span>
-              </Button>
+              <div className="flex flex-wrap gap-2 sm:gap-3">
+                <Button
+                  variant="ghost"
+                  onClick={handleAddGroup}
+                  className="group h-10 border border-dashed border-indigo-100 rounded-xl text-indigo-500 hover:bg-indigo-50 hover:border-indigo-200 transition-all text-xs font-bold p-0 pr-4 overflow-hidden"
+                >
+                  <div className="w-10 h-full bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                    <Plus size={14} strokeWidth={3} />
+                  </div>
+                  <span className="ml-3">New Exercise Group</span>
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={handleAddExercise}
+                  className="group h-10 border border-dashed border-indigo-100 rounded-xl text-indigo-500 hover:bg-indigo-50 hover:border-indigo-200 transition-all text-xs font-bold p-0 pr-4 overflow-hidden"
+                >
+                  <div className="w-10 h-full bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                    <div className="bg-indigo-100/50 p-1 rounded-lg group-hover:bg-white/20 transition-all">
+                      <Plus size={12} strokeWidth={3} />
+                    </div>
+                  </div>
+                  <span className="ml-3">Add Exercise</span>
+                </Button>
+              </div>
             )}
           </div>
         </motion.div>

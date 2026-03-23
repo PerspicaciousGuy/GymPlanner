@@ -33,7 +33,7 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
     if (!isOpen) setIsOpen(true);
   }, [group, onChange, isOpen]);
 
-  const canDeleteGroup = groupCount > 1 && typeof onDeleteGroup === 'function';
+  const canDeleteGroup = typeof onDeleteGroup === 'function';
 
   // Summarize exercises for collapsed view
   const exercisesSummary = group.rows
@@ -45,27 +45,27 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
   const hasMore = group.rows.filter(r => r.exercise).length > 2;
 
   return (
-    <div className="bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden group/card">
+    <div className="bg-white dark:bg-[#1a1a1e] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden group/card">
       <div 
-        className="bg-slate-50/50 border-b border-slate-100 px-4 py-2 flex items-center justify-between gap-2 cursor-pointer hover:bg-slate-100/50 transition-colors group/header"
+        className="bg-slate-50/50 dark:bg-white/5 border-b border-slate-100 dark:border-white/5 px-4 py-2 flex items-center justify-between gap-2 cursor-pointer hover:bg-slate-100/50 dark:hover:bg-white/10 transition-colors group/header"
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex items-center gap-2">
-          <div className="bg-indigo-50 text-indigo-600 p-1 rounded-lg group-hover/header:bg-indigo-100 transition-colors">
+          <div className="bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 p-1 rounded-lg group-hover/header:bg-indigo-100 dark:group-hover/header:bg-indigo-500/30 transition-colors">
             <Layers size={12} strokeWidth={3} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-tight">
               Exercise Group {groupIndex + 1}
             </span>
             {!isOpen && (
               <motion.span 
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-[9px] text-indigo-400 font-bold uppercase tracking-tight leading-tight"
+                className="text-[9px] text-indigo-400 dark:text-indigo-500 font-bold uppercase tracking-tight leading-tight"
               >
                 {group.rows.length} {group.rows.length === 1 ? 'Exercise' : 'Exercises'} 
-                {exercisesSummary && <span className="text-slate-300 ml-1">• {exercisesSummary}{hasMore ? '...' : ''}</span>}
+                {exercisesSummary && <span className="text-slate-300 dark:text-slate-600 ml-1">• {exercisesSummary}{hasMore ? '...' : ''}</span>}
               </motion.span>
             )}
           </div>

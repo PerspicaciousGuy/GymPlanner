@@ -140,12 +140,16 @@ function flattenWorkoutsForGrid(workoutsMap, { includeEmpty = false } = {}) {
       const dayName = getDayOfWeek(new Date(dateKey));
 
     for (const session of ['am', 'pm']) {
-        const groups = data?.[session]?.groups ?? [];
+      const sessData = data?.[session] ?? {};
+      const groups = sessData.groups ?? [];
+      const standalone = sessData.standaloneExercises ?? [];
+
+      // Flatten traditional groups
       groups.forEach((group, groupIdx) => {
         (group.rows ?? []).forEach((row, rowIdx) => {
           const flatRow = {
-              dateOrDay: dateKey,
-              day: dayName,
+            dateOrDay: dateKey,
+            day: dayName,
             session,
             groupIndex: String(groupIdx + 1),
             rowIndex: String(rowIdx + 1),
@@ -157,12 +161,40 @@ function flattenWorkoutsForGrid(workoutsMap, { includeEmpty = false } = {}) {
             weight: row.weight || '',
             dropSets: row.dropSets || '',
             dropWeight: row.dropWeight || '',
+            isAdvanced: false
           };
 
           if (includeEmpty || hasWorkoutRowData(flatRow)) {
             rows.push(flatRow);
           }
         });
+      });
+
+      // Flatten standalone (advanced) exercises
+      standalone.forEach((ex, exIdx) => {
+        // We represent advanced exercises as a single row in the grid for simplicity, 
+        // joining their multiple sets into comma-separated values.
+        const flatRow = {
+          dateOrDay: dateKey,
+          day: dayName,
+          session,
+          groupIndex: `Adv ${exIdx + 1}`,
+          rowIndex: '1',
+          muscle: ex.muscle || '',
+          subMuscle: ex.subMuscle || '',
+          exercise: ex.exercise || '',
+          sets: String(ex.sets?.length || 0),
+          reps: ex.sets?.map(s => s.reps).filter(v => v !== '').join(',') || '',
+          weight: ex.sets?.map(s => s.weight).filter(v => v !== '').join(',') || '',
+          dropSets: '',
+          dropWeight: '',
+          isAdvanced: true,
+          originalId: ex.id
+        };
+
+        if (includeEmpty || hasWorkoutRowData(flatRow)) {
+          rows.push(flatRow);
+        }
       });
     }
   }
@@ -183,6 +215,41 @@ function buildWorkoutsFromGrid(rows) {
     const key = normalizeWorkoutDateKey(row.dateOrDay || row.day);
     if (!key) continue;
     const session = row.session === 'pm' ? 'pm' : 'am';
+    
+    if (!workouts[key]) {
+      workouts[key] = defaultDayWorkout();
+    }
+
+    const isAdvanced = String(row.groupIndex || '').startsWith('Adv');
+    
+    if (isAdvanced) {
+      if (!workouts[key][session].standaloneExercises) {
+        workouts[key][session].standaloneExercises = [];
+      }
+      
+      const repsArr = String(row.reps || '').split(',').map(v => v.trim());
+      const weightArr = String(row.weight || '').split(',').map(v => v.trim());
+      const setInfo = [];
+      const setLen = Math.max(repsArr.length, weightArr.length, Number(row.sets) || 1);
+      
+      for(let i=0; i<setLen; i++) {
+        setInfo.push({
+          reps: repsArr[i] || '',
+          weight: weightArr[i] || ''
+        });
+      }
+
+      workouts[key][session].standaloneExercises.push({
+        id: row.originalId || crypto.randomUUID(),
+        muscle: row.muscle || '',
+        subMuscle: row.subMuscle || '',
+        exercise: row.exercise || '',
+        totalSets: setInfo.length,
+        sets: setInfo
+      });
+      continue;
+    }
+
     const groupIndex = Math.max(1, Number.parseInt(String(row.groupIndex), 10) || 1);
     const rowIndex = Math.max(1, Number.parseInt(String(row.rowIndex), 10) || 1);
 
@@ -200,10 +267,6 @@ function buildWorkoutsFromGrid(rows) {
     const hasData = WORKOUT_FIELDS.some((key) => String(rowData[key]).trim() !== '');
     if (!hasData) continue;
 
-    if (!workouts[key]) {
-      workouts[key] = defaultDayWorkout();
-    }
-
     const groups = workouts[key][session].groups;
     while (groups.length < groupIndex) {
       groups.push({ rows: [] });
@@ -220,9 +283,10 @@ function buildWorkoutsFromGrid(rows) {
   // Ensure at least one group with one row for each date/session
   for (const key of Object.keys(workouts)) {
     for (const session of ['am', 'pm']) {
-      const groups = workouts[key][session].groups;
-      if (groups.length === 0) {
-        workouts[key][session] = { groups: [defaultGroup()] };
+      const sess = workouts[key][session];
+      const groups = sess.groups;
+      if (groups.length === 0 && (!sess.standaloneExercises || sess.standaloneExercises.length === 0)) {
+        sess.groups = [defaultGroup()];
         continue;
       }
 
@@ -843,7 +907,7 @@ export default function DataConsolePage({ hideSidebar }) {
                       <TableCell className="px-3 py-2">
                         <Input
                           value={row.subMuscle}
-                          onChange={(e) => updateExerciseRow(idx, 'subMuscle', e.target.value)}
+                          onChange={(e) => updateWorkoutRow(idx, 'subMuscle', e.target.value)}
                           className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200"
                         />
                       </TableCell>
