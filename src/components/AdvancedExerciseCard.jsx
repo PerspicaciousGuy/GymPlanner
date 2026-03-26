@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   getMuscleGroupKeys, 
   getSubMusclesForMuscle, 
-  getExercisesForSubMuscle 
+  getExercisesForSubMuscle,
+  addExerciseWithSync
 } from '../utils/storage';
 import { Stepper } from './ui/stepper';
 
@@ -21,7 +22,24 @@ export default function AdvancedExerciseCard({
 
   const muscleGroupKeys = useMemo(() => getMuscleGroupKeys(), []);
   const subMuscles = useMemo(() => muscle ? getSubMusclesForMuscle(muscle) : [], [muscle]);
-  const allExercises = useMemo(() => muscle && subMuscle ? getExercisesForSubMuscle(muscle, subMuscle) : [], [muscle, subMuscle]);
+  
+  // Local cache for exercises to show newly added ones immediately without waiting for storage refresh
+  const [localExercises, setLocalExercises] = useState([]);
+  const [isAddingNew, setIsAddingNew] = useState(false);
+  const [newExName, setNewExName] = useState('');
+
+  const allExercises = useMemo(() => {
+    const fromStorage = muscle && subMuscle ? getExercisesForSubMuscle(muscle, subMuscle) : [];
+    // Combine storage exercises with local ones (to ensure visibility)
+    return Array.from(new Set([...fromStorage, ...localExercises]));
+  }, [muscle, subMuscle, localExercises]);
+
+  // Reset local cache when muscle/submuscle changes
+  useEffect(() => {
+    setLocalExercises([]);
+    setIsAddingNew(false);
+    setNewExName('');
+  }, [muscle, subMuscle]);
 
   const update = useCallback((patch) => {
     onChange({ ...exerciseData, ...patch });
@@ -54,6 +72,22 @@ export default function AdvancedExerciseCard({
       newSets = newSets.slice(0, num);
     }
     update({ totalSets: num, sets: newSets });
+  };
+
+  const handleSaveNewExercise = () => {
+    const trimmed = newExName.trim();
+    if (!trimmed) return;
+    
+    // Save to database
+    addExerciseWithSync(muscle, subMuscle, trimmed);
+    
+    // Add to local list and select it
+    setLocalExercises(prev => [...prev, trimmed]);
+    update({ exercise: trimmed });
+    
+    // Reset adding state
+    setIsAddingNew(false);
+    setNewExName('');
   };
 
   return (
@@ -144,18 +178,56 @@ export default function AdvancedExerciseCard({
               {/* Exercise Name Selection */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-foreground uppercase tracking-widest px-1">Exercise Name</label>
-                <div className="relative">
-                  <select
-                    value={exercise}
-                    onChange={(e) => update({ exercise: e.target.value })}
-                    disabled={!subMuscle}
-                    className="w-full bg-secondary text-primary border border-border rounded-xl px-3 py-2 text-xs font-black outline-none focus:ring-2 ring-primary/50 transition-all appearance-none disabled:opacity-50 shadow-sm"
-                  >
-                    <option value="" className="bg-card">— Select Exercise —</option>
-                    {allExercises.map(ex => <option key={ex} value={ex} className="bg-card">{ex}</option>)}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-primary pointer-events-none" />
-                </div>
+                
+                {isAddingNew ? (
+                  <div className="flex gap-2">
+                    <input
+                      autoFocus
+                      placeholder="Enter exercise name..."
+                      value={newExName}
+                      onChange={(e) => setNewExName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSaveNewExercise();
+                        if (e.key === 'Escape') setIsAddingNew(false);
+                      }}
+                      className="flex-1 bg-secondary text-primary border border-border rounded-xl px-3 py-2 text-xs font-black outline-none focus:ring-2 ring-primary/50 transition-all shadow-sm"
+                    />
+                    <button
+                      onClick={handleSaveNewExercise}
+                      className="px-3 bg-indigo-600 text-white rounded-xl text-[10px] font-bold uppercase hover:bg-indigo-700 transition-all"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setIsAddingNew(false)}
+                      className="px-3 bg-muted text-muted-foreground rounded-xl text-[10px] font-bold uppercase hover:bg-slate-200 transition-all"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <select
+                      value={exercise}
+                      onChange={(e) => {
+                        if (e.target.value === '_add_new_') {
+                          setIsAddingNew(true);
+                        } else {
+                          update({ exercise: e.target.value });
+                        }
+                      }}
+                      disabled={!subMuscle}
+                      className="w-full bg-secondary text-primary border border-border rounded-xl px-3 py-2 text-xs font-black outline-none focus:ring-2 ring-primary/50 transition-all appearance-none disabled:opacity-50 shadow-sm"
+                    >
+                      <option value="" className="bg-card">— Select Exercise —</option>
+                      {allExercises.map(ex => <option key={ex} value={ex} className="bg-card">{ex}</option>)}
+                      {subMuscle && (
+                        <option value="_add_new_" className="bg-indigo-50 text-indigo-700 font-bold italic">+ Add New Exercise...</option>
+                      )}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-primary pointer-events-none" />
+                  </div>
+                )}
               </div>
 
               {/* Total Sets Input */}
