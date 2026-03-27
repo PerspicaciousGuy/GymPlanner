@@ -38,7 +38,7 @@ import {
   Award,
   Zap
 } from 'lucide-react';
-import { loadWorkouts, loadCompletion } from '../utils/storage';
+import { loadWorkouts, loadCompletion, loadSchedule } from '../utils/storage';
 import { formatDateDisplay, formatDateKey } from '../utils/dateUtils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -107,11 +107,20 @@ export default function AnalyticsPage() {
 
     // Process Volume over time
     const dateKeys = Object.keys(workouts).sort();
+    const schedule = loadSchedule() || {};
+    const isOff = (txt) => {
+      if (!txt) return true;
+      const t = String(txt).toLowerCase().trim();
+      return t === '' || t === 'off' || t === 'rest' || t.startsWith('off ') || t.startsWith('rest ');
+    };
+
     let totalVolume = 0;
     let completedSessions = 0;
+    let plannedSessions = 0;
     
     let prevTotalVolume = 0;
     let prevCompletedSessions = 0;
+    let prevPlannedSessions = 0;
     
     const volumeHistory = [];
 
@@ -127,6 +136,17 @@ export default function AnalyticsPage() {
       const dayData = workouts[date];
       
       ['am', 'pm'].forEach(session => {
+        // Track stats from schedule
+        const dayDate = new Date(date);
+        const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayDate.getDay()];
+        const scheduledTitle = schedule[dayName]?.[session] || '';
+        const isSessionPlanned = !isOff(scheduledTitle);
+        
+        if (isSessionPlanned) {
+          if (isCurrentPeriod) plannedSessions++;
+          if (isPrevPeriod) prevPlannedSessions++;
+        }
+
         const status = completion[`${date}_${session}`];
         if (status === true) {
           if (isCurrentPeriod) completedSessions++;
@@ -262,13 +282,21 @@ export default function AnalyticsPage() {
       return { name, ...best };
     }).sort((a, b) => b.weight - a.weight).slice(0, 5);
 
+    const sessionsTrend = timeRange === 'all' ? null : calculateTrend(completedSessions, prevCompletedSessions);
+    const compliance = plannedSessions > 0 ? Math.round((completedSessions / plannedSessions) * 100) : 100;
+    const prevCompliance = prevPlannedSessions > 0 ? Math.round((prevCompletedSessions / prevPlannedSessions) * 100) : 100;
+    const complianceTrend = timeRange === 'all' ? null : calculateTrend(compliance, prevCompliance);
+
     return {
       volumeHistory,
       muscleData,
       totalVolume,
       completedSessions,
+      plannedSessions,
+      compliance,
       volumeTrend: timeRange === 'all' ? null : calculateTrend(totalVolume, prevTotalVolume),
-      sessionsTrend: timeRange === 'all' ? null : calculateTrend(completedSessions, prevCompletedSessions),
+      sessionsTrend,
+      complianceTrend,
       exerciseHistory,
       personalRecords,
       exerciseList: Array.from(exerciseList).sort(),
@@ -412,9 +440,10 @@ export default function AnalyticsPage() {
           />
           <StatCard 
             title="Consistency" 
-            value={analyticsData.completedSessions} 
-            subtitle={timeRange === 'all' ? "Sessions completed (lifetime)" : "Sessions this period"}
-            trend={analyticsData.sessionsTrend}
+            value={analyticsData.compliance} 
+            suffix="%"
+            subtitle={`${analyticsData.completedSessions} of ${analyticsData.plannedSessions} sessions`}
+            trend={analyticsData.complianceTrend}
             icon={<TrendingUp size={20} />}
             iconColor="text-emerald-500"
             bgColor="bg-emerald-500/10"
