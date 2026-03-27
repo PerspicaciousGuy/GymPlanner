@@ -65,6 +65,7 @@ export default function AnalyticsPage() {
   const dashboardRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const [muscleMetric, setMuscleMetric] = useState('sets'); // 'sets' | 'volume'
   const [activeTab, setActiveTab] = useState('overview');
 
   // Refresh data when navigating to analytics to ensure it catches latest workouts
@@ -206,31 +207,57 @@ export default function AnalyticsPage() {
       }
     });
 
-    // Process Muscle Distribution
+    // Process Muscle Distribution (Current vs Previous)
     const muscleMap = {};
-    Object.entries(workouts).forEach(([date, day]) => {
-      if (date < startDateString) return;
-      ['am', 'pm'].forEach(session => {
-        const sess = day[session] || {};
-        (sess.groups || []).forEach(group => {
-          (group.rows || []).forEach(row => {
-            if (row.muscle) {
-              muscleMap[row.muscle] = (muscleMap[row.muscle] || 0) + 1;
-            }
-          });
-        });
-        (sess.standaloneExercises || []).forEach(ex => {
-          if (ex.muscle) {
-            // Count each advanced exercise as a single entry in distribution
-            muscleMap[ex.muscle] = (muscleMap[ex.muscle] || 0) + 1;
+    const prevMuscleMap = {};
+
+    const processMuscleSess = (sess, map) => {
+      (sess.groups || []).forEach(group => {
+        (group.rows || []).forEach(row => {
+          if (row.muscle) {
+            const m = row.muscle;
+            if (!map[m]) map[m] = { sets: 0, volume: 0 };
+            const sets = parseInt(row.sets) || 0;
+            const reps = parseInt(row.reps) || 0;
+            const weight = parseFloat(row.weight) || 0;
+            map[m].sets += sets;
+            map[m].volume += (sets * reps * weight);
           }
         });
       });
+      (sess.standaloneExercises || []).forEach(ex => {
+        if (ex.muscle) {
+          const m = ex.muscle;
+          if (!map[m]) map[m] = { sets: 0, volume: 0 };
+          (ex.sets || []).forEach(s => {
+            const reps = parseInt(s.reps) || 0;
+            const weight = parseFloat(s.weight) || 0;
+            map[m].sets += 1;
+            map[m].volume += (reps * weight);
+          });
+        }
+      });
+    };
+
+    Object.entries(workouts).forEach(([date, day]) => {
+      const isCurrent = date >= startDateString;
+      const isPrev = date < startDateString && date >= prevDateString;
+      
+      if (isCurrent) {
+        ['am', 'pm'].forEach(s => processMuscleSess(day[s] || {}, muscleMap));
+      } else if (isPrev) {
+        ['am', 'pm'].forEach(s => processMuscleSess(day[s] || {}, prevMuscleMap));
+      }
     });
 
-    const muscleData = Object.entries(muscleMap)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
+    const formats = (map) => Object.entries(map).map(([name, data]) => ({ 
+      name, 
+      sets: data.sets, 
+      volume: Math.round(data.volume) 
+    })).sort((a,b) => b.sets - a.sets);
+
+    const muscleData = formats(muscleMap);
+    const prevMuscleData = formats(prevMuscleMap);
 
     // Process Exercise PRs/Progress
     const exerciseList = new Set();
@@ -299,7 +326,9 @@ export default function AnalyticsPage() {
     return {
       volumeHistory,
       muscleData,
+      prevMuscleData,
       totalVolume,
+      prevTotalVolume,
       completedSessions,
       plannedSessions,
       compliance,
@@ -313,6 +342,7 @@ export default function AnalyticsPage() {
       insights: {
         highestVolumeDay: [...volumeHistory].sort((a, b) => b.volume - a.volume)[0],
         topMuscle: muscleData[0],
+        prevTopMuscle: prevMuscleData[0],
         topExercise: Object.entries(exerciseHistory)
           .map(([name, history]) => ({ name, count: history.length }))
           .sort((a, b) => b.count - a.count)[0]
@@ -598,45 +628,137 @@ export default function AnalyticsPage() {
 
           {/* Muscle Distribution */}
           <div className="bg-card rounded-3xl border border-border p-6 shadow-sm hover:shadow-md transition-all">
-            <div className="mb-6">
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
-                <Target size={16} className="text-primary" />
-                Body Focus
-              </h3>
-              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Muscle group distribution</p>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
+                  <Target size={16} className="text-primary" />
+                  Body Focus
+                </h3>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Muscle group distribution</p>
+              </div>
+              <div className="flex bg-muted p-1 rounded-xl border border-border">
+                <button 
+                  onClick={() => setMuscleMetric('sets')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-tight transition-all",
+                    muscleMetric === 'sets' ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                  )}
+                >
+                  Sets
+                </button>
+                <button 
+                  onClick={() => setMuscleMetric('volume')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-tight transition-all",
+                    muscleMetric === 'volume' ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                  )}
+                >
+                  Volume
+                </button>
+              </div>
             </div>
+            
             {analyticsData.muscleData.length === 0 ? (
               <div className="h-[250px] flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
                 <Target size={32} className="mb-2 opacity-20" />
                 <p className="text-[10px] font-bold uppercase tracking-widest">No muscle data yet</p>
               </div>
-            ) : (
-              <div className="h-[250px] w-full min-w-0" style={{ minHeight: '250px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={analyticsData.muscleData.slice(0, 6)} style={{ outline: 'none' }}>
-                    <PolarGrid stroke="var(--color-slate-100)" strokeOpacity={0.5} />
-                    <PolarAngleAxis dataKey="name" tick={{fontSize: 10, fontWeight: 700, fill: 'var(--color-slate-500)'}} />
-                    <Radar
-                      name="Focus"
-                      dataKey="value"
-                      stroke="var(--color-primary)"
-                      fill="var(--color-primary)"
-                      fillOpacity={0.4}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-            <div className="mt-4 space-y-2">
-              {analyticsData.muscleData.slice(0, 3).map((item, i) => (
-                <div key={item.name} className="flex items-center justify-between p-2 rounded-xl bg-muted/50 border border-border/50">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full" style={{backgroundColor: COLORS[i]}} />
-                    <span className="text-[10px] font-bold text-foreground uppercase">{item.name}</span>
-                  </div>
-                  <span className="text-[10px] font-extrabold text-primary">{item.value} Sets</span>
+            ) : (() => {
+               // Prepare comparative data for the radar chart
+               const currentMap = analyticsData.muscleData;
+               const prevMap = analyticsData.prevMuscleData;
+               const allMuscles = Array.from(new Set([...currentMap.map(m => m.name), ...prevMap.map(m => m.name)]));
+               
+               const combinedData = allMuscles.map(name => {
+                 const curr = currentMap.find(m => m.name === name);
+                 const past = prevMap.find(m => m.name === name);
+                 return {
+                   name,
+                   current: curr ? curr[muscleMetric] : 0,
+                   previous: past ? past[muscleMetric] : 0
+                 };
+               }).sort((a,b) => b.current - a.current).slice(0, 6); // Keep it clean with top 6 focus areas
+
+               return (
+                <div className="h-[250px] w-full min-w-0" style={{ minHeight: '250px' }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={combinedData} style={{ outline: 'none' }}>
+                      <PolarGrid stroke="var(--color-slate-100)" strokeOpacity={0.5} />
+                      <PolarAngleAxis dataKey="name" tick={{fontSize: 10, fontWeight: 700, fill: 'var(--color-slate-500)'}} />
+                      
+                      {/* Previous Period "Ghost" Radar */}
+                      <Radar
+                        name="Previous"
+                        dataKey="previous"
+                        stroke="#94a3b8"
+                        strokeWidth={1}
+                        strokeDasharray="4 4"
+                        fill="#f1f5f9"
+                        fillOpacity={0.2}
+                      />
+
+                      {/* Current Period Active Radar */}
+                      <Radar
+                        name="Current"
+                        dataKey="current"
+                        stroke="#6366f1"
+                        strokeWidth={2}
+                        fill="url(#colorRadar)"
+                        fillOpacity={0.5}
+                      />
+                      
+                      <defs>
+                        <radialGradient id="colorRadar" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.8}/>
+                          <stop offset="100%" stopColor="#818cf8" stopOpacity={0.3}/>
+                        </radialGradient>
+                      </defs>
+                    </RadarChart>
+                  </ResponsiveContainer>
                 </div>
-              ))}
+               );
+            })()}
+            
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-1 bg-indigo-500 rounded-full" />
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Current</span>
+                </div>
+                <div className="flex items-center gap-1.5 opacity-50">
+                  <div className="w-2.5 h-1 border border-slate-400 border-dashed rounded-full" />
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Previous</span>
+                </div>
+              </div>
+              
+              {analyticsData.muscleData.slice(0, 3).map((item, i) => {
+                const pastItem = analyticsData.prevMuscleData.find(m => m.name === item.name);
+                const pastVal = pastItem ? pastItem[muscleMetric] : 0;
+                const currVal = item[muscleMetric];
+                const diff = pastVal > 0 ? Math.round(((currVal - pastVal) / pastVal) * 100) : 0;
+                
+                return (
+                  <div key={item.name} className="group relative flex items-center justify-between p-3 rounded-2xl bg-slate-50/50 border border-slate-100 hover:bg-white hover:border-indigo-100 hover:shadow-sm transition-all overflow-hidden">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                      <span className="text-[10px] font-extrabold text-slate-700 uppercase tracking-tight">{item.name}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {diff !== 0 && (
+                        <span className={cn(
+                          "text-[9px] font-black tracking-tighter",
+                          diff > 0 ? "text-emerald-500" : "text-rose-500"
+                        )}>
+                          {diff > 0 ? '+' : ''}{diff}%
+                        </span>
+                      )}
+                      <span className="text-[10px] font-black text-indigo-600">
+                        {currVal.toLocaleString()} {muscleMetric === 'sets' ? 'Sets' : 'kg'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
