@@ -11,8 +11,21 @@ import { cn } from "@/lib/utils";
 export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
   const session = dayData?.[sessionKey];
   const groups = session?.groups || [];
+  const standalone = session?.standaloneExercises || [];
 
-  const allExercises = groups.flatMap(g => g.rows || []).filter(r => r.exercise);
+  const allExercises = [
+    ...groups.flatMap(g => g.rows || []),
+    ...standalone.map(ex => ({
+      exercise: ex.exercise,
+      muscle: ex.muscle,
+      subMuscle: ex.subMuscle,
+      // Summary for standalone: Use first set for weight/reps but indicate total sets
+      sets: ex.sets?.length || 0,
+      reps: ex.sets?.length === 1 ? ex.sets[0].reps : 'Varies',
+      weight: ex.sets?.length === 1 ? ex.sets[0].weight : (ex.sets?.length ? ex.sets[0].weight : 0),
+      isAdvanced: true
+    }))
+  ].filter(r => r.exercise);
 
   if (allExercises.length === 0) {
     return (

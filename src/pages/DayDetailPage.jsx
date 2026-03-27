@@ -2,9 +2,10 @@ import { useMemo, useState } from 'react';
 import { ChevronLeft, Calendar as CalendarIcon, Weight, Layers, Zap, List, LayoutGrid, Sun, Moon, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
 import WorkoutSection from '../components/WorkoutSection';
 import WorkoutLogView from '../components/WorkoutLogView';
-import MuscleMap from '../components/MuscleMap';
 import { formatDateDisplay, formatDateKey, getDayOfWeek } from '../utils/dateUtils';
 import { loadWorkoutByDate, isDayComplete, loadSessionTitles } from '../utils/storage';
+import { calculateRecovery } from '../utils/recoveryLogic';
+import InteractiveMuscleMap from '../components/InteractiveMuscleMap/InteractiveMuscleMap';
 import { cn } from "@/lib/utils";
 
 export default function DayDetailPage({ date, onBack, syncKey }) {
@@ -44,7 +45,10 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
     let topExercise = { name: '-', volume: 0 };
 
     ['am', 'pm'].forEach(session => {
-      dayData[session]?.groups?.forEach(group => {
+      const sessionData = dayData[session] || {};
+      
+      // Traditional Groups
+      sessionData.groups?.forEach(group => {
         let groupVolume = 0;
         group.rows?.forEach(row => {
           if (row.muscle) musclesSet.add(row.muscle);
@@ -58,6 +62,24 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
         });
         if (groupVolume > topExercise.volume && group.title) {
           topExercise = { name: group.title, volume: groupVolume };
+        }
+      });
+
+      // Standalone Advanced Exercises
+      sessionData.standaloneExercises?.forEach(ex => {
+        if (ex.muscle) musclesSet.add(ex.muscle);
+        let exVolume = 0;
+        let exSets = 0;
+        ex.sets?.forEach(set => {
+          const weight = parseFloat(set.weight) || 0;
+          const reps = parseInt(set.reps) || 0;
+          exVolume += weight * reps;
+          exSets += 1;
+        });
+        totalVolume += exVolume;
+        totalSets += exSets;
+        if (exVolume > topExercise.volume && ex.exercise) {
+          topExercise = { name: ex.exercise, volume: exVolume };
         }
       });
     });
@@ -103,9 +125,15 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Muscle Map & Stats */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-card rounded-3xl border border-border p-6 shadow-sm">
+          <div className="bg-card rounded-3xl border border-border p-6 shadow-sm overflow-hidden relative">
             <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Training Focus</h2>
-            <MuscleMap muscles={stats.muscles} />
+            <div className="flex justify-center -mx-6">
+              <InteractiveMuscleMap 
+                muscleStats={calculateRecovery(['am', 'pm'].map(session => ({ date: dateStr, ...dayData[session], session })))} 
+                size={140}
+                noBackground={true}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

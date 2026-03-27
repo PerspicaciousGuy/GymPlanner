@@ -54,6 +54,9 @@ import {
 
 import { Button } from "@/components/ui/button";
 
+import { calculateRecovery } from '../utils/recoveryLogic';
+import InteractiveMuscleMap from '../components/InteractiveMuscleMap/InteractiveMuscleMap';
+
 const COLORS = ['oklch(0.91 0.23 108)', 'oklch(0.8 0.18 108)', 'oklch(0.7 0.15 108)', 'oklch(0.6 0.12 108)'];
 
 export default function AnalyticsPage() {
@@ -62,6 +65,7 @@ export default function AnalyticsPage() {
   const dashboardRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Refresh data when navigating to analytics to ensure it catches latest workouts
   useEffect(() => {
@@ -287,6 +291,11 @@ export default function AnalyticsPage() {
     const prevCompliance = prevPlannedSessions > 0 ? Math.round((prevCompletedSessions / prevPlannedSessions) * 100) : 100;
     const complianceTrend = timeRange === 'all' ? null : calculateTrend(compliance, prevCompliance);
 
+    // Process Recovery
+    const recoveryData = calculateRecovery(Object.entries(workouts).flatMap(([date, day]) => 
+      ['am', 'pm'].map(session => ({ date, ...day[session], session }))
+    ));
+
     return {
       volumeHistory,
       muscleData,
@@ -299,6 +308,7 @@ export default function AnalyticsPage() {
       complianceTrend,
       exerciseHistory,
       personalRecords,
+      recoveryData,
       exerciseList: Array.from(exerciseList).sort(),
       insights: {
         highestVolumeDay: [...volumeHistory].sort((a, b) => b.volume - a.volume)[0],
@@ -425,8 +435,20 @@ export default function AnalyticsPage() {
       </div>
 
       <div ref={dashboardRef} className="space-y-6 bg-background p-1 -m-1 rounded-3xl">
-        {/* Header Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="flex justify-center mb-8">
+            <TabsList className="bg-muted/50 p-1 rounded-2xl border border-border/50 h-auto gap-1">
+              <TabsTrigger value="overview" className="rounded-xl px-6 py-2.5 text-xs font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
+              <TabsTrigger value="evolution" className="rounded-xl px-6 py-2.5 text-xs font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Focus</TabsTrigger>
+              <TabsTrigger value="recovery" className="rounded-xl px-6 py-2.5 text-xs font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
+                Recovery <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="overview" className="space-y-6 outline-none">
+            {/* Header Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard 
             title="Total Volume" 
             value={analyticsData.totalVolume / 1000} 
@@ -654,9 +676,11 @@ export default function AnalyticsPage() {
             </div>
           </div>
         )}
+      </TabsContent>
 
-        {/* Strength Evolution */}
-        <div className="bg-card rounded-3xl border border-border p-6 shadow-sm chart-container">
+          <TabsContent value="evolution" className="outline-none">
+            {/* Strength Evolution */}
+            <div className="bg-card rounded-3xl border border-border p-6 shadow-sm chart-container">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
               <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
@@ -786,20 +810,122 @@ export default function AnalyticsPage() {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
-
-              <div className="flex items-center justify-center gap-6 pt-4 border-t border-border/50">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-primary" />
-                  <span className="text-[10px] font-black text-foreground uppercase tracking-widest">Max Weight</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-indigo-500/50 border border-indigo-500 border-dashed" />
-                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Est. 1-Rep Max</span>
-                </div>
-              </div>
             </div>
           )}
         </div>
+      </TabsContent>
+
+          <TabsContent value="recovery" className="outline-none">
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                 {/* Recovery Map Section */}
+                 <div className="lg:col-span-2 bg-gradient-to-b from-card to-muted/20 rounded-[2.5rem] border border-border p-8 shadow-sm">
+                    <div className="flex items-start justify-between mb-8">
+                       <div>
+                          <h3 className="text-xl font-black text-foreground tracking-tight">Anatomy Recovery</h3>
+                          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">Real-time fatigue heatmap</p>
+                       </div>
+                       <div className="flex gap-4">
+                          <div className="flex flex-col items-center">
+                             <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)] mb-1" />
+                             <span className="text-[9px] font-black text-slate-400 uppercase">Rest</span>
+                          </div>
+                          <div className="flex flex-col items-center">
+                             <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)] mb-1" />
+                             <span className="text-[9px] font-black text-slate-400 uppercase">Healing</span>
+                          </div>
+                          <div className="flex flex-col items-center">
+                             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] mb-1" />
+                             <span className="text-[9px] font-black text-slate-400 uppercase">Ready</span>
+                          </div>
+                       </div>
+                    </div>
+
+                    <InteractiveMuscleMap 
+                      muscleStats={analyticsData.recoveryData} 
+                      size={180}
+                    />
+
+                    <div className="mt-8 p-6 bg-blue-500/5 rounded-2xl border border-blue-500/10 flex items-start gap-4">
+                       <div className="p-2 bg-blue-500/10 rounded-xl">
+                          <Activity className="w-5 h-5 text-blue-600" />
+                       </div>
+                       <div>
+                          <p className="text-xs font-black text-blue-900 uppercase tracking-wide">Recovery Science</p>
+                          <p className="text-[11px] font-bold text-blue-700/80 leading-relaxed mt-1">
+                            Status is calculated based on time-decay since your last logged set. Large muscle groups typically require 48-72 hours 
+                            for full neurological and tissue recovery.
+                          </p>
+                       </div>
+                    </div>
+                 </div>
+
+                 {/* Recovery Sidebar */}
+                 <div className="space-y-6">
+                    <div className="bg-card rounded-[2.5rem] border border-border p-8 shadow-sm h-full flex flex-col">
+                       <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-6">Status Feed</h3>
+                       
+                       <div className="space-y-3 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar flex-grow">
+                          {Object.entries(analyticsData.recoveryData || {}).length > 0 ? (
+                            Object.entries(analyticsData.recoveryData)
+                             .sort((a,b) => a[1].hoursSince - b[1].hoursSince)
+                             .map(([muscle, data]) => (
+                              <div key={muscle} className="group flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-transparent hover:border-border hover:bg-muted/50 transition-all">
+                                 <div className="flex items-center gap-3">
+                                    <div className={`w-2.5 h-2.5 rounded-full ${
+                                      data.status === 'fatigued' ? 'bg-rose-500 shadow-lg shadow-rose-200' : 
+                                      data.status === 'recovering' ? 'bg-amber-500 shadow-lg shadow-amber-100' : 
+                                      'bg-emerald-500 shadow-lg shadow-emerald-100'
+                                    }`} />
+                                    <div>
+                                       <p className="text-[11px] font-black text-foreground uppercase tracking-tight">{muscle.replace('-', ' ')}</p>
+                                       <p className="text-[9px] font-bold text-muted-foreground">Trained {data.hoursSince}h ago</p>
+                                    </div>
+                                 </div>
+                                 <div className={`text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest ${
+                                    data.status === 'fatigued' ? 'bg-rose-100 text-rose-600' :
+                                    data.status === 'recovering' ? 'bg-amber-100 text-amber-600' :
+                                    'bg-emerald-100 text-emerald-600'
+                                 }`}>
+                                    {data.status}
+                                 </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-20 text-center opacity-30">
+                               <Activity className="w-10 h-10 mb-4" />
+                               <p className="text-xs font-black uppercase tracking-widest">No Recent Activity</p>
+                            </div>
+                          )}
+                       </div>
+
+                       <div className="mt-8 pt-8 border-t border-border/50">
+                          <div className="bg-indigo-600 rounded-3xl p-6 text-white relative overflow-hidden shadow-xl shadow-indigo-100">
+                             <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <Zap className="w-12 h-12" />
+                             </div>
+                             <h4 className="text-xs font-black uppercase tracking-[0.2em] mb-3">Fresh Capacity</h4>
+                             <div className="flex flex-wrap gap-2">
+                                {Object.entries(analyticsData.recoveryData || {})
+                                  .filter(([_, d]) => d.status === 'recovered')
+                                  .slice(0, 3)
+                                  .map(([m]) => (
+                                    <span key={m} className="px-2.5 py-1.5 bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-tighter">
+                                      {m.replace('-', ' ')}
+                                    </span>
+                                  ))}
+                                {Object.entries(analyticsData.recoveryData || {}).filter(([_, d]) => d.status === 'recovered').length === 0 && (
+                                  <span className="text-[10px] font-black text-indigo-200">Processing recovery...</span>
+                                )}
+                             </div>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+               </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
