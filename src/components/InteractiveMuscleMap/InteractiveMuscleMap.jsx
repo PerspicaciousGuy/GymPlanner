@@ -13,7 +13,8 @@ const COLORS = {
   fatigued: '#f43f5e',   // rose-500
   recovering: '#f59e0b', // amber-500
   recovered: '#10b981',  // emerald-500
-  idle: '#e2e8f0'      // slate-200
+  idle: '#e2e8f0',       // slate-200
+  active: '#6366f1'      // indigo-500
 };
 
 export default function InteractiveMuscleMap({ 

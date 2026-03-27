@@ -167,6 +167,40 @@ function getAnatomyKeys(main, sub) {
   if (keys.length === 0 && targetMain) {
     keys.push(...(MUSCLE_MAPPING[targetMain] || []));
   }
-
   return keys;
 }
+
+/**
+ * Simple focus extraction for a single day (used in DayDetailPage)
+ * Instead of recovery science, it just shows what was trained.
+ */
+export const getDailyFocus = (dayData) => {
+  const muscleStates = {};
+  const trainedMuscles = new Set();
+  
+  // dayData is [{...}, {...}] session array
+  dayData.forEach(session => {
+    session.groups?.forEach(group => {
+      group.rows?.forEach(row => {
+        if (row.exercise && (row.sets || row.weight)) {
+          getAnatomyKeys(row.muscle, row.subMuscle).forEach(k => trainedMuscles.add(k));
+        }
+      });
+    });
+
+    session.standaloneExercises?.forEach(ex => {
+      if (ex.exercise) {
+        getAnatomyKeys(ex.muscle || ex.muscleGroup, ex.subMuscle).forEach(k => trainedMuscles.add(k));
+      }
+    });
+  });
+
+  trainedMuscles.forEach(key => {
+    muscleStates[key] = {
+      status: 'active',
+      intensity: 'Primary'
+    };
+  });
+
+  return muscleStates;
+};

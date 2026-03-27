@@ -4,7 +4,7 @@ import WorkoutSection from '../components/WorkoutSection';
 import WorkoutLogView from '../components/WorkoutLogView';
 import { formatDateDisplay, formatDateKey, getDayOfWeek } from '../utils/dateUtils';
 import { loadWorkoutByDate, isDayComplete, loadSessionTitles } from '../utils/storage';
-import { calculateRecovery } from '../utils/recoveryLogic';
+import { calculateRecovery, getDailyFocus } from '../utils/recoveryLogic';
 import InteractiveMuscleMap from '../components/InteractiveMuscleMap/InteractiveMuscleMap';
 import { cn } from "@/lib/utils";
 
@@ -129,7 +129,7 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
             <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Training Focus</h2>
             <div className="flex justify-center -mx-6">
               <InteractiveMuscleMap 
-                muscleStats={calculateRecovery(['am', 'pm'].map(session => ({ date: dateStr, ...dayData[session], session })))} 
+                muscleStats={getDailyFocus(['am', 'pm'].map(session => ({ date: dateStr, ...dayData[session], session })))} 
                 size={140}
                 noBackground={true}
               />
