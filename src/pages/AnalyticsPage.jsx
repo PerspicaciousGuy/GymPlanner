@@ -284,8 +284,26 @@ export default function AnalyticsPage() {
 
   const selectedExerciseData = useMemo(() => {
     if (exerciseFilter === 'All') return [];
-    return (analyticsData.exerciseHistory[exerciseFilter] || [])
-      .sort((a, b) => a.date.localeCompare(b.date));
+    const history = analyticsData.exerciseHistory[exerciseFilter] || [];
+    
+    // Group by date to get the "Daily Best"
+    const dailyBest = {};
+    history.forEach(item => {
+      const { date, weight, reps } = item;
+      // Brzycki formula for Est 1RM
+      const est1RM = reps > 1 ? Math.round(weight * (36 / (37 - reps))) : weight;
+      
+      if (!dailyBest[date] || weight > dailyBest[date].weight) {
+        dailyBest[date] = {
+          date,
+          weight,
+          reps,
+          est1RM
+        };
+      }
+    });
+
+    return Object.values(dailyBest).sort((a, b) => a.date.localeCompare(b.date));
   }, [exerciseFilter, analyticsData]);
 
   const handleExportImage = () => {
@@ -608,16 +626,16 @@ export default function AnalyticsPage() {
           </div>
         )}
 
-        {/* Exercise Evolution */}
-          <div className="bg-card rounded-3xl border border-border p-6 shadow-sm chart-container">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-              <div>
-                <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
-                  <Dumbbell size={16} className="text-primary" />
-                  Strength Evolution
-                </h3>
-                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Individual exercise progression</p>
-              </div>
+        {/* Strength Evolution */}
+        <div className="bg-card rounded-3xl border border-border p-6 shadow-sm chart-container">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+              <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
+                <Dumbbell size={16} className="text-primary" />
+                Strength Evolution
+              </h3>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Individual exercise progression</p>
+            </div>
             
             <Select value={exerciseFilter} onValueChange={setExerciseFilter}>
               <SelectTrigger className="w-[180px] h-9 bg-muted/50 border-border text-xs font-bold text-foreground rounded-xl">
@@ -632,43 +650,124 @@ export default function AnalyticsPage() {
             </Select>
           </div>
 
-          {exerciseFilter === 'All' ? (
-            <div className="h-[200px] flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
-              <History size={32} className="mb-2 opacity-20" />
-              <p className="text-[10px] font-bold uppercase tracking-widest">Select an exercise to view history</p>
+          {!exerciseFilter || exerciseFilter === 'All' ? (
+            <div className="h-[300px] flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border border-spacing-4">
+              <div className="p-4 bg-muted rounded-full mb-4 animate-pulse">
+                <History size={32} className="opacity-20 translate-x-[1px]" />
+              </div>
+              <p className="text-xs font-black uppercase tracking-widest">Select an exercise</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1 opacity-60">to view your progression history</p>
+            </div>
+          ) : selectedExerciseData.length === 0 ? (
+            <div className="h-[300px] flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
+              <Activity size={32} className="mb-2 opacity-20" />
+              <p className="text-[10px] font-bold uppercase tracking-widest">No history recorded yet</p>
+              <p className="text-[10px] text-muted-foreground font-medium mt-1">Check back once you've logged this exercise in a completed session.</p>
             </div>
           ) : (
-            <div className="h-[300px] w-full min-w-0" style={{ minHeight: '300px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={selectedExerciseData} style={{ outline: 'none' }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-slate-100)" strokeOpacity={0.5} />
-                  <XAxis 
-                    dataKey="date" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{fontSize: 10, fontWeight: 600, fill: 'var(--color-slate-400)'}}
-                    tickFormatter={(val) => formatDateDisplay(val)}
-                  />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{fontSize: 10, fontWeight: 600, fill: 'var(--color-slate-400)'}}
-                  />
-                  <Tooltip 
-                    labelFormatter={(val) => formatDateDisplay(val)}
-                    contentStyle={{borderRadius: '16px', border: 'none', backgroundColor: 'var(--color-white)', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', padding: '12px'}}
-                  />
-                  <Area 
-                    type="stepAfter" 
-                    dataKey="weight" 
-                    stroke="var(--color-primary)" 
-                    strokeWidth={3}
-                    fillOpacity={0.15} 
-                    fill="var(--color-primary)"
-                    animationDuration={1500}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-3 bg-muted/30 rounded-2xl border border-border/50">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Max Weight</p>
+                  <p className="text-xl font-black text-foreground">{Math.max(...selectedExerciseData.map(d => d.weight))}kg</p>
+                </div>
+                <div className="p-3 bg-muted/30 rounded-2xl border border-border/50">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Peak 1RM (Est)</p>
+                  <p className="text-xl font-black text-indigo-600">{Math.max(...selectedExerciseData.map(d => d.est1RM))}kg</p>
+                </div>
+                <div className="p-3 bg-muted/30 rounded-2xl border border-border/50">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Sessions</p>
+                  <p className="text-xl font-black text-foreground">{selectedExerciseData.length}</p>
+                </div>
+                <div className="p-3 bg-muted/30 rounded-2xl border border-border/50">
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Growth</p>
+                  <div className="flex items-center gap-1">
+                    {selectedExerciseData.length > 1 ? (
+                      (() => {
+                        const first = selectedExerciseData[0].weight;
+                        const last = selectedExerciseData[selectedExerciseData.length-1].weight;
+                        const diff = last - first;
+                        return (
+                          <>
+                            {diff >= 0 ? <TrendingUp size={14} className="text-emerald-500" /> : <TrendingDown size={14} className="text-rose-500" />}
+                            <p className={cn("text-xl font-black", diff >= 0 ? "text-emerald-500" : "text-rose-500")}>
+                              {Math.abs(diff)}kg
+                            </p>
+                          </>
+                        );
+                      })()
+                    ) : (
+                      <p className="text-xl font-black text-muted-foreground">—</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="h-[300px] w-full min-w-0" style={{ minHeight: '300px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={selectedExerciseData} style={{ outline: 'none' }}>
+                    <defs>
+                      <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="color1RM" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="oklch(0.58 0.23 268)" stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor="oklch(0.58 0.23 268)" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-slate-100)" strokeOpacity={0.5} />
+                    <XAxis 
+                      dataKey="date" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fontSize: 10, fontWeight: 700, fill: 'var(--color-slate-400)'}}
+                      tickFormatter={(val) => formatDateDisplay(val).split(',')[0]}
+                      dy={10}
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fontSize: 10, fontWeight: 700, fill: 'var(--color-slate-400)'}}
+                      domain={['auto', 'auto']}
+                    />
+                    <Tooltip 
+                      content={<CustomExerciseTooltip />}
+                      cursor={{ stroke: 'var(--color-primary)', strokeWidth: 1.5, strokeDasharray: '4 4' }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="est1RM" 
+                      stroke="oklch(0.58 0.23 268)" 
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      fillOpacity={1} 
+                      fill="url(#color1RM)"
+                      animationDuration={1500}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="weight" 
+                      stroke="var(--primary)" 
+                      strokeWidth={3}
+                      fillOpacity={1} 
+                      fill="url(#colorWeight)" 
+                      animationDuration={1500}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="flex items-center justify-center gap-6 pt-4 border-t border-border/50">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-primary" />
+                  <span className="text-[10px] font-black text-foreground uppercase tracking-widest">Max Weight</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-indigo-500/50 border border-indigo-500 border-dashed" />
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Est. 1-Rep Max</span>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -773,3 +872,41 @@ const CustomVolumeTooltip = ({ active, payload }) => {
 };
 
 
+const CustomExerciseTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[1]?.payload || payload[0]?.payload; // Fallback to either
+    return (
+      <div className="bg-card rounded-2xl shadow-xl border border-border p-4 min-w-[180px]">
+        <p className="text-xs font-black text-foreground mb-3 border-b border-border pb-2">
+          {formatDateDisplay(data.date)}
+        </p>
+        
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-primary" />
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Max Lift</span>
+            </div>
+            <p className="text-sm font-black text-foreground">{data.weight}kg</p>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full border border-indigo-500 border-dashed" />
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Est. 1RM</span>
+            </div>
+            <p className="text-sm font-black text-indigo-600">{data.est1RM}kg</p>
+          </div>
+
+          <div className="pt-2 border-t border-border mt-2">
+            <div className="flex items-center justify-between opacity-60">
+              <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Reps Performed</span>
+              <span className="text-xs font-black text-foreground">{data.reps}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
