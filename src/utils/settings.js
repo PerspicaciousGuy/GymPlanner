@@ -3,7 +3,14 @@ const SETTINGS_KEY = 'gymplanner_settings';
 const defaultSettings = {
   units: 'kg', // 'kg' | 'lbs'
   theme: 'light', // 'light' | 'dark'
-  compactMode: false
+  compactMode: false,
+  nutritionGoals: {
+    enabled: false,
+    calories: 2000,
+    protein: 150,
+    carbs: 250,
+    fats: 65
+  }
 };
 
 export const loadSettings = () => {

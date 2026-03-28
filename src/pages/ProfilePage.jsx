@@ -13,10 +13,13 @@ import {
   Weight,
   Bell,
   BellOff,
-  Zap,
   Sun,
-  Moon
+  Moon,
+  Utensils,
+  Flame,
+  Zap
 } from 'lucide-react';
+import { Input } from "@/components/ui/input";
 import { 
   isNotificationSupported, 
   requestNotificationPermission, 
@@ -97,6 +100,13 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
   const handleToggleTheme = (checked) => {
     const newTheme = checked ? 'dark' : 'light';
     const updated = updateSetting('theme', newTheme);
+    setSettings(updated);
+    onSettingsChange?.(updated);
+  };
+
+  const handleUpdateNutrition = (key, value) => {
+    const newGoals = { ...settings.nutritionGoals, [key]: value };
+    const updated = updateSetting('nutritionGoals', newGoals);
     setSettings(updated);
     onSettingsChange?.(updated);
   };
@@ -253,8 +263,80 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
             />
           </div>
         </div>
+      </div>
 
-        <div className="pt-2 flex flex-col items-center gap-6">
+      {/* Nutrition Goals Settings */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
+        <div>
+          <h2 className="text-2xl font-black text-slate-800 tracking-tighter flex items-center gap-2">
+            Target Diet <Utensils size={20} className="text-indigo-600" />
+          </h2>
+          <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.15em]">Manage your nutritional goals</p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="p-5 bg-indigo-50/30 rounded-3xl border border-indigo-100/50 flex items-center justify-between">
+            <div className="flex flex-col">
+              <p className="text-xs font-black text-indigo-700 uppercase tracking-tight">Track Daily Targets</p>
+              <p className="text-[11px] text-indigo-400 font-bold tracking-tight">Show goals on your Health Hub</p>
+            </div>
+            <Switch 
+              checked={settings.nutritionGoals?.enabled} 
+              onCheckedChange={(checked) => handleUpdateNutrition('enabled', checked)}
+              className="data-[state=checked]:bg-indigo-600"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
+                Target Calories <Flame size={10} className="text-amber-500 fill-amber-500" />
+              </label>
+              <Input 
+                type="number" 
+                value={settings.nutritionGoals?.calories || 2000}
+                onChange={(e) => handleUpdateNutrition('calories', parseInt(e.target.value) || 0)}
+                className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
+                placeholder="2000"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
+                Protein (Grams) <Zap size={10} className="text-rose-500 fill-rose-500" />
+              </label>
+              <Input 
+                type="number" 
+                value={settings.nutritionGoals?.protein || 150}
+                onChange={(e) => handleUpdateNutrition('protein', parseInt(e.target.value) || 0)}
+                className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
+                placeholder="150"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Carbohydrates (Grams)</label>
+              <Input 
+                type="number" 
+                value={settings.nutritionGoals?.carbs || 250}
+                onChange={(e) => handleUpdateNutrition('carbs', parseInt(e.target.value) || 0)}
+                className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
+                placeholder="250"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Fats (Grams)</label>
+              <Input 
+                type="number" 
+                value={settings.nutritionGoals?.fats || 65}
+                onChange={(e) => handleUpdateNutrition('fats', parseInt(e.target.value) || 0)}
+                className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
+                placeholder="65"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <div className="pt-8 flex flex-col items-center gap-6">
           {notificationsEnabled && notifPermission === 'granted' && (
             <button 
               onClick={testNotification}
@@ -264,10 +346,10 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
             </button>
           )}
 
-          <div className="w-full flex flex-col gap-3">
+          <div className="w-full flex flex-col gap-3 px-4">
              <Button 
                 variant="ghost" 
-                className="w-full h-12 rounded-2xl text-slate-400 hover:bg-indigo-50/50 hover:text-indigo-600 group transition-all"
+                className="w-full h-12 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 group transition-all"
                 onClick={() => onDataRefreshed?.()}
               >
                 <div className="flex items-center gap-3">
@@ -278,7 +360,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
 
               <Button 
                 variant="ghost" 
-                className="w-full h-12 rounded-2xl text-slate-400 hover:bg-indigo-50/50 hover:text-indigo-600 group transition-all"
+                className="w-full h-12 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 group transition-all"
                 onClick={exportData}
               >
                 <div className="flex items-center gap-3">
@@ -288,7 +370,6 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
               </Button>
           </div>
         </div>
-      </div>
 
       {/* Data Control Center Card */}
       <div className="bg-gradient-to-br from-card to-card/95 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden group cursor-pointer border border-border/50" onClick={() => setShowConsole(true)}>

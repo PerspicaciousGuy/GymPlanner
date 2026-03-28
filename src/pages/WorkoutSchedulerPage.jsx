@@ -294,33 +294,35 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight leading-none mb-1">Training Hub</h1>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-2">
+        <div className="flex flex-col">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">Training Hub</h1>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.1em] whitespace-nowrap">
               Today is {formatDateDisplay(new Date())}
             </span>
             {syncState === 'loading' && (
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 animate-pulse">
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 animate-pulse border border-indigo-100/50">
                 <RefreshCw size={10} className="animate-spin" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Syncing</span>
+                <span className="text-[9px] font-black uppercase tracking-widest">Syncing</span>
               </div>
             )}
             {syncState === 'offline' && (
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">
                 <AlertCircle size={10} />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Offline Mode</span>
+                <span className="text-[9px] font-black uppercase tracking-widest">Offline</span>
               </div>
             )}
           </div>
         </div>
 
-        <WeekPicker 
-          currentWeekStart={selectedWeek} 
-          onWeekChange={setSelectedWeek} 
-          compact
-        />
+        <div className="flex items-center self-start sm:self-auto">
+          <WeekPicker 
+            currentWeekStart={selectedWeek} 
+            onWeekChange={setSelectedWeek} 
+            compact
+          />
+        </div>
       </div>
 
       <div className="flex flex-col">

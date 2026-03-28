@@ -1,0 +1,389 @@
+import { useState, useMemo, useEffect } from 'react';
+import {
+  ArrowLeft,
+  MoreVertical,
+  Bookmark,
+  BookmarkCheck,
+  Minus,
+  Plus,
+  Flame,
+  Pencil,
+  Zap,
+  Droplet,
+  Cookie,
+  Loader2,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import {
+  calculateNutrition,
+  toggleBookmark,
+  isBookmarked as checkBookmarked,
+  SERVING_UNITS,
+} from '../../utils/foodDatabase';
+import { getFatSecretFoodDetail } from '../../utils/fatSecretApi';
+
+// Micro nutrient display config
+const MICRO_NUTRIENTS = [
+  { key: 'saturatedFat', label: 'Saturated Fat', unit: 'g' },
+  { key: 'polyunsaturatedFat', label: 'Polyunsaturated Fat', unit: 'g' },
+  { key: 'monounsaturatedFat', label: 'Monounsaturated Fat', unit: 'g' },
+  { key: 'cholesterol', label: 'Cholesterol', unit: 'mg' },
+  { key: 'sodium', label: 'Sodium', unit: 'mg' },
+  { key: 'fiber', label: 'Fiber', unit: 'g' },
+  { key: 'sugar', label: 'Sugar', unit: 'g' },
+  { key: 'potassium', label: 'Potassium', unit: 'mg' },
+  { key: 'vitaminA', label: 'Vitamin A', unit: 'μg' },
+  { key: 'vitaminC', label: 'Vitamin C', unit: 'mg' },
+  { key: 'calcium', label: 'Calcium', unit: 'mg' },
+  { key: 'iron', label: 'Iron', unit: 'mg' },
+];
+
+/**
+ * FoodDetailPage — Nutrition detail / editing screen.
+ * If `food` is null, acts as a "Manual Add" blank form.
+ */
+export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
+  const isManual = !food;
+
+  // Editable state
+  const [name, setName] = useState(food?.name || '');
+  const [servings, setServings] = useState(1);
+  const [selectedUnit, setSelectedUnit] = useState(
+    food?.availableUnits?.[0] || SERVING_UNITS.SERVING
+  );
+  const [bookmarked, setBookmarked] = useState(
+    food ? checkBookmarked(food.id) : false
+  );
+  const [editingField, setEditingField] = useState(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [enrichedFood, setEnrichedFood] = useState(food);
+
+  // For manual entry, allow free-form macro editing
+  const [manualValues, setManualValues] = useState({
+    calories: food?.calories || 0,
+    protein: food?.protein || 0,
+    carbs: food?.carbs || 0,
+    fats: food?.fats || 0,
+    saturatedFat: food?.saturatedFat || 0,
+    polyunsaturatedFat: food?.polyunsaturatedFat || 0,
+    monounsaturatedFat: food?.monounsaturatedFat || 0,
+    cholesterol: food?.cholesterol || 0,
+    sodium: food?.sodium || 0,
+    fiber: food?.fiber || 0,
+    sugar: food?.sugar || 0,
+    potassium: food?.potassium || 0,
+    vitaminA: food?.vitaminA || 0,
+    vitaminC: food?.vitaminC || 0,
+    calcium: food?.calcium || 0,
+    iron: food?.iron || 0,
+  });
+
+  // Fetch full detail from FatSecret if needed
+  useEffect(() => {
+    if (food?.isFatSecret && food?._needsDetailFetch && food?.fatSecretId) {
+      setLoadingDetail(true);
+      getFatSecretFoodDetail(food.fatSecretId).then(detail => {
+        if (detail) {
+          setEnrichedFood(detail);
+          setManualValues({
+            calories: detail.calories || 0,
+            protein: detail.protein || 0,
+            carbs: detail.carbs || 0,
+            fats: detail.fats || 0,
+            saturatedFat: detail.saturatedFat || 0,
+            polyunsaturatedFat: detail.polyunsaturatedFat || 0,
+            monounsaturatedFat: detail.monounsaturatedFat || 0,
+            cholesterol: detail.cholesterol || 0,
+            sodium: detail.sodium || 0,
+            fiber: detail.fiber || 0,
+            sugar: detail.sugar || 0,
+            potassium: detail.potassium || 0,
+            vitaminA: detail.vitaminA || 0,
+            vitaminC: detail.vitaminC || 0,
+            calcium: detail.calcium || 0,
+            iron: detail.iron || 0,
+          });
+        }
+      }).finally(() => setLoadingDetail(false));
+    }
+  }, [food]);
+
+  // Use enriched food for calculations
+  const activeFood = enrichedFood || food;
+
+  // Calculated nutrition (for database foods, scale by servings)
+  const nutrition = useMemo(() => {
+    if (isManual) {
+      // For manual, scale the manually entered values by servings
+      const result = {};
+      Object.keys(manualValues).forEach(k => {
+        result[k] = Math.round(manualValues[k] * servings * 10) / 10;
+      });
+      return result;
+    }
+    return calculateNutrition(activeFood, servings);
+  }, [activeFood, servings, isManual, manualValues]);
+
+  const availableUnits = activeFood?.availableUnits || [SERVING_UNITS.SERVING, SERVING_UNITS.GRAM];
+
+  const handleBookmark = () => {
+    if (food) {
+      toggleBookmark(food.id);
+      setBookmarked(!bookmarked);
+    }
+  };
+
+  const handleManualValueChange = (key, value) => {
+    setManualValues(prev => ({ ...prev, [key]: parseFloat(value) || 0 }));
+    setEditingField(null);
+  };
+
+  const handleSave = () => {
+    const entry = {
+      food: isManual
+        ? {
+            id: `manual_${Date.now()}`,
+            name: name || 'Unnamed Food',
+            calories: manualValues.calories,
+            protein: manualValues.protein,
+            carbs: manualValues.carbs,
+            fats: manualValues.fats,
+            saturatedFat: manualValues.saturatedFat,
+            polyunsaturatedFat: manualValues.polyunsaturatedFat,
+            monounsaturatedFat: manualValues.monounsaturatedFat,
+            cholesterol: manualValues.cholesterol,
+            sodium: manualValues.sodium,
+            fiber: manualValues.fiber,
+            sugar: manualValues.sugar,
+            potassium: manualValues.potassium,
+            vitaminA: manualValues.vitaminA,
+            vitaminC: manualValues.vitaminC,
+            calcium: manualValues.calcium,
+            iron: manualValues.iron,
+            isManual: true,
+            servingSize: '1 serving',
+            servingGrams: 100,
+          }
+        : activeFood,
+      servings,
+    };
+    onSave(entry);
+  };
+
+  return (
+    <motion.div
+      initial={{ x: '100%' }}
+      animate={{ x: 0 }}
+      exit={{ x: '100%' }}
+      transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+      className="fixed inset-0 bg-background z-[110] flex flex-col"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 pt-4 pb-2">
+        <button
+          onClick={onBack}
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+        >
+          <ArrowLeft size={22} className="text-foreground" />
+        </button>
+        <h1 className="text-lg font-black text-foreground tracking-tight">
+          {isManual ? 'Manual Add' : 'Nutrition'}
+        </h1>
+        <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors">
+          <MoreVertical size={20} className="text-muted-foreground" />
+        </button>
+      </div>
+
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto px-4 pb-32">
+        {/* Food Name + Bookmark */}
+        <div className="flex items-start justify-between mt-4 mb-2">
+          {editingField === 'name' || isManual ? (
+            <input
+              autoFocus={editingField === 'name'}
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onBlur={() => setEditingField(null)}
+              placeholder="Tap to name"
+              className="text-2xl font-black text-foreground tracking-tight bg-transparent outline-none border-b-2 border-foreground/20 focus:border-foreground pb-1 flex-1 mr-4"
+            />
+          ) : (
+            <button
+              onClick={() => setEditingField('name')}
+              className="text-2xl font-black text-foreground tracking-tight text-left flex-1 mr-4"
+            >
+              {name || 'Tap to name'}
+            </button>
+          )}
+          {!isManual && (
+            <button
+              onClick={handleBookmark}
+              className="mt-1 p-1"
+            >
+              {bookmarked ? (
+                <BookmarkCheck size={24} className="text-foreground fill-foreground" />
+              ) : (
+                <Bookmark size={24} className="text-muted-foreground" />
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* Serving Size Measurement */}
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">
+          Serving Size Measurement
+        </p>
+        <div className="flex gap-2 mb-6">
+          {availableUnits.map(unit => (
+            <button
+              key={unit}
+              onClick={() => setSelectedUnit(unit)}
+              className={cn(
+                "px-4 py-2 rounded-full text-xs font-bold border-2 transition-all capitalize",
+                selectedUnit === unit
+                  ? "bg-foreground text-background border-foreground"
+                  : "border-border text-muted-foreground hover:border-foreground/30"
+              )}
+            >
+              {unit}
+            </button>
+          ))}
+        </div>
+
+        {/* Serving Amount */}
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-sm font-bold text-foreground">Serving Amount</p>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setServings(prev => Math.max(0.5, prev - 0.5))}
+              className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+            >
+              <Minus size={18} strokeWidth={2.5} />
+            </button>
+            <span className="text-xl font-black text-foreground w-8 text-center">{servings}</span>
+            <button
+              onClick={() => setServings(prev => prev + 0.5)}
+              className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+            >
+              <Plus size={18} strokeWidth={2.5} />
+            </button>
+          </div>
+        </div>
+
+        {/* Calories Card */}
+        <Card className="rounded-3xl border border-border shadow-sm mb-4">
+          <CardContent className="p-5 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
+                <Flame size={22} className="text-muted-foreground" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Calories</p>
+                {editingField === 'calories' ? (
+                  <input
+                    autoFocus
+                    type="number"
+                    defaultValue={isManual ? manualValues.calories : food?.calories || 0}
+                    onBlur={(e) => handleManualValueChange('calories', e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleManualValueChange('calories', e.target.value)}
+                    className="text-2xl font-black text-foreground bg-transparent outline-none border-b-2 border-foreground w-24"
+                  />
+                ) : (
+                  <p className="text-2xl font-black text-foreground">{nutrition.calories}</p>
+                )}
+              </div>
+            </div>
+            {(isManual || food) && (
+              <button
+                onClick={() => setEditingField('calories')}
+                className="p-2 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+              >
+                <Pencil size={16} />
+              </button>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Macro Cards Row */}
+        <div className="grid grid-cols-3 gap-3 mb-8">
+          {[
+            { key: 'protein', label: 'Protein', icon: Zap, color: 'text-rose-500' },
+            { key: 'carbs', label: 'Carbs', icon: Cookie, color: 'text-amber-500' },
+            { key: 'fats', label: 'Fats', icon: Droplet, color: 'text-blue-500' },
+          ].map(macro => (
+            <Card key={macro.key} className="rounded-2xl border border-border shadow-sm">
+              <CardContent className="p-3 flex flex-col items-start gap-1">
+                <div className="flex items-center gap-1.5">
+                  <macro.icon size={12} className={macro.color} />
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">{macro.label}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {editingField === macro.key ? (
+                    <input
+                      autoFocus
+                      type="number"
+                      defaultValue={isManual ? manualValues[macro.key] : food?.[macro.key] || 0}
+                      onBlur={(e) => handleManualValueChange(macro.key, e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleManualValueChange(macro.key, e.target.value)}
+                      className="text-lg font-black text-foreground bg-transparent outline-none border-b-2 border-foreground w-12"
+                    />
+                  ) : (
+                    <span className="text-lg font-black text-foreground">{nutrition[macro.key]}g</span>
+                  )}
+                  <button
+                    onClick={() => setEditingField(macro.key)}
+                    className="p-0.5 text-muted-foreground/30 hover:text-muted-foreground"
+                  >
+                    <Pencil size={10} />
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Other Nutrition Facts */}
+        <h3 className="text-base font-black text-foreground tracking-tight mb-4">
+          Other nutrition facts
+        </h3>
+        <div className="space-y-0">
+          {MICRO_NUTRIENTS.map((micro, idx) => (
+            <div
+              key={micro.key}
+              className={cn(
+                "flex items-center justify-between py-4 px-1",
+                idx < MICRO_NUTRIENTS.length - 1 && "border-b border-border/50"
+              )}
+            >
+              <span className="text-sm text-foreground font-medium">{micro.label}</span>
+              <span className="text-sm font-bold text-foreground">
+                {nutrition[micro.key] || 0}{micro.unit}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Save Button */}
+      <div
+        className="fixed bottom-0 left-0 right-0 px-4 py-4 z-[111]"
+        style={{
+          background: 'linear-gradient(to top, var(--background) 60%, transparent)',
+        }}
+      >
+        <Button
+          onClick={handleSave}
+          disabled={isManual && !name.trim()}
+          className="w-full h-14 rounded-2xl bg-foreground text-background font-black text-base hover:bg-foreground/90 transition-all shadow-xl disabled:opacity-40"
+        >
+          Save
+        </Button>
+      </div>
+    </motion.div>
+  );
+}

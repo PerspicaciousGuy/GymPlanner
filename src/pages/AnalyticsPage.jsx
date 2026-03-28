@@ -56,10 +56,11 @@ import { Button } from "@/components/ui/button";
 
 import { calculateRecovery } from '../utils/recoveryLogic';
 import InteractiveMuscleMap from '../components/InteractiveMuscleMap/InteractiveMuscleMap';
+import HistoryPage from './HistoryPage';
 
 const COLORS = ['oklch(0.91 0.23 108)', 'oklch(0.8 0.18 108)', 'oklch(0.7 0.15 108)', 'oklch(0.6 0.12 108)'];
 
-export default function AnalyticsPage() {
+export default function AnalyticsPage({ onDateSelect }) {
   const [exerciseFilter, setExerciseFilter] = useState('All');
   const [timeRange, setTimeRange] = useState('30d');
   const dashboardRef = useRef(null);
@@ -467,58 +468,67 @@ export default function AnalyticsPage() {
       <div ref={dashboardRef} className="space-y-6 bg-background p-1 -m-1 rounded-3xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex justify-center mb-8">
-            <TabsList className="bg-muted/50 p-1 rounded-2xl border border-border/50 h-auto gap-1">
-              <TabsTrigger value="overview" className="rounded-xl px-6 py-2.5 text-xs font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
-              <TabsTrigger value="evolution" className="rounded-xl px-6 py-2.5 text-xs font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Focus</TabsTrigger>
-              <TabsTrigger value="recovery" className="rounded-xl px-6 py-2.5 text-xs font-black uppercase tracking-widest data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center gap-2">
-                Recovery <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <TabsList className="bg-muted/50 p-1 rounded-2xl border border-border/50 h-auto gap-0.5 w-full max-w-[400px]">
+              <TabsTrigger value="overview" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
+              <TabsTrigger value="history" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">History</TabsTrigger>
+              <TabsTrigger value="evolution" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Focus</TabsTrigger>
+              <TabsTrigger value="recovery" className="flex-1 rounded-xl px-1 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center justify-center gap-1">
+                Recovery <div className="w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
               </TabsTrigger>
             </TabsList>
           </div>
 
           <TabsContent value="overview" className="space-y-6 outline-none">
             {/* Header Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex flex-col gap-4">
+              {/* Primary Metric - Full Width Hero Card */}
               <StatCard
                 title="Total Volume"
                 value={analyticsData.totalVolume / 1000}
                 suffix="t"
                 subtitle={timeRange === 'all' ? "Tonnage lifted (lifetime)" : "Tonnage this period"}
                 trend={analyticsData.volumeTrend}
-                icon={<BarChart3 size={20} />}
+                icon={<BarChart3 size={24} />}
                 iconColor="text-primary"
                 bgColor="bg-primary/10"
                 className="stat-card"
               />
-              <StatCard
-                title="Consistency"
-                value={analyticsData.compliance}
-                suffix="%"
-                subtitle={`${analyticsData.completedSessions} of ${analyticsData.plannedSessions} sessions`}
-                trend={analyticsData.complianceTrend}
-                icon={<TrendingUp size={20} />}
-                iconColor="text-emerald-500"
-                bgColor="bg-emerald-500/10"
-                className="stat-card"
-              />
-              <StatCard
-                title="Intensity"
-                value={8.4}
-                subtitle="Avg RPE (Est.)"
-                icon={<Flame size={20} />}
-                iconColor="text-orange-500"
-                bgColor="bg-orange-500/10"
-                className="stat-card"
-              />
-              <StatCard
-                title="Achievements"
-                value={analyticsData.volumeHistory.length ? 12 : 0}
-                subtitle="Personal Records"
-                icon={<Trophy size={20} />}
-                iconColor="text-amber-500"
-                bgColor="bg-amber-500/10"
-                className="stat-card"
-              />
+
+              {/* Micro Metrics Row - 3 Side-by-side Cards */}
+              <div className="grid grid-cols-3 gap-3 md:gap-4 overflow-x-auto pb-4 md:pb-0 no-scrollbar snap-x">
+                <StatCard
+                  isMicro
+                  title="Consistency"
+                  value={analyticsData.compliance}
+                  suffix="%"
+                  subtitle={`${analyticsData.completedSessions} Days`}
+                  trend={analyticsData.complianceTrend}
+                  icon={<TrendingUp size={16} />}
+                  iconColor="text-emerald-500"
+                  bgColor="bg-emerald-500/10"
+                  className="stat-center snap-center"
+                />
+                <StatCard
+                  isMicro
+                  title="Intensity"
+                  value={8.4}
+                  subtitle="Avg RPE"
+                  icon={<Flame size={16} />}
+                  iconColor="text-orange-500"
+                  bgColor="bg-orange-500/10"
+                  className="stat-center snap-center"
+                />
+                <StatCard
+                  isMicro
+                  title="Records"
+                  value={analyticsData.volumeHistory.length ? 12 : 0}
+                  subtitle="New PRs"
+                  icon={<Trophy size={16} />}
+                  iconColor="text-amber-500"
+                  bgColor="bg-amber-500/10"
+                  className="stat-center snap-center"
+                />
+              </div>
             </div>
 
             {/* Dynamic Insights Highlights */}
@@ -800,6 +810,10 @@ export default function AnalyticsPage() {
             )}
           </TabsContent>
 
+          <TabsContent value="history" className="outline-none">
+            <HistoryPage onDateSelect={onDateSelect} />
+          </TabsContent>
+
           <TabsContent value="evolution" className="outline-none">
             {/* Strength Evolution */}
             <div className="bg-card rounded-3xl border border-border p-6 shadow-sm chart-container">
@@ -1075,33 +1089,57 @@ function GlowCounter({ value, suffix = "", decimals = 0 }) {
   return <span ref={countRef}>0</span>;
 }
 
-function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend, suffix = "", className }) {
+function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend, suffix = "", className, isMicro }) {
   return (
-    <Card className={cn("rounded-3xl bg-card border border-border shadow-sm hover:shadow-md transition-all group overflow-hidden relative", className)}>
+    <Card className={cn(
+      "rounded-3xl bg-muted/30 border border-border transition-all group overflow-hidden relative min-w-0",
+      isMicro ? "p-3" : "p-0",
+      className
+    )}>
       <div className={cn(
-        "absolute top-0 right-0 p-8 rotate-12 translate-x-4 -translate-y-4 opacity-5 bg-primary rounded-full group-hover:scale-110 transition-transform"
+        "absolute top-0 right-0 rotate-12 translate-x-4 -translate-y-4 opacity-5 bg-primary rounded-full group-hover:scale-110 transition-transform",
+        isMicro ? "p-4" : "p-8"
       )} />
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between relative min-h-[48px]">
-          <div className={cn("p-3 rounded-2xl transition-transform group-hover:scale-110", bgColor, iconColor)}>
+      <CardContent className={cn("p-0 flex flex-col h-full", !isMicro && "p-5")}>
+        <div className="flex items-start justify-between relative">
+          <div className={cn(
+            "rounded-2xl transition-transform group-hover:scale-110 flex items-center justify-center shrink-0", 
+            isMicro ? "p-2 w-8 h-8" : "p-3 w-12 h-12",
+            bgColor, 
+            iconColor
+          )}>
             {icon}
           </div>
           {trend !== undefined && trend !== null && (
             <div className={cn(
-              "flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold",
-              trend >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'
+              "flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg text-[9px] font-black",
+              trend >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500',
+              isMicro ? "absolute right-0 top-0" : ""
             )}>
-              {trend >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+              {trend >= 0 ? <TrendingUp size={8} /> : <TrendingDown size={8} />}
               {Math.abs(trend)}%
             </div>
           )}
         </div>
-        <div className="mt-4">
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{title}</p>
-          <h2 className="text-2xl font-black text-foreground mt-1">
+        <div className={cn("mt-4 flex-grow", isMicro && "mt-3")}>
+          <p className={cn(
+            "font-black text-muted-foreground uppercase tracking-[0.1em] mb-0.5 truncate",
+            isMicro ? "text-[8px]" : "text-[10px]"
+          )}>
+            {title}
+          </p>
+          <h2 className={cn(
+            "font-black text-foreground leading-none flex items-baseline gap-0.5",
+            isMicro ? "text-base mt-0.5" : "text-3xl mt-1.5"
+          )}>
             <GlowCounter value={value} suffix={suffix} decimals={suffix === 't' ? 1 : 0} />
           </h2>
-          <p className="text-[10px] text-muted-foreground font-medium mt-1">{subtitle}</p>
+          <p className={cn(
+            "text-muted-foreground font-bold tracking-tight truncate",
+            isMicro ? "text-[8px] mt-1" : "text-[10px] mt-1.5"
+          )}>
+            {subtitle}
+          </p>
         </div>
       </CardContent>
     </Card>

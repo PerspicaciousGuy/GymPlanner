@@ -48,6 +48,21 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: true,
+    proxy: {
+      '/fatsecret-token': {
+        target: 'https://oauth.fatsecret.com',
+        changeOrigin: true,
+        rewrite: (path) => '/connect/token',
+      },
+      '/fatsecret-api': {
+        target: 'https://platform.fatsecret.com',
+        changeOrigin: true,
+        rewrite: (path) => '/rest/server.api',
+      },
+    },
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true

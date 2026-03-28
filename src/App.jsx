@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Calendar, LogIn, LogOut, Cloud, Trash2, RefreshCw, BarChart3, History, User } from 'lucide-react';
+import { Sparkles, Calendar, LogIn, LogOut, Cloud, Trash2, RefreshCw, BarChart3, History, User, Activity } from 'lucide-react';
 
-import Navbar from './components/Navbar';
+
 import WorkoutSchedulerPage from './pages/WorkoutSchedulerPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import HistoryPage from './pages/HistoryPage';
@@ -9,6 +9,7 @@ import DayDetailPage from './pages/DayDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import RoutinesPage from './pages/RoutinesPage';
 import EditRoutinePage from './pages/EditRoutinePage';
+import HealthPage from './pages/HealthPage';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ export default function App() {
   const [selectedHistoryDate, setSelectedHistoryDate] = useState(null);
   const [editRoutineId, setEditRoutineId] = useState(null);
   const [syncNonce, setSyncNonce] = useState(0);
+  const [fullScreenMode, setFullScreenMode] = useState(false);
   const authState = useFirebaseAuth();
   const syncScope = authState.user?.uid || (authState.isConfigured ? 'signed-out' : 'local');
   const syncKey = `${syncScope}:${syncNonce}`;
@@ -57,6 +59,11 @@ export default function App() {
     }
   }, [settings.theme]);
 
+  // Reset full screen mode when switching main pages
+  useEffect(() => {
+    setFullScreenMode(false);
+  }, [activePage]);
+
   const handleDateSelect = (date) => {
     setSelectedHistoryDate(date);
     const complete = isDayComplete(date, 'am') && isDayComplete(date, 'pm');
@@ -82,7 +89,7 @@ export default function App() {
         <nav className="flex flex-col gap-6 flex-1">
           {[
             { id: 'workout', name: 'Training', icon: Calendar },
-            { id: 'history', name: 'History', icon: History },
+            { id: 'health', name: 'Health', icon: Activity },
             { id: 'routines', name: 'Routines', icon: Sparkles },
             { id: 'analytics', name: 'Insights', icon: BarChart3 },
             { id: 'profile', name: 'Profile', icon: User },
@@ -127,23 +134,19 @@ export default function App() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden pb-20 md:pb-0">
-        <Navbar
-          activePage={activePage}
-          onNavigate={setActivePage}
-          authState={authState}
-          onDataRefreshed={() => setSyncNonce((n) => n + 1)}
-          compact
-        />
+      <div className={cn(
+        "flex-1 flex flex-col min-w-0 h-screen overflow-hidden md:pb-0",
+        fullScreenMode ? "pb-0" : "pb-20"
+      )}>
 
         <main className="flex-1 overflow-auto">
           <div className="p-3 sm:p-4 lg:p-6 mx-auto w-full max-w-[1600px]">
             {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} targetDate={selectedHistoryDate} />}
-            {activePage === 'history' && <HistoryPage onDateSelect={handleDateSelect} />}
-            {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('history')} syncKey={syncKey} />}
+            {activePage === 'health' && <HealthPage settings={settings} onFullScreenToggle={setFullScreenMode} />}
             {activePage === 'routines' && <RoutinesPage onEdit={(id) => { setEditRoutineId(id); setActivePage('edit-routine'); }} />}
             {activePage === 'edit-routine' && <EditRoutinePage routineId={editRoutineId} onBack={() => setActivePage('routines')} />}
-            {activePage === 'analytics' && <AnalyticsPage />}
+            {activePage === 'analytics' && <AnalyticsPage onDateSelect={handleDateSelect} />}
+            {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('analytics')} syncKey={syncKey} />}
             {activePage === 'profile' && <ProfilePage authState={authState} onDataRefreshed={() => setSyncNonce(n => n + 1)} onSettingsChange={setSettings} />}
           </div>
 
@@ -151,14 +154,15 @@ export default function App() {
       </div>
 
       {/* Floating Bottom Navigation for Mobile */}
-      <nav className="md:hidden fixed bottom-6 left-6 right-6 h-[72px] bg-white/20 dark:bg-black/40 border-t-[0.5px] border-white/50 dark:border-white/10 flex items-center justify-around z-[9999] rounded-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
-        style={{
-          backdropFilter: 'blur(30px) saturate(210%) contrast(110%)',
-          WebkitBackdropFilter: 'blur(30px) saturate(210%) contrast(110%)'
-        }}>
+      {!fullScreenMode && (
+        <nav className="md:hidden fixed bottom-6 left-6 right-6 h-[72px] bg-white/20 dark:bg-black/40 border-t-[0.5px] border-white/50 dark:border-white/10 flex items-center justify-around z-[9999] rounded-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
+          style={{
+            backdropFilter: 'blur(30px) saturate(210%) contrast(110%)',
+            WebkitBackdropFilter: 'blur(30px) saturate(210%) contrast(110%)'
+          }}>
         {[
           { id: 'workout', name: 'Training', icon: Calendar },
-          { id: 'history', name: 'History', icon: History },
+          { id: 'health', name: 'Health', icon: Activity },
           { id: 'routines', name: 'Routines', icon: Sparkles },
           { id: 'analytics', name: 'Insights', icon: BarChart3 },
           { id: 'profile', name: 'Profile', icon: User },
@@ -186,7 +190,8 @@ export default function App() {
             </span>
           </Button>
         ))}
-      </nav>
+        </nav>
+      )}
     </div>
   );
 }
