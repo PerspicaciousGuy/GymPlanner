@@ -14,7 +14,8 @@ import {
   Zap,
   Leaf,
   Drumstick,
-  Cookie
+  Cookie,
+  Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,7 +25,12 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { getToday, formatDateKey, formatDateDisplay } from '../utils/dateUtils';
 import { loadSettings } from '../utils/settings';
-import { getDailyTotals, addFoodToLog } from '../utils/foodDatabase';
+import { 
+  getDailyTotals, 
+  addFoodToLog,
+  getFoodLog,
+  removeFoodFromLog
+} from '../utils/foodDatabase';
 import LogFoodPage from './health/LogFoodPage';
 import FoodDetailPage from './health/FoodDetailPage';
 import CreateMealPage from './health/CreateMealPage';
@@ -349,16 +355,61 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
                     <Button variant="ghost" size="sm" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">See All</Button>
                 </h3>
 
-                <Card className="rounded-3xl border border-dashed border-border/60 bg-muted/20">
-                    <CardContent className="p-12 flex flex-col items-center justify-center text-center">
-                        <div className="w-20 h-20 bg-card rounded-2xl shadow-sm border border-border flex items-center justify-center mb-6">
-                            <Cookie className="w-10 h-10 text-muted-foreground/40" />
+
+                {getFoodLog(dateKey).length === 0 ? (
+                  <Card className="rounded-3xl border border-dashed border-border/60 bg-muted/20">
+                      <CardContent className="p-12 flex flex-col items-center justify-center text-center">
+                          <div className="w-20 h-20 bg-card rounded-2xl shadow-sm border border-border flex items-center justify-center mb-6">
+                              <Cookie className="w-10 h-10 text-muted-foreground/40" />
+                          </div>
+                          <p className="text-sm font-bold text-muted-foreground leading-relaxed">
+                              Tap <span className="text-foreground">+</span> to add your <br /> first meal of the day
+                          </p>
+                      </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-3">
+                    {getFoodLog(dateKey).map((entry) => (
+                      <motion.div
+                        key={entry.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="group bg-card border border-border rounded-[32px] p-4 flex items-center justify-between hover:shadow-md transition-all"
+                      >
+                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                          <div className="w-12 h-12 bg-muted/50 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <Utensils className="w-5 h-5 text-muted-foreground/60" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-sm font-black text-foreground truncate">{entry.food?.name}</h4>
+                              <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full whitespace-nowrap">
+                                {entry.servings} serving{entry.servings !== 1 ? 's' : ''}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="text-xs font-bold text-foreground/70">{Math.round(entry.food?.calories * entry.servings)} cal</span>
+                              <div className="flex items-center gap-1.5 opacity-60">
+                                <span className="text-[10px] font-bold">P: {Math.round(entry.food?.protein * entry.servings)}g</span>
+                                <span className="text-[10px] font-bold">C: {Math.round(entry.food?.carbs * entry.servings)}g</span>
+                                <span className="text-[10px] font-bold">F: {Math.round(entry.food?.fats * entry.servings)}g</span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <p className="text-sm font-bold text-muted-foreground leading-relaxed">
-                            Tap <span className="text-foreground">+</span> to add your <br /> first meal of the day
-                        </p>
-                    </CardContent>
-                </Card>
+                        <button
+                          onClick={() => {
+                            removeFoodFromLog(dateKey, entry.id);
+                            setLogVersion(v => v + 1);
+                          }}
+                          className="w-10 h-10 flex items-center justify-center rounded-2xl text-muted-foreground/20 group-hover:text-red-500/60 transition-colors hover:bg-red-500/5"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
             </div>
         </TabsContent>
 
