@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { ChevronDown, Calendar, AlertCircle, CheckCircle2, Clock, RefreshCw } from 'lucide-react';
+import { ChevronDown, Calendar, AlertCircle, CheckCircle2, Clock, RefreshCw, Repeat, BedDouble } from 'lucide-react';
 import WorkoutSection from '../components/WorkoutSection';
 import { 
   loadSessionTitles, 
@@ -24,6 +24,7 @@ import {
 import WeekPicker from '../components/WeekPicker';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from "@/lib/utils";
+import { loadTrainingPlan, getCycleSlotForDate } from '../utils/trainingPlan';
 
 function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged }) {
   const [open, setOpen] = useState(defaultOpen && !section.isFullyComplete);
@@ -101,6 +102,19 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
           <div className="scale-90 md:scale-100 origin-left flex items-center gap-2">
             {badgeEl}
             {shiftedBadge}
+            {section.cycleInfo && (
+              <div className={cn(
+                "flex items-center gap-1.5 px-2 py-0.5 rounded-full border",
+                section.cycleInfo.slot?.type === 'rest'
+                  ? "bg-slate-50 text-slate-400 border-slate-200"
+                  : "bg-violet-50 text-violet-600 border-violet-100"
+              )}>
+                <Repeat size={10} strokeWidth={3} />
+                <span className="text-[10px] font-bold uppercase tracking-wider">
+                  Day {section.cycleInfo.position + 1}/{section.cycleInfo.cycleLength}
+                </span>
+              </div>
+            )}
           </div>
 
           {section.muscleGroup && (
@@ -173,7 +187,8 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
 
   const sections = useMemo(() => {
     const titles = loadSessionTitles();
-
+    const plan = loadTrainingPlan();
+    const isDynamic = plan.mode === 'dynamic' && plan.cycle?.length > 0;
     const hasPlannedTraining = (date) => {
       const am = getEffectiveSessionTitle(date, 'am').trim().toLowerCase();
       const pm = getEffectiveSessionTitle(date, 'pm').trim().toLowerCase();
@@ -207,6 +222,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
           defaultOpen: targetDate ? isSameDay(yesterday, targetDate) : true,
           isFullyComplete: yesterdayComplete,
           data: loadWorkoutByDate(yesterday),
+          cycleInfo: isDynamic ? getCycleSlotForDate(yesterday, plan) : null,
           isShifted: !!getDailyMetadata(yesterday, 'am').isShifted || !!getDailyMetadata(yesterday, 'pm').isShifted,
           isShiftedFrom: !!getDailyMetadata(yesterday, 'am').isShiftedFrom || !!getDailyMetadata(yesterday, 'pm').isShiftedFrom,
           shiftedFromLabel: (getDailyMetadata(yesterday, 'am').originalDate || getDailyMetadata(yesterday, 'pm').originalDate) 
@@ -228,6 +244,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
         defaultOpen: targetDate ? isSameDay(today, targetDate) : true,
         isFullyComplete: todayComplete,
         data: loadWorkoutByDate(today),
+        cycleInfo: isDynamic ? getCycleSlotForDate(today, plan) : null,
         isShifted: !!todayAmMeta.isShifted || !!todayPmMeta.isShifted,
         isShiftedFrom: !!todayAmMeta.isShiftedFrom || !!todayPmMeta.isShiftedFrom,
         shiftedFromLabel: (todayAmMeta.originalDate || todayPmMeta.originalDate) 
@@ -249,6 +266,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
         defaultOpen: targetDate ? isSameDay(tomorrow, targetDate) : false,
         isFullyComplete: tomorrowComplete,
         data: loadWorkoutByDate(tomorrow),
+        cycleInfo: isDynamic ? getCycleSlotForDate(tomorrow, plan) : null,
         isShifted: !!tomorrowAmMeta.isShifted || !!tomorrowPmMeta.isShifted,
         isShiftedFrom: !!tomorrowAmMeta.isShiftedFrom || !!tomorrowPmMeta.isShiftedFrom,
         shiftedFromLabel: (tomorrowAmMeta.originalDate || tomorrowPmMeta.originalDate) 
@@ -279,8 +297,8 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
             ? `${getDayOfWeek(amMeta.originalDate || pmMeta.originalDate).slice(0,3)}, ${formatDateCompact(amMeta.originalDate || pmMeta.originalDate)}` : null,
           shiftedToLabel: (amMeta.shiftedToDate || pmMeta.shiftedToDate) 
             ? `${getDayOfWeek(amMeta.shiftedToDate || pmMeta.shiftedToDate).slice(0,3)}, ${formatDateCompact(amMeta.shiftedToDate || pmMeta.shiftedToDate)}` : null,
-          data: loadWorkoutByDate(date)
-        };
+          data: loadWorkoutByDate(date),
+          cycleInfo: isDynamic ? getCycleSlotForDate(date, plan) : null,        };
       });
 
       // If a specific date was targeted, only show THAT date

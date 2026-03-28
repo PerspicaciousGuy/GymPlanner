@@ -4,6 +4,7 @@ const defaultSettings = {
   units: 'kg', // 'kg' | 'lbs'
   theme: 'light', // 'light' | 'dark'
   compactMode: false,
+  trainingMode: 'fixed', // 'fixed' | 'dynamic'
   nutritionGoals: {
     enabled: false,
     calories: 2000,

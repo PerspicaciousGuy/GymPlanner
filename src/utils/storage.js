@@ -18,6 +18,7 @@ import {
   getDateForDayInWeek,
   getWeekDates,
 } from './dateUtils.js';
+import { loadTrainingPlan, getPlanSessionTitle } from './trainingPlan.js';
 
 // ─── Storage keys ────────────────────────────────────────────
 const SCHEDULE_KEY         = 'gymplanner_schedule';
@@ -136,14 +137,20 @@ export function getDailyMetadata(date, session) {
  * Returns the session title for a specific date/session.
  * Priorities: 
  * 1. Daily Metadata Override
- * 2. Global Session Title Template (Day of week)
- * 3. Fallback to Empty
+ * 2. Training Plan (Fixed or Dynamic mode)
+ * 3. Legacy Session Title Template (Day of week fallback)
+ * 4. Fallback to Empty
  */
 export function getEffectiveSessionTitle(date, session) {
   const override = getDailyMetadata(date, session);
   if (override.title !== undefined && override.title !== null) {
     return override.title;
   }
+
+  // Try training plan
+  const plan = loadTrainingPlan();
+  const planTitle = getPlanSessionTitle(date, session, plan);
+  if (planTitle) return planTitle;
 
   const titles = loadSessionTitles();
   const dayName = getDayOfWeek(date);

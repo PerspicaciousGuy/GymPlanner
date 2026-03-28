@@ -8,7 +8,8 @@ import {
   Calendar, 
   ChevronRight, 
   Pencil,
-  X
+  X,
+  Repeat
 } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { loadTemplates, deleteTemplate, saveTemplate, defaultSession } from '../utils/storage';
 import { cn } from "@/lib/utils";
 
-export default function RoutinesPage({ onEdit }) {
+export default function RoutinesPage({ onEdit, onOpenTrainingPlan }) {
   const [templateRows, setTemplateRows] = useState(() => loadTemplates());
   const [templatesSaved, setTemplatesSaved] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,6 +55,14 @@ export default function RoutinesPage({ onEdit }) {
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <Button
+            onClick={onOpenTrainingPlan}
+            variant="outline"
+            className="h-10 sm:h-9 px-4 rounded-xl border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-black uppercase text-[10px] tracking-widest transition-all flex items-center justify-center gap-2 shrink-0"
+          >
+            <Repeat size={14} strokeWidth={3} />
+            <span>Training Plan</span>
+          </Button>
           <Button
             onClick={handleCreateNew}
             className="h-10 sm:h-9 px-4 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/10 transition-all flex items-center justify-center gap-2 shrink-0"
