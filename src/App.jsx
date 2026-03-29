@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import useFirebaseAuth from './hooks/useFirebaseAuth';
-import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isDayComplete } from './utils/storage';
+import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isDayComplete, getEffectiveSessionTitle } from './utils/storage';
 import { scheduleTomorrowSummary } from './utils/notificationService';
 import { loadSettings } from './utils/settings';
 import { loadTrainingPlan } from './utils/trainingPlan';
@@ -70,9 +70,12 @@ export default function App() {
 
   const handleDateSelect = (date) => {
     setSelectedHistoryDate(date);
-    const plan = loadTrainingPlan();
-    const isSingle = plan?.sessionLayout === 'single';
-    const complete = isDayComplete(date, 'am') && (isSingle || isDayComplete(date, 'pm'));
+    
+    const pmTitle = getEffectiveSessionTitle(date, 'pm').trim().toLowerCase();
+    const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ') || txt.startsWith('rest ');
+    const hasPlannedPm = !isOff(pmTitle);
+    
+    const complete = isDayComplete(date, 'am') && (!hasPlannedPm || isDayComplete(date, 'pm'));
     if (complete) {
       setActivePage('dayDetail');
     } else {

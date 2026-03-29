@@ -14,7 +14,6 @@ export function defaultTrainingPlan() {
     name: 'My Plan',
     createdAt: new Date().toISOString(),
     mode: 'fixed',        // 'fixed' | 'dynamic'
-    sessionLayout: 'split',// 'single' | 'split'
     startDate: formatDateKey(new Date()),
     cycle: [],            // Array of { id, name, type, templateId, amTitle, pmTitle }
     fixedWeek: {

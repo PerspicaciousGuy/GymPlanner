@@ -19,32 +19,25 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
   // Load and process data for summary
   const dayData = useMemo(() => loadWorkoutByDate(dateStr), [dateStr, syncKey, refreshTrigger]);
   const titles = loadSessionTitles();
-  const plan = useMemo(() => loadTrainingPlan(), [syncKey]);
-  const sessionLayout = plan?.sessionLayout || 'split';
+  const pmTitle = (titles.pm?.[dayName] || '').trim().toLowerCase();
+  const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ');
+  const plannedPm = !isOff(pmTitle);
   
   const statusInfo = useMemo(() => {
     const amTitle = (titles.am?.[dayName] || '').trim().toLowerCase();
-    const pmTitle = (titles.pm?.[dayName] || '').trim().toLowerCase();
-    const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ');
     
     const plannedAm = !isOff(amTitle);
-    const plannedPm = !isOff(pmTitle);
     
     const doneAm = isDayComplete(dateStr, 'am');
     const donePm = isDayComplete(dateStr, 'pm');
     
     const amOk = plannedAm ? doneAm : true;
     const pmOk = plannedPm ? donePm : true;
-    
-    if (sessionLayout === 'single') {
-      if (amOk) return { label: 'Completed', color: 'text-emerald-500 bg-emerald-500/10', icon: <CheckCircle2 size={12} /> };
-      return { label: 'Missed', color: 'text-rose-500 bg-rose-500/10', icon: <XCircle size={12} /> };
-    }
 
     if (amOk && pmOk) return { label: 'Completed', color: 'text-emerald-500 bg-emerald-500/10', icon: <CheckCircle2 size={12} /> };
     if ((plannedAm && doneAm) || (plannedPm && donePm)) return { label: 'Partial', color: 'text-amber-500 bg-amber-500/10', icon: <AlertCircle size={12} /> };
     return { label: 'Missed', color: 'text-rose-500 bg-rose-500/10', icon: <XCircle size={12} /> };
-  }, [dateStr, dayName, titles, sessionLayout]);
+  }, [dateStr, dayName, titles]);
 
   const stats = useMemo(() => {
     let totalVolume = 0;
@@ -174,7 +167,7 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
               <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Activity Log</h2>
               
               {/* Session Switcher */}
-              {sessionLayout !== 'single' && (
+              {plannedPm && (
                 <div className="flex bg-muted p-1 rounded-xl border border-border/50">
                   <button 
                     onClick={() => setActiveSession('am')}

@@ -191,8 +191,9 @@ function ModeCard({ icon: Icon, title, description, active, onClick }) {
 }
 
 // ─── Cycle Slot Card ─────────────────────────────────────────
-function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, isFirst, isLast, templates, sessionLayout }) {
+function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, isFirst, isLast, templates }) {
   const [expanded, setExpanded] = useState(false);
+  const [showPm, setShowPm] = useState(!!slot.pmTitle);
   const isRest = slot.type === 'rest';
 
   return (
@@ -313,11 +314,21 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, 
             className="overflow-hidden"
           >
             <div className="px-3 pb-3 pt-1 border-t border-slate-50 space-y-3">
-              <div className={cn("grid gap-3", sessionLayout === 'single' ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2")}>
+              <div className={cn("grid gap-3", !showPm ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2")}>
                 <div className="space-y-1.5">
-                  <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 pl-1">
-                    <Sun size={10} /> {sessionLayout === 'single' ? 'Session Title' : 'AM Session Title'}
-                  </label>
+                  <div className="flex items-center justify-between pl-1">
+                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                      <Sun size={10} /> {!showPm ? 'Session Title' : 'Session 1 Title'}
+                    </label>
+                    {!showPm && (
+                      <button 
+                        onClick={() => setShowPm(true)}
+                        className="text-[8px] font-black text-indigo-500 hover:text-indigo-600 uppercase tracking-widest"
+                      >
+                        + Add New Session
+                      </button>
+                    )}
+                  </div>
                   <Input
                     value={slot.amTitle || ''}
                     onChange={(e) => onUpdate({ amTitle: e.target.value })}
@@ -325,11 +336,22 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, 
                     className="h-9 rounded-xl text-xs font-bold bg-slate-50 border-slate-100 focus-visible:border-indigo-200"
                   />
                 </div>
-                {sessionLayout !== 'single' && (
+                {showPm && (
                   <div className="space-y-1.5">
-                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 pl-1">
-                      <Moon size={10} /> PM Session Title
-                    </label>
+                    <div className="flex items-center justify-between pl-1">
+                      <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <Moon size={10} /> Session 2 Title
+                      </label>
+                      <button 
+                        onClick={() => {
+                          setShowPm(false);
+                          onUpdate({ pmTitle: '' });
+                        }}
+                        className="text-[8px] font-black text-rose-500 hover:text-rose-600 uppercase tracking-widest"
+                      >
+                        Remove
+                      </button>
+                    </div>
                     <Input
                       value={slot.pmTitle || ''}
                       onChange={(e) => onUpdate({ pmTitle: e.target.value })}
@@ -439,6 +461,77 @@ function CyclePreview({ plan }) {
   );
 }
 
+function FixedDayRow({ day, plan, updatePlan }) {
+  const hasPm = plan.fixedWeek?.pm && day in plan.fixedWeek.pm && plan.fixedWeek.pm[day] !== undefined;
+
+  return (
+    <div className="flex flex-col gap-2 p-3 rounded-xl bg-slate-50/50 border border-slate-50 hover:border-slate-200 transition-all">
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest w-16 shrink-0">
+          {day.slice(0, 3)}
+        </span>
+        <div className="flex-1 flex items-center gap-1.5">
+          <Sun size={10} className="text-slate-300 shrink-0" />
+          <Input
+            value={plan.fixedWeek?.am?.[day] || ''}
+            onChange={(e) => {
+              const fw = { ...plan.fixedWeek };
+              fw.am = { ...fw.am, [day]: e.target.value };
+              updatePlan({ fixedWeek: fw });
+            }}
+            placeholder={hasPm ? "Session 1..." : "Session..."}
+            className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
+          />
+        </div>
+        {!hasPm && (
+          <Button
+            variant="ghost"
+            onClick={() => {
+              const fw = { ...plan.fixedWeek };
+              fw.pm = { ...fw.pm, [day]: '' };
+              updatePlan({ fixedWeek: fw });
+            }}
+            className="text-[8px] h-8 px-2 font-black text-indigo-500 hover:text-indigo-600 bg-white shadow-sm hover:shadow-md uppercase tracking-widest shrink-0 rounded-lg"
+          >
+            + New Session
+          </Button>
+        )}
+      </div>
+
+      {hasPm && (
+        <div className="flex items-center gap-2">
+          <div className="w-16 shrink-0"></div>
+          <div className="flex-1 flex items-center gap-1.5">
+            <Moon size={10} className="text-slate-300 shrink-0" />
+            <Input
+              value={plan.fixedWeek?.pm?.[day] || ''}
+              onChange={(e) => {
+                const fw = { ...plan.fixedWeek };
+                fw.pm = { ...fw.pm, [day]: e.target.value };
+                updatePlan({ fixedWeek: fw });
+              }}
+              placeholder="Session 2..."
+              className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
+            />
+          </div>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              const fw = { ...plan.fixedWeek };
+              const pm = { ...fw.pm };
+              delete pm[day];
+              fw.pm = pm;
+              updatePlan({ fixedWeek: fw });
+            }}
+            className="text-[8px] h-8 px-2.5 font-black text-rose-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 uppercase tracking-widest shrink-0 rounded-lg transition-all"
+          >
+            Remove
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Main Page ───────────────────────────────────────────────
 export default function TrainingPlanPage({ onBack }) {
@@ -756,36 +849,7 @@ export default function TrainingPlanPage({ onBack }) {
             </div>
           </div>
 
-          {/* Session Layout Selector */}
-          <div className="space-y-3">
-            <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2 px-1">
-              <Sparkles size={11} /> Session Layout
-            </h2>
-            <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100 shadow-sm">
-              <button
-                onClick={() => updatePlan({ sessionLayout: 'single' })}
-                className={cn(
-                  "flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all",
-                  (!plan.sessionLayout || plan.sessionLayout === 'single')
-                    ? "bg-white text-indigo-600 shadow-sm"
-                    : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                )}
-              >
-                1 Session per day
-              </button>
-              <button
-                onClick={() => updatePlan({ sessionLayout: 'split' })}
-                className={cn(
-                  "flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all",
-                  plan.sessionLayout === 'split'
-                    ? "bg-white text-indigo-600 shadow-sm"
-                    : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                )}
-              >
-                Split (AM/PM)
-              </button>
-            </div>
-          </div>
+
 
           {/* Dynamic Mode: Cycle Builder */}
           <AnimatePresence mode="wait">
@@ -955,44 +1019,7 @@ export default function TrainingPlanPage({ onBack }) {
 
                   <div className="space-y-2">
                     {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
-                      <div
-                        key={day}
-                        className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-xl bg-slate-50/50 border border-slate-50 hover:border-slate-200 transition-all"
-                      >
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest w-20 shrink-0">
-                          {day.slice(0, 3)}
-                        </span>
-                        <div className="flex-1 flex flex-col sm:flex-row gap-2">
-                          <div className="flex-1 flex items-center gap-1.5">
-                            {plan.sessionLayout !== 'single' && <Sun size={10} className="text-slate-300 shrink-0" />}
-                            <Input
-                              value={plan.fixedWeek?.am?.[day] || ''}
-                              onChange={(e) => {
-                                const fw = { ...plan.fixedWeek };
-                                fw.am = { ...fw.am, [day]: e.target.value };
-                                updatePlan({ fixedWeek: fw });
-                              }}
-                              placeholder={plan.sessionLayout === 'single' ? "Session..." : "AM Session..."}
-                              className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
-                            />
-                          </div>
-                          {plan.sessionLayout !== 'single' && (
-                            <div className="flex-1 flex items-center gap-1.5">
-                              <Moon size={10} className="text-slate-300 shrink-0" />
-                              <Input
-                                value={plan.fixedWeek?.pm?.[day] || ''}
-                                onChange={(e) => {
-                                  const fw = { ...plan.fixedWeek };
-                                  fw.pm = { ...fw.pm, [day]: e.target.value };
-                                  updatePlan({ fixedWeek: fw });
-                                }}
-                                placeholder="PM Session..."
-                                className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      <FixedDayRow key={day} day={day} plan={plan} updatePlan={updatePlan} />
                     ))}
                   </div>
                 </div>

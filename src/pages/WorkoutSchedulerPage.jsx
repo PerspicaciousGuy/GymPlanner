@@ -196,6 +196,12 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       return !(isOff(am) && isOff(pm));
     };
 
+    const hasPlannedPm = (date) => {
+      const pm = getEffectiveSessionTitle(date, 'pm').trim().toLowerCase();
+      const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ') || txt.startsWith('rest ');
+      return !isOff(pm);
+    };
+
     const currentWeekStart = getWeekStart(new Date());
     const isCurrentWeek = currentWeekStart.getTime() === selectedWeek.getTime();
 
@@ -208,11 +214,11 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       const yesterdayMissed =
         hasPlannedTraining(yesterday) &&
         !isDayComplete(yesterday, 'am') &&
-        (plan.sessionLayout === 'single' || !isDayComplete(yesterday, 'pm'));
+        (!hasPlannedPm(yesterday) || !isDayComplete(yesterday, 'pm'));
       
       const list = [];
       if (yesterdayMissed) {
-        const yesterdayComplete = isDayComplete(yesterday, 'am') && (plan.sessionLayout === 'single' || isDayComplete(yesterday, 'pm'));
+        const yesterdayComplete = isDayComplete(yesterday, 'am') && (!hasPlannedPm(yesterday) || isDayComplete(yesterday, 'pm'));
         list.push({ 
           date: yesterday, 
           dayName: yesterdayName, 
@@ -232,7 +238,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
         });
       }
       
-      const todayComplete = isDayComplete(today, 'am') && (plan.sessionLayout === 'single' || isDayComplete(today, 'pm'));
+      const todayComplete = isDayComplete(today, 'am') && (!hasPlannedPm(today) || isDayComplete(today, 'pm'));
       const todayAmMeta = getDailyMetadata(today, 'am');
       const todayPmMeta = getDailyMetadata(today, 'pm');
       list.push({ 
@@ -253,7 +259,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
           ? `${getDayOfWeek(todayAmMeta.shiftedToDate || todayPmMeta.shiftedToDate).slice(0,3)}, ${formatDateCompact(todayAmMeta.shiftedToDate || todayPmMeta.shiftedToDate)}` : null,
       });
 
-      const tomorrowComplete = isDayComplete(tomorrow, 'am') && (plan.sessionLayout === 'single' || isDayComplete(tomorrow, 'pm'));
+      const tomorrowComplete = isDayComplete(tomorrow, 'am') && (!hasPlannedPm(tomorrow) || isDayComplete(tomorrow, 'pm'));
       const tomorrowAmMeta = getDailyMetadata(tomorrow, 'am');
       const tomorrowPmMeta = getDailyMetadata(tomorrow, 'pm');
       list.push({ 
@@ -279,7 +285,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       const weekDates = getWeekDates(selectedWeek);
       const list = weekDates.map((date) => {
         const dayName = getDayOfWeek(date);
-        const isFullyComplete = isDayComplete(date, 'am') && (plan.sessionLayout === 'single' || isDayComplete(date, 'pm'));
+        const isFullyComplete = isDayComplete(date, 'am') && (!hasPlannedPm(date) || isDayComplete(date, 'pm'));
         const amMeta = getDailyMetadata(date, 'am');
         const pmMeta = getDailyMetadata(date, 'pm');
         return {

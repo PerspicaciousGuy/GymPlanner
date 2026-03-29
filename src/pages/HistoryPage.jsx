@@ -139,18 +139,15 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
   const doneAm = isDayComplete(dateKey, 'am');
   const donePm = isDayComplete(dateKey, 'pm');
   
-  const plan = loadTrainingPlan();
-  const sessionLayout = plan?.sessionLayout || 'split';
-  
   const amTitle = (titles.am?.[dayName] || '').trim().toLowerCase();
   const pmTitle = (titles.pm?.[dayName] || '').trim().toLowerCase();
   const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ');
   
   const plannedAm = !isOff(amTitle);
   const plannedPm = !isOff(pmTitle);
-  const isPlanned = sessionLayout === 'single' ? plannedAm : (plannedAm || plannedPm);
+  const isPlanned = plannedAm || plannedPm;
   
-  const hasLoggedWorkout = (dayWorkout.am?.groups?.length > 0) || (sessionLayout !== 'single' && dayWorkout.pm?.groups?.length > 0);
+  const hasLoggedWorkout = (dayWorkout.am?.groups?.length > 0) || (dayWorkout.pm?.groups?.length > 0);
   
   // Status Logic
   let status = 'none'; // 'completed', 'partial', 'skipped', 'planned', 'none'
@@ -160,17 +157,12 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
     const pmOk = plannedPm ? (donePm || (dayWorkout.pm?.groups?.length > 0 && donePm)) : true;
     
     if (isPlanned || hasLoggedWorkout) {
-      if (sessionLayout === 'single') {
-        if (amOk) status = 'completed';
-        else status = 'skipped';
+      if (amOk && pmOk) {
+        status = 'completed';
+      } else if ((plannedAm && doneAm) || (plannedPm && donePm)) {
+        status = 'partial';
       } else {
-        if (amOk && pmOk) {
-          status = 'completed';
-        } else if ((plannedAm && doneAm) || (plannedPm && donePm)) {
-          status = 'partial';
-        } else {
-          status = 'skipped';
-        }
+        status = 'skipped';
       }
     }
   } else if (isPlanned) {
