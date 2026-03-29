@@ -65,8 +65,8 @@ svg.recharts-surface {
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.585 0.233 277.117);
-  /* Original Indigo */
+  --primary: oklch(0.205 0.005 250);
+  /* Black #1C1C1E */
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -86,7 +86,7 @@ svg.recharts-surface {
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.585 0.233 277.117);
+  --sidebar-primary: oklch(0.205 0.005 250);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -95,14 +95,14 @@ svg.recharts-surface {
 
   /* Light Theme Specific Colors */
   --color-white: #ffffff;
-  --color-indigo-50: #eef2ff;
-  --color-indigo-100: #e0e7ff;
-  --color-indigo-200: #c7d2fe;
-  --color-indigo-300: #a5b4fc;
-  --color-indigo-400: #818cf8;
-  --color-indigo-500: #6366f1;
-  --color-indigo-600: #4f46e5;
-  --color-indigo-700: #4338ca;
+  --color-indigo-50: #F2F2F7;
+  --color-indigo-100: #E5E5EA;
+  --color-indigo-200: #D1D1D6;
+  --color-indigo-300: #C7C7CC;
+  --color-indigo-400: #AEAEB2;
+  --color-indigo-500: #1C1C1E; /* Primary */
+  --color-indigo-600: #151516;
+  --color-indigo-700: #000000;
   --color-slate-50: #f8fafc;
   --color-slate-100: #f1f5f9;
   --color-slate-200: #e2e8f0;
@@ -129,8 +129,8 @@ svg.recharts-surface {
   --card-foreground: oklch(0.98 0 0);
   --popover: oklch(0.22 0.015 250);
   --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.91 0.23 108); /* Electric Lime */
-  --primary-foreground: oklch(0.18 0 0);
+  --primary: oklch(0.985 0 0); /* Pure White */
+  --primary-foreground: oklch(0.205 0.005 250); /* #1C1C1E */
   --secondary: oklch(0.28 0.02 250);
   --secondary-foreground: oklch(0.98 0 0);
   --muted: oklch(0.28 0.02 250);
@@ -143,8 +143,8 @@ svg.recharts-surface {
   --ring: oklch(0.91 0.23 108 / 30%);
   --sidebar: oklch(0.2 0.01 250);
   --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.91 0.23 108);
-  --sidebar-primary-foreground: oklch(0.18 0 0);
+  --sidebar-primary: oklch(0.985 0 0);
+  --sidebar-primary-foreground: oklch(0.205 0.005 250);
   --sidebar-accent: oklch(0.25 0.01 250);
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
@@ -152,14 +152,14 @@ svg.recharts-surface {
 
   /* Dark Theme Specific Overrides (mapped to Lime/Charcoal) */
   --color-white: #1e1e20;
-  --color-indigo-50: oklch(0.28 0.05 108 / 0.1);
-  --color-indigo-100: oklch(0.28 0.05 108 / 0.15);
-  --color-indigo-200: oklch(0.32 0.06 108 / 0.2);
-  --color-indigo-300: oklch(0.38 0.08 108 / 0.25);
-  --color-indigo-400: oklch(0.42 0.12 108 / 0.3);
-  --color-indigo-500: #D4FF00;
-  --color-indigo-600: #BBDD00;
-  --color-indigo-700: #A5C200;
+  --color-indigo-50: oklch(0.25 0.01 250 / 0.3);
+  --color-indigo-100: oklch(0.25 0.01 250 / 0.5);
+  --color-indigo-200: oklch(0.30 0.01 250 / 0.7);
+  --color-indigo-300: oklch(0.40 0.01 250);
+  --color-indigo-400: oklch(0.50 0.01 250);
+  --color-indigo-500: #FFFFFF;
+  --color-indigo-600: #F2F2F7;
+  --color-indigo-700: #E5E5EA;
 
   /* High-contrast Slate for readability in Dark Mode */
   --color-slate-50: #1a1a1c;
@@ -223,14 +223,14 @@ svg.recharts-surface {
 
   /* Mode-aware color overrides */
   --color-white: var(--color-white);
-  --color-indigo-50: var(--color-indigo-50);
-  --color-indigo-100: var(--color-indigo-100);
-  --color-indigo-200: var(--color-indigo-200);
-  --color-indigo-300: var(--color-indigo-300);
-  --color-indigo-400: var(--color-indigo-400);
-  --color-indigo-500: var(--color-indigo-500);
-  --color-indigo-600: var(--color-indigo-600);
-  --color-indigo-700: var(--color-indigo-700);
+  --color-indigo-50: #F2F2F7;
+  --color-indigo-100: #E5E5EA;
+  --color-indigo-200: #D1D1D6;
+  --color-indigo-300: #C7C7CC;
+  --color-indigo-400: #AEAEB2;
+  --color-indigo-500: #1C1C1E;
+  --color-indigo-600: #151516;
+  --color-indigo-700: #000000;
 
   --color-slate-50: var(--color-slate-50);
   --color-slate-100: var(--color-slate-100);

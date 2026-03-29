@@ -208,11 +208,11 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       const yesterdayMissed =
         hasPlannedTraining(yesterday) &&
         !isDayComplete(yesterday, 'am') &&
-        !isDayComplete(yesterday, 'pm');
+        (plan.sessionLayout === 'single' || !isDayComplete(yesterday, 'pm'));
       
       const list = [];
       if (yesterdayMissed) {
-        const yesterdayComplete = isDayComplete(yesterday, 'am') && isDayComplete(yesterday, 'pm');
+        const yesterdayComplete = isDayComplete(yesterday, 'am') && (plan.sessionLayout === 'single' || isDayComplete(yesterday, 'pm'));
         list.push({ 
           date: yesterday, 
           dayName: yesterdayName, 
@@ -232,7 +232,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
         });
       }
       
-      const todayComplete = isDayComplete(today, 'am') && isDayComplete(today, 'pm');
+      const todayComplete = isDayComplete(today, 'am') && (plan.sessionLayout === 'single' || isDayComplete(today, 'pm'));
       const todayAmMeta = getDailyMetadata(today, 'am');
       const todayPmMeta = getDailyMetadata(today, 'pm');
       list.push({ 
@@ -253,7 +253,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
           ? `${getDayOfWeek(todayAmMeta.shiftedToDate || todayPmMeta.shiftedToDate).slice(0,3)}, ${formatDateCompact(todayAmMeta.shiftedToDate || todayPmMeta.shiftedToDate)}` : null,
       });
 
-      const tomorrowComplete = isDayComplete(tomorrow, 'am') && isDayComplete(tomorrow, 'pm');
+      const tomorrowComplete = isDayComplete(tomorrow, 'am') && (plan.sessionLayout === 'single' || isDayComplete(tomorrow, 'pm'));
       const tomorrowAmMeta = getDailyMetadata(tomorrow, 'am');
       const tomorrowPmMeta = getDailyMetadata(tomorrow, 'pm');
       list.push({ 
@@ -279,7 +279,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       const weekDates = getWeekDates(selectedWeek);
       const list = weekDates.map((date) => {
         const dayName = getDayOfWeek(date);
-        const isFullyComplete = isDayComplete(date, 'am') && isDayComplete(date, 'pm');
+        const isFullyComplete = isDayComplete(date, 'am') && (plan.sessionLayout === 'single' || isDayComplete(date, 'pm'));
         const amMeta = getDailyMetadata(date, 'am');
         const pmMeta = getDailyMetadata(date, 'pm');
         return {

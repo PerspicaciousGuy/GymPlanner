@@ -191,7 +191,7 @@ function ModeCard({ icon: Icon, title, description, active, onClick }) {
 }
 
 // ─── Cycle Slot Card ─────────────────────────────────────────
-function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, isFirst, isLast, templates }) {
+function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, isFirst, isLast, templates, sessionLayout }) {
   const [expanded, setExpanded] = useState(false);
   const isRest = slot.type === 'rest';
 
@@ -313,10 +313,10 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, 
             className="overflow-hidden"
           >
             <div className="px-3 pb-3 pt-1 border-t border-slate-50 space-y-3">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className={cn("grid gap-3", sessionLayout === 'single' ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2")}>
                 <div className="space-y-1.5">
                   <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 pl-1">
-                    <Sun size={10} /> AM Session Title
+                    <Sun size={10} /> {sessionLayout === 'single' ? 'Session Title' : 'AM Session Title'}
                   </label>
                   <Input
                     value={slot.amTitle || ''}
@@ -325,17 +325,19 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, 
                     className="h-9 rounded-xl text-xs font-bold bg-slate-50 border-slate-100 focus-visible:border-indigo-200"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 pl-1">
-                    <Moon size={10} /> PM Session Title
-                  </label>
-                  <Input
-                    value={slot.pmTitle || ''}
-                    onChange={(e) => onUpdate({ pmTitle: e.target.value })}
-                    placeholder="e.g., Chest + Biceps"
-                    className="h-9 rounded-xl text-xs font-bold bg-slate-50 border-slate-100 focus-visible:border-indigo-200"
-                  />
-                </div>
+                {sessionLayout !== 'single' && (
+                  <div className="space-y-1.5">
+                    <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 pl-1">
+                      <Moon size={10} /> PM Session Title
+                    </label>
+                    <Input
+                      value={slot.pmTitle || ''}
+                      onChange={(e) => onUpdate({ pmTitle: e.target.value })}
+                      placeholder="e.g., Chest + Biceps"
+                      className="h-9 rounded-xl text-xs font-bold bg-slate-50 border-slate-100 focus-visible:border-indigo-200"
+                    />
+                  </div>
+                )}
               </div>
 
               {templates.length > 0 && (
@@ -754,6 +756,37 @@ export default function TrainingPlanPage({ onBack }) {
             </div>
           </div>
 
+          {/* Session Layout Selector */}
+          <div className="space-y-3">
+            <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2 px-1">
+              <Sparkles size={11} /> Session Layout
+            </h2>
+            <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100 shadow-sm">
+              <button
+                onClick={() => updatePlan({ sessionLayout: 'single' })}
+                className={cn(
+                  "flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all",
+                  (!plan.sessionLayout || plan.sessionLayout === 'single')
+                    ? "bg-white text-indigo-600 shadow-sm"
+                    : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                )}
+              >
+                1 Session per day
+              </button>
+              <button
+                onClick={() => updatePlan({ sessionLayout: 'split' })}
+                className={cn(
+                  "flex-1 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all",
+                  plan.sessionLayout === 'split'
+                    ? "bg-white text-indigo-600 shadow-sm"
+                    : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                )}
+              >
+                Split (AM/PM)
+              </button>
+            </div>
+          </div>
+
           {/* Dynamic Mode: Cycle Builder */}
           <AnimatePresence mode="wait">
             {plan.mode === 'dynamic' && (
@@ -817,6 +850,7 @@ export default function TrainingPlanPage({ onBack }) {
                             isFirst={index === 0}
                             isLast={index === plan.cycle.length - 1}
                             templates={templates}
+                            sessionLayout={plan.sessionLayout || 'split'}
                           />
                         ))}
                       </AnimatePresence>
@@ -930,7 +964,7 @@ export default function TrainingPlanPage({ onBack }) {
                         </span>
                         <div className="flex-1 flex flex-col sm:flex-row gap-2">
                           <div className="flex-1 flex items-center gap-1.5">
-                            <Sun size={10} className="text-slate-300 shrink-0" />
+                            {plan.sessionLayout !== 'single' && <Sun size={10} className="text-slate-300 shrink-0" />}
                             <Input
                               value={plan.fixedWeek?.am?.[day] || ''}
                               onChange={(e) => {
@@ -938,23 +972,25 @@ export default function TrainingPlanPage({ onBack }) {
                                 fw.am = { ...fw.am, [day]: e.target.value };
                                 updatePlan({ fixedWeek: fw });
                               }}
-                              placeholder="AM Session..."
+                              placeholder={plan.sessionLayout === 'single' ? "Session..." : "AM Session..."}
                               className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
                             />
                           </div>
-                          <div className="flex-1 flex items-center gap-1.5">
-                            <Moon size={10} className="text-slate-300 shrink-0" />
-                            <Input
-                              value={plan.fixedWeek?.pm?.[day] || ''}
-                              onChange={(e) => {
-                                const fw = { ...plan.fixedWeek };
-                                fw.pm = { ...fw.pm, [day]: e.target.value };
-                                updatePlan({ fixedWeek: fw });
-                              }}
-                              placeholder="PM Session..."
-                              className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
-                            />
-                          </div>
+                          {plan.sessionLayout !== 'single' && (
+                            <div className="flex-1 flex items-center gap-1.5">
+                              <Moon size={10} className="text-slate-300 shrink-0" />
+                              <Input
+                                value={plan.fixedWeek?.pm?.[day] || ''}
+                                onChange={(e) => {
+                                  const fw = { ...plan.fixedWeek };
+                                  fw.pm = { ...fw.pm, [day]: e.target.value };
+                                  updatePlan({ fixedWeek: fw });
+                                }}
+                                placeholder="PM Session..."
+                                className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

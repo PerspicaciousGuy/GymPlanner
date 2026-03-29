@@ -41,6 +41,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatDateKey } from '../utils/dateUtils';
+import { loadTrainingPlan } from '../utils/trainingPlan';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken, onWorkoutChanged, initialSession = 'am' }) {
@@ -58,6 +59,8 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   };
 
   const [dayData, setDayData] = useState(() => ensureAdvanced(initialData));
+  const plan = useMemo(() => loadTrainingPlan(), [syncToken]);
+  const sessionLayout = plan?.sessionLayout || 'split';
   const [activeSession, setActiveSession] = useState(initialSession);
   const [saveFlash, setSaveFlash] = useState(false);
   const [titleSaveFlash, setTitleSaveFlash] = useState(false);
@@ -117,10 +120,13 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     markDayCompleteWithSync(date || workoutDateKey, activeSession);
     onWorkoutChanged?.();
 
-    if (activeSession === 'am') {
+    if (activeSession === 'am' && sessionLayout !== 'single') {
       setAmDone(true);
       setAmSkipped(false);
       setActiveSession('pm');
+    } else if (activeSession === 'am') {
+      setAmDone(true);
+      setAmSkipped(false);
     } else {
       setPmDone(true);
       setPmSkipped(false);
@@ -130,10 +136,13 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const handleSkip = () => {
     markDaySkippedWithSync(date || workoutDateKey, activeSession);
     onWorkoutChanged?.();
-    if (activeSession === 'am') {
+    if (activeSession === 'am' && sessionLayout !== 'single') {
       setAmDone(false);
       setAmSkipped(true);
       setActiveSession('pm');
+    } else if (activeSession === 'am') {
+      setAmDone(false);
+      setAmSkipped(true);
     } else {
       setPmDone(false);
       setPmSkipped(true);
@@ -268,7 +277,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const sessionSkipped = activeSession === 'am' ? amSkipped : pmSkipped;
   const amTitle = amTitleState;
   const pmTitle = pmTitleState;
-  const bothDone = (amDone || amSkipped) && (pmDone || pmSkipped);
+  const bothDone = sessionLayout === 'single' ? (amDone || amSkipped) : (amDone || amSkipped) && (pmDone || pmSkipped);
 
   const tabCls = (session, done, skipped) => {
     const isActive = activeSession === session;
@@ -291,41 +300,46 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
           <div>
             <p className="text-emerald-900 font-bold text-[11px] md:text-xs">Training session finalized!</p>
             <p className="text-emerald-600 text-[9px] md:text-[10px] font-medium uppercase tracking-tight mt-0.5">
-              AM {amDone ? '✓ COMPLETED' : '⏭ SKIPPED'} &nbsp;·&nbsp; PM {pmDone ? '✓ COMPLETED' : '⏭ SKIPPED'}
+              {sessionLayout === 'single' ? 
+                `SESSION ${amDone ? '✓ COMPLETED' : '⏭ SKIPPED'}` :
+                `AM ${amDone ? '✓ COMPLETED' : '⏭ SKIPPED'}  ·  PM ${pmDone ? '✓ COMPLETED' : '⏭ SKIPPED'}`
+              }
             </p>
           </div>
         </div>
       )}
 
       {/* Sub-tabs for AM/PM */}
-      <div className="flex items-center gap-1 md:gap-2 border-b border-slate-50 mb-1 overflow-x-auto scrollbar-none">
-        <button className={tabCls('am', amDone, amSkipped)} onClick={() => setActiveSession('am')}>
-          <Sun size={14} className={cn(activeSession === 'am' ? "text-indigo-600" : "text-slate-400")} />
-          <span>AM Session</span>
-          {amDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
-          {amSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
-          {activeSession === 'am' && (
-            <motion.div 
-              layoutId="activeSessionIndicator"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" 
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            />
-          )}
-        </button>
-        <button className={tabCls('pm', pmDone, pmSkipped)} onClick={() => setActiveSession('pm')}>
-          <Moon size={14} className={cn(activeSession === 'pm' ? "text-indigo-600" : "text-slate-400")} />
-          <span>PM Session</span>
-          {pmDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
-          {pmSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
-          {activeSession === 'pm' && (
-            <motion.div 
-              layoutId="activeSessionIndicator"
-              className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" 
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            />
-          )}
-        </button>
-      </div>
+      {sessionLayout !== 'single' && (
+        <div className="flex items-center gap-1 md:gap-2 border-b border-slate-50 mb-1 overflow-x-auto scrollbar-none">
+          <button className={tabCls('am', amDone, amSkipped)} onClick={() => setActiveSession('am')}>
+            <Sun size={14} className={cn(activeSession === 'am' ? "text-indigo-600" : "text-slate-400")} />
+            <span>AM Session</span>
+            {amDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
+            {amSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
+            {activeSession === 'am' && (
+              <motion.div 
+                layoutId="activeSessionIndicator"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" 
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              />
+            )}
+          </button>
+          <button className={tabCls('pm', pmDone, pmSkipped)} onClick={() => setActiveSession('pm')}>
+            <Moon size={14} className={cn(activeSession === 'pm' ? "text-indigo-600" : "text-slate-400")} />
+            <span>PM Session</span>
+            {pmDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
+            {pmSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
+            {activeSession === 'pm' && (
+              <motion.div 
+                layoutId="activeSessionIndicator"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" 
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              />
+            )}
+          </button>
+        </div>
+      )}
 
       <AnimatePresence mode="wait">
         <motion.div

@@ -47,29 +47,29 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan }) {
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
-          <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 font-black tracking-tighter text-[9px] px-2 py-0.5 rounded-full uppercase">
-            MY TEMPLATES
-          </Badge>
-          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight leading-none italic uppercase">Routines</h1>
+
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight leading-none uppercase">Routines</h1>
           <p className="text-sm text-muted-foreground font-medium tracking-tight">Manage workout templates and session structures.</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <Button
-            onClick={onOpenTrainingPlan}
-            variant="outline"
-            className="h-10 sm:h-9 px-4 rounded-xl border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-black uppercase text-[10px] tracking-widest transition-all flex items-center justify-center gap-2 shrink-0"
-          >
-            <Repeat size={14} strokeWidth={3} />
-            <span>Training Plan</span>
-          </Button>
-          <Button
-            onClick={handleCreateNew}
-            className="h-10 sm:h-9 px-4 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-black uppercase text-[10px] tracking-widest shadow-lg shadow-primary/10 transition-all flex items-center justify-center gap-2 shrink-0"
-          >
-            <Plus size={14} strokeWidth={3} />
-            <span>New Routine</span>
-          </Button>
+        <div className="flex flex-col lg:flex-row lg:items-center gap-3 w-full md:w-auto">
+          <div className="grid grid-cols-2 gap-2 shrink-0">
+            <Button
+              onClick={onOpenTrainingPlan}
+              variant="outline"
+              className="h-10 px-3 rounded-xl border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-black uppercase text-[9px] tracking-widest transition-all flex items-center justify-center gap-2 shadow-sm"
+            >
+              <Repeat size={12} strokeWidth={3} />
+              <span className="truncate">Training Plan</span>
+            </Button>
+            <Button
+              onClick={handleCreateNew}
+              className="h-10 px-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-black uppercase text-[9px] tracking-widest shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2"
+            >
+              <Plus size={12} strokeWidth={3} />
+              <span className="truncate">New Routine</span>
+            </Button>
+          </div>
 
           <div className="flex flex-1 items-center gap-2 bg-card p-1.5 rounded-xl border border-border shadow-sm backdrop-blur-sm">
             <div className="relative flex-1">
@@ -107,7 +107,7 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan }) {
             </div>
           </div>
           <div className="max-w-md mx-auto px-6 space-y-2">
-            <h3 className="text-xl font-black text-foreground uppercase italic tracking-tight">Library Empty</h3>
+            <h3 className="text-xl font-black text-foreground uppercase tracking-tight">Library Empty</h3>
             <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest leading-relaxed">
               No routines found. Save active sessions as routines to build your library.
             </p>
@@ -155,7 +155,7 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan }) {
                   <Dumbbell className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 <div className="flex-1 pr-16 md:pr-10 pt-0.5">
-                  <h3 className="text-base md:text-lg font-black text-foreground tracking-tight leading-none group-hover:text-primary transition-colors uppercase italic break-words">{t.name}</h3>
+                  <h3 className="text-base md:text-lg font-black text-foreground tracking-tight leading-none group-hover:text-primary transition-colors uppercase break-words">{t.name}</h3>
                   <div className="flex flex-wrap items-center gap-1 mt-2">
                     {muscles.length > 0 ? muscles.map(m => (
                       <span key={m} className="px-1.5 py-0.5 bg-muted text-[7px] font-black text-foreground/70 rounded-md border border-border uppercase tracking-widest">{m}</span>

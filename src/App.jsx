@@ -18,6 +18,7 @@ import useFirebaseAuth from './hooks/useFirebaseAuth';
 import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isDayComplete } from './utils/storage';
 import { scheduleTomorrowSummary } from './utils/notificationService';
 import { loadSettings } from './utils/settings';
+import { loadTrainingPlan } from './utils/trainingPlan';
 
 export default function App() {
   const [activePage, setActivePage] = useState('workout');
@@ -65,9 +66,13 @@ export default function App() {
     setFullScreenMode(false);
   }, [activePage]);
 
+  const showNavBar = !fullScreenMode && !['training-plan', 'edit-routine', 'dayDetail'].includes(activePage);
+
   const handleDateSelect = (date) => {
     setSelectedHistoryDate(date);
-    const complete = isDayComplete(date, 'am') && isDayComplete(date, 'pm');
+    const plan = loadTrainingPlan();
+    const isSingle = plan?.sessionLayout === 'single';
+    const complete = isDayComplete(date, 'am') && (isSingle || isDayComplete(date, 'pm'));
     if (complete) {
       setActivePage('dayDetail');
     } else {
@@ -137,7 +142,7 @@ export default function App() {
       {/* Main Content Area */}
       <div className={cn(
         "flex-1 flex flex-col min-w-0 h-screen overflow-hidden md:pb-0",
-        fullScreenMode ? "pb-0" : "pb-20"
+        showNavBar ? "pb-20" : "pb-0"
       )}>
 
         <main className="flex-1 overflow-auto">
@@ -156,7 +161,7 @@ export default function App() {
       </div>
 
       {/* Floating Bottom Navigation for Mobile */}
-      {!fullScreenMode && (
+      {showNavBar && (
         <nav className="md:hidden fixed bottom-6 left-6 right-6 h-[72px] bg-white/20 dark:bg-black/40 border-t-[0.5px] border-white/50 dark:border-white/10 flex items-center justify-around z-[9999] rounded-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
           style={{
             backdropFilter: 'blur(30px) saturate(210%) contrast(110%)',

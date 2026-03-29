@@ -14,6 +14,7 @@ export function defaultTrainingPlan() {
     name: 'My Plan',
     createdAt: new Date().toISOString(),
     mode: 'fixed',        // 'fixed' | 'dynamic'
+    sessionLayout: 'split',// 'single' | 'split'
     startDate: formatDateKey(new Date()),
     cycle: [],            // Array of { id, name, type, templateId, amTitle, pmTitle }
     fixedWeek: {
@@ -127,6 +128,7 @@ function hydratePlan(raw) {
   return {
     ...defaultTrainingPlan(),
     ...raw,
+    sessionLayout: raw.sessionLayout || 'split',
     fixedWeek: {
       am: { ...AM_TITLES, ...(raw.fixedWeek?.am ?? {}) },
       pm: { ...PM_TITLES, ...(raw.fixedWeek?.pm ?? {}) },

@@ -4,6 +4,7 @@ import WorkoutSection from '../components/WorkoutSection';
 import WorkoutLogView from '../components/WorkoutLogView';
 import { formatDateDisplay, formatDateKey, getDayOfWeek } from '../utils/dateUtils';
 import { loadWorkoutByDate, isDayComplete, loadSessionTitles } from '../utils/storage';
+import { loadTrainingPlan } from '../utils/trainingPlan';
 import { calculateRecovery, getDailyFocus } from '../utils/recoveryLogic';
 import InteractiveMuscleMap from '../components/InteractiveMuscleMap/InteractiveMuscleMap';
 import { cn } from "@/lib/utils";
@@ -18,6 +19,8 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
   // Load and process data for summary
   const dayData = useMemo(() => loadWorkoutByDate(dateStr), [dateStr, syncKey, refreshTrigger]);
   const titles = loadSessionTitles();
+  const plan = useMemo(() => loadTrainingPlan(), [syncKey]);
+  const sessionLayout = plan?.sessionLayout || 'split';
   
   const statusInfo = useMemo(() => {
     const amTitle = (titles.am?.[dayName] || '').trim().toLowerCase();
@@ -33,10 +36,15 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
     const amOk = plannedAm ? doneAm : true;
     const pmOk = plannedPm ? donePm : true;
     
+    if (sessionLayout === 'single') {
+      if (amOk) return { label: 'Completed', color: 'text-emerald-500 bg-emerald-500/10', icon: <CheckCircle2 size={12} /> };
+      return { label: 'Missed', color: 'text-rose-500 bg-rose-500/10', icon: <XCircle size={12} /> };
+    }
+
     if (amOk && pmOk) return { label: 'Completed', color: 'text-emerald-500 bg-emerald-500/10', icon: <CheckCircle2 size={12} /> };
     if ((plannedAm && doneAm) || (plannedPm && donePm)) return { label: 'Partial', color: 'text-amber-500 bg-amber-500/10', icon: <AlertCircle size={12} /> };
     return { label: 'Missed', color: 'text-rose-500 bg-rose-500/10', icon: <XCircle size={12} /> };
-  }, [dateStr, dayName, titles]);
+  }, [dateStr, dayName, titles, sessionLayout]);
 
   const stats = useMemo(() => {
     let totalVolume = 0;
@@ -166,24 +174,26 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
               <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Activity Log</h2>
               
               {/* Session Switcher */}
-              <div className="flex bg-muted p-1 rounded-xl border border-border/50">
-                <button 
-                  onClick={() => setActiveSession('am')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                    activeSession === 'am' ? 'bg-card text-indigo-500 shadow-sm border border-border' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Sun size={12} /> AM
-                </button>
-                <button 
-                  onClick={() => setActiveSession('pm')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                    activeSession === 'pm' ? 'bg-card text-indigo-500 shadow-sm border border-border' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Moon size={12} /> PM
-                </button>
-              </div>
+              {sessionLayout !== 'single' && (
+                <div className="flex bg-muted p-1 rounded-xl border border-border/50">
+                  <button 
+                    onClick={() => setActiveSession('am')}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                      activeSession === 'am' ? 'bg-card text-indigo-500 shadow-sm border border-border' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Sun size={12} /> AM
+                  </button>
+                  <button 
+                    onClick={() => setActiveSession('pm')}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                      activeSession === 'pm' ? 'bg-card text-indigo-500 shadow-sm border border-border' : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Moon size={12} /> PM
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* View Mode Switcher */}

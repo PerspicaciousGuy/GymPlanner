@@ -18,7 +18,7 @@ GymPlanner follows a **premium, Apple-inspired, minimal** aesthetic. It prioriti
 ### ☀️ Light Mode (Clean & Professional)
 | Element | Color / Value |
 | :--- | :--- |
-| **Primary** | `oklch(0.585 0.233 277.117)` (Indigo) |
+| **Primary** | `oklch(0.205 0.005 250)` (Black - `#1C1C1E`) |
 | **Background** | `oklch(1 0 0)` (Pure White) |
 | **Foreground** | `oklch(0.145 0 0)` (Deep Slate) |
 | **Cards** | `oklch(1 0 0)` with `--shadow-sm` |
@@ -27,7 +27,7 @@ GymPlanner follows a **premium, Apple-inspired, minimal** aesthetic. It prioriti
 ### 🌙 Dark Mode (Bold & Energetic)
 | Element | Color / Value |
 | :--- | :--- |
-| **Primary** | `oklch(0.91 0.23 108)` (Electric Lime - `#D4FF00`) |
+| **Primary** | `oklch(0.985 0 0)` (Pure White) |
 | **Background** | `oklch(0.18 0.01 250)` (Deep Soft Charcoal) |
 | **Foreground** | `oklch(0.98 0 0)` (Off-White) |
 | **Cards** | `oklch(0.22 0.015 250)` (Slightly lighter surface) |
@@ -77,7 +77,7 @@ Used for dashboard stats, workout logs, and navigation items.
 
 ### 📊 Progress Indicators
 Circular and linear progress bars are used for macro tracking and goal completion.
-- **Colors**: Indigo, Emerald (Success), Rose (Energy), Amber (Vitality).
+- **Colors**: Black/White (Primary), Emerald (Success), Rose (Energy), Amber (Vitality).
 
 ### 🔘 Buttons & Controls
 - **Floating Action Button (FAB)**: Large, circular button at the bottom right for primary actions.

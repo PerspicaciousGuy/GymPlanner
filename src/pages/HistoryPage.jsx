@@ -21,6 +21,7 @@ import {
 } from '../utils/dateUtils';
 import { loadWorkoutByDate, isDayComplete, loadSessionTitles } from '../utils/storage';
 import { getDayOfWeek } from '../utils/dateUtils';
+import { loadTrainingPlan } from '../utils/trainingPlan';
 
 export default function HistoryPage({ onDateSelect }) {
   const [viewDate, setViewDate] = useState(getToday());
@@ -138,15 +139,18 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
   const doneAm = isDayComplete(dateKey, 'am');
   const donePm = isDayComplete(dateKey, 'pm');
   
+  const plan = loadTrainingPlan();
+  const sessionLayout = plan?.sessionLayout || 'split';
+  
   const amTitle = (titles.am?.[dayName] || '').trim().toLowerCase();
   const pmTitle = (titles.pm?.[dayName] || '').trim().toLowerCase();
   const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ');
   
   const plannedAm = !isOff(amTitle);
   const plannedPm = !isOff(pmTitle);
-  const isPlanned = plannedAm || plannedPm;
+  const isPlanned = sessionLayout === 'single' ? plannedAm : (plannedAm || plannedPm);
   
-  const hasLoggedWorkout = (dayWorkout.am?.groups?.length > 0) || (dayWorkout.pm?.groups?.length > 0);
+  const hasLoggedWorkout = (dayWorkout.am?.groups?.length > 0) || (sessionLayout !== 'single' && dayWorkout.pm?.groups?.length > 0);
   
   // Status Logic
   let status = 'none'; // 'completed', 'partial', 'skipped', 'planned', 'none'
@@ -156,12 +160,17 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
     const pmOk = plannedPm ? (donePm || (dayWorkout.pm?.groups?.length > 0 && donePm)) : true;
     
     if (isPlanned || hasLoggedWorkout) {
-      if (amOk && pmOk) {
-        status = 'completed';
-      } else if ((plannedAm && doneAm) || (plannedPm && donePm)) {
-        status = 'partial';
+      if (sessionLayout === 'single') {
+        if (amOk) status = 'completed';
+        else status = 'skipped';
       } else {
-        status = 'skipped';
+        if (amOk && pmOk) {
+          status = 'completed';
+        } else if ((plannedAm && doneAm) || (plannedPm && donePm)) {
+          status = 'partial';
+        } else {
+          status = 'skipped';
+        }
       }
     }
   } else if (isPlanned) {
