@@ -15,7 +15,10 @@ import {
   Leaf,
   Drumstick,
   Cookie,
-  Trash2
+  Trash2,
+  Footprints,
+  Minus,
+  GlassWater
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,14 +37,16 @@ import {
 import LogFoodPage from './health/LogFoodPage';
 import FoodDetailPage from './health/FoodDetailPage';
 import CreateMealPage from './health/CreateMealPage';
+import MealDetailPage from './health/MealDetailPage';
 
 export default function HealthPage({ settings, onFullScreenToggle }) {
   const [activeTab, setActiveTab] = useState('nutrition');
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [currentSlide, setCurrentSlide] = useState(0);
   const [waterIntake, setWaterIntake] = useState(0);
-  const [healthSubView, setHealthSubView] = useState(null); // null | 'log-food' | 'food-detail' | 'create-meal'
+  const [healthSubView, setHealthSubView] = useState(null); // null | 'log-food' | 'food-detail' | 'create-meal' | 'meal-detail'
   const [selectedFood, setSelectedFood] = useState(null);
+  const [selectedMeal, setSelectedMeal] = useState(null);
   const [logVersion, setLogVersion] = useState(0); // trigger re-render on food log
   
   // Update parent full screen mode
@@ -291,41 +296,73 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
                         {currentSlide === 2 && (
                             <div className="space-y-4">
                                 {/* Slide 3: Activity & Habits */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Card className="rounded-[40px] border border-border shadow-sm p-6 flex flex-col items-center justify-center text-center relative overflow-hidden group h-40">
-                                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform"><Activity className="w-8 h-8 text-foreground" /></div>
-                                        <p className="text-4xl font-black text-foreground">0<span className="text-sm text-muted-foreground opacity-30"> / 10000</span></p>
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-2">Steps Today</p>
-                                        <div className="mt-4 p-2 bg-indigo-500/10 rounded-xl border border-indigo-500/10 flex items-center gap-2">
-                                            <Activity size={12} className="text-indigo-600" />
-                                            <span className="text-[8px] font-black text-indigo-700 uppercase">Connect Health</span>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {/* Steps Card */}
+                                    <Card className="rounded-[32px] border border-border shadow-sm p-4 md:p-5 flex flex-col h-60 relative overflow-hidden">
+                                        <div className="z-10 text-left">
+                                            <p className="text-2xl md:text-3xl font-black text-foreground">107<span className="text-sm md:text-base text-muted-foreground font-black opacity-50"> /10000</span></p>
+                                            <p className="text-[11px] md:text-xs font-bold text-foreground mt-0.5">Steps Today</p>
+                                        </div>
+                                        <div className="mt-auto flex justify-center pb-1 relative z-10 flex-col items-center">
+                                            <div className="relative w-32 h-32 md:w-36 md:h-36">
+                                                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                                                    <circle cx="50" cy="50" r="38" className="stroke-slate-100/80 dark:stroke-slate-800/80 fill-none" strokeWidth="8" />
+                                                    <circle cx="50" cy="50" r="38" className="stroke-foreground fill-none transition-all duration-1000" strokeWidth="8" strokeLinecap="round" strokeDasharray="239" strokeDashoffset={239 - (239 * Math.max(0.01, Math.min(107 / 10000, 1)))} />
+                                                </svg>
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <Footprints className="w-6 h-6 text-foreground fill-foreground/90" />
+                                                </div>
+                                            </div>
                                         </div>
                                     </Card>
-                                    <Card className="rounded-[40px] border border-border shadow-sm p-6 flex flex-col items-center justify-center text-center h-40">
-                                        <Flame className="w-8 h-8 text-amber-500 fill-amber-500 mb-2" />
-                                        <p className="text-4xl font-black text-foreground">0</p>
-                                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-2">Calories Burned</p>
+
+                                    {/* Calories Burned Card */}
+                                    <Card className="rounded-[32px] border border-border shadow-sm p-4 md:p-5 flex flex-col h-60 relative overflow-hidden">
+                                        <div className="flex items-center gap-1.5 z-10">
+                                            <Flame className="w-5 h-5 text-foreground fill-foreground" />
+                                            <p className="text-2xl md:text-3xl font-black text-foreground">2</p>
+                                        </div>
+                                        <p className="text-[11px] md:text-xs font-bold text-foreground mt-0.5 z-10 text-left">Calories burned</p>
+                                        
+                                        <div className="mt-4 flex items-center gap-2.5 z-10">
+                                            <div className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center shrink-0">
+                                                <Footprints className="w-3.5 h-3.5" strokeWidth={2.5} />
+                                            </div>
+                                            <div className="flex flex-col items-start gap-0.5">
+                                                <span className="text-[11px] font-bold text-foreground leading-none">Steps</span>
+                                                <span className="text-[10px] font-black text-muted-foreground bg-muted/60 rounded-full px-2 py-0.5 leading-none mt-0.5">+2</span>
+                                            </div>
+                                        </div>
                                     </Card>
                                 </div>
-                                <Card className="rounded-[40px] border border-border shadow-sm p-6 md:p-8 flex items-center justify-between">
+
+                                {/* Water Card */}
+                                <Card className="rounded-[32px] border border-border shadow-sm p-4 md:p-5 flex-row! items-center justify-between! w-full !gap-0">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-16 h-16 bg-blue-500/10 rounded-3xl flex items-center justify-center border border-blue-500/10">
-                                            <Droplet className="w-8 h-8 text-blue-500" />
+                                        <div className="w-14 h-14 bg-[#F2F4F7] dark:bg-slate-800/60 rounded-[20px] flex items-center justify-center shrink-0">
+                                            <GlassWater className="w-6 h-6 text-[#4F8CEF] fill-[#4F8CEF]" strokeWidth={1.5} />
                                         </div>
-                                        <div>
-                                            <p className="text-2xl font-black text-foreground">{waterIntake} <span className="text-xs text-muted-foreground opacity-30 font-black">ml</span></p>
-                                            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Water Intake</p>
+                                        <div className="flex flex-col items-start">
+                                            <p className="text-[13px] md:text-sm font-bold text-foreground mb-1">Water</p>
+                                            <div className="flex items-center gap-1.5">
+                                                <p className="text-base font-black text-foreground leading-none">{waterIntake} ml</p>
+                                                <Settings className="w-4 h-4 text-muted-foreground/40 hover:text-muted-foreground cursor-pointer transition-colors" strokeWidth={2} />
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button 
                                             onClick={() => setWaterIntake(prev => Math.max(0, prev - 250))}
-                                            className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-foreground font-black text-xl border border-border hover:bg-slate-200 transition-colors"
-                                        >−</button>
+                                            className="w-10 h-10 rounded-full flex items-center justify-center text-foreground border border-foreground hover:bg-muted/50 transition-colors"
+                                        >
+                                            <Minus size={18} strokeWidth={2} />
+                                        </button>
                                         <button 
                                             onClick={() => setWaterIntake(prev => prev + 250)}
-                                            className="w-12 h-12 bg-foreground text-background rounded-2xl flex items-center justify-center text-xl font-bold hover:scale-105 transition-transform"
-                                        >+</button>
+                                            className="w-10 h-10 rounded-full flex items-center justify-center bg-foreground text-background hover:scale-105 transition-transform"
+                                        >
+                                            <Plus size={18} strokeWidth={2.5} />
+                                        </button>
                                     </div>
                                 </Card>
                             </div>
@@ -370,11 +407,17 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
                 ) : (
                   <div className="space-y-3">
                     {getFoodLog(dateKey).map((entry) => (
-                      <motion.div
+                      <motion.button
                         key={entry.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="group bg-card border border-border rounded-[32px] p-4 flex items-center justify-between hover:shadow-md transition-all"
+                        onClick={() => {
+                          setSelectedFood(entry.food);
+                          // We pass the whole entry for editing in the future, 
+                          // but for now detail page just needs the food object.
+                          setHealthSubView('food-detail');
+                        }}
+                        className="w-full text-left group bg-card border border-border rounded-[32px] p-4 flex items-center justify-between hover:shadow-md transition-all active:scale-[0.98]"
                       >
                         <div className="flex items-center gap-4 flex-1 min-w-0">
                           <div className="w-12 h-12 bg-muted/50 rounded-2xl flex items-center justify-center flex-shrink-0">
@@ -398,15 +441,16 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
                           </div>
                         </div>
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation(); // Don't trigger the card's onClick
                             removeFoodFromLog(dateKey, entry.id);
                             setLogVersion(v => v + 1);
                           }}
-                          className="w-10 h-10 flex items-center justify-center rounded-2xl text-muted-foreground/20 group-hover:text-red-500/60 transition-colors hover:bg-red-500/5"
+                          className="w-10 h-10 flex items-center justify-center rounded-2xl text-muted-foreground/20 group-hover:text-red-500/60 transition-colors hover:bg-red-500/5 relative z-10"
                         >
                           <Trash2 size={18} />
                         </button>
-                      </motion.div>
+                      </motion.button>
                     ))}
                   </div>
                 )}
@@ -445,6 +489,10 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
               setSelectedFood(food); // null = manual add
               setHealthSubView('food-detail');
             }}
+            onSelectMeal={(meal) => {
+              setSelectedMeal(meal);
+              setHealthSubView('meal-detail');
+            }}
             onCreateMeal={() => {
               setHealthSubView('create-meal');
             }}
@@ -471,6 +519,27 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
             onBack={() => setHealthSubView('log-food')}
             onSaveMeal={(meal) => {
               setHealthSubView(null);
+            }}
+          />
+        )}
+        {healthSubView === 'meal-detail' && selectedMeal && (
+          <MealDetailPage
+            meal={selectedMeal}
+            onBack={() => {
+              setHealthSubView('log-food');
+              setSelectedMeal(null);
+            }}
+            onAddItems={() => {
+              // TODO: Navigate to a food picker that adds items back to the meal
+              setHealthSubView('log-food');
+            }}
+            onDone={(updatedMeal) => {
+              setHealthSubView(null);
+              setSelectedMeal(null);
+            }}
+            onDeleteMeal={() => {
+              setHealthSubView('log-food');
+              setSelectedMeal(null);
             }}
           />
         )}

@@ -35,7 +35,7 @@ const TABS = [
   { id: 'saved', label: 'Saved' },
 ];
 
-export default function LogFoodPage({ onBack, onSelectFood, onCreateMeal }) {
+export default function LogFoodPage({ onBack, onSelectFood, onSelectMeal, onCreateMeal }) {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [apiResults, setApiResults] = useState([]);
@@ -296,7 +296,7 @@ export default function LogFoodPage({ onBack, onSelectFood, onCreateMeal }) {
                   <motion.button
                     key={meal.id}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => onSelectFood(meal)}
+                    onClick={() => onSelectMeal ? onSelectMeal(meal) : onSelectFood(meal)}
                     className="w-full flex items-center justify-between p-4 bg-card border border-border rounded-2xl hover:shadow-md transition-all group text-left"
                   >
                     <div className="flex-1 min-w-0">
@@ -304,7 +304,7 @@ export default function LogFoodPage({ onBack, onSelectFood, onCreateMeal }) {
                       <div className="flex items-center gap-1.5 mt-1">
                         <Flame size={12} className="text-muted-foreground/50" />
                         <span className="text-xs text-muted-foreground">
-                          {meal.items?.length || 0} items
+                          {meal.items?.reduce((sum, item) => sum + Math.round((item.food?.calories || 0) * (item.servings || 1)), 0) || 0} cal
                         </span>
                       </div>
                     </div>

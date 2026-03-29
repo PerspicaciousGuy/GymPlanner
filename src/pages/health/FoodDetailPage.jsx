@@ -52,6 +52,8 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
   // Editable state
   const [name, setName] = useState(food?.name || '');
   const [servings, setServings] = useState(1);
+  const [gramAmount, setGramAmount] = useState(food?.servingGrams || 100);
+  const [editingGrams, setEditingGrams] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(
     food?.availableUnits?.[0] || SERVING_UNITS.SERVING
   );
@@ -89,6 +91,7 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
       getFatSecretFoodDetail(food.fatSecretId).then(detail => {
         if (detail) {
           setEnrichedFood(detail);
+          setGramAmount(detail.servingGrams || 100);
           setManualValues({
             calories: detail.calories || 0,
             protein: detail.protein || 0,
@@ -115,18 +118,28 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
   // Use enriched food for calculations
   const activeFood = enrichedFood || food;
 
+  // Are we in gram mode?
+  const isGramMode = selectedUnit === SERVING_UNITS.GRAM;
+
+  // The effective multiplier for nutrition scaling
+  const effectiveServings = useMemo(() => {
+    if (isGramMode && activeFood?.servingGrams) {
+      return gramAmount / activeFood.servingGrams;
+    }
+    return servings;
+  }, [isGramMode, gramAmount, activeFood, servings]);
+
   // Calculated nutrition (for database foods, scale by servings)
   const nutrition = useMemo(() => {
     if (isManual) {
-      // For manual, scale the manually entered values by servings
       const result = {};
       Object.keys(manualValues).forEach(k => {
-        result[k] = Math.round(manualValues[k] * servings * 10) / 10;
+        result[k] = Math.round(manualValues[k] * effectiveServings * 10) / 10;
       });
       return result;
     }
-    return calculateNutrition(activeFood, servings);
-  }, [activeFood, servings, isManual, manualValues]);
+    return calculateNutrition(activeFood, effectiveServings);
+  }, [activeFood, effectiveServings, isManual, manualValues]);
 
   const availableUnits = activeFood?.availableUnits || [SERVING_UNITS.SERVING, SERVING_UNITS.GRAM];
 
@@ -169,7 +182,7 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
             servingGrams: 100,
           }
         : activeFood,
-      servings,
+      servings: effectiveServings,
     };
     onSave(entry);
   };
@@ -257,17 +270,68 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
 
         {/* Serving Amount */}
         <div className="flex items-center justify-between mb-6">
-          <p className="text-sm font-bold text-foreground">Serving Amount</p>
+          <div>
+            <p className="text-sm font-bold text-foreground">
+              {isGramMode ? 'Amount (grams)' : 'Serving Amount'}
+            </p>
+            {isGramMode && activeFood?.servingSize && (
+              <p className="text-[10px] font-medium text-muted-foreground mt-0.5">
+                1 serving = {activeFood.servingGrams}g ({activeFood.servingSize})
+              </p>
+            )}
+          </div>
           <div className="flex items-center gap-4">
             <button
-              onClick={() => setServings(prev => Math.max(0.5, prev - 0.5))}
+              onClick={() => {
+                if (isGramMode) {
+                  setGramAmount(prev => Math.max(1, prev - 10));
+                } else {
+                  setServings(prev => Math.max(0.5, prev - 0.5));
+                }
+              }}
               className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
             >
               <Minus size={18} strokeWidth={2.5} />
             </button>
-            <span className="text-xl font-black text-foreground w-8 text-center">{servings}</span>
+            {isGramMode ? (
+              editingGrams ? (
+                <input
+                  autoFocus
+                  type="number"
+                  defaultValue={gramAmount}
+                  onBlur={(e) => {
+                    const val = parseInt(e.target.value) || 1;
+                    setGramAmount(Math.max(1, val));
+                    setEditingGrams(false);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const val = parseInt(e.target.value) || 1;
+                      setGramAmount(Math.max(1, val));
+                      setEditingGrams(false);
+                    }
+                  }}
+                  className="text-xl font-black text-foreground w-16 text-center bg-transparent outline-none border-b-2 border-foreground"
+                />
+              ) : (
+                <button
+                  onClick={() => setEditingGrams(true)}
+                  className="text-xl font-black text-foreground min-w-[3rem] text-center"
+                >
+                  {gramAmount}<span className="text-xs text-muted-foreground ml-0.5">g</span>
+                </button>
+              )
+            ) : (
+              <span className="text-xl font-black text-foreground w-8 text-center">{servings}</span>
+            )}
             <button
-              onClick={() => setServings(prev => prev + 0.5)}
+              onClick={() => {
+                if (isGramMode) {
+                  setGramAmount(prev => prev + 10);
+                } else {
+                  setServings(prev => prev + 0.5);
+                }
+              }}
               className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
             >
               <Plus size={18} strokeWidth={2.5} />
@@ -276,14 +340,14 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
         </div>
 
         {/* Calories Card */}
-        <Card className="rounded-3xl border border-border shadow-sm mb-4">
-          <CardContent className="p-5 flex items-center justify-between">
+        <Card className="rounded-2xl border border-border shadow-sm mb-4">
+          <CardContent className="py-2.5 px-5 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center">
-                <Flame size={22} className="text-muted-foreground" />
+              <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                <Flame size={20} className="text-muted-foreground" />
               </div>
               <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Calories</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Calories</p>
                 {editingField === 'calories' ? (
                   <input
                     autoFocus
@@ -291,10 +355,10 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
                     defaultValue={isManual ? manualValues.calories : food?.calories || 0}
                     onBlur={(e) => handleManualValueChange('calories', e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleManualValueChange('calories', e.target.value)}
-                    className="text-2xl font-black text-foreground bg-transparent outline-none border-b-2 border-foreground w-24"
+                    className="text-2xl font-black text-foreground bg-transparent outline-none border-b-2 border-foreground w-24 leading-none"
                   />
                 ) : (
-                  <p className="text-2xl font-black text-foreground">{nutrition.calories}</p>
+                  <p className="text-2xl font-black text-foreground leading-none">{nutrition.calories}</p>
                 )}
               </div>
             </div>
@@ -316,7 +380,7 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
             { key: 'carbs', label: 'Carbs', icon: Cookie, color: 'text-amber-500' },
             { key: 'fats', label: 'Fats', icon: Droplet, color: 'text-blue-500' },
           ].map(macro => (
-            <Card key={macro.key} className="rounded-2xl border border-border shadow-sm">
+            <Card key={macro.key} className="rounded-xl border border-border shadow-sm">
               <CardContent className="p-3 flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1.5">
                   <macro.icon size={12} className={macro.color} />
