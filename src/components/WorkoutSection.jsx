@@ -41,7 +41,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatDateKey } from '../utils/dateUtils';
-import { loadTrainingPlan } from '../utils/trainingPlan';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken, onWorkoutChanged, initialSession = 'am' }) {
@@ -59,8 +58,11 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   };
 
   const [dayData, setDayData] = useState(() => ensureAdvanced(initialData));
-  const plan = useMemo(() => loadTrainingPlan(), [syncToken]);
-  const sessionLayout = plan?.sessionLayout || 'split';
+  const hasPlannedPm = useMemo(() => {
+     const pmTitle = getEffectiveSessionTitle(date || workoutDateKey, 'pm').trim().toLowerCase();
+     const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ') || txt.startsWith('rest ');
+     return !isOff(pmTitle);
+  }, [date, workoutDateKey, syncToken]);
   const [activeSession, setActiveSession] = useState(initialSession);
   const [saveFlash, setSaveFlash] = useState(false);
   const [titleSaveFlash, setTitleSaveFlash] = useState(false);
@@ -120,7 +122,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     markDayCompleteWithSync(date || workoutDateKey, activeSession);
     onWorkoutChanged?.();
 
-    if (activeSession === 'am' && sessionLayout !== 'single') {
+    if (activeSession === 'am' && hasPlannedPm) {
       setAmDone(true);
       setAmSkipped(false);
       setActiveSession('pm');
@@ -136,7 +138,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const handleSkip = () => {
     markDaySkippedWithSync(date || workoutDateKey, activeSession);
     onWorkoutChanged?.();
-    if (activeSession === 'am' && sessionLayout !== 'single') {
+    if (activeSession === 'am' && hasPlannedPm) {
       setAmDone(false);
       setAmSkipped(true);
       setActiveSession('pm');
@@ -277,7 +279,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const sessionSkipped = activeSession === 'am' ? amSkipped : pmSkipped;
   const amTitle = amTitleState;
   const pmTitle = pmTitleState;
-  const bothDone = sessionLayout === 'single' ? (amDone || amSkipped) : (amDone || amSkipped) && (pmDone || pmSkipped);
+  const bothDone = !hasPlannedPm ? (amDone || amSkipped) : (amDone || amSkipped) && (pmDone || pmSkipped);
 
   const tabCls = (session, done, skipped) => {
     const isActive = activeSession === session;
@@ -300,9 +302,9 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
           <div>
             <p className="text-emerald-900 font-bold text-[11px] md:text-xs">Training session finalized!</p>
             <p className="text-emerald-600 text-[9px] md:text-[10px] font-medium uppercase tracking-tight mt-0.5">
-              {sessionLayout === 'single' ? 
+              {!hasPlannedPm ? 
                 `SESSION ${amDone ? '✓ COMPLETED' : '⏭ SKIPPED'}` :
-                `AM ${amDone ? '✓ COMPLETED' : '⏭ SKIPPED'}  ·  PM ${pmDone ? '✓ COMPLETED' : '⏭ SKIPPED'}`
+                `SESSION 1 ${amDone ? '✓ COMPLETED' : '⏭ SKIPPED'}  ·  SESSION 2 ${pmDone ? '✓ COMPLETED' : '⏭ SKIPPED'}`
               }
             </p>
           </div>
@@ -310,11 +312,11 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
       )}
 
       {/* Sub-tabs for AM/PM */}
-      {sessionLayout !== 'single' && (
+      {hasPlannedPm && (
         <div className="flex items-center gap-1 md:gap-2 border-b border-slate-50 mb-1 overflow-x-auto scrollbar-none">
           <button className={tabCls('am', amDone, amSkipped)} onClick={() => setActiveSession('am')}>
             <Sun size={14} className={cn(activeSession === 'am' ? "text-indigo-600" : "text-slate-400")} />
-            <span>AM Session</span>
+            <span>Session 1</span>
             {amDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
             {amSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
             {activeSession === 'am' && (
@@ -327,7 +329,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
           </button>
           <button className={tabCls('pm', pmDone, pmSkipped)} onClick={() => setActiveSession('pm')}>
             <Moon size={14} className={cn(activeSession === 'pm' ? "text-indigo-600" : "text-slate-400")} />
-            <span>PM Session</span>
+            <span>Session 2</span>
             {pmDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
             {pmSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
             {activeSession === 'pm' && (
