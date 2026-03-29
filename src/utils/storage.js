@@ -143,14 +143,21 @@ export function getDailyMetadata(date, session) {
  */
 export function getEffectiveSessionTitle(date, session) {
   const override = getDailyMetadata(date, session);
-  if (override.title !== undefined && override.title !== null) {
+  if (
+    override.title !== undefined && 
+    override.title !== null && 
+    override.title.trim() !== '' && 
+    override.title.trim().toLowerCase() !== 'workout'
+  ) {
     return override.title;
   }
 
   // Try training plan
   const plan = loadTrainingPlan();
   const planTitle = getPlanSessionTitle(date, session, plan);
-  if (planTitle) return planTitle;
+  if (planTitle !== null && planTitle !== undefined) {
+    return planTitle;
+  }
 
   const titles = loadSessionTitles();
   const dayName = getDayOfWeek(date);

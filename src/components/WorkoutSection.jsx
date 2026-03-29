@@ -240,10 +240,19 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
 
   const handleSessionTitleSave = () => {
     const value = activeSession === 'am' ? amTitleState : pmTitleState;
-    saveDailyMetadata(date || workoutDateKey, activeSession, { title: value });
-    onWorkoutChanged?.();
-    setTitleSaveFlash(true);
-    setTimeout(() => setTitleSaveFlash(false), 1800);
+    const original = getEffectiveSessionTitle(date || workoutDateKey, activeSession);
+
+    if (value.trim() === '') {
+      saveDailyMetadata(date || workoutDateKey, activeSession, { title: null });
+      const fallback = getEffectiveSessionTitle(date || workoutDateKey, activeSession);
+      if (activeSession === 'am') setAmTitleState(fallback);
+      else setPmTitleState(fallback);
+    } else if (value !== original) {
+      saveDailyMetadata(date || workoutDateKey, activeSession, { title: value });
+      onWorkoutChanged?.();
+      setTitleSaveFlash(true);
+      setTimeout(() => setTitleSaveFlash(false), 1800);
+    }
   };
 
   const handleDeleteGroup = useCallback((groupIdx) => {
