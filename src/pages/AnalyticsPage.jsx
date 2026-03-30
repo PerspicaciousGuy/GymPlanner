@@ -68,10 +68,24 @@ export default function AnalyticsPage({ onDateSelect }) {
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [muscleMetric, setMuscleMetric] = useState('sets'); // 'sets' | 'volume'
   const [activeTab, setActiveTab] = useState('overview');
+  const tabsSentinelRef = useRef(null);
+  const [isTabsSticky, setIsTabsSticky] = useState(false);
 
   // Refresh data when navigating to analytics to ensure it catches latest workouts
   useEffect(() => {
     setRefreshNonce(n => n + 1);
+  }, []);
+
+  // Sticky tabs via IntersectionObserver (reliable across all scroll contexts)
+  useEffect(() => {
+    const sentinel = tabsSentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsTabsSticky(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
   }, []);
 
   const analyticsData = useMemo(() => {
@@ -465,10 +479,29 @@ export default function AnalyticsPage({ onDateSelect }) {
         </div>
       </div>
 
-      <div ref={dashboardRef} className="space-y-6 bg-background p-1 -m-1 rounded-3xl">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="flex justify-center mb-8">
-            <TabsList className="bg-muted/50 p-1 rounded-2xl border border-border/50 h-auto gap-0.5 w-full max-w-[400px]">
+          {/* Sentinel: when this scrolls out of view, tabs become fixed */}
+          <div ref={tabsSentinelRef} className="h-0 w-full" />
+
+          {/* Fixed floating tabs overlay (appears when scrolled past sentinel) */}
+          <div
+            className={`fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl py-3 px-3 sm:px-4 lg:px-6 border-b border-border/30 shadow-sm transition-all duration-200 ${isTabsSticky ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'}`}
+          >
+            <div className="flex justify-center mx-auto max-w-[1600px]">
+              <TabsList className="bg-muted/60 p-1 rounded-2xl border border-border/40 h-auto gap-0.5 w-full max-w-[400px] shadow-sm">
+                <TabsTrigger value="overview" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
+                <TabsTrigger value="history" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">History</TabsTrigger>
+                <TabsTrigger value="evolution" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Focus</TabsTrigger>
+                <TabsTrigger value="recovery" className="flex-1 rounded-xl px-1 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center justify-center gap-1">
+                  Recovery <div className="w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+
+          {/* Inline tabs (always rendered to prevent layout shift) */}
+          <div className="flex justify-center mb-4">
+            <TabsList className="bg-muted/60 p-1 rounded-2xl border border-border/40 h-auto gap-0.5 w-full max-w-[400px] shadow-sm">
               <TabsTrigger value="overview" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
               <TabsTrigger value="history" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">History</TabsTrigger>
               <TabsTrigger value="evolution" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Focus</TabsTrigger>
@@ -477,6 +510,8 @@ export default function AnalyticsPage({ onDateSelect }) {
               </TabsTrigger>
             </TabsList>
           </div>
+
+      <div ref={dashboardRef} className="space-y-6 bg-background rounded-3xl">
 
           <TabsContent value="overview" className="space-y-6 outline-none">
             {/* Header Cards */}
@@ -1059,8 +1094,8 @@ export default function AnalyticsPage({ onDateSelect }) {
               </div>
             </div>
           </TabsContent>
+        </div>
         </Tabs>
-      </div>
     </div>
   );
 }
