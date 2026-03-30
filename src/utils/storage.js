@@ -429,7 +429,8 @@ export function findPreviousExerciseEntry({ exercise, beforeDate, session }) {
   const targetWeekday = getDayOfWeek(beforeDate);
   const buckets = [null, null, null, null];
 
-  const workoutEntries = Object.entries(loadWorkouts())
+  const workouts = loadWorkouts();
+  const workoutEntries = Object.entries(workouts)
     .filter(([dateKey]) => DATE_KEY_REGEX.test(dateKey) && dateKey < beforeDateKey)
     .sort(([dateA], [dateB]) => dateB.localeCompare(dateA));
 
@@ -437,8 +438,10 @@ export function findPreviousExerciseEntry({ exercise, beforeDate, session }) {
     const normalizedDay = ensureAmPm(dayData);
 
     for (const sessionKey of ['am', 'pm']) {
-      const groups = normalizedDay?.[sessionKey]?.groups ?? [];
-
+      const sessionData = normalizedDay[sessionKey] || {};
+      
+      // 1. Search in Traditional Groups
+      const groups = sessionData.groups ?? [];
       for (const group of groups) {
         for (const row of group.rows ?? []) {
           const rowExercise = String(row?.exercise || '').trim().toLowerCase();
@@ -467,6 +470,39 @@ export function findPreviousExerciseEntry({ exercise, beforeDate, session }) {
               },
             };
           }
+        }
+      }
+
+      // 2. Search in Standalone Advanced Exercises
+      const standalone = sessionData.standaloneExercises ?? [];
+      for (const ex of standalone) {
+        const exExercise = String(ex?.exercise || '').trim().toLowerCase();
+        if (exExercise !== exerciseName) continue;
+
+        // Check if any sets have data
+        const validSets = (ex.sets || []).filter(s => String(s.reps || '').trim() !== '' || String(s.weight || '').trim() !== '');
+        if (validSets.length === 0) continue;
+
+        const isSameWeekday = getDayOfWeek(dateKey) === targetWeekday;
+        const isSameSession = sessionKey === session;
+        const bucketIndex = isSameWeekday && isSameSession ? 0 : isSameSession ? 1 : isSameWeekday ? 2 : 3;
+
+        if (!buckets[bucketIndex]) {
+          // Format the first set for backward compatibility with row-based consumers
+          const firstSet = validSets[0];
+          buckets[bucketIndex] = {
+            date: dateKey,
+            session: sessionKey,
+            row: {
+              sets: String(ex.sets?.length || ''),
+              reps: String(firstSet.reps || ''),
+              weight: String(firstSet.weight || ''),
+              dropSets: '',
+              dropWeight: '',
+              // Include the full sets for smarter consumers
+              allSets: ex.sets
+            },
+          };
         }
       }
     }
@@ -500,7 +536,10 @@ export function getExerciseOccurrenceCount({ exercise, reps, weight, beforeDate 
   for (const [_, dayData] of workoutEntries) {
     const normalizedDay = ensureAmPm(dayData);
     for (const sessionKey of ['am', 'pm']) {
-      const groups = normalizedDay?.[sessionKey]?.groups ?? [];
+      const sessionData = normalizedDay[sessionKey] || {};
+      
+      // Check Groups
+      const groups = sessionData.groups ?? [];
       for (const group of groups) {
         for (const row of group.rows ?? []) {
           const rowEx = String(row?.exercise || '').trim().toLowerCase();
@@ -508,6 +547,21 @@ export function getExerciseOccurrenceCount({ exercise, reps, weight, beforeDate 
           const rowWeight = String(row?.weight || '').trim();
 
           if (rowEx === exName && rowReps === targetReps && rowWeight === targetWeight) {
+            count++;
+          }
+        }
+      }
+
+      // Check Standalone
+      const standalone = sessionData.standaloneExercises ?? [];
+      for (const ex of standalone) {
+        const exEx = String(ex?.exercise || '').trim().toLowerCase();
+        if (exEx !== exName) continue;
+        
+        for (const s of ex.sets || []) {
+          const sReps = String(s.reps || '').trim();
+          const sWeight = String(s.weight || '').trim();
+          if (sReps === targetReps && sWeight === targetWeight) {
             count++;
           }
         }

@@ -1,14 +1,18 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { ChevronDown, Plus, Trash2, X, Hash, Dumbbell, Target } from 'lucide-react';
+import { ChevronDown, Plus, Trash2, X, Hash, Dumbbell, Target, History } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   getMuscleGroupKeys, 
   getSubMusclesForMuscle, 
   getExercisesForSubMuscle,
-  addExerciseWithSync
+  addExerciseWithSync,
+  findPreviousExerciseEntry,
+  getExerciseOccurrenceCount
 } from '../utils/storage';
+import { formatDateCompact } from '../utils/dateUtils';
 import { Stepper } from './ui/stepper';
+import { Button } from "@/components/ui/button";
 
 export default function AdvancedExerciseCard({ 
   exerciseData, 
@@ -40,6 +44,48 @@ export default function AdvancedExerciseCard({
     setIsAddingNew(false);
     setNewExName('');
   }, [muscle, subMuscle]);
+
+  const previousEntry = useMemo(
+    () => findPreviousExerciseEntry({ exercise, beforeDate: workoutDate }),
+    [exercise, workoutDate]
+  );
+
+  const occurrenceCount = useMemo(() => {
+    // We check occurrence for the first set's values
+    const firstSet = sets[0] || {};
+    if (!exercise || !firstSet.reps || !firstSet.weight) return 0;
+    return getExerciseOccurrenceCount({ 
+      exercise, 
+      reps: firstSet.reps, 
+      weight: firstSet.weight, 
+      beforeDate: workoutDate 
+    });
+  }, [exercise, sets, workoutDate]);
+
+  const applyPreviousValues = useCallback(() => {
+    if (!previousEntry) return;
+    
+    if (previousEntry.row.allSets) {
+      // If it was an advanced exercise before, restore all sets
+      onChange({
+        ...exerciseData,
+        sets: JSON.parse(JSON.stringify(previousEntry.row.allSets)),
+        totalSets: previousEntry.row.allSets.length
+      });
+    } else {
+      // Legacy or simple row, create N sets with same values
+      const numSets = parseInt(previousEntry.row.sets) || 1;
+      const newSets = Array(numSets).fill(null).map(() => ({
+        reps: previousEntry.row.reps,
+        weight: previousEntry.row.weight
+      }));
+      onChange({
+        ...exerciseData,
+        sets: newSets,
+        totalSets: numSets
+      });
+    }
+  }, [previousEntry, exerciseData, onChange]);
 
   const update = useCallback((patch) => {
     onChange({ ...exerciseData, ...patch });
@@ -245,6 +291,33 @@ export default function AdvancedExerciseCard({
                   />
                 </div>
               </div>
+
+              {/* History & Occurrence Badge */}
+              {exercise && previousEntry && (
+                <div className="mt-2 p-3 bg-indigo-50/30 dark:bg-indigo-500/5 rounded-2xl border border-indigo-100/50 dark:border-indigo-500/10 space-y-2.5 animate-in fade-in slide-in-from-bottom-1 duration-300">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-tight">
+                      <History size={12} className="opacity-70" />
+                      <span className="truncate">
+                        Last Done: {formatDateCompact(previousEntry.date)}
+                        {previousEntry.row && ` • ${previousEntry.row.reps} reps @ ${previousEntry.row.weight} kg`}
+                      </span>
+                    </div>
+                    {occurrenceCount > 0 && (
+                      <div className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-black px-1.5 py-0.5 rounded-lg text-[8px] uppercase tracking-tighter border border-emerald-100 dark:border-emerald-500/20">
+                        Done {occurrenceCount}x before
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    onClick={(e) => { e.stopPropagation(); applyPreviousValues(); }}
+                    variant="outline"
+                    className="w-full h-8 border-indigo-100 dark:border-indigo-500/20 bg-white dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-indigo-50 dark:hover:bg-indigo-500/20 transition-all shadow-sm"
+                  >
+                    Apply Last Values
+                  </Button>
+                </div>
+              )}
 
               {/* Sets Table */}
               {sets.length > 0 && (
