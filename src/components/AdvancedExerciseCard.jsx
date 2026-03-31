@@ -7,12 +7,14 @@ import {
   getSubMusclesForMuscle, 
   getExercisesForSubMuscle,
   addExerciseWithSync,
+  removeExerciseWithSync,
   findPreviousExerciseEntry,
   getExerciseOccurrenceCount
 } from '../utils/storage';
 import { formatDateCompact } from '../utils/dateUtils';
 import { Stepper } from './ui/stepper';
 import { Button } from "@/components/ui/button";
+import { Check } from 'lucide-react';
 
 export default function AdvancedExerciseCard({ 
   exerciseData, 
@@ -31,6 +33,7 @@ export default function AdvancedExerciseCard({
   const [localExercises, setLocalExercises] = useState([]);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newExName, setNewExName] = useState('');
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const allExercises = useMemo(() => {
     const fromStorage = muscle && subMuscle ? getExercisesForSubMuscle(muscle, subMuscle) : [];
@@ -43,6 +46,7 @@ export default function AdvancedExerciseCard({
     setLocalExercises([]);
     setIsAddingNew(false);
     setNewExName('');
+    setConfirmingDelete(false);
   }, [muscle, subMuscle]);
 
   const previousEntry = useMemo(
@@ -251,27 +255,61 @@ export default function AdvancedExerciseCard({
                       <X size={14} />
                     </button>
                   </div>
+                ) : confirmingDelete ? (
+                  <div className="flex items-center justify-between rounded-xl border border-red-100 bg-red-50 p-2 animate-in slide-in-from-top-1 duration-200">
+                    <span className="text-red-700 font-bold text-xs uppercase truncate pr-4">Delete "{exercise}"?</span>
+                    <div className="flex gap-2 shrink-0">
+                      <button 
+                        onClick={() => {
+                          removeExerciseWithSync(muscle, subMuscle, exercise);
+                          setLocalExercises(prev => prev.filter(prevEx => prevEx !== exercise));
+                          update({ exercise: '' });
+                          setConfirmingDelete(false);
+                        }} 
+                        className="bg-red-500 text-white p-1.5 rounded-lg shadow-sm hover:bg-red-600 transition-colors"
+                      >
+                        <Check size={14} strokeWidth={3} />
+                      </button>
+                      <button 
+                        onClick={() => setConfirmingDelete(false)} 
+                        className="bg-white text-slate-500 border border-red-100 p-1.5 rounded-lg shadow-sm hover:bg-slate-50 transition-colors"
+                      >
+                        <X size={14} strokeWidth={3} />
+                      </button>
+                    </div>
+                  </div>
                 ) : (
-                  <div className="relative">
-                    <select
-                      value={exercise}
-                      onChange={(e) => {
-                        if (e.target.value === '_add_new_') {
-                          setIsAddingNew(true);
-                        } else {
-                          update({ exercise: e.target.value });
-                        }
-                      }}
-                      disabled={!subMuscle}
-                      className="w-full bg-secondary text-primary border border-border rounded-xl px-3 py-2 text-xs font-black outline-none focus:ring-2 ring-primary/50 transition-all appearance-none disabled:opacity-50 shadow-sm"
-                    >
-                      <option value="" className="bg-card">— Select Exercise —</option>
-                      {allExercises.map(ex => <option key={ex} value={ex} className="bg-card">{ex}</option>)}
-                      {subMuscle && (
-                        <option value="_add_new_" className="bg-indigo-50 text-indigo-700 font-bold italic">+ Add New Exercise...</option>
-                      )}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-primary pointer-events-none" />
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                      <select
+                        value={exercise}
+                        onChange={(e) => {
+                          if (e.target.value === '_add_new_') {
+                            setIsAddingNew(true);
+                          } else {
+                            update({ exercise: e.target.value });
+                          }
+                        }}
+                        disabled={!subMuscle}
+                        className="w-full bg-secondary text-primary border border-border rounded-xl px-3 py-2 text-xs font-black outline-none focus:ring-2 ring-primary/50 transition-all appearance-none disabled:opacity-50 shadow-sm"
+                      >
+                        <option value="" className="bg-card">— Select Exercise —</option>
+                        {allExercises.map(ex => <option key={ex} value={ex} className="bg-card">{ex}</option>)}
+                        {subMuscle && (
+                          <option value="_add_new_" className="bg-indigo-50 text-indigo-700 font-bold italic">+ Add New Exercise...</option>
+                        )}
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-primary pointer-events-none" />
+                    </div>
+                    {exercise && (
+                      <button 
+                        onClick={() => setConfirmingDelete(true)} 
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all shadow-sm shrink-0 border border-transparent hover:border-red-100"
+                        title="Delete Exercise from Database"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
