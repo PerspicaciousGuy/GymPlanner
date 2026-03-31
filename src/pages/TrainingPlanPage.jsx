@@ -73,7 +73,7 @@ function SavedPlanCard({ plan, isActive, isSelected, onSelect, onSetActive, onDe
     >
       {/* Plan Name */}
       <h4 className={cn(
-        "text-xs font-black tracking-tight truncate mt-1",
+        "text-xs font-black tracking-tight truncate mt-1 pr-14",
         isSelected ? "text-indigo-900" : "text-slate-700"
       )}>
         {plan.name}
@@ -104,31 +104,31 @@ function SavedPlanCard({ plan, isActive, isSelected, onSelect, onSetActive, onDe
         </div>
       )}
 
-      {/* Hover actions */}
-      <div className="absolute top-2.5 right-2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+      {/* Actions */}
+      <div className="absolute top-2.5 right-2 flex items-center gap-1 transition-opacity">
         {!isActive && (
           <button
             onClick={(e) => { e.stopPropagation(); onSetActive(); }}
-            className="h-5 w-5 rounded-full bg-emerald-50 text-emerald-500 hover:bg-emerald-100 flex items-center justify-center transition-all"
+            className="h-6 w-6 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center transition-all"
             title="Set as active"
           >
-            <Zap size={9} strokeWidth={3} />
+            <Zap size={11} strokeWidth={2.5} />
           </button>
         )}
         <button
           onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
-          className="h-5 w-5 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 flex items-center justify-center transition-all"
+          className="h-6 w-6 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 flex items-center justify-center transition-all"
           title="Duplicate"
         >
-          <Copy size={9} strokeWidth={3} />
+          <Copy size={11} strokeWidth={2.5} />
         </button>
         {!isActive && (
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="h-5 w-5 rounded-full bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 flex items-center justify-center transition-all"
+            className="h-6 w-6 rounded-full bg-rose-50 text-rose-500 hover:bg-rose-100 hover:text-rose-600 flex items-center justify-center transition-all"
             title="Delete"
           >
-            <Trash2 size={9} strokeWidth={3} />
+            <Trash2 size={11} strokeWidth={2.5} />
           </button>
         )}
       </div>
