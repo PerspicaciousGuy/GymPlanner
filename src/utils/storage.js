@@ -165,6 +165,13 @@ export function getEffectiveSessionTitle(date, session) {
 }
 
 /**
+ * Returns the session notes for a specific date/session.
+ */
+export function getEffectiveSessionNotes(date, session) {
+  return getDailyMetadata(date, session).notes || '';
+}
+
+/**
  * Moves a session (title + exercises) from one date to another.
  */
 export function shiftWorkout(fromDate, toDate, fromSession, toSession = null) {

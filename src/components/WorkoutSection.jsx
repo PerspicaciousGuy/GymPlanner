@@ -14,7 +14,8 @@ import {
   AlertCircle,
   RefreshCw,
   FolderOpen,
-  ArrowRight
+  ArrowRight,
+  FileText
 } from 'lucide-react';
 import ExerciseGroup from './ExerciseGroup';
 import AdvancedExerciseCard from './AdvancedExerciseCard';
@@ -33,6 +34,7 @@ import {
   loadSessionTitles, 
   saveSessionTitlesWithSync,
   getEffectiveSessionTitle,
+  getEffectiveSessionNotes,
   saveDailyMetadata,
   shiftWorkout
 } from '../utils/storage';
@@ -72,6 +74,13 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const [pmSkipped, setPmSkipped] = useState(() => isDaySkipped(date || workoutDateKey, 'pm'));
   const [amTitleState, setAmTitleState] = useState(() => getEffectiveSessionTitle(date || workoutDateKey, 'am'));
   const [pmTitleState, setPmTitleState] = useState(() => getEffectiveSessionTitle(date || workoutDateKey, 'pm'));
+  const [amNotesState, setAmNotesState] = useState(() => getEffectiveSessionNotes(date || workoutDateKey, 'am'));
+  const [pmNotesState, setPmNotesState] = useState(() => getEffectiveSessionNotes(date || workoutDateKey, 'pm'));
+  const [showNotes, setShowNotes] = useState(() => {
+    const amN = getEffectiveSessionNotes(date || workoutDateKey, 'am');
+    const pmN = getEffectiveSessionNotes(date || workoutDateKey, 'pm');
+    return Boolean(amN) || Boolean(pmN);
+  });
   const [isConfirmingFinish, setIsConfirmingFinish] = useState(false);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [showShiftPicker, setShowShiftPicker] = useState(false);
@@ -83,6 +92,8 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   useEffect(() => {
     setAmTitleState(getEffectiveSessionTitle(date || workoutDateKey, 'am'));
     setPmTitleState(getEffectiveSessionTitle(date || workoutDateKey, 'pm'));
+    setAmNotesState(getEffectiveSessionNotes(date || workoutDateKey, 'am'));
+    setPmNotesState(getEffectiveSessionNotes(date || workoutDateKey, 'pm'));
   }, [date, workoutDateKey, syncToken]);
 
   useEffect(() => {
@@ -238,20 +249,36 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     else setPmTitleState(value);
   };
 
-  const handleSessionTitleSave = () => {
-    const value = activeSession === 'am' ? amTitleState : pmTitleState;
-    const original = getEffectiveSessionTitle(date || workoutDateKey, activeSession);
+  const handleSessionNotesChange = (session, value) => {
+    if (session === 'am') setAmNotesState(value);
+    else setPmNotesState(value);
+  };
 
-    if (value.trim() === '') {
-      saveDailyMetadata(date || workoutDateKey, activeSession, { title: null });
-      const fallback = getEffectiveSessionTitle(date || workoutDateKey, activeSession);
-      if (activeSession === 'am') setAmTitleState(fallback);
-      else setPmTitleState(fallback);
-    } else if (value !== original) {
-      saveDailyMetadata(date || workoutDateKey, activeSession, { title: value });
+  const handleSessionTitleSave = () => {
+    const titleVal = activeSession === 'am' ? amTitleState : pmTitleState;
+    const notesVal = activeSession === 'am' ? amNotesState : pmNotesState;
+    const originalTitle = getEffectiveSessionTitle(date || workoutDateKey, activeSession);
+    const originalNotes = getEffectiveSessionNotes(date || workoutDateKey, activeSession);
+
+    const payload = {};
+    if (titleVal.trim() === '') payload.title = null;
+    else if (titleVal !== originalTitle) payload.title = titleVal;
+
+    if (notesVal !== originalNotes) {
+      payload.notes = notesVal.trim() === '' ? null : notesVal;
+    }
+
+    if (Object.keys(payload).length > 0) {
+      saveDailyMetadata(date || workoutDateKey, activeSession, payload);
       onWorkoutChanged?.();
       setTitleSaveFlash(true);
       setTimeout(() => setTitleSaveFlash(false), 1800);
+      
+      if (payload.title === null) {
+        const fallback = getEffectiveSessionTitle(date || workoutDateKey, activeSession);
+        if (activeSession === 'am') setAmTitleState(fallback);
+        else setPmTitleState(fallback);
+      }
     }
   };
 
@@ -361,75 +388,110 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="flex flex-col gap-3 md:gap-4 mt-2"
         >
-          <div className="flex items-center gap-4 group/session">
-            <div className="flex-1 relative flex items-center">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within/session:text-indigo-400 transition-colors z-20 pointer-events-none">
-                <Tag size={14} strokeWidth={2.5} />
-              </div>
-              <Input
-                value={activeSession === 'am' ? amTitle : pmTitle}
-                onChange={(e) => handleSessionTitleChange(activeSession, e.target.value)}
-                onBlur={handleSessionTitleSave}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.currentTarget.blur();
-                  }
-                }}
-                placeholder="Designate Training Protocol..."
-                disabled={sessionDone || sessionSkipped}
-                className="w-full pl-11 pr-24 bg-slate-50 shadow-sm border-slate-100 rounded-[1.25rem] text-[13px] font-black text-slate-800 placeholder:text-slate-200 focus-visible:bg-white focus-visible:border-indigo-200 focus-visible:ring-indigo-500/5 transition-all h-12 italic"
-              />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 z-20">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "h-8 w-8 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-white hover:border-indigo-200 hover:shadow-sm transition-all border border-slate-100 bg-white/80",
-                    (sessionDone || sessionSkipped) && "hidden"
-                  )}
-                  onClick={() => setShowShiftPicker(true)}
-                  title="Shift Workout"
-                >
-                  <ArrowRight size={16} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "h-8 w-8 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-white hover:border-indigo-200 hover:shadow-sm transition-all border border-slate-100 bg-white/80",
-                    (sessionDone || sessionSkipped) && "hidden"
-                  )}
-                  onClick={() => {
-                    setTemplateDialogMode('load');
-                    setShowTemplateDialog(true);
+          <div className="flex flex-col gap-2 relative">
+            <div className="flex items-center gap-4 group/session">
+              <div className="flex-1 relative flex items-center">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within/session:text-indigo-400 transition-colors z-20 pointer-events-none">
+                  <Tag size={14} strokeWidth={2.5} />
+                </div>
+                <Input
+                  value={activeSession === 'am' ? amTitle : pmTitle}
+                  onChange={(e) => handleSessionTitleChange(activeSession, e.target.value)}
+                  onBlur={handleSessionTitleSave}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      e.currentTarget.blur();
+                    }
                   }}
-                  title="Load Routine"
-                >
-                  <FolderOpen size={16} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "h-8 w-8 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-white hover:border-indigo-200 hover:shadow-sm transition-all border border-slate-100 bg-white/80",
-                    (sessionDone || sessionSkipped) && "hidden"
-                  )}
-                  onClick={() => {
-                    setTemplateDialogMode('save');
-                    setShowTemplateDialog(true);
-                  }}
-                  title="Save Protocol"
-                >
-                  <Sparkles size={16} />
-                </Button>
+                  placeholder="Designate Training Protocol..."
+                  disabled={sessionDone || sessionSkipped}
+                  className="w-full pl-11 pr-36 bg-slate-50 shadow-sm border-slate-100 rounded-[1.25rem] text-[13px] font-black text-slate-800 placeholder:text-slate-200 focus-visible:bg-white focus-visible:border-indigo-200 focus-visible:ring-indigo-500/5 transition-all h-12 italic"
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 z-20">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "h-8 w-8 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-white hover:border-indigo-200 hover:shadow-sm transition-all border outline-none",
+                      showNotes ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm" : "border-slate-100 bg-white/80"
+                    )}
+                    onClick={() => setShowNotes(!showNotes)}
+                    title="Toggle Session Notes"
+                  >
+                    <FileText size={16} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "h-8 w-8 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-white hover:border-indigo-200 hover:shadow-sm transition-all border border-slate-100 bg-white/80",
+                      (sessionDone || sessionSkipped) && "hidden"
+                    )}
+                    onClick={() => setShowShiftPicker(true)}
+                    title="Shift Workout"
+                  >
+                    <ArrowRight size={16} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "h-8 w-8 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-white hover:border-indigo-200 hover:shadow-sm transition-all border border-slate-100 bg-white/80",
+                      (sessionDone || sessionSkipped) && "hidden"
+                    )}
+                    onClick={() => {
+                      setTemplateDialogMode('load');
+                      setShowTemplateDialog(true);
+                    }}
+                    title="Load Routine"
+                  >
+                    <FolderOpen size={16} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "h-8 w-8 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-white hover:border-indigo-200 hover:shadow-sm transition-all border border-slate-100 bg-white/80",
+                      (sessionDone || sessionSkipped) && "hidden"
+                    )}
+                    onClick={() => {
+                      setTemplateDialogMode('save');
+                      setShowTemplateDialog(true);
+                    }}
+                    title="Save Protocol"
+                  >
+                    <Sparkles size={16} />
+                  </Button>
+                </div>
               </div>
+              {titleSaveFlash && (
+                <Badge variant="outline" className="text-emerald-500 font-black text-[9px] uppercase tracking-widest border-emerald-100 bg-emerald-50/50 animate-in fade-in zoom-in-95 duration-300 h-6 shrink-0">
+                  Synchronized
+                </Badge>
+              )}
             </div>
-            {titleSaveFlash && (
-              <Badge variant="outline" className="text-emerald-500 font-black text-[9px] uppercase tracking-widest border-emerald-100 bg-emerald-50/50 animate-in fade-in zoom-in-95 duration-300 h-6 shrink-0">
-                Synchronized
-              </Badge>
-            )}
+
+            <AnimatePresence>
+              {showNotes && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  className="overflow-hidden"
+                >
+                  <textarea
+                    value={activeSession === 'am' ? amNotesState : pmNotesState}
+                    onChange={(e) => handleSessionNotesChange(activeSession, e.target.value)}
+                    onBlur={handleSessionTitleSave}
+                    placeholder="Add session notes, warm-ups, or bodyweight here..."
+                    disabled={sessionDone || sessionSkipped}
+                    className="w-full p-4 bg-slate-50/50 border border-slate-100/80 rounded-2xl text-xs font-medium text-slate-600 placeholder:text-slate-300 focus-visible:bg-white focus-visible:border-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/5 transition-all outline-none resize-none min-h-[80px]"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <TemplateDialog 
