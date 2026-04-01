@@ -214,17 +214,36 @@ export default function CreateMealPage({ onBack, onSaveMeal }) {
 
       {/* Create Meal Button */}
       <div
-        className="fixed bottom-0 left-0 right-0 px-4 py-4 z-[111]"
-        style={{
-          background: 'linear-gradient(to top, var(--background) 60%, transparent)',
-        }}
+        className="fixed bottom-0 left-0 right-0 px-4 py-4 z-[111] flex gap-3 bg-background/90 backdrop-blur-md border-t border-border"
       >
         <Button
-          onClick={handleCreate}
+          variant="outline"
+          onClick={() => {
+            const meal = saveMeal({
+              name: mealName || 'Unnamed Meal',
+              items: mealItems,
+              totalNutrition: totals,
+            });
+            onSaveMeal(meal, false);
+          }}
           disabled={mealItems.length === 0}
-          className="w-full h-14 rounded-2xl bg-foreground text-background font-black text-base hover:bg-foreground/90 transition-all shadow-xl disabled:opacity-40"
+          className="flex-1 h-14 rounded-2xl font-black text-base transition-all border-2 border-border"
         >
-          Create Meal
+          Save
+        </Button>
+        <Button
+          onClick={() => {
+            const meal = saveMeal({
+              name: mealName || 'Unnamed Meal',
+              items: mealItems,
+              totalNutrition: totals,
+            });
+            onSaveMeal(meal, true);
+          }}
+          disabled={mealItems.length === 0}
+          className="flex-[2] h-14 rounded-2xl bg-foreground text-background font-black text-base hover:bg-foreground/90 transition-all shadow-xl disabled:opacity-40"
+        >
+          Save & Log Meal
         </Button>
       </div>
 

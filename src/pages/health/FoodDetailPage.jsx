@@ -23,6 +23,7 @@ import {
   toggleBookmark,
   isBookmarked as checkBookmarked,
   SERVING_UNITS,
+  saveCustomFood,
 } from '../../utils/foodDatabase';
 import { getFatSecretFoodDetail } from '../../utils/fatSecretApi';
 
@@ -82,6 +83,7 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
     vitaminC: food?.vitaminC || 0,
     calcium: food?.calcium || 0,
     iron: food?.iron || 0,
+    ingredients: food?.ingredients || '',
   });
 
   // Fetch full detail from FatSecret if needed
@@ -156,32 +158,40 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
   };
 
   const handleSave = () => {
+    let finalFood = activeFood;
+    
+    if (isManual) {
+      finalFood = {
+        id: `custom_${Date.now()}`, // Save as custom
+        name: name || 'Unnamed Food',
+        calories: manualValues.calories,
+        protein: manualValues.protein,
+        carbs: manualValues.carbs,
+        fats: manualValues.fats,
+        saturatedFat: manualValues.saturatedFat,
+        polyunsaturatedFat: manualValues.polyunsaturatedFat,
+        monounsaturatedFat: manualValues.monounsaturatedFat,
+        cholesterol: manualValues.cholesterol,
+        sodium: manualValues.sodium,
+        fiber: manualValues.fiber,
+        sugar: manualValues.sugar,
+        potassium: manualValues.potassium,
+        vitaminA: manualValues.vitaminA,
+        vitaminC: manualValues.vitaminC,
+        calcium: manualValues.calcium,
+        iron: manualValues.iron,
+        ingredients: manualValues.ingredients, 
+        isManual: true,
+        servingSize: '1 serving',
+        servingGrams: 100,
+      };
+      
+      // Persist to user's "My Foods" library
+      saveCustomFood(finalFood);
+    }
+
     const entry = {
-      food: isManual
-        ? {
-            id: `manual_${Date.now()}`,
-            name: name || 'Unnamed Food',
-            calories: manualValues.calories,
-            protein: manualValues.protein,
-            carbs: manualValues.carbs,
-            fats: manualValues.fats,
-            saturatedFat: manualValues.saturatedFat,
-            polyunsaturatedFat: manualValues.polyunsaturatedFat,
-            monounsaturatedFat: manualValues.monounsaturatedFat,
-            cholesterol: manualValues.cholesterol,
-            sodium: manualValues.sodium,
-            fiber: manualValues.fiber,
-            sugar: manualValues.sugar,
-            potassium: manualValues.potassium,
-            vitaminA: manualValues.vitaminA,
-            vitaminC: manualValues.vitaminC,
-            calcium: manualValues.calcium,
-            iron: manualValues.iron,
-            isManual: true,
-            servingSize: '1 serving',
-            servingGrams: 100,
-          }
-        : activeFood,
+      food: finalFood,
       servings: effectiveServings,
     };
     onSave(entry);
@@ -410,6 +420,22 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
             </Card>
           ))}
         </div>
+        
+        {/* Ingredients section for manual entry */}
+        {isManual && (
+          <div className="mb-8">
+            <h3 className="text-base font-black text-foreground tracking-tight mb-4 flex items-center justify-between">
+              Ingredients
+              <span className="text-[10px] text-muted-foreground font-normal tracking-normal uppercase">Optional</span>
+            </h3>
+            <textarea
+              placeholder="e.g. 2 eggs, 1 slice cheese, 1 cup spinach..."
+              value={manualValues.ingredients || ''}
+              onChange={(e) => setManualValues(prev => ({ ...prev, ingredients: e.target.value }))}
+              className="w-full min-h-[100px] p-4 bg-muted/30 border border-border rounded-2xl text-sm font-medium text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20 resize-none transition-all"
+            />
+          </div>
+        )}
 
         {/* Other Nutrition Facts */}
         <h3 className="text-base font-black text-foreground tracking-tight mb-4">
@@ -425,9 +451,36 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
               )}
             >
               <span className="text-sm text-foreground font-medium">{micro.label}</span>
-              <span className="text-sm font-bold text-foreground">
-                {nutrition[micro.key] || 0}{micro.unit}
-              </span>
+              <div className="flex items-center gap-2">
+                {editingField === micro.key ? (
+                  <div className="flex items-center">
+                    <input
+                      autoFocus
+                      type="number"
+                      step="any"
+                      defaultValue={isManual ? manualValues[micro.key] : activeFood?.[micro.key] || 0}
+                      onBlur={(e) => handleManualValueChange(micro.key, e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleManualValueChange(micro.key, e.target.value)}
+                      className="text-sm font-bold text-foreground bg-transparent outline-none border-b border-foreground w-16 text-right appearance-none"
+                    />
+                    <span className="text-sm font-bold text-foreground ml-1">{micro.unit}</span>
+                  </div>
+                ) : (
+                  <span className="text-sm font-bold text-foreground">
+                    {nutrition[micro.key] || 0}{micro.unit}
+                  </span>
+                )}
+                
+                {/* Always allow editing for manual input */}
+                {(isManual || food) && (
+                  <button
+                    onClick={() => setEditingField(micro.key)}
+                    className="p-1 text-muted-foreground/30 hover:text-muted-foreground transition-colors ml-1"
+                  >
+                    <Pencil size={12} />
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>

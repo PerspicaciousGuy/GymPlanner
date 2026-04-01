@@ -29,6 +29,7 @@ export default function MealDetailPage({
   onBack,
   onAddItems,
   onDone,
+  onLogMeal,
   onDeleteMeal,
 }) {
   const [mealName, setMealName] = useState(meal?.name || 'Unnamed Meal');
@@ -198,18 +199,35 @@ export default function MealDetailPage({
         </button>
       </div>
 
-      {/* Done Button */}
+      {/* Bottom Action Bar */}
       <div
-        className="fixed bottom-0 left-0 right-0 px-4 py-4 z-[111]"
-        style={{
-          background: 'linear-gradient(to top, var(--background) 60%, transparent)',
-        }}
+        className="fixed bottom-0 left-0 right-0 px-4 py-4 z-[111] flex gap-3 bg-background/90 backdrop-blur-md border-t border-border"
       >
         <Button
+          variant="outline"
           onClick={handleDone}
-          className="w-full h-14 rounded-2xl bg-foreground text-background font-black text-base hover:bg-foreground/90 transition-all shadow-xl"
+          className="flex-1 h-14 rounded-2xl font-black text-base transition-all border-2 border-border"
         >
-          Done
+          Save Details
+        </Button>
+        <Button
+          onClick={() => {
+            if (meal?.id) {
+              const updatedMeal = saveMeal({
+                ...meal,
+                name: mealName || 'Unnamed Meal',
+                items,
+              });
+              onDone?.(updatedMeal);
+            }
+            if (onLogMeal && items.length > 0) {
+               onLogMeal();
+            }
+          }}
+          disabled={items.length === 0}
+          className="flex-[2] h-14 rounded-2xl bg-foreground text-background font-black text-base hover:bg-foreground/90 transition-all shadow-xl disabled:opacity-50"
+        >
+          Log Meal ({items.length} items)
         </Button>
       </div>
     </motion.div>

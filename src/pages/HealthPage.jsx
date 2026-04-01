@@ -517,7 +517,13 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
         {healthSubView === 'create-meal' && (
           <CreateMealPage
             onBack={() => setHealthSubView('log-food')}
-            onSaveMeal={(meal) => {
+            onSaveMeal={(meal, shouldLog) => {
+              if (shouldLog && meal?.items) {
+                meal.items.forEach(item => {
+                  addFoodToLog(dateKey, item);
+                });
+                setLogVersion(v => v + 1);
+              }
               setHealthSubView(null);
             }}
           />
@@ -534,6 +540,17 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
               setHealthSubView('log-food');
             }}
             onDone={(updatedMeal) => {
+              setHealthSubView(null);
+              setSelectedMeal(null);
+            }}
+            onLogMeal={() => {
+              // Log every item in the meal to the current day
+              if (selectedMeal?.items) {
+                selectedMeal.items.forEach(item => {
+                  addFoodToLog(dateKey, item);
+                });
+                setLogVersion(v => v + 1);
+              }
               setHealthSubView(null);
               setSelectedMeal(null);
             }}

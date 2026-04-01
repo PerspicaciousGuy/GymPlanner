@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronLeft, Calendar as CalendarIcon, Weight, Layers, Zap, List, LayoutGrid, Sun, Moon, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
+import { ChevronLeft, Calendar as CalendarIcon, Weight, Layers, Zap, List, LayoutGrid, Sun, Moon, CheckCircle2, AlertCircle, XCircle, Flame, Droplet, Cookie, Drumstick, Utensils } from 'lucide-react';
 import WorkoutSection from '../components/WorkoutSection';
 import WorkoutLogView from '../components/WorkoutLogView';
 import { formatDateDisplay, formatDateKey, getDayOfWeek } from '../utils/dateUtils';
@@ -7,6 +7,7 @@ import { loadWorkoutByDate, isDayComplete, loadSessionTitles } from '../utils/st
 import { loadTrainingPlan } from '../utils/trainingPlan';
 import { calculateRecovery, getDailyFocus } from '../utils/recoveryLogic';
 import InteractiveMuscleMap from '../components/InteractiveMuscleMap/InteractiveMuscleMap';
+import { getFoodLog, getDailyTotals } from '../utils/foodDatabase';
 import { cn } from "@/lib/utils";
 
 export default function DayDetailPage({ date, onBack, syncKey }) {
@@ -18,6 +19,9 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
 
   // Load and process data for summary
   const dayData = useMemo(() => loadWorkoutByDate(dateStr), [dateStr, syncKey, refreshTrigger]);
+  const foodLog = useMemo(() => getFoodLog(dateStr), [dateStr, syncKey, refreshTrigger]);
+  const foodTotals = useMemo(() => getDailyTotals(dateStr), [dateStr, syncKey, refreshTrigger]);
+  
   const titles = loadSessionTitles();
   const pmTitle = (titles.pm?.[dayName] || '').trim().toLowerCase();
   const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ');
@@ -123,9 +127,9 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {/* Left Column: Muscle Map & Stats */}
-        <div className="lg:col-span-1 space-y-6">
+        <div className="lg:col-span-1 xl:col-span-1 space-y-6">
           <div className="bg-card rounded-3xl border border-border p-6 shadow-sm overflow-hidden relative">
             <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Training Focus</h2>
             <div className="flex justify-center -mx-6">
@@ -160,8 +164,8 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
           </div>
         </div>
 
-        {/* Right Column: Detailed Lists */}
-        <div className="lg:col-span-2 bg-card rounded-3xl border border-border p-4 md:p-8 shadow-sm">
+        {/* Middle Column: Detailed Lists */}
+        <div className="lg:col-span-2 xl:col-span-2 bg-card rounded-3xl border border-border p-4 md:p-8 shadow-sm flex flex-col">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-6">
               <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Activity Log</h2>
@@ -228,6 +232,72 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
                 initialSession={activeSession}
               />
             )}
+          </div>
+        </div>
+
+        {/* Right Column: Nutrition/Food details */}
+        <div className="lg:col-span-3 xl:col-span-1 space-y-6">
+          <div className="bg-card rounded-3xl border border-border p-6 shadow-sm overflow-hidden flex flex-col h-full">
+            <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Nutrition Summary</h2>
+            
+            {/* Calories Ring / Summary */}
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-border/50 mb-6">
+              <div>
+                <p className="text-2xl font-black text-foreground">{foodTotals.calories}</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5 flex items-center gap-1"><Flame size={12} className="text-amber-500"/> Calories</p>
+              </div>
+              <div className="flex gap-4 text-left">
+                <div>
+                  <p className="text-sm font-black text-foreground">{foodTotals.protein}g</p>
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-rose-500">Pro</p>
+                </div>
+                <div>
+                  <p className="text-sm font-black text-foreground">{foodTotals.carbs}g</p>
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-amber-500">Car</p>
+                </div>
+                <div>
+                  <p className="text-sm font-black text-foreground">{foodTotals.fats}g</p>
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-blue-500">Fat</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Food Log List */}
+            <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-3">Logged Food</h3>
+            <div className="flex-1 overflow-y-auto pr-2 space-y-2 max-h-[400px] scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+              {foodLog.length === 0 ? (
+                <div className="text-center py-8">
+                  <Utensils size={24} className="mx-auto text-muted-foreground/30 mb-2" />
+                  <p className="text-xs font-bold text-muted-foreground">No food logged</p>
+                </div>
+              ) : (
+                foodLog.map((entry) => (
+                  <div key={entry.id} className="p-3 bg-muted/30 rounded-xl border border-border/50 flex items-center justify-between group">
+                    <div className="min-w-0 pr-3">
+                      <p className="text-xs font-bold text-foreground truncate">{entry.food.name}</p>
+                      <div className="flex items-center gap-2 mt-1 w-full flex-wrap">
+                        <span className="text-[9px] font-bold text-muted-foreground border border-border px-1.5 py-0.5 rounded-md flex-shrink-0">
+                          {entry.servings}x {entry.food.servingSize || 'serving'}
+                        </span>
+                        {entry.food.brand && (
+                          <span className="text-[9px] font-medium text-muted-foreground/80 truncate">
+                            {entry.food.brand}
+                          </span>
+                        )}
+                      </div>
+                      {entry.food.ingredients && (
+                        <p className="text-[9px] font-medium text-muted-foreground/60 mt-1 line-clamp-2">
+                          Ing: {entry.food.ingredients}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex-shrink-0 text-right">
+                      <p className="text-xs font-black text-foreground">{Math.round((entry.food.calories || 0) * entry.servings)} cal</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
