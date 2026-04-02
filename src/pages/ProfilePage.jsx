@@ -374,7 +374,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
           <div className="space-y-2">
             <Badge className="bg-primary text-primary-foreground border-none font-black text-[9px] px-3 py-1 rounded-full uppercase tracking-widest">Internal</Badge>
             <h3 className="text-2xl font-black text-foreground tracking-tight">Data Control Center</h3>
-            <p className="text-muted-foreground text-xs font-semibold max-w-[280px]">Manage and export your training data, exercise libraries, and session logs.</p>
+            <p className="text-muted-foreground text-xs font-semibold max-w-[280px]">Manage training data, exercise libraries, and export all metrics.</p>
           </div>
           <Button variant="outline" className="rounded-2xl border-border bg-card/50 hover:bg-muted text-foreground font-black text-[10px] uppercase tracking-[0.2em] px-6 h-12 border-2 group-hover:border-primary/50 transition-all">
             Enter Console <Settings className="ml-2 w-4 h-4 text-primary" />

@@ -76,7 +76,6 @@ import {
 import WeekPicker from '../components/WeekPicker';
 
 const TABS = [
-  { key: 'schedule', label: 'Sessions' },
   { key: 'workouts', label: 'Workouts' },
   { key: 'completion', label: 'Completion' },
   { key: 'exerciseDb', label: 'Exercise DB' },
@@ -337,11 +336,8 @@ function completionStatus(val) {
 }
 
 export default function DataConsolePage({ hideSidebar }) {
-  const [activeTab, setActiveTab] = useState('schedule');
+  const [activeTab, setActiveTab] = useState('workouts');
   const [searchQuery, setSearchQuery] = useState('');
-
-  const [sessionTitles, setSessionTitles] = useState(() => loadSessionTitles());
-  const [titlesSaved, setTitlesSaved] = useState(false);
 
   const [workoutRows, setWorkoutRows] = useState(() => buildInitialWorkoutRows());
   const [workoutsSaved, setWorkoutsSaved] = useState(false);
@@ -502,7 +498,7 @@ export default function DataConsolePage({ hideSidebar }) {
     try {
       setExporting(true);
       exportPlannerWorkbook({
-        sessionTitles,
+        sessionTitles: loadSessionTitles(),
         workoutRows,
         completion: loadCompletion(),
         exerciseRows,
@@ -533,7 +529,6 @@ export default function DataConsolePage({ hideSidebar }) {
 
       if (parsed.sessionTitles) {
         saveSessionTitlesWithSync(parsed.sessionTitles);
-        setSessionTitles(parsed.sessionTitles);
       }
 
       if (parsed.workoutRows?.length) {
@@ -570,12 +565,6 @@ export default function DataConsolePage({ hideSidebar }) {
     <div className={`flex flex-col gap-6 ${!hideSidebar ? 'min-h-screen bg-[#f8fafc]' : ''}`}>
       {!hideSidebar && (
         <aside className="fixed left-0 top-0 bottom-0 w-20 lg:w-24 bg-white border-r border-slate-200 flex flex-col items-center py-8 gap-10 z-50">
-          <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('schedule')}>
-            <div className={`p-3 rounded-xl transition-all ${activeTab === 'schedule' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
-              <LayoutGrid size={24} />
-            </div>
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'schedule' ? 'text-indigo-600' : 'text-slate-400'}`}>Sessions</span>
-          </div>
 
           <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('workouts')}>
             <div className={`p-3 rounded-xl transition-all ${activeTab === 'workouts' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
@@ -596,13 +585,6 @@ export default function DataConsolePage({ hideSidebar }) {
               <Database size={24} />
             </div>
             <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'exerciseDb' ? 'text-indigo-600' : 'text-slate-400'}`}>Exercise DB</span>
-          </div>
-          
-          <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('templates')}>
-            <div className={`p-3 rounded-xl transition-all ${activeTab === 'templates' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
-              <Sparkles size={24} />
-            </div>
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'templates' ? 'text-indigo-600' : 'text-slate-400'}`}>Routines</span>
           </div>
         </aside>
       )}
@@ -693,7 +675,7 @@ export default function DataConsolePage({ hideSidebar }) {
             <div className="flex-1 w-full sm:max-w-xs relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
               <Input 
-                placeholder={`Search ${activeTab === 'schedule' ? 'sessions' : 'data'}...`}
+                placeholder={`Search data...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 h-9 bg-slate-50 border-slate-200 rounded-xl text-[11px] md:text-xs focus-visible:ring-indigo-500/10 focus-visible:border-indigo-500 transition-all font-medium"
@@ -779,53 +761,6 @@ export default function DataConsolePage({ hideSidebar }) {
               </button>
             </div>
           </div>
-
-          {activeTab === 'schedule' && (
-            <div className="flex-1 overflow-auto scrollbar-none">
-              <Table className="min-w-[600px]">
-                <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
-                  <TableRow className="hover:bg-transparent border-none">
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Day</TableHead>
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">AM Session Title</TableHead>
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">PM Session Title</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="divide-y divide-slate-50">
-                  {DAYS.map((day) => (
-                    <TableRow key={day} className="group hover:bg-slate-50/50 transition-colors border-none">
-                      <TableCell className="px-4 py-3 font-bold text-slate-700 italic">{day}</TableCell>
-                      <TableCell className="px-4 py-2">
-                        <Input
-                          value={sessionTitles.am?.[day] || ''}
-                          onChange={(e) =>
-                            setSessionTitles((prev) => ({
-                              ...prev,
-                              am: { ...prev.am, [day]: e.target.value },
-                            }))
-                          }
-                          className="h-9 bg-transparent border-transparent rounded-lg text-slate-700 focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
-                          placeholder="e.g. Upper Body"
-                        />
-                      </TableCell>
-                      <TableCell className="px-4 py-2">
-                        <Input
-                          value={sessionTitles.pm?.[day] || ''}
-                          onChange={(e) =>
-                            setSessionTitles((prev) => ({
-                              ...prev,
-                              pm: { ...prev.pm, [day]: e.target.value },
-                            }))
-                          }
-                          className="h-9 bg-transparent border-transparent rounded-lg text-slate-700 focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
-                          placeholder="e.g. Cardio + Core"
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
 
           {activeTab === 'workouts' && (
             <div className="flex-1 overflow-auto">
@@ -1064,117 +999,6 @@ export default function DataConsolePage({ hideSidebar }) {
             </div>
           )}
 
-          {activeTab === 'templates' && (
-            <div className="flex-1 overflow-auto p-4 md:p-8 bg-slate-50/30 animate-in fade-in duration-700">
-              <div className="max-w-5xl mx-auto space-y-8">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                  <div>
-                    <Badge variant="outline" className="mb-2 bg-indigo-50/50 text-indigo-600 border-indigo-100 font-black tracking-tighter text-[9px] px-2 py-0.5 rounded-full uppercase">
-                      Master Library
-                    </Badge>
-                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight leading-none italic">Training Protocols</h2>
-                    <p className="text-sm text-slate-400 font-medium tracking-tight mt-1">Curate and manage your high-performance routine repository.</p>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/50 p-1.5 rounded-2xl border border-slate-100 shadow-sm backdrop-blur-sm">
-                    <div className="px-3 py-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Inventory: <span className="text-indigo-600">{templateRows.length}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {templateRows.length === 0 ? (
-                  <div className="py-24 text-center bg-white rounded-[3rem] border border-dashed border-slate-200/60 shadow-inner group transition-all hover:bg-slate-50/30">
-                    <div className="relative inline-block mb-6">
-                      <div className="absolute inset-0 bg-indigo-100 rounded-full blur-3xl opacity-40 animate-pulse" />
-                      <div className="relative bg-white w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto text-slate-200 shadow-2xl border border-slate-50 rotate-6 transition-transform group-hover:rotate-0">
-                        <Sparkles size={40} strokeWidth={1.5} />
-                      </div>
-                    </div>
-                    <div className="max-w-xs mx-auto space-y-2">
-                      <h3 className="text-lg font-black text-slate-800 tracking-tight">Repository Empty</h3>
-                      <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
-                        No protocols found. Initialize one via the workout screen to populate your library.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
-                    {templateRows.map((t) => (
-                      <div key={t.id} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 hover:shadow-[0_20px_50px_rgba(79,70,229,0.08)] hover:border-indigo-100 transition-all group relative overflow-hidden active:scale-[0.99]">
-                        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-indigo-50/30 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                        
-                        <div className="absolute top-6 right-6 flex items-center gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="icon-sm"
-                            onClick={() => setEditingTemplate(t)}
-                            className="h-10 w-10 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all shadow-sm hover:shadow-inner"
-                          >
-                            <Pencil size={18} />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon-sm"
-                            onClick={() => removeTemplate(t.id)}
-                            className="h-10 w-10 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all shadow-sm hover:shadow-inner"
-                          >
-                            <Trash2 size={18} />
-                          </Button>
-                        </div>
-                        
-                        <div className="flex items-start gap-6 relative z-10">
-                          <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white p-4 rounded-[1.75rem] shadow-lg shadow-indigo-100 shrink-0 transform group-hover:-rotate-3 transition-transform">
-                            <Dumbbell size={24} />
-                          </div>
-                          <div className="flex-1 pr-10">
-                            <h3 className="text-xl font-black text-slate-800 tracking-tight leading-tight group-hover:text-indigo-600 transition-colors uppercase italic">{t.name}</h3>
-                            <div className="flex items-center gap-3 mt-1.5">
-                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                                Saved on {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'Unknown Date'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mt-8 space-y-4 relative z-10">
-                          <div className="flex items-center justify-between px-1">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                              Routine Overview
-                            </span>
-                            <Badge variant="secondary" className="bg-slate-50 text-slate-500 border-none font-black text-[9px] px-2.5 py-1 rounded-lg uppercase tracking-wider shadow-sm">
-                              {t.groups?.length || 0} Sections
-                            </Badge>
-                          </div>
-                          
-                          <div className="bg-slate-50/50 rounded-[2rem] p-5 space-y-3 border border-slate-100/50 group-hover:bg-white group-hover:border-indigo-50 transition-all">
-                            {(t.groups || []).slice(0, 3).map((group, gIdx) => (
-                              <div key={gIdx} className="flex items-center gap-3 group/ex">
-                                <div className="w-2 h-2 rounded-full bg-slate-200 group-hover/ex:bg-indigo-400 transition-colors shrink-0 shadow-inner" />
-                                <span className="text-xs font-black text-slate-600 truncate tracking-tight">
-                                  {group.rows?.[0]?.exercise || 'Unnamed Exercise'}
-                                  {(group.rows || []).length > 1 && (
-                                    <span className="text-indigo-400 ml-1.5 font-bold text-[10px] bg-indigo-50/50 px-1.5 py-0.5 rounded-md">+{(group.rows || []).length - 1} more</span>
-                                  )}
-                                </span>
-                              </div>
-                            ))}
-                            {(t.groups || []).length > 3 && (
-                              <div className="pt-2 mt-2 border-t border-slate-100 flex items-center justify-center">
-                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">
-                                  + {(t.groups || []).length - 3} Additional Sections
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Table Footer */}
           <footer className="px-4 py-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
@@ -1183,10 +1007,6 @@ export default function DataConsolePage({ hideSidebar }) {
                 <>Showing {Math.min(EXERCISES_PER_PAGE, filteredExerciseRows.length)} of {filteredExerciseRows.length} Exercises</>
               ) : activeTab === 'workouts' ? (
                 <>Displaying {visibleWorkoutRows.length} training entries</>
-              ) : activeTab === 'schedule' ? (
-                <>Full 7-day training week</>
-              ) : activeTab === 'templates' ? (
-                <>Managing {templateRows.length} saved routines</>
               ) : (
                 <>Training completion status</>
               )}
@@ -1223,18 +1043,6 @@ export default function DataConsolePage({ hideSidebar }) {
 
           {/* Action Footer */}
           <div className="flex items-center gap-4 mt-6 px-4 pb-6">
-            {activeTab === 'schedule' && (
-              <Button
-                onClick={() => {
-                  saveSessionTitlesWithSync(sessionTitles);
-                  flashSaved(setTitlesSaved);
-                }}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-8 shadow-lg shadow-indigo-100"
-              >
-                <Save size={16} className="mr-2" />
-                Save Session Titles
-              </Button>
-            )}
             {activeTab === 'workouts' && (
               <Button
                 onClick={saveWorkoutGrid}
@@ -1254,7 +1062,7 @@ export default function DataConsolePage({ hideSidebar }) {
               </Button>
             )}
             
-            {(titlesSaved || workoutsSaved || exerciseSaved || completionSaved) && (
+            {(workoutsSaved || exerciseSaved || completionSaved) && (
               <Badge variant="outline" className="text-emerald-500 border-emerald-200 bg-emerald-50/50 animate-pulse font-bold px-3 py-1">
                 ✓ SAVED TO CLOUD
               </Badge>

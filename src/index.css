@@ -223,14 +223,14 @@ svg.recharts-surface {
 
   /* Mode-aware color overrides */
   --color-white: var(--color-white);
-  --color-indigo-50: #F2F2F7;
-  --color-indigo-100: #E5E5EA;
-  --color-indigo-200: #D1D1D6;
-  --color-indigo-300: #C7C7CC;
-  --color-indigo-400: #AEAEB2;
-  --color-indigo-500: #1C1C1E;
-  --color-indigo-600: #151516;
-  --color-indigo-700: #000000;
+  --color-indigo-50: var(--color-indigo-50);
+  --color-indigo-100: var(--color-indigo-100);
+  --color-indigo-200: var(--color-indigo-200);
+  --color-indigo-300: var(--color-indigo-300);
+  --color-indigo-400: var(--color-indigo-400);
+  --color-indigo-500: var(--color-indigo-500);
+  --color-indigo-600: var(--color-indigo-600);
+  --color-indigo-700: var(--color-indigo-700);
 
   --color-slate-50: var(--color-slate-50);
   --color-slate-100: var(--color-slate-100);

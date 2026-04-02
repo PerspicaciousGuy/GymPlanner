@@ -14,7 +14,7 @@ import {
 import { formatDateCompact } from '../utils/dateUtils';
 import { Stepper } from './ui/stepper';
 import { Button } from "@/components/ui/button";
-import { Check } from 'lucide-react';
+import { Check, Zap } from 'lucide-react';
 
 export default function AdvancedExerciseCard({ 
   exerciseData, 
@@ -24,7 +24,7 @@ export default function AdvancedExerciseCard({
   index = 0
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const { muscle, subMuscle, exercise, sets = [], totalSets = 0 } = exerciseData;
+  const { muscle, subMuscle, exercise, sets = [], totalSets = 0, hasDropsets = false } = exerciseData;
 
   const muscleGroupKeys = useMemo(() => getMuscleGroupKeys(), []);
   const subMuscles = useMemo(() => muscle ? getSubMusclesForMuscle(muscle) : [], [muscle]);
@@ -96,7 +96,7 @@ export default function AdvancedExerciseCard({
   }, [exerciseData, onChange]);
 
   const handleAddSet = () => {
-    const newSets = [...sets, { reps: '', weight: '' }];
+    const newSets = [...sets, { reps: '', weight: '', dropReps: '', dropWeight: '' }];
     update({ sets: newSets, totalSets: newSets.length });
   };
 
@@ -315,19 +315,34 @@ export default function AdvancedExerciseCard({
               </div>
 
               {/* Total Sets Input */}
-              <div className="flex items-center justify-between bg-muted/50 p-3 rounded-2xl border border-border">
-                <div className="flex items-center gap-2">
-                  <Hash size={14} className="text-muted-foreground" />
-                  <span className="text-[11px] font-black text-foreground uppercase tracking-widest">Total Sets</span>
+               <div className="flex items-center gap-3">
+                <div className="flex-1 flex items-center justify-between bg-muted/50 p-3 rounded-2xl border border-border">
+                  <div className="flex items-center gap-2">
+                    <Hash size={14} className="text-muted-foreground" />
+                    <span className="text-[11px] font-black text-foreground uppercase tracking-widest">Total Sets</span>
+                  </div>
+                  <div className="w-24">
+                    <Stepper 
+                      value={totalSets} 
+                      onChange={handleTotalSetsChange}
+                      min={0}
+                      max={20}
+                    />
+                  </div>
                 </div>
-                <div className="w-24">
-                  <Stepper 
-                    value={totalSets} 
-                    onChange={handleTotalSetsChange}
-                    min={0}
-                    max={20}
-                  />
-                </div>
+                
+                <button
+                  onClick={() => update({ hasDropsets: !hasDropsets })}
+                  className={cn(
+                    "h-[48px] px-2.5 flex flex-col items-center justify-center gap-0.5 border rounded-xl transition-all",
+                    hasDropsets 
+                      ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm" 
+                      : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50"
+                  )}
+                >
+                  <Zap size={13} className={hasDropsets ? "fill-current" : ""} />
+                  <span className="text-[7.5px] font-black uppercase tracking-tighter leading-none">Drop</span>
+                </button>
               </div>
 
               {/* History & Occurrence Badge */}
@@ -360,10 +375,19 @@ export default function AdvancedExerciseCard({
               {/* Sets Table */}
               {sets.length > 0 && (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-[3rem_1fr_1fr_2rem] gap-2 px-2">
+                  <div className={cn(
+                    "grid gap-2 px-2",
+                    hasDropsets ? "grid-cols-[1.75rem_1fr_1fr_1fr_1fr_1.5rem]" : "grid-cols-[1.75rem_1fr_1fr_1.5rem]"
+                  )}>
                     <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Set</span>
                     <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Rep</span>
-                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Weight (kg)</span>
+                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Weight</span>
+                    {hasDropsets && (
+                      <>
+                        <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">D-Rep</span>
+                        <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">D-Wt</span>
+                      </>
+                    )}
                     <span />
                   </div>
                   
@@ -374,9 +398,12 @@ export default function AdvancedExerciseCard({
                         layout
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="grid grid-cols-[3rem_1fr_1fr_2rem] gap-2 items-center"
+                        className={cn(
+                          "grid gap-2 items-center",
+                          hasDropsets ? "grid-cols-[1.75rem_1fr_1fr_1fr_1fr_1.5rem]" : "grid-cols-[1.75rem_1fr_1fr_1.5rem]"
+                        )}
                       >
-                        <div className="h-10 bg-muted flex items-center justify-center text-xs font-black text-foreground border border-border rounded-xl">
+                        <div className="h-10 bg-muted flex items-center justify-center text-[10px] font-black text-foreground border border-border rounded-xl">
                           {idx + 1}
                         </div>
                         <Stepper 
@@ -392,6 +419,23 @@ export default function AdvancedExerciseCard({
                           step={2.5}
                           placeholder="0"
                         />
+                        {hasDropsets && (
+                          <>
+                            <Stepper 
+                              value={set.dropReps || ''} 
+                              onChange={(v) => handleUpdateSet(idx, { dropReps: v })}
+                              className="h-10 border-indigo-100 bg-indigo-50/30"
+                              placeholder="0"
+                            />
+                            <Stepper 
+                              value={set.dropWeight || ''} 
+                              onChange={(v) => handleUpdateSet(idx, { dropWeight: v })}
+                              className="h-10 border-indigo-100 bg-indigo-50/30"
+                              step={2.5}
+                              placeholder="0"
+                            />
+                          </>
+                        )}
                         <button 
                           onClick={() => handleRemoveSet(idx)}
                           className="p-1 h-8 w-8 text-slate-300 dark:text-slate-700 hover:text-red-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all flex items-center justify-center"

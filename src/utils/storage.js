@@ -1,5 +1,4 @@
 import { exerciseDatabase } from '../data/exerciseDatabase.js';
-import { AM_TITLES, PM_TITLES } from '../data/ampmTitles.js';
 import {
   fetchCloudPlannerData,
   isCloudSyncReady,
@@ -98,15 +97,14 @@ export function saveSchedule(schedule) {
 
 export function loadSessionTitles() {
   const raw = safeLoad(SESSION_TITLES_KEY, { am: {}, pm: {} }) || { am: {}, pm: {} };
-  const am = { ...AM_TITLES, ...(raw?.am ?? {}) };
-  const pm = { ...PM_TITLES, ...(raw?.pm ?? {}) };
-  return { am, pm };
+  return { 
+    am: raw.am || {}, 
+    pm: raw.pm || {} 
+  };
 }
 
 export function saveSessionTitles(titles) {
-  const am = { ...AM_TITLES, ...(titles?.am ?? {}) };
-  const pm = { ...PM_TITLES, ...(titles?.pm ?? {}) };
-  localStorage.setItem(SESSION_TITLES_KEY, JSON.stringify({ am, pm }));
+  localStorage.setItem(SESSION_TITLES_KEY, JSON.stringify(titles || { am: {}, pm: {} }));
 }
 
 // ─── Daily Overrides (Date-specific metadata) ────────────────

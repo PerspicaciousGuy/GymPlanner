@@ -147,14 +147,17 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
   const plannedPm = !isOff(pmTitle);
   const isPlanned = plannedAm || plannedPm;
   
-  const hasLoggedWorkout = (dayWorkout.am?.groups?.length > 0) || (dayWorkout.pm?.groups?.length > 0);
+  const hasLoggedWorkout = (dayWorkout.am?.groups?.length > 0) || 
+                           (dayWorkout.am?.standaloneExercises?.length > 0) ||
+                           (dayWorkout.pm?.groups?.length > 0) ||
+                           (dayWorkout.pm?.standaloneExercises?.length > 0);
   
   // Status Logic
   let status = 'none'; // 'completed', 'partial', 'skipped', 'planned', 'none'
   
   if (isPast || isToday) {
-    const amOk = plannedAm ? (doneAm || (dayWorkout.am?.groups?.length > 0 && doneAm)) : true;
-    const pmOk = plannedPm ? (donePm || (dayWorkout.pm?.groups?.length > 0 && donePm)) : true;
+    const amOk = plannedAm ? (doneAm || ((dayWorkout.am?.groups?.length > 0 || dayWorkout.am?.standaloneExercises?.length > 0) && doneAm)) : true;
+    const pmOk = plannedPm ? (donePm || ((dayWorkout.pm?.groups?.length > 0 || dayWorkout.pm?.standaloneExercises?.length > 0) && donePm)) : true;
     
     if (isPlanned || hasLoggedWorkout) {
       if (amOk && pmOk) {
@@ -173,10 +176,14 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
   const getPrimaryMuscle = () => {
     const muscles = [];
     ['am', 'pm'].forEach(s => {
-      dayWorkout[s]?.groups?.forEach(g => {
+      const sess = dayWorkout[s] || {};
+      sess.groups?.forEach(g => {
         g.rows?.forEach(r => {
           if (r.muscle) muscles.push(r.muscle);
         });
+      });
+      sess.standaloneExercises?.forEach(ex => {
+        if (ex.muscle) muscles.push(ex.muscle);
       });
     });
     if (muscles.length === 0) return null;

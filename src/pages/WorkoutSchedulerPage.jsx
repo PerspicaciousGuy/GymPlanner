@@ -205,21 +205,20 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
     const currentWeekStart = getWeekStart(new Date());
     const isCurrentWeek = currentWeekStart.getTime() === selectedWeek.getTime();
 
-    // Only show focused view (Yesterday/Today/Tomorrow) if it's the current week AND no specific date was targeted
-    if (isCurrentWeek && !targetDate) {
-      const yesterdayName = getDayOfWeek(yesterday);
-      const todayName = getDayOfWeek(today);
-      const tomorrowName = getDayOfWeek(tomorrow);
+      if (isCurrentWeek && !targetDate) {
+        const yesterdayName = getDayOfWeek(yesterday);
+        const todayName = getDayOfWeek(today);
+        const tomorrowName = getDayOfWeek(tomorrow);
 
-      const yesterdayMissed =
-        hasPlannedTraining(yesterday) &&
-        !isDayComplete(yesterday, 'am') &&
-        (!hasPlannedPm(yesterday) || !isDayComplete(yesterday, 'pm'));
-      
-      const list = [];
-      if (yesterdayMissed) {
+        const yesterdayMissed =
+          hasPlannedTraining(yesterday) &&
+          !isDayComplete(yesterday, 'am') &&
+          (!hasPlannedPm(yesterday) || !isDayComplete(yesterday, 'pm'));
+        
+        const focusedList = [];
+        if (yesterdayMissed) {
         const yesterdayComplete = isDayComplete(yesterday, 'am') && (!hasPlannedPm(yesterday) || isDayComplete(yesterday, 'pm'));
-        list.push({ 
+        focusedList.push({ 
           date: yesterday, 
           dayName: yesterdayName, 
           muscleGroup: '', 
@@ -241,7 +240,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       const todayComplete = isDayComplete(today, 'am') && (!hasPlannedPm(today) || isDayComplete(today, 'pm'));
       const todayAmMeta = getDailyMetadata(today, 'am');
       const todayPmMeta = getDailyMetadata(today, 'pm');
-      list.push({ 
+      focusedList.push({ 
         date: today, 
         dayName: todayName, 
         muscleGroup: '', 
@@ -262,7 +261,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       const tomorrowComplete = isDayComplete(tomorrow, 'am') && (!hasPlannedPm(tomorrow) || isDayComplete(tomorrow, 'pm'));
       const tomorrowAmMeta = getDailyMetadata(tomorrow, 'am');
       const tomorrowPmMeta = getDailyMetadata(tomorrow, 'pm');
-      list.push({ 
+      focusedList.push({ 
         date: tomorrow, 
         dayName: tomorrowName, 
         muscleGroup: '', 
@@ -280,7 +279,8 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
         shiftedToLabel: (tomorrowAmMeta.shiftedToDate || tomorrowPmMeta.shiftedToDate) 
           ? `${getDayOfWeek(tomorrowAmMeta.shiftedToDate || tomorrowPmMeta.shiftedToDate).slice(0,3)}, ${formatDateCompact(tomorrowAmMeta.shiftedToDate || tomorrowPmMeta.shiftedToDate)}` : null,
       });
-      return list;
+      
+      return focusedList.filter(s => !s.isFullyComplete);
     } else {
       const weekDates = getWeekDates(selectedWeek);
       const list = weekDates.map((date) => {
@@ -308,13 +308,15 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       });
 
       // If a specific date was targeted, only show THAT date
+      // Filter out completed workouts to keep the hub focused on remaining tasks
+      // BUT: preserve completed workouts if explicitly looking for a specific targetDate (e.g. from History)
       if (targetDate) {
         return list.filter(s => isSameDay(s.date, targetDate));
       }
 
-      return list;
+      return list.filter(s => !s.isFullyComplete);
     }
-  }, [syncState, selectedWeek, today, yesterday, tomorrow, plannerRefreshNonce]);
+  }, [syncState, selectedWeek, today, yesterday, tomorrow, plannerRefreshNonce, targetDate]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -350,15 +352,49 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       </div>
 
       <div className="flex flex-col">
-        {sections.map((s) => (
-          <AccordionSection
-            key={s.date.getTime()}
-            section={s}
-            defaultOpen={s.defaultOpen}
-            syncToken={syncState}
-            onWorkoutChanged={() => setPlannerRefreshNonce((value) => value + 1)}
-          />
-        ))}
+        <AnimatePresence initial={false} mode="popLayout">
+          {sections.length > 0 ? (
+            sections.map((s) => (
+              <motion.div
+                key={s.date.getTime()}
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -100, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 350, damping: 25 }}
+              >
+                <AccordionSection
+                  section={s}
+                  defaultOpen={s.defaultOpen}
+                  syncToken={syncState}
+                  onWorkoutChanged={() => setPlannerRefreshNonce((value) => value + 1)}
+                />
+              </motion.div>
+            ))
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="py-20 flex flex-col items-center justify-center text-center gap-6 bg-slate-50/50 rounded-[3rem] border border-dashed border-slate-200 mt-4"
+            >
+              <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-100 ring-4 ring-emerald-50/50">
+                <CheckCircle2 size={40} strokeWidth={1.5} />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Focus Achieved!</h2>
+                <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em] max-w-[240px] leading-relaxed mx-auto">
+                  All items for this period have been cleared. History updated with your progress.
+                </p>
+              </div>
+              <Button 
+                variant="outline" 
+                onClick={() => setPlannerRefreshNonce(n => n + 1)}
+                className="rounded-xl border-slate-200 text-slate-400 font-black uppercase text-[10px] tracking-widest h-10 px-6 hover:bg-slate-50 group transition-all"
+              >
+                Refresh Hub <RefreshCw size={14} className="ml-2 group-hover:rotate-180 transition-transform duration-500" />
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

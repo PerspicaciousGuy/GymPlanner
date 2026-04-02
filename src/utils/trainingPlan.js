@@ -1,4 +1,3 @@
-import { AM_TITLES, PM_TITLES } from '../data/ampmTitles.js';
 import { formatDateKey } from './dateUtils.js';
 
 // ─── Storage Keys ─────────────────────────────────────────────
@@ -17,8 +16,8 @@ export function defaultTrainingPlan() {
     startDate: formatDateKey(new Date()),
     cycle: [],            // Array of { id, name, type, templateId, amTitle, pmTitle }
     fixedWeek: {
-      am: { ...AM_TITLES },
-      pm: { ...PM_TITLES },
+      am: {},
+      pm: {},
       amSubtitles: {},
       pmSubtitles: {},
     },
@@ -133,8 +132,8 @@ function hydratePlan(raw) {
     sessionLayout: raw.sessionLayout || 'split',
     loggingStyle: raw.loggingStyle || 'advanced',
     fixedWeek: {
-      am: { ...AM_TITLES, ...(raw.fixedWeek?.am ?? {}) },
-      pm: { ...PM_TITLES, ...(raw.fixedWeek?.pm ?? {}) },
+      am: raw.fixedWeek?.am ?? {},
+      pm: raw.fixedWeek?.pm ?? {},
       amSubtitles: raw.fixedWeek?.amSubtitles ?? {},
       pmSubtitles: raw.fixedWeek?.pmSubtitles ?? {},
     },
