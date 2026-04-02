@@ -5,8 +5,6 @@ import {
   CheckCircle, 
   FastForward, 
   Lock, 
-  Sun, 
-  Moon, 
   Tag, 
   Sparkles,
   CheckCircle2,
@@ -379,7 +377,6 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
       {hasPlannedPm && (
         <div className="flex items-center gap-1 md:gap-2 border-b border-slate-50 mb-1 overflow-x-auto scrollbar-none">
           <button className={tabCls('am', amDone, amSkipped)} onClick={() => setActiveSession('am')}>
-            <Sun size={14} className={cn(activeSession === 'am' ? "text-indigo-600" : "text-slate-400")} />
             <span>Session 1</span>
             {amDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
             {amSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
@@ -392,7 +389,6 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
             )}
           </button>
           <button className={tabCls('pm', pmDone, pmSkipped)} onClick={() => setActiveSession('pm')}>
-            <Moon size={14} className={cn(activeSession === 'pm' ? "text-indigo-600" : "text-slate-400")} />
             <span>Session 2</span>
             {pmDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
             {pmSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
