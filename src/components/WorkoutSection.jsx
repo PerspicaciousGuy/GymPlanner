@@ -38,6 +38,7 @@ import {
   saveDailyMetadata,
   shiftWorkout
 } from '../utils/storage';
+import { loadTrainingPlan, getPlanSessionSubtitle } from '../utils/trainingPlan';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -84,6 +85,18 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const [isConfirmingFinish, setIsConfirmingFinish] = useState(false);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [showShiftPicker, setShowShiftPicker] = useState(false);
+
+  const loggingStyle = useMemo(() => {
+    try {
+      return loadTrainingPlan()?.loggingStyle || 'advanced';
+    } catch {
+      return 'advanced';
+    }
+  }, [syncToken]);
+
+  const sessionSubtitle = useMemo(() => {
+    return getPlanSessionSubtitle(date || workoutDateKey, activeSession);
+  }, [date, workoutDateKey, activeSession, syncToken]);
 
   useEffect(() => {
     setDayData(ensureAdvanced(initialData));
@@ -472,6 +485,21 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
               )}
             </div>
 
+            {sessionSubtitle && (
+              <motion.div 
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="px-6 py-1 -mt-1"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0" />
+                  <span className="text-[10px] md:text-xs font-bold text-slate-400 italic">
+                    {sessionSubtitle}
+                  </span>
+                </div>
+              </motion.div>
+            )}
+
             <AnimatePresence>
               {showNotes && (
                 <motion.div
@@ -538,16 +566,18 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
             ))}
             {!sessionDone && !sessionSkipped && (
               <div className="flex flex-wrap gap-2 sm:gap-3">
-                <Button
-                  variant="ghost"
-                  onClick={handleAddGroup}
-                  className="group h-10 border border-dashed border-indigo-100 rounded-xl text-indigo-500 hover:bg-indigo-50 hover:border-indigo-200 transition-all text-xs font-bold p-0 pr-4 overflow-hidden"
-                >
-                  <div className="w-10 h-full bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                    <Plus size={14} strokeWidth={3} />
-                  </div>
-                  <span className="ml-3">New Exercise Group</span>
-                </Button>
+                {loggingStyle === 'legacy' && (
+                  <Button
+                    variant="ghost"
+                    onClick={handleAddGroup}
+                    className="group h-10 border border-dashed border-indigo-100 rounded-xl text-indigo-500 hover:bg-indigo-50 hover:border-indigo-200 transition-all text-xs font-bold p-0 pr-4 overflow-hidden"
+                  >
+                    <div className="w-10 h-full bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                      <Plus size={14} strokeWidth={3} />
+                    </div>
+                    <span className="ml-3">New Exercise Group</span>
+                  </Button>
+                )}
 
                 <Button
                   variant="ghost"

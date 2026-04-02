@@ -300,7 +300,7 @@ export function defaultGroup() {
 }
 
 export function defaultSession() {
-  return { groups: [defaultGroup(), defaultGroup()], standaloneExercises: [] };
+  return { groups: [], standaloneExercises: [] };
 }
 
 // Each day now stores two independent sessions: am and pm

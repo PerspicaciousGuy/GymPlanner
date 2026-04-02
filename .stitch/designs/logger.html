@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kinetic | Food Logger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;700;800;900&amp;family=Manrope:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error-dim": "#d7383b",
+                        "secondary-fixed-dim": "#abc3ff",
+                        "secondary-fixed": "#c0d1ff",
+                        "on-primary-container": "#022150",
+                        "on-primary-fixed-variant": "#314879",
+                        "primary-dim": "#a1b8f0",
+                        "tertiary-fixed": "#f99efb",
+                        "inverse-surface": "#fcf9f8",
+                        "outline-variant": "#484848",
+                        "surface-tint": "#afc6ff",
+                        "on-tertiary": "#6e2176",
+                        "tertiary-dim": "#ea91ed",
+                        "primary-fixed-dim": "#a1b8f0",
+                        "surface-container-lowest": "#000000",
+                        "on-tertiary-container": "#63156c",
+                        "tertiary-fixed-dim": "#ea91ed",
+                        "inverse-on-surface": "#565555",
+                        "surface-bright": "#2c2c2c",
+                        "primary-fixed": "#afc6ff",
+                        "surface-container-highest": "#262626",
+                        "background": "#0e0e0e",
+                        "secondary-dim": "#0f6ef0",
+                        "surface-dim": "#0e0e0e",
+                        "on-background": "#ffffff",
+                        "secondary": "#6c9cff",
+                        "on-surface": "#ffffff",
+                        "tertiary": "#ffb2ff",
+                        "surface-container-low": "#131313",
+                        "primary-container": "#89a0d7",
+                        "on-primary-fixed": "#0f2a5a",
+                        "on-error": "#490006",
+                        "error": "#ff716c",
+                        "surface-container-high": "#202020",
+                        "on-tertiary-fixed": "#46004f",
+                        "on-primary": "#273f6f",
+                        "surface": "#0e0e0e",
+                        "on-secondary": "#001e4d",
+                        "tertiary-container": "#f99efb",
+                        "surface-container": "#191a1a",
+                        "on-secondary-fixed": "#003174",
+                        "inverse-primary": "#475e90",
+                        "on-secondary-container": "#f7f7ff",
+                        "surface-variant": "#262626",
+                        "primary": "#afc6ff",
+                        "on-secondary-fixed-variant": "#004cac",
+                        "outline": "#767575",
+                        "on-error-container": "#ffa8a3",
+                        "on-tertiary-fixed-variant": "#6e2076",
+                        "on-surface-variant": "#adaaaa",
+                        "error-container": "#9f0519",
+                        "secondary-container": "#0059c7"
+                    },
+                    fontFamily: {
+                        "headline": ["Lexend"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .kinetic-gradient {
+            background: linear-gradient(135deg, #afc6ff 0%, #2E7DFF 100%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top AppBar (from JSON context) -->
+<header class="bg-[#0e0e0e] flex justify-between items-center w-full px-6 h-16 fixed top-0 z-50">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden border border-outline-variant/20">
+<img class="w-full h-full object-cover" data-alt="close-up portrait of a fit young man with athletic build in dramatic studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDql8wjpcSJHTYVBegBeNmEV0X2DE8ZbWgTLDsq2LORkyHpPVIj9sff-CSNqXF-f7i9BkZvcSXcu934XbUpDEe6H3YCX1MQoNnJXLvKltfeAWg8g7xnAgHd2fiMrm1q_5I8tFgxMDCzC6ZJTLHHrVEd-ZF3zrvh799nTHKdRKLVFVrUEOs8o2VlJJeBX7rEsYNvD94pRAkzdRhcu4dLuXrT7u_TLHViwVcHsKxnn5Ig5rvTh7868oreFxyZ2RSIRubBeCr0Y8R44rTj"/>
+</div>
+<span class="text-2xl font-black italic tracking-tighter text-[#afc6ff]">KINETIC</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#adaaaa] hover:text-white transition-colors duration-300 cursor-pointer" data-icon="settings">settings</span>
+</div>
+</header>
+<main class="pt-24 pb-48 px-6 max-w-2xl mx-auto">
+<!-- Editorial Header -->
+<section class="mb-12">
+<span class="font-label font-bold uppercase tracking-[0.2em] text-[10px] text-primary mb-2 block">LOGGER</span>
+<h1 class="font-headline font-black text-6xl md:text-7xl leading-tight tracking-tighter uppercase italic">
+                BREAK<br/>FAST
+            </h1>
+</section>
+<!-- Search Section -->
+<section class="mb-10">
+<div class="relative group">
+<div class="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-primary-fixed-dim" data-icon="search">search</span>
+</div>
+<input class="w-full bg-surface-container-high h-16 pl-16 pr-6 rounded-xl border-none focus:ring-2 focus:ring-primary/20 text-on-surface font-body text-lg placeholder:text-on-surface-variant/50 transition-all" placeholder="Search 500k+ foods..." type="text"/>
+</div>
+</section>
+<!-- Quick-Add Categories -->
+<section class="mb-12 overflow-x-auto no-scrollbar -mx-6 px-6">
+<div class="flex gap-3 min-w-max">
+<button class="px-6 py-2.5 rounded-full kinetic-gradient text-on-primary-container font-label font-bold text-xs uppercase tracking-wider shadow-lg shadow-primary/10">Breakfast</button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label font-bold text-xs uppercase tracking-wider hover:text-white transition-colors">Lunch</button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label font-bold text-xs uppercase tracking-wider hover:text-white transition-colors">Dinner</button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label font-bold text-xs uppercase tracking-wider hover:text-white transition-colors">Snack</button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label font-bold text-xs uppercase tracking-wider hover:text-white transition-colors">Pre-Workout</button>
+</div>
+</section>
+<!-- Recent Logs List (Asymmetric Editorial Style) -->
+<section class="space-y-4">
+<div class="flex justify-between items-end mb-6">
+<h2 class="font-headline font-bold text-2xl uppercase tracking-tight">Recent Logs</h2>
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">History (Last 7 Days)</span>
+</div>
+<!-- Card 1 -->
+<div class="group relative flex items-center p-5 bg-surface-container-low rounded-lg transition-all hover:bg-surface-container-high cursor-pointer">
+<div class="absolute left-0 w-1 h-12 bg-primary rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-lg text-on-surface">Grilled Chicken Breast</h3>
+<span class="font-headline text-3xl font-light text-primary">42<span class="text-[10px] font-label font-bold uppercase ml-1 align-top text-on-surface-variant">g P</span></span>
+</div>
+<p class="font-label text-xs uppercase tracking-widest text-on-surface-variant">150g • Free Range • Lean Cut</p>
+</div>
+<div class="ml-6">
+<span class="material-symbols-outlined text-primary-fixed-dim bg-surface-container-highest p-3 rounded-full group-hover:bg-primary group-hover:text-on-primary-container transition-all" data-icon="add" style="font-variation-settings: 'FILL' 1;">add</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative flex items-center p-5 bg-surface-container-low rounded-lg transition-all hover:bg-surface-container-high cursor-pointer border-l-4 border-transparent hover:border-secondary">
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-lg text-on-surface">Sweet Potato</h3>
+<span class="font-headline text-3xl font-light text-secondary">35<span class="text-[10px] font-label font-bold uppercase ml-1 align-top text-on-surface-variant">g C</span></span>
+</div>
+<p class="font-label text-xs uppercase tracking-widest text-on-surface-variant">200g • Roasted • Whole Food</p>
+</div>
+<div class="ml-6">
+<span class="material-symbols-outlined text-primary-fixed-dim bg-surface-container-highest p-3 rounded-full group-hover:bg-secondary group-hover:text-white transition-all" data-icon="add" style="font-variation-settings: 'FILL' 1;">add</span>
+</div>
+</div>
+<!-- Card 3 (Empty State Mock) -->
+<div class="group relative flex items-center p-5 bg-surface-container-low/50 rounded-lg transition-all hover:bg-surface-container-high cursor-pointer">
+<div class="flex-grow">
+<div class="flex justify-between items-start mb-1">
+<h3 class="font-headline font-bold text-lg text-on-surface-variant">Avocado Toast</h3>
+<span class="font-headline text-3xl font-light text-tertiary-fixed-dim">12<span class="text-[10px] font-label font-bold uppercase ml-1 align-top text-on-surface-variant">g F</span></span>
+</div>
+<p class="font-label text-xs uppercase tracking-widest text-on-surface-variant">80g • Sourdough • Ripe</p>
+</div>
+<div class="ml-6">
+<span class="material-symbols-outlined text-primary-fixed-dim bg-surface-container-highest p-3 rounded-full transition-all" data-icon="history">history</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Macro Selection Tray (Bottom Glassmorphic) -->
+<div class="fixed bottom-32 left-0 right-0 z-40 px-6 max-w-2xl mx-auto">
+<div class="bg-surface-container/60 backdrop-blur-[32px] p-6 rounded-lg shadow-[0_20px_40px_rgba(161,184,240,0.08)]">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label font-bold text-xs text-primary uppercase tracking-widest">2 Items Selected</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-headline text-4xl font-black text-white">450</span>
+<span class="font-label font-bold text-xs text-on-surface-variant uppercase tracking-widest">kcal</span>
+<div class="flex gap-4 ml-6 items-center">
+<div class="text-center">
+<p class="text-primary font-headline font-bold text-sm">42g</p>
+<p class="text-[8px] font-label font-black text-on-surface-variant uppercase">Prot</p>
+</div>
+<div class="text-center">
+<p class="text-secondary font-headline font-bold text-sm">35g</p>
+<p class="text-[8px] font-label font-black text-on-surface-variant uppercase">Carb</p>
+</div>
+<div class="text-center">
+<p class="text-tertiary font-headline font-bold text-sm">12g</p>
+<p class="text-[8px] font-label font-black text-on-surface-variant uppercase">Fat</p>
+</div>
+</div>
+</div>
+</div>
+<button class="kinetic-gradient w-full md:w-auto px-10 py-5 rounded-full text-on-primary-container font-headline font-extrabold text-sm uppercase tracking-widest shadow-xl active:scale-95 transition-transform">
+                    ADD TO LOG
+                </button>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center px-4 bg-[#202020]/60 backdrop-blur-[32px] rounded-full mx-6 mb-8 h-20 shadow-[0_20px_40px_rgba(161,184,240,0.08)]">
+<a class="flex flex-col items-center justify-center text-[#afc6ff] relative after:block after:w-1 after:h-1 after:bg-[#afc6ff] after:rounded-full after:mt-1 after:shadow-[0_0_10px_#afc6ff]" href="#">
+<span class="material-symbols-outlined" data-icon="book" style="font-variation-settings: 'FILL' 1;">book</span>
+<span class="font-['Manrope'] font-bold text-[10px] tracking-[0.1em] uppercase">JOURNAL</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaaa] hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-['Manrope'] font-bold text-[10px] tracking-[0.1em] uppercase">STATS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaaa] hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="font-['Manrope'] font-bold text-[10px] tracking-[0.1em] uppercase">ADD</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaaa] hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="ads_click">ads_click</span>
+<span class="font-['Manrope'] font-bold text-[10px] tracking-[0.1em] uppercase">GOALS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#adaaaa] hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Manrope'] font-bold text-[10px] tracking-[0.1em] uppercase">PROFILE</span>
+</a>
+</nav>
+<!-- Background Decoration -->
+<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+<div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-secondary/5 rounded-full blur-[120px]"></div>
+</div>
+</body></html>

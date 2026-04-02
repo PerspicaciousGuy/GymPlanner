@@ -1,0 +1,49 @@
+{
+  "name": "projects/12764555030156603800",
+  "projectId": "12764555030156603800",
+  "title": "GymPlanner Nutrition Tracker",
+  "visibility": "PRIVATE",
+  "projectType": "PROJECT_DESIGN",
+  "origin": "STITCH",
+  "deviceType": "MOBILE",
+  "designTheme": {
+    "colorMode": "DARK",
+    "font": "LEXEND",
+    "roundness": "ROUND_FOUR",
+    "customColor": "#007AFF"
+  },
+  "screens": {
+    "dashboard": {
+      "id": "11906b110aaf4c469610ccb9d5a1b6c7",
+      "sourceScreen": "projects/12764555030156603800/screens/11906b110aaf4c469610ccb9d5a1b6c7",
+      "x": 0,
+      "y": 0,
+      "width": 780,
+      "height": 2220
+    },
+    "logger": {
+      "id": "ba0cac04a72d4f54b99182bcad940ee1",
+      "sourceScreen": "projects/12764555030156603800/screens/ba0cac04a72d4f54b99182bcad940ee1",
+      "x": 800,
+      "y": 0,
+      "width": 780,
+      "height": 2218
+    },
+    "macros": {
+      "id": "cd5ecc2e139840e8871f1e9dc5074010",
+      "sourceScreen": "projects/12764555030156603800/screens/cd5ecc2e139840e8871f1e9dc5074010",
+      "x": 1600,
+      "y": 0,
+      "width": 780,
+      "height": 4834
+    },
+    "insights": {
+      "id": "15e1d68065604728a7bdade0ff41d85d",
+      "sourceScreen": "projects/12764555030156603800/screens/15e1d68065604728a7bdade0ff41d85d",
+      "x": 2400,
+      "y": 0,
+      "width": 780,
+      "height": 3516
+    }
+  }
+}

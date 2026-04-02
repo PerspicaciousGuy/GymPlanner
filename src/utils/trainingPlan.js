@@ -19,7 +19,10 @@ export function defaultTrainingPlan() {
     fixedWeek: {
       am: { ...AM_TITLES },
       pm: { ...PM_TITLES },
+      amSubtitles: {},
+      pmSubtitles: {},
     },
+    loggingStyle: 'advanced', // 'legacy' (groups) | 'advanced' (standalone)
   };
 }
 
@@ -128,9 +131,12 @@ function hydratePlan(raw) {
     ...defaultTrainingPlan(),
     ...raw,
     sessionLayout: raw.sessionLayout || 'split',
+    loggingStyle: raw.loggingStyle || 'advanced',
     fixedWeek: {
       am: { ...AM_TITLES, ...(raw.fixedWeek?.am ?? {}) },
       pm: { ...PM_TITLES, ...(raw.fixedWeek?.pm ?? {}) },
+      amSubtitles: raw.fixedWeek?.amSubtitles ?? {},
+      pmSubtitles: raw.fixedWeek?.pmSubtitles ?? {},
     },
   };
 }
@@ -200,6 +206,27 @@ export function getPlanSessionTitle(date, session, plan) {
 }
 
 /**
+ * Get the session subtitle for a date based on the training plan.
+ */
+export function getPlanSessionSubtitle(date, session, plan) {
+  const p = plan || loadTrainingPlan();
+  const d = date instanceof Date ? date : new Date(date);
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const dayName = days[d.getDay()];
+
+  if (p.mode === 'fixed') {
+    const key = session === 'am' ? 'amSubtitles' : 'pmSubtitles';
+    return p.fixedWeek?.[key]?.[dayName] || '';
+  }
+
+  const info = getCycleSlotForDate(date, p);
+  if (!info) return '';
+
+  const { slot } = info;
+  return session === 'am' ? (slot.amSubtitle || '') : (slot.pmSubtitle || '');
+}
+
+/**
  * Check if a date is a rest day according to the training plan.
  */
 export function isRestDay(date, plan) {
@@ -230,6 +257,8 @@ export function createCycleSlot(name, type = 'workout', options = {}) {
     templateId: options.templateId || null,
     amTitle: options.amTitle || '',
     pmTitle: options.pmTitle || '',
+    amSubtitle: options.amSubtitle || '',
+    pmSubtitle: options.pmSubtitle || '',
   };
 }
 

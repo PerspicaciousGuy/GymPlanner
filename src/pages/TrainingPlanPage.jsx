@@ -7,8 +7,6 @@ import {
   Repeat,
   Calendar,
   Moon,
-  ChevronDown,
-  ChevronUp,
   Dumbbell,
   BedDouble,
   Sparkles,
@@ -23,12 +21,14 @@ import {
   Pencil,
   X,
   Check,
+  LayoutGrid,
+  List,
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import {
   loadSavedPlans,
   saveSavedPlans,
@@ -191,14 +191,19 @@ function ModeCard({ icon: Icon, title, description, active, onClick }) {
 }
 
 // ─── Cycle Slot Card ─────────────────────────────────────────
-function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, isFirst, isLast, templates }) {
+function CycleSlotCard({ slot, index, onUpdate, onDelete, templates }) {
   const [expanded, setExpanded] = useState(false);
   const [showPm, setShowPm] = useState(!!slot.pmTitle);
+  const [showAmSubtitle, setShowAmSubtitle] = useState(!!slot.amSubtitle);
+  const [showPmSubtitle, setShowPmSubtitle] = useState(!!slot.pmSubtitle);
   const isRest = slot.type === 'rest';
+  const controls = useDragControls();
 
   return (
-    <motion.div
-      layout
+    <Reorder.Item
+      value={slot}
+      dragListener={false}
+      dragControls={controls}
       initial={{ opacity: 0, y: 15, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95, height: 0, marginBottom: 0 }}
@@ -214,8 +219,12 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, 
       <div className="flex items-center gap-3 px-3 py-2.5">
         {/* Drag Handle + Day Number */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="text-slate-200 cursor-grab active:cursor-grabbing hover:text-slate-400 transition-colors">
-            <GripVertical size={14} />
+          <div 
+            onPointerDown={(e) => controls.start(e)}
+            style={{ touchAction: 'none' }}
+            className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-slate-500 transition-colors p-2 -ml-2"
+          >
+            <GripVertical size={16} />
           </div>
           <div className={cn(
             "w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0",
@@ -259,25 +268,6 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, 
 
         {/* Actions */}
         <div className="flex items-center gap-1 shrink-0">
-          {!isFirst && (
-            <Button
-              variant="ghost" size="icon"
-              onClick={onMoveUp}
-              className="h-7 w-7 text-slate-400 hover:text-slate-700 hover:bg-slate-100 bg-slate-50/50 rounded-full transition-all"
-            >
-              <ChevronUp size={12} strokeWidth={2.5} />
-            </Button>
-          )}
-          {!isLast && (
-            <Button
-              variant="ghost" size="icon"
-              onClick={onMoveDown}
-              className="h-7 w-7 text-slate-400 hover:text-slate-700 hover:bg-slate-100 bg-slate-50/50 rounded-full transition-all"
-            >
-              <ChevronDown size={12} strokeWidth={2.5} />
-            </Button>
-          )}
-
           {!isRest && (
             <Button
               variant="ghost" size="icon"
@@ -318,46 +308,124 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, 
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between pl-1">
                     <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                      <Sun size={10} /> {!showPm ? 'Session Title' : 'Session 1 Title'}
+                      <Sun size={10} /> Session 1
                     </label>
-                    {!showPm && (
-                      <button 
-                        onClick={() => setShowPm(true)}
-                        className="text-[8px] font-black text-indigo-500 hover:text-indigo-600 uppercase tracking-widest"
-                      >
-                        + Add New Session
-                      </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {!showAmSubtitle && (
+                        <button 
+                          onClick={() => setShowAmSubtitle(true)}
+                          className="text-[8px] font-black text-slate-400 hover:text-indigo-600 uppercase tracking-widest"
+                        >
+                          + Subtitle
+                        </button>
+                      )}
+                      {!showPm && (
+                        <button 
+                          onClick={() => setShowPm(true)}
+                          className="text-[8px] font-black text-indigo-500 hover:text-indigo-600 uppercase tracking-widest"
+                        >
+                          + Add Session 2
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <Input
                     value={slot.amTitle || ''}
                     onChange={(e) => onUpdate({ amTitle: e.target.value })}
-                    placeholder="e.g., Glutes + Calves · Abs"
+                    placeholder="Session 1 Title..."
                     className="h-9 rounded-xl text-xs font-bold bg-slate-50 border-slate-100 focus-visible:border-indigo-200"
                   />
+                  <AnimatePresence>
+                    {showAmSubtitle && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="space-y-1 overflow-hidden"
+                      >
+                        <div className="flex items-center justify-between pl-1 mt-1">
+                          <label className="text-[7px] font-bold text-slate-300 uppercase tracking-wider">Subtitle</label>
+                          <button 
+                            onClick={() => {
+                              setShowAmSubtitle(false);
+                              onUpdate({ amSubtitle: '' });
+                            }}
+                            className="text-[7px] font-bold text-rose-400 hover:text-rose-500 uppercase"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <Input
+                          value={slot.amSubtitle || ''}
+                          onChange={(e) => onUpdate({ amSubtitle: e.target.value })}
+                          placeholder="e.g. Glutes / Abs"
+                          className="h-7 rounded-lg text-[9px] font-medium bg-white/50 border-slate-50 focus-visible:border-indigo-100 italic"
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
                 {showPm && (
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between pl-1">
                       <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                        <Moon size={10} /> Session 2 Title
+                        <Moon size={10} /> Session 2
                       </label>
-                      <button 
-                        onClick={() => {
-                          setShowPm(false);
-                          onUpdate({ pmTitle: '' });
-                        }}
-                        className="text-[8px] font-black text-rose-500 hover:text-rose-600 uppercase tracking-widest"
-                      >
-                        Remove
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {!showPmSubtitle && (
+                          <button 
+                            onClick={() => setShowPmSubtitle(true)}
+                            className="text-[8px] font-black text-slate-400 hover:text-indigo-600 uppercase tracking-widest"
+                          >
+                            + Subtitle
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => {
+                            setShowPm(false);
+                            onUpdate({ pmTitle: '', pmSubtitle: '' });
+                          }}
+                          className="text-[8px] font-black text-rose-500 hover:text-rose-600 uppercase tracking-widest"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                     <Input
                       value={slot.pmTitle || ''}
                       onChange={(e) => onUpdate({ pmTitle: e.target.value })}
-                      placeholder="e.g., Chest + Biceps"
+                      placeholder="Session 2 Title..."
                       className="h-9 rounded-xl text-xs font-bold bg-slate-50 border-slate-100 focus-visible:border-indigo-200"
                     />
+                    <AnimatePresence>
+                      {showPmSubtitle && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="space-y-1 overflow-hidden"
+                        >
+                          <div className="flex items-center justify-between pl-1 mt-1">
+                            <label className="text-[7px] font-bold text-slate-300 uppercase tracking-wider">Subtitle</label>
+                            <button 
+                              onClick={() => {
+                                setShowPmSubtitle(false);
+                                onUpdate({ pmSubtitle: '' });
+                              }}
+                              className="text-[7px] font-bold text-rose-400 hover:text-rose-500 uppercase"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                          <Input
+                            value={slot.pmSubtitle || ''}
+                            onChange={(e) => onUpdate({ pmSubtitle: e.target.value })}
+                            placeholder="e.g. Upper Focus"
+                            className="h-7 rounded-lg text-[9px] font-medium bg-white/50 border-slate-50 focus-visible:border-indigo-100 italic"
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 )}
               </div>
@@ -383,7 +451,7 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, onMoveUp, onMoveDown, 
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </Reorder.Item>
   );
 }
 
@@ -463,6 +531,8 @@ function CyclePreview({ plan }) {
 
 function FixedDayRow({ day, plan, updatePlan }) {
   const hasPm = plan.fixedWeek?.pm && day in plan.fixedWeek.pm && plan.fixedWeek.pm[day] !== undefined;
+  const hasAmSubtitle = !!plan.fixedWeek?.amSubtitles?.[day];
+  const hasPmSubtitle = !!plan.fixedWeek?.pmSubtitles?.[day];
 
   return (
     <div className="flex flex-col gap-2 p-3 rounded-xl bg-slate-50/50 border border-slate-50 hover:border-slate-200 transition-all">
@@ -472,62 +542,162 @@ function FixedDayRow({ day, plan, updatePlan }) {
         </span>
         <div className="flex-1 flex items-center gap-1.5">
           <Sun size={10} className="text-slate-300 shrink-0" />
-          <Input
-            value={plan.fixedWeek?.am?.[day] || ''}
-            onChange={(e) => {
-              const fw = { ...plan.fixedWeek };
-              fw.am = { ...fw.am, [day]: e.target.value };
-              updatePlan({ fixedWeek: fw });
-            }}
-            placeholder={hasPm ? "Session 1..." : "Session..."}
-            className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
-          />
-        </div>
-        {!hasPm && (
-          <Button
-            variant="ghost"
-            onClick={() => {
-              const fw = { ...plan.fixedWeek };
-              fw.pm = { ...fw.pm, [day]: '' };
-              updatePlan({ fixedWeek: fw });
-            }}
-            className="text-[8px] h-8 px-2 font-black text-indigo-500 hover:text-indigo-600 bg-white shadow-sm hover:shadow-md uppercase tracking-widest shrink-0 rounded-lg"
-          >
-            + New Session
-          </Button>
-        )}
-      </div>
-
-      {hasPm && (
-        <div className="flex items-center gap-2">
-          <div className="w-16 shrink-0"></div>
-          <div className="flex-1 flex items-center gap-1.5">
-            <Moon size={10} className="text-slate-300 shrink-0" />
             <Input
-              value={plan.fixedWeek?.pm?.[day] || ''}
+              value={plan.fixedWeek?.am?.[day] || ''}
               onChange={(e) => {
                 const fw = { ...plan.fixedWeek };
-                fw.pm = { ...fw.pm, [day]: e.target.value };
+                fw.am = { ...fw.am, [day]: e.target.value };
                 updatePlan({ fixedWeek: fw });
               }}
-              placeholder="Session 2..."
+              placeholder="Session 1 Title..."
               className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
             />
           </div>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              const fw = { ...plan.fixedWeek };
-              const pm = { ...fw.pm };
-              delete pm[day];
-              fw.pm = pm;
-              updatePlan({ fixedWeek: fw });
-            }}
-            className="text-[8px] h-8 px-2.5 font-black text-rose-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 uppercase tracking-widest shrink-0 rounded-lg transition-all"
-          >
-            Remove
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            {!hasAmSubtitle && (
+              <button 
+                onClick={() => {
+                  const fw = { ...plan.fixedWeek };
+                  fw.amSubtitles = { ...fw.amSubtitles, [day]: ' ' };
+                  updatePlan({ fixedWeek: fw });
+                }}
+                className="text-[8px] font-black text-slate-400 hover:text-indigo-600 uppercase tracking-widest px-2"
+              >
+                + Subtitle
+              </button>
+            )}
+            {!hasPm && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  const fw = { ...plan.fixedWeek };
+                  fw.pm = { ...fw.pm, [day]: '' };
+                  updatePlan({ fixedWeek: fw });
+                }}
+                className="text-[8px] h-8 px-2 font-black text-indigo-500 hover:text-indigo-600 bg-white shadow-sm hover:shadow-md uppercase tracking-widest shrink-0 rounded-lg"
+              >
+                + Add Session 2
+              </Button>
+            )}
+          </div>
         </div>
+        <AnimatePresence>
+          {hasAmSubtitle && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="flex items-center gap-2 pl-20 -mt-1 overflow-hidden"
+            >
+              <div className="flex-1">
+                <Input
+                  value={plan.fixedWeek?.amSubtitles?.[day]?.trim() || ''}
+                  onChange={(e) => {
+                    const fw = { ...plan.fixedWeek };
+                    fw.amSubtitles = { ...fw.amSubtitles, [day]: e.target.value };
+                    updatePlan({ fixedWeek: fw });
+                  }}
+                  placeholder="e.g. Glutes / Abs"
+                  className="h-6 rounded-lg text-[8px] font-medium bg-transparent border-transparent hover:border-slate-100 focus-visible:border-indigo-100 shadow-none italic px-2"
+                />
+              </div>
+              <button 
+                onClick={() => {
+                  const fw = { ...plan.fixedWeek };
+                  const sub = { ...fw.amSubtitles };
+                  delete sub[day];
+                  fw.amSubtitles = sub;
+                  updatePlan({ fixedWeek: fw });
+                }}
+                className="text-[7px] font-bold text-rose-400 hover:text-rose-500 uppercase px-2"
+              >
+                Remove
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+      {hasPm && (
+        <>
+          <div className="flex items-center gap-2">
+            <div className="w-16 shrink-0"></div>
+            <div className="flex-1 flex items-center gap-1.5">
+              <Moon size={10} className="text-slate-300 shrink-0" />
+                  <Input
+                    value={plan.fixedWeek?.pm?.[day] || ''}
+                    onChange={(e) => {
+                      const fw = { ...plan.fixedWeek };
+                      fw.pm = { ...fw.pm, [day]: e.target.value };
+                      updatePlan({ fixedWeek: fw });
+                    }}
+                    placeholder="Session 2 Title..."
+                    className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
+                  />
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {!hasPmSubtitle && (
+                    <button 
+                      onClick={() => {
+                        const fw = { ...plan.fixedWeek };
+                        fw.pmSubtitles = { ...fw.pmSubtitles, [day]: ' ' };
+                        updatePlan({ fixedWeek: fw });
+                      }}
+                      className="text-[8px] font-black text-slate-400 hover:text-indigo-600 uppercase tracking-widest px-2"
+                    >
+                      + Subtitle
+                    </button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      const fw = { ...plan.fixedWeek };
+                      const pm = { ...fw.pm };
+                      delete pm[day];
+                      fw.pm = pm;
+                      updatePlan({ fixedWeek: fw });
+                    }}
+                    className="text-[8px] h-8 px-2.5 font-black text-rose-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 uppercase tracking-widest shrink-0 rounded-lg transition-all"
+                  >
+                    Remove
+                  </Button>
+                </div>
+              </div>
+              <AnimatePresence>
+                {hasPmSubtitle && (
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="flex items-center gap-2 pl-20 -mt-1 overflow-hidden"
+                  >
+                    <div className="flex-1">
+                      <Input
+                        value={plan.fixedWeek?.pmSubtitles?.[day]?.trim() || ''}
+                        onChange={(e) => {
+                          const fw = { ...plan.fixedWeek };
+                          fw.pmSubtitles = { ...fw.pmSubtitles, [day]: e.target.value };
+                          updatePlan({ fixedWeek: fw });
+                        }}
+                        placeholder="e.g. Upper Focus"
+                        className="h-6 rounded-lg text-[8px] font-medium bg-transparent border-transparent hover:border-slate-100 focus-visible:border-indigo-100 shadow-none italic px-2"
+                      />
+                    </div>
+                    <button 
+                      onClick={() => {
+                        const fw = { ...plan.fixedWeek };
+                        const sub = { ...fw.pmSubtitles };
+                        delete sub[day];
+                        fw.pmSubtitles = sub;
+                        updatePlan({ fixedWeek: fw });
+                      }}
+                      className="text-[7px] font-bold text-rose-400 hover:text-rose-500 uppercase px-2"
+                    >
+                      Remove
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+        </>
       )}
     </div>
   );
@@ -651,15 +821,6 @@ export default function TrainingPlanPage({ onBack }) {
 
   const handleDeleteSlot = (index) => {
     updatePlan({ cycle: plan.cycle.filter((_, i) => i !== index) });
-  };
-
-  const handleMoveSlot = (index, direction) => {
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= plan.cycle.length) return;
-    const cycle = [...plan.cycle];
-    const [moved] = cycle.splice(index, 1);
-    cycle.splice(newIndex, 0, moved);
-    updatePlan({ cycle });
   };
 
   const handleSetMode = (mode) => {
@@ -849,6 +1010,29 @@ export default function TrainingPlanPage({ onBack }) {
             </div>
           </div>
 
+          {/* Logging Style Selector */}
+          <div className="space-y-3">
+            <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2 px-1">
+              <Sparkles size={11} /> Logging Experience
+            </h2>
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <ModeCard
+                icon={List}
+                title="Advanced Logging"
+                description="Streamlined. Best for individual exercises."
+                active={plan.loggingStyle === 'advanced'}
+                onClick={() => updatePlan({ loggingStyle: 'advanced' })}
+              />
+              <ModeCard
+                icon={LayoutGrid}
+                title="Legacy Groups"
+                description="Complex. Support for manual exercise groups."
+                active={plan.loggingStyle === 'legacy'}
+                onClick={() => updatePlan({ loggingStyle: 'legacy' })}
+              />
+            </div>
+          </div>
+
 
 
           {/* Dynamic Mode: Cycle Builder */}
@@ -900,25 +1084,24 @@ export default function TrainingPlanPage({ onBack }) {
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <AnimatePresence mode="popLayout">
-                        {plan.cycle.map((slot, index) => (
-                          <CycleSlotCard
-                            key={slot.id}
-                            slot={slot}
-                            index={index}
-                            onUpdate={(updates) => handleUpdateSlot(index, updates)}
-                            onDelete={() => handleDeleteSlot(index)}
-                            onMoveUp={() => handleMoveSlot(index, -1)}
-                            onMoveDown={() => handleMoveSlot(index, 1)}
-                            isFirst={index === 0}
-                            isLast={index === plan.cycle.length - 1}
-                            templates={templates}
-                            sessionLayout={plan.sessionLayout || 'split'}
-                          />
-                        ))}
-                      </AnimatePresence>
-                    </div>
+                    <Reorder.Group 
+                      axis="y" 
+                      values={plan.cycle} 
+                      onReorder={(newCycle) => updatePlan({ cycle: newCycle })}
+                      className="space-y-2"
+                    >
+                      {plan.cycle.map((slot, index) => (
+                        <CycleSlotCard
+                          key={slot.id}
+                          slot={slot}
+                          index={index}
+                          onUpdate={(updates) => handleUpdateSlot(index, updates)}
+                          onDelete={() => handleDeleteSlot(index)}
+                          templates={templates}
+                          sessionLayout={plan.sessionLayout || 'split'}
+                        />
+                      ))}
+                    </Reorder.Group>
                   )}
 
                   {/* Add Buttons */}
