@@ -294,10 +294,9 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
               </label>
               <Input 
                 type="number" 
-                value={settings.nutritionGoals?.calories || 2000}
+                value={settings.nutritionGoals?.calories || ''}
                 onChange={(e) => handleUpdateNutrition('calories', parseInt(e.target.value) || 0)}
                 className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
-                placeholder="2000"
               />
             </div>
             <div className="space-y-2">
@@ -306,30 +305,27 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
               </label>
               <Input 
                 type="number" 
-                value={settings.nutritionGoals?.protein || 150}
+                value={settings.nutritionGoals?.protein || ''}
                 onChange={(e) => handleUpdateNutrition('protein', parseInt(e.target.value) || 0)}
                 className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
-                placeholder="150"
               />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Carbohydrates (Grams)</label>
               <Input 
                 type="number" 
-                value={settings.nutritionGoals?.carbs || 250}
+                value={settings.nutritionGoals?.carbs || ''}
                 onChange={(e) => handleUpdateNutrition('carbs', parseInt(e.target.value) || 0)}
                 className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
-                placeholder="250"
               />
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Fats (Grams)</label>
               <Input 
                 type="number" 
-                value={settings.nutritionGoals?.fats || 65}
+                value={settings.nutritionGoals?.fats || ''}
                 onChange={(e) => handleUpdateNutrition('fats', parseInt(e.target.value) || 0)}
                 className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
-                placeholder="65"
               />
             </div>
           </div>

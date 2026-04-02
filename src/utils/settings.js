@@ -7,10 +7,10 @@ const defaultSettings = {
   trainingMode: 'fixed', // 'fixed' | 'dynamic'
   nutritionGoals: {
     enabled: false,
-    calories: 2000,
-    protein: 150,
-    carbs: 250,
-    fats: 65
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fats: 0
   }
 };
 

@@ -86,7 +86,7 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
   const isToday = dateKey === formatDateKey(getToday());
 
   // Mock data for goals (these would eventually come from user settings)
-  const nutritionGoals = settings.nutritionGoals || { enabled: false, calories: 2000, protein: 150, carbs: 250, fats: 65 };
+  const nutritionGoals = settings.nutritionGoals || { enabled: false, calories: 0, protein: 0, carbs: 0, fats: 0 };
 
   const goals = {
     calories: nutritionGoals.calories,
