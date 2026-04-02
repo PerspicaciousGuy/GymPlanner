@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { 
   Plus, 
   Save, 
@@ -41,6 +41,7 @@ import {
 import { loadTrainingPlan, getPlanSessionSubtitle } from '../utils/trainingPlan';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatDateKey } from '../utils/dateUtils';
@@ -130,6 +131,20 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
       setActiveSession('am');
     }
   }, [activeSession, amDone, amSkipped, pmDone, pmSkipped]);
+
+  const amTitleRef = useRef(null);
+  const pmTitleRef = useRef(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const ref = activeSession === 'am' ? amTitleRef : pmTitleRef;
+    if (ref.current) {
+      ref.current.style.height = 'auto';
+      ref.current.style.height = `${ref.current.scrollHeight}px`;
+    }
+  }, [amTitleState, pmTitleState, activeSession]);
+
+  const canEdit = !amDone && !amSkipped; // Simplified for checks if needed
 
   const [isDirty, setIsDirty] = useState(false);
 
@@ -404,24 +419,29 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
           <div className="flex flex-col gap-2 relative">
             <div className="flex items-center gap-4 group/session">
               <div className="flex-1 relative flex items-center">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within/session:text-indigo-400 transition-colors z-20 pointer-events-none">
+                <div className="absolute left-4 top-4 text-slate-300 group-focus-within/session:text-indigo-400 transition-colors z-20 pointer-events-none">
                   <Tag size={14} strokeWidth={2.5} />
                 </div>
-                <Input
-                  value={activeSession === 'am' ? amTitle : pmTitle}
-                  onChange={(e) => handleSessionTitleChange(activeSession, e.target.value)}
+                <Textarea
+                  ref={activeSession === 'am' ? amTitleRef : pmTitleRef}
+                  value={activeSession === 'am' ? amTitleState : pmTitleState}
+                  onChange={(e) => {
+                    handleSessionTitleChange(activeSession, e.target.value);
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${e.target.scrollHeight}px`;
+                  }}
                   onBlur={handleSessionTitleSave}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === 'Enter' && e.ctrlKey) {
                       e.preventDefault();
                       e.currentTarget.blur();
                     }
                   }}
                   placeholder="Designate Training Protocol..."
                   disabled={sessionDone || sessionSkipped}
-                  className="w-full pl-11 pr-36 bg-slate-50 shadow-sm border-slate-100 rounded-[1.25rem] text-[13px] font-black text-slate-800 placeholder:text-slate-200 focus-visible:bg-white focus-visible:border-indigo-200 focus-visible:ring-indigo-500/5 transition-all h-12 italic"
+                  className="w-full pl-11 pr-36 bg-slate-50 shadow-sm border-slate-100 rounded-[1.25rem] text-[13px] font-black text-slate-800 placeholder:text-slate-200 focus-visible:bg-white focus-visible:border-indigo-200 focus-visible:ring-indigo-500/5 transition-all min-h-[3rem] h-auto italic py-3 resize-none overflow-hidden"
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 z-20">
+                <div className="absolute right-2 top-2 flex items-center gap-1 z-20">
                   <Button
                     variant="ghost"
                     size="icon"

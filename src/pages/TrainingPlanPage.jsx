@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
@@ -329,11 +330,16 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, templates }) {
                       )}
                     </div>
                   </div>
-                  <Input
+                  <Textarea
                     value={slot.amTitle || ''}
-                    onChange={(e) => onUpdate({ amTitle: e.target.value })}
+                    onChange={(e) => {
+                      onUpdate({ amTitle: e.target.value });
+                      e.target.style.height = 'auto';
+                      e.target.style.height = `${e.target.scrollHeight}px`;
+                    }}
                     placeholder="Session 1 Title..."
-                    className="h-9 rounded-xl text-xs font-bold bg-slate-50 border-slate-100 focus-visible:border-indigo-200"
+                    rows={1}
+                    className="w-full min-h-[2.25rem] h-auto rounded-xl text-xs font-bold bg-slate-50 border-slate-100 focus-visible:border-indigo-200 resize-none overflow-hidden py-2"
                   />
                   <AnimatePresence>
                     {showAmSubtitle && (
@@ -355,11 +361,16 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, templates }) {
                             Remove
                           </button>
                         </div>
-                        <Input
+                        <Textarea
                           value={slot.amSubtitle || ''}
-                          onChange={(e) => onUpdate({ amSubtitle: e.target.value })}
+                          onChange={(e) => {
+                            onUpdate({ amSubtitle: e.target.value });
+                            e.target.style.height = 'auto';
+                            e.target.style.height = `${e.target.scrollHeight}px`;
+                          }}
                           placeholder="e.g. Glutes / Abs"
-                          className="h-7 rounded-lg text-[9px] font-medium bg-white/50 border-slate-50 focus-visible:border-indigo-100 italic"
+                          rows={1}
+                          className="w-full min-h-[1.75rem] h-auto rounded-lg text-[9px] font-medium bg-white/50 border-slate-50 focus-visible:border-indigo-100 italic resize-none overflow-hidden py-1"
                         />
                       </motion.div>
                     )}
@@ -391,11 +402,16 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, templates }) {
                         </button>
                       </div>
                     </div>
-                    <Input
+                    <Textarea
                       value={slot.pmTitle || ''}
-                      onChange={(e) => onUpdate({ pmTitle: e.target.value })}
+                      onChange={(e) => {
+                        onUpdate({ pmTitle: e.target.value });
+                        e.target.style.height = 'auto';
+                        e.target.style.height = `${e.target.scrollHeight}px`;
+                      }}
                       placeholder="Session 2 Title..."
-                      className="h-9 rounded-xl text-xs font-bold bg-slate-50 border-slate-100 focus-visible:border-indigo-200"
+                      rows={1}
+                      className="w-full min-h-[2.25rem] h-auto rounded-xl text-xs font-bold bg-slate-50 border-slate-100 focus-visible:border-indigo-200 resize-none overflow-hidden py-2"
                     />
                     <AnimatePresence>
                       {showPmSubtitle && (
@@ -417,11 +433,16 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, templates }) {
                               Remove
                             </button>
                           </div>
-                          <Input
+                          <Textarea
                             value={slot.pmSubtitle || ''}
-                            onChange={(e) => onUpdate({ pmSubtitle: e.target.value })}
+                            onChange={(e) => {
+                              onUpdate({ pmSubtitle: e.target.value });
+                              e.target.style.height = 'auto';
+                              e.target.style.height = `${e.target.scrollHeight}px`;
+                            }}
                             placeholder="e.g. Upper Focus"
-                            className="h-7 rounded-lg text-[9px] font-medium bg-white/50 border-slate-50 focus-visible:border-indigo-100 italic"
+                            rows={1}
+                            className="w-full min-h-[1.75rem] h-auto rounded-lg text-[9px] font-medium bg-white/50 border-slate-50 focus-visible:border-indigo-100 italic resize-none overflow-hidden py-1"
                           />
                         </motion.div>
                       )}
@@ -542,15 +563,18 @@ function FixedDayRow({ day, plan, updatePlan }) {
         </span>
         <div className="flex-1 flex items-center gap-1.5">
           <Sun size={10} className="text-slate-300 shrink-0" />
-            <Input
+            <Textarea
               value={plan.fixedWeek?.am?.[day] || ''}
               onChange={(e) => {
                 const fw = { ...plan.fixedWeek };
                 fw.am = { ...fw.am, [day]: e.target.value };
                 updatePlan({ fixedWeek: fw });
+                e.target.style.height = 'auto';
+                e.target.style.height = `${e.target.scrollHeight}px`;
               }}
               placeholder="Session 1 Title..."
-              className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
+              rows={1}
+              className="w-full min-h-[2rem] h-auto rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none resize-none overflow-hidden py-1.5"
             />
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -590,15 +614,18 @@ function FixedDayRow({ day, plan, updatePlan }) {
               className="flex items-center gap-2 pl-20 -mt-1 overflow-hidden"
             >
               <div className="flex-1">
-                <Input
+                <Textarea
                   value={plan.fixedWeek?.amSubtitles?.[day]?.trim() || ''}
                   onChange={(e) => {
                     const fw = { ...plan.fixedWeek };
                     fw.amSubtitles = { ...fw.amSubtitles, [day]: e.target.value };
                     updatePlan({ fixedWeek: fw });
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${e.target.scrollHeight}px`;
                   }}
                   placeholder="e.g. Glutes / Abs"
-                  className="h-6 rounded-lg text-[8px] font-medium bg-transparent border-transparent hover:border-slate-100 focus-visible:border-indigo-100 shadow-none italic px-2"
+                  rows={1}
+                  className="w-full min-h-[1.5rem] h-auto rounded-lg text-[8px] font-medium bg-transparent border-transparent hover:border-slate-100 focus-visible:border-indigo-100 shadow-none italic px-2 resize-none overflow-hidden py-1"
                 />
               </div>
               <button 
@@ -623,15 +650,18 @@ function FixedDayRow({ day, plan, updatePlan }) {
             <div className="w-16 shrink-0"></div>
             <div className="flex-1 flex items-center gap-1.5">
               <Moon size={10} className="text-slate-300 shrink-0" />
-                  <Input
+                  <Textarea
                     value={plan.fixedWeek?.pm?.[day] || ''}
                     onChange={(e) => {
                       const fw = { ...plan.fixedWeek };
                       fw.pm = { ...fw.pm, [day]: e.target.value };
                       updatePlan({ fixedWeek: fw });
+                      e.target.style.height = 'auto';
+                      e.target.style.height = `${e.target.scrollHeight}px`;
                     }}
                     placeholder="Session 2 Title..."
-                    className="h-8 rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none"
+                    rows={1}
+                    className="w-full min-h-[2rem] h-auto rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none resize-none overflow-hidden py-1.5"
                   />
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -671,15 +701,18 @@ function FixedDayRow({ day, plan, updatePlan }) {
                     className="flex items-center gap-2 pl-20 -mt-1 overflow-hidden"
                   >
                     <div className="flex-1">
-                      <Input
+                      <Textarea
                         value={plan.fixedWeek?.pmSubtitles?.[day]?.trim() || ''}
                         onChange={(e) => {
                           const fw = { ...plan.fixedWeek };
                           fw.pmSubtitles = { ...fw.pmSubtitles, [day]: e.target.value };
                           updatePlan({ fixedWeek: fw });
+                          e.target.style.height = 'auto';
+                          e.target.style.height = `${e.target.scrollHeight}px`;
                         }}
                         placeholder="e.g. Upper Focus"
-                        className="h-6 rounded-lg text-[8px] font-medium bg-transparent border-transparent hover:border-slate-100 focus-visible:border-indigo-100 shadow-none italic px-2"
+                        rows={1}
+                        className="w-full min-h-[1.5rem] h-auto rounded-lg text-[8px] font-medium bg-transparent border-transparent hover:border-slate-100 focus-visible:border-indigo-100 shadow-none italic px-2 resize-none overflow-hidden py-1"
                       />
                     </div>
                     <button 
