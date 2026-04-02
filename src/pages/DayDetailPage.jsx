@@ -27,6 +27,16 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
   const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ');
   const plannedPm = !isOff(pmTitle);
   
+  const plan = useMemo(() => loadTrainingPlan(), [syncKey]);
+  const isSplitLayout = plan.sessionLayout === 'split';
+  
+  const hasDataInPm = useMemo(() => {
+    const pm = dayData.pm || {};
+    return (pm.groups?.length > 0) || (pm.standaloneExercises?.length > 0);
+  }, [dayData]);
+
+  const shouldShowSessionSwitcher = isSplitLayout || hasDataInPm;
+
   const statusInfo = useMemo(() => {
     const amTitle = (titles.am?.[dayName] || '').trim().toLowerCase();
     
@@ -171,7 +181,7 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
               <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Activity Log</h2>
               
               {/* Session Switcher */}
-              {plannedPm && (
+              {shouldShowSessionSwitcher && (
                 <div className="flex bg-muted p-1 rounded-xl border border-border/50">
                   <button 
                     onClick={() => setActiveSession('am')}
