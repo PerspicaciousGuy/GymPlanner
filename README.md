@@ -5,7 +5,7 @@ GymPlanner is a high-performance, daily workout scheduler with AM/PM planning, l
 ---
 
 ### 🧬 Built with AI
-This application was architected and developed with the assistance of **Advanced Agentic AI**. Every component, design decision, and logic flow was refined through a collaborative pair-programming process between the human creator and AI agents, demonstrating the capabilities of modern machine-assisted software development.
+This app was built with the help of Ai, the ideas were taken from multiple apps and merged into a single app. The logger feature was developed by me personally for advance logging instead of simple logging like all other apps.
 
 ---
 
