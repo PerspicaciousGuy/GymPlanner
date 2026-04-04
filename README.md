@@ -2,9 +2,17 @@
 
 GymPlanner is a high-performance, daily workout scheduler with AM/PM planning, local-first persistence, and Firebase cloud sync. It features a modern "Liquid Glass" design language inspired by premium mobile interfaces.
 
+---
+
+### 🧬 Built with AI
+This application was architected and developed with the assistance of **Advanced Agentic AI**. Every component, design decision, and logic flow was refined through a collaborative pair-programming process between the human creator and AI agents, demonstrating the capabilities of modern machine-assisted software development.
+
+---
+
 ## 🚀 Key Features
 
 - **Workout Shifting**: Redistribute training sessions across the week. Move a missed workout to a future rest day with a single click.
+- **Cycle-Based Planning**: Support for dynamic training cycles (e.g., 8-day rotations) instead of traditional 7-day fixed weeks.
 - **Daily Metadata Overrides**: Customize session titles for specific dates (e.g., "Max Effort Monday") without affecting the global weekly template.
 - **Liquid Glass UI**: Ultra-refined aesthetics with heavy backdrop blurs (`40px`), vibrant refraction, and floating specular elements.
 - **Detailed Training History**: Transparent "Shifted From/To" badges in the Training Hub provide clear chronological audit trails for adjusted schedules.
@@ -18,11 +26,12 @@ GymPlanner is a high-performance, daily workout scheduler with AM/PM planning, l
 | Layer | Tech |
 |---|---|
 | **Frontend** | React + Vite + Tailwind CSS |
-| **Animation** | Framer Motion |
+| **Animation** | Framer Motion + GSAP |
 | **Icons** | Lucide React |
 | **Cloud** | Firebase Auth + Firestore |
 | **Persistence** | LocalStorage + Synced Cloud Layer |
 | **PWA** | Vite PWA + Service Workers |
+| **Development** | Anthropic Claude + Google Gemini Agentic AI |
 
 ## 📦 Getting Started
 
