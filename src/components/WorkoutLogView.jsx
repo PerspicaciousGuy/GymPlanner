@@ -120,14 +120,17 @@ export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
                 <div className="space-y-2 mt-4">
                   <p className="text-[9px] font-bold text-amber-600 uppercase tracking-widest pl-1">Drop Set Progressions</p>
                   <div className="flex flex-wrap gap-2">
-                    {ex.allSets.filter(s => s.isDrop).map((s, i) => (
-                      <div key={i} className="flex items-center gap-2 p-2 bg-amber-50/50 rounded-xl border border-amber-100/50">
-                        <Zap size={10} className="text-amber-500 fill-current" />
-                        <span className="text-[10px] font-black text-amber-800">
-                          {s.dropReps} reps @ {s.dropWeight} kg
-                        </span>
-                      </div>
-                    ))}
+                    {ex.allSets.filter(s => s.isDrop).map((s, i) => {
+                      const drops = s.drops || (s.dropReps || s.dropWeight ? [{ reps: s.dropReps, weight: s.dropWeight }] : []);
+                      return drops.map((drop, j) => (
+                        <div key={`${i}-${j}`} className="flex items-center gap-2 p-2 bg-amber-50/50 rounded-xl border border-amber-100/50">
+                          <Zap size={10} className="text-amber-500 fill-current" />
+                          <span className="text-[10px] font-black text-amber-800">
+                            {drop.reps} reps @ {drop.weight} kg
+                          </span>
+                        </div>
+                      ));
+                    })}
                   </div>
                 </div>
               )}

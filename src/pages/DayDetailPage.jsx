@@ -89,6 +89,12 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
           const reps = parseInt(set.reps) || 0;
           exVolume += weight * reps;
           exSets += 1;
+          
+          // Multi-drop support
+          const drops = set.drops || (set.isDrop && (set.dropWeight || set.dropReps) ? [{ weight: set.dropWeight, reps: set.dropReps }] : []);
+          drops.forEach(drop => {
+            exVolume += (parseFloat(drop.weight) || 0) * (parseInt(drop.reps) || 0);
+          });
         });
         totalVolume += exVolume;
         totalSets += exSets;

@@ -206,12 +206,13 @@ export default function AnalyticsPage({ onDateSelect }) {
                 const reps = parseInt(set.reps) || 0;
                 dayVolume += weight * reps; // Standing alone, each set row is individual
 
-                // Include advanced drop sets
-                if (set.isDrop) {
-                  const dWeight = parseFloat(set.dropWeight) || 0;
-                  const dReps = parseInt(set.dropReps) || 0;
+                // Include advanced drop sets (multi-drop support)
+                const drops = set.drops || (set.isDrop && (set.dropWeight || set.dropReps) ? [{ weight: set.dropWeight, reps: set.dropReps }] : []);
+                drops.forEach(drop => {
+                  const dWeight = parseFloat(drop.weight) || 0;
+                  const dReps = parseInt(drop.reps) || 0;
                   dayVolume += dWeight * dReps;
-                }
+                });
               });
             }
           });
@@ -261,6 +262,14 @@ export default function AnalyticsPage({ onDateSelect }) {
             const weight = parseFloat(s.weight) || 0;
             map[m].sets += 1;
             map[m].volume += (reps * weight);
+            
+            // Include advanced drop sets in muscle volume
+            const drops = s.drops || (s.isDrop && (s.dropWeight || s.dropReps) ? [{ weight: s.dropWeight, reps: s.dropReps }] : []);
+            drops.forEach(drop => {
+              const dWeight = parseFloat(drop.weight) || 0;
+              const dReps = parseInt(drop.reps) || 0;
+              map[m].volume += (dWeight * dReps);
+            });
           });
         }
       });

@@ -379,104 +379,140 @@ export default function AdvancedExerciseCard({
               {/* Sets Table */}
               {sets.length > 0 && (
                 <div className="space-y-3">
-                  <div className={cn(
-                    "grid gap-2 px-2",
-                    hasDropsets ? "grid-cols-[1.75rem_1fr_1fr_1fr_1fr_1.5rem]" : "grid-cols-[1.75rem_1fr_1fr_1.5rem]"
-                  )}>
+                  <div className="grid grid-cols-[1.75rem_1fr_1fr_1.5rem] gap-2 px-2">
                     <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Set</span>
                     <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Rep</span>
                     <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Weight</span>
-                    {hasDropsets && (
-                      <>
-                        <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">D-Rep</span>
-                        <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest">D-Wt</span>
-                      </>
-                    )}
                     <span />
                   </div>
                   
                   <div className="space-y-2">
-                    {sets.map((set, idx) => (
-                      <motion.div 
-                        key={idx}
-                        layout
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={cn(
-                          "grid gap-2 items-center",
-                          hasDropsets ? "grid-cols-[1.75rem_1fr_1fr_1fr_1fr_1.5rem]" : "grid-cols-[1.75rem_1fr_1fr_1.5rem]"
-                        )}
-                      >
-                        <button 
-                          onClick={() => {
-                            const nextIsDrop = !set.isDrop;
-                            if (nextIsDrop && !hasDropsets) {
-                              update({ 
-                                hasDropsets: true, 
-                                sets: sets.map((s, i) => i === idx ? { ...s, isDrop: true } : s) 
-                              });
-                            } else {
-                              handleUpdateSet(idx, { isDrop: nextIsDrop });
-                            }
-                          }}
-                          className={cn(
-                            "h-10 flex flex-col items-center justify-center border rounded-xl transition-all",
-                            set.isDrop 
-                              ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm ring-2 ring-indigo-500/10" 
-                              : "bg-muted text-foreground border-border hover:bg-muted/70"
-                          )}
-                        >
-                          <span className="text-[10px] font-black leading-none">{idx + 1}</span>
-                          {set.isDrop && <Zap size={8} className="fill-current mt-0.5" />}
-                        </button>
-                        <Stepper 
-                          value={set.reps} 
-                          onChange={(v) => handleUpdateSet(idx, { reps: v })}
-                          className="h-10"
-                          placeholder="0"
-                        />
-                        <Stepper 
-                          value={set.weight} 
-                          onChange={(v) => handleUpdateSet(idx, { weight: v })}
-                          className="h-10"
-                          step={2.5}
-                          placeholder="0"
-                        />
-                        {hasDropsets && (
-                          <>
-                            <div className="relative group">
-                              <Stepper 
-                                value={set.dropReps || ''} 
-                                onChange={(v) => handleUpdateSet(idx, { dropReps: v })}
-                                className={cn(
-                                  "h-10 transition-opacity",
-                                  set.isDrop ? "border-indigo-100 bg-indigo-50/30" : "opacity-30 pointer-events-none"
-                                )}
-                                placeholder={set.isDrop ? "0" : "—"}
-                              />
-                            </div>
-                            <div className="relative group">
-                              <Stepper 
-                                value={set.dropWeight || ''} 
-                                onChange={(v) => handleUpdateSet(idx, { dropWeight: v })}
-                                className={cn(
-                                  "h-10 transition-opacity",
-                                  set.isDrop ? "border-indigo-100 bg-indigo-50/30" : "opacity-30 pointer-events-none"
-                                )}
-                                step={2.5}
-                                placeholder={set.isDrop ? "0" : "—"}
-                              />
-                            </div>
-                          </>
-                        )}
-                        <button 
-                          onClick={() => handleRemoveSet(idx)}
-                          className="p-1 h-8 w-8 text-slate-300 dark:text-slate-700 hover:text-red-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all flex items-center justify-center"
-                        >
-                          <X size={12} strokeWidth={3} />
-                        </button>
-                      </motion.div>
-                    ))}
+                    {sets.map((set, idx) => {
+                      // Ensure drops array exists for multi-drop support
+                      const drops = set.drops || (set.dropReps || set.dropWeight ? [{ reps: set.dropReps, weight: set.dropWeight }] : []);
+                      
+                      return (
+                        <div key={idx} className="space-y-2">
+                          <motion.div 
+                            layout
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={cn(
+                              "grid gap-2 items-center",
+                              "grid-cols-[1.75rem_1fr_1fr_1.5rem]"
+                            )}
+                          >
+                            <button 
+                              onClick={() => {
+                                const nextIsDrop = !set.isDrop;
+                                if (nextIsDrop && !hasDropsets) {
+                                  update({ 
+                                    hasDropsets: true, 
+                                    sets: sets.map((s, i) => i === idx ? { ...s, isDrop: true, drops: drops.length ? drops : [{ reps: '', weight: '' }] } : s) 
+                                  });
+                                } else {
+                                  const newDrops = nextIsDrop && !drops.length ? [{ reps: '', weight: '' }] : drops;
+                                  handleUpdateSet(idx, { isDrop: nextIsDrop, drops: newDrops });
+                                }
+                              }}
+                              className={cn(
+                                "h-10 flex flex-col items-center justify-center border rounded-xl transition-all",
+                                set.isDrop 
+                                  ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm ring-2 ring-indigo-500/10" 
+                                  : "bg-muted text-foreground border-border hover:bg-muted/70"
+                              )}
+                            >
+                              <span className="text-[10px] font-black leading-none">{idx + 1}</span>
+                              {set.isDrop && <Zap size={8} className="fill-current mt-0.5" />}
+                            </button>
+                            <Stepper 
+                              value={set.reps} 
+                              onChange={(v) => handleUpdateSet(idx, { reps: v })}
+                              className="h-10"
+                              placeholder="0"
+                            />
+                            <Stepper 
+                              value={set.weight} 
+                              onChange={(v) => handleUpdateSet(idx, { weight: v })}
+                              className="h-10"
+                              step={2.5}
+                              placeholder="0"
+                            />
+                            <button 
+                              onClick={() => handleRemoveSet(idx)}
+                              className="p-1 h-8 w-8 text-slate-300 dark:text-slate-700 hover:text-red-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded-lg transition-all flex items-center justify-center"
+                            >
+                              <X size={12} strokeWidth={3} />
+                            </button>
+                          </motion.div>
+
+                          {/* Multi-Drop Rows */}
+                          <AnimatePresence>
+                            {set.isDrop && drops.map((drop, dropIdx) => (
+                              <motion.div
+                                key={dropIdx}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -10 }}
+                                className="grid grid-cols-[1.75rem_1fr_1fr_1.5rem] gap-2 items-center pl-4"
+                              >
+                                <div className="h-6 flex items-center justify-center relative">
+                                   <div className="absolute left-[-10px] top-0 bottom-1/2 w-[2px] bg-indigo-100 rounded-full" />
+                                   <div className="absolute left-[-10px] top-1/2 right-0 h-[2px] bg-indigo-100 rounded-full" />
+                                   <Zap size={10} className="text-indigo-400 fill-current" />
+                                </div>
+                                <input
+                                  type="text"
+                                  value={drop.reps}
+                                  onChange={(e) => {
+                                    const newDrops = [...drops];
+                                    newDrops[dropIdx] = { ...newDrops[dropIdx], reps: e.target.value };
+                                    handleUpdateSet(idx, { drops: newDrops, dropReps: newDrops[0].reps });
+                                  }}
+                                  placeholder="Drop Reps"
+                                  className="w-full text-center bg-muted/30 border border-slate-100 rounded-xl h-10 text-xs font-bold text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 placeholder:text-slate-300 transition-all"
+                                />
+                                <input
+                                  type="text"
+                                  value={drop.weight}
+                                  onChange={(e) => {
+                                    const newWeight = e.target.value;
+                                    const newDrops = [...drops];
+                                    newDrops[dropIdx] = { ...newDrops[dropIdx], weight: newWeight };
+                                    handleUpdateSet(idx, { drops: newDrops, dropReps: newDrops[0]?.reps || '', dropWeight: newDrops[0]?.weight || '' });
+                                  }}
+                                  placeholder="Drop Weight"
+                                  className="w-full text-center bg-muted/30 border border-slate-100 rounded-xl h-10 text-xs font-bold text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 placeholder:text-slate-300 transition-all"
+                                />
+                                <div className="flex flex-col gap-1 items-center">
+                                  {dropIdx === drops.length - 1 ? (
+                                    <button 
+                                      onClick={() => {
+                                        const newDrops = [...drops, { reps: '', weight: '' }];
+                                        handleUpdateSet(idx, { drops: newDrops });
+                                      }}
+                                      className="p-1 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                                    >
+                                      <Plus size={12} strokeWidth={3} />
+                                    </button>
+                                  ) : (
+                                    <button 
+                                      onClick={() => {
+                                        const newDrops = drops.filter((_, i) => i !== dropIdx);
+                                        handleUpdateSet(idx, { drops: newDrops, dropReps: newDrops[0]?.reps || '', dropWeight: newDrops[0]?.weight || '' });
+                                      }}
+                                      className="p-1 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                    >
+                                      <X size={12} strokeWidth={3} />
+                                    </button>
+                                  )}
+                                </div>
+                              </motion.div>
+                            ))}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
