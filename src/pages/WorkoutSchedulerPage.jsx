@@ -385,13 +385,12 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
                   All items for this period have been cleared. History updated with your progress.
                 </p>
               </div>
-              <Button 
-                variant="outline" 
+              <button 
                 onClick={() => setPlannerRefreshNonce(n => n + 1)}
-                className="rounded-xl border-slate-200 text-slate-400 font-black uppercase text-[10px] tracking-widest h-10 px-6 hover:bg-slate-50 group transition-all"
+                className="inline-flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 font-black uppercase text-[10px] tracking-widest h-10 px-6 hover:bg-slate-50 group transition-all"
               >
                 Refresh Hub <RefreshCw size={14} className="ml-2 group-hover:rotate-180 transition-transform duration-500" />
-              </Button>
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
