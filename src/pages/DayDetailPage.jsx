@@ -3,7 +3,7 @@ import { ChevronLeft, Calendar as CalendarIcon, Weight, Layers, Zap, List, Layou
 import WorkoutSection from '../components/WorkoutSection';
 import WorkoutLogView from '../components/WorkoutLogView';
 import { formatDateDisplay, formatDateKey, getDayOfWeek } from '../utils/dateUtils';
-import { loadWorkoutByDate, isDayComplete, loadSessionTitles } from '../utils/storage';
+import { loadWorkoutByDate, isDayComplete, loadSessionTitles, getEffectiveSessionTitle } from '../utils/storage';
 import { loadTrainingPlan } from '../utils/trainingPlan';
 import { calculateRecovery, getDailyFocus } from '../utils/recoveryLogic';
 import InteractiveMuscleMap from '../components/InteractiveMuscleMap/InteractiveMuscleMap';
@@ -22,36 +22,32 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
   const foodLog = useMemo(() => getFoodLog(dateStr), [dateStr, syncKey, refreshTrigger]);
   const foodTotals = useMemo(() => getDailyTotals(dateStr), [dateStr, syncKey, refreshTrigger]);
   
-  const titles = loadSessionTitles();
-  const pmTitle = (titles.pm?.[dayName] || '').trim().toLowerCase();
-  const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ');
+  const amTitle = getEffectiveSessionTitle(date, 'am');
+  const pmTitle = getEffectiveSessionTitle(date, 'pm');
+  const isOff = (txt) => !txt || ['off', 'rest', ''].includes(txt.trim().toLowerCase()) || txt.trim().toLowerCase().startsWith('off ') || txt.trim().toLowerCase().startsWith('rest ');
+
+  const plannedAm = !isOff(amTitle);
   const plannedPm = !isOff(pmTitle);
   
   const plan = useMemo(() => loadTrainingPlan(), [syncKey]);
-  const isSplitLayout = plan.sessionLayout === 'split';
   
   const hasDataInPm = useMemo(() => {
     const pm = dayData.pm || {};
-    return (pm.groups?.length > 0) || (pm.standaloneExercises?.length > 0);
+    const hasGroups = pm.groups?.some(g => g.rows?.some(r => (r.exercise || '').trim() || (r.weight || '').trim() || (r.reps || '').trim()));
+    const hasStandalone = (pm.standaloneExercises || []).length > 0;
+    return !!(hasGroups || hasStandalone);
   }, [dayData]);
 
-  const shouldShowSessionSwitcher = isSplitLayout || hasDataInPm;
+  const shouldShowSessionSwitcher = plannedPm || hasDataInPm;
 
   const statusInfo = useMemo(() => {
-    const amTitle = (titles.am?.[dayName] || '').trim().toLowerCase();
-    
-    const plannedAm = !isOff(amTitle);
-    
-    const doneAm = isDayComplete(dateStr, 'am');
-    const donePm = isDayComplete(dateStr, 'pm');
-    
-    const amOk = plannedAm ? doneAm : true;
-    const pmOk = plannedPm ? donePm : true;
+    const amOk = plannedAm ? isDayComplete(dateStr, 'am') : true;
+    const pmOk = plannedPm ? isDayComplete(dateStr, 'pm') : true;
 
     if (amOk && pmOk) return { label: 'Completed', color: 'text-emerald-500 bg-emerald-500/10', icon: <CheckCircle2 size={12} /> };
     if ((plannedAm && doneAm) || (plannedPm && donePm)) return { label: 'Partial', color: 'text-amber-500 bg-amber-500/10', icon: <AlertCircle size={12} /> };
     return { label: 'Missed', color: 'text-rose-500 bg-rose-500/10', icon: <XCircle size={12} /> };
-  }, [dateStr, dayName, titles]);
+  }, [dateStr, dayName]);
 
   const stats = useMemo(() => {
     let totalVolume = 0;
@@ -189,7 +185,7 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
                       activeSession === 'am' ? 'bg-card text-indigo-500 shadow-sm border border-border' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    <Sun size={12} /> AM
+                    {plan.sessionLayout === 'split' ? <><Sun size={12} /> AM</> : "Session 1"}
                   </button>
                   <button 
                     onClick={() => setActiveSession('pm')}
@@ -197,7 +193,7 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
                       activeSession === 'pm' ? 'bg-card text-indigo-500 shadow-sm border border-border' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    <Moon size={12} /> PM
+                    {plan.sessionLayout === 'split' ? <><Moon size={12} /> PM</> : "Session 2"}
                   </button>
                 </div>
               )}
