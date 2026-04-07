@@ -256,7 +256,7 @@ export default function AnalyticsPage({ onDateSelect }) {
 
     Object.entries(workouts).forEach(([date, day]) => {
       const isCurrent = date >= startDateString;
-      const isPrev = date < startDateString && date >= prevDateString;
+      const isPrev = date < startDateString && date >= prevStartStr;
 
       if (isCurrent) {
         ['am', 'pm'].forEach(s => processMuscleSess(day[s] || {}, muscleMap));
@@ -479,28 +479,15 @@ export default function AnalyticsPage({ onDateSelect }) {
         </div>
       </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          {/* Sentinel: when this scrolls out of view, tabs become fixed */}
-          <div ref={tabsSentinelRef} className="h-0 w-full" />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        {/* Sentinel: when this scrolls out of view, tabs become fixed */}
+        <div ref={tabsSentinelRef} className="h-0 w-full" />
 
-          {/* Fixed floating tabs overlay (appears when scrolled past sentinel) */}
-          <div
-            className={`fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl py-3 px-3 sm:px-4 lg:px-6 border-b border-border/30 shadow-sm transition-all duration-200 ${isTabsSticky ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'}`}
-          >
-            <div className="flex justify-center mx-auto max-w-[1600px]">
-              <TabsList className="bg-muted/60 p-1 rounded-2xl border border-border/40 h-auto gap-0.5 w-full max-w-[400px] shadow-sm">
-                <TabsTrigger value="overview" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
-                <TabsTrigger value="history" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">History</TabsTrigger>
-                <TabsTrigger value="evolution" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Focus</TabsTrigger>
-                <TabsTrigger value="recovery" className="flex-1 rounded-xl px-1 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center justify-center gap-1">
-                  Recovery <div className="w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
-                </TabsTrigger>
-              </TabsList>
-            </div>
-          </div>
-
-          {/* Inline tabs (always rendered to prevent layout shift) */}
-          <div className="flex justify-center mb-4">
+        {/* Fixed floating tabs overlay (appears when scrolled past sentinel) */}
+        <div
+          className={`fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl py-3 px-3 sm:px-4 lg:px-6 border-b border-border/30 shadow-sm transition-all duration-200 ${isTabsSticky ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'}`}
+        >
+          <div className="flex justify-center mx-auto max-w-[1600px]">
             <TabsList className="bg-muted/60 p-1 rounded-2xl border border-border/40 h-auto gap-0.5 w-full max-w-[400px] shadow-sm">
               <TabsTrigger value="overview" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
               <TabsTrigger value="history" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">History</TabsTrigger>
@@ -510,8 +497,21 @@ export default function AnalyticsPage({ onDateSelect }) {
               </TabsTrigger>
             </TabsList>
           </div>
+        </div>
 
-      <div ref={dashboardRef} className="space-y-6 bg-background rounded-3xl">
+        {/* Inline tabs (always rendered to prevent layout shift) */}
+        <div className="flex justify-center mb-4">
+          <TabsList className="bg-muted/60 p-1 rounded-2xl border border-border/40 h-auto gap-0.5 w-full max-w-[400px] shadow-sm">
+            <TabsTrigger value="overview" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
+            <TabsTrigger value="history" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">History</TabsTrigger>
+            <TabsTrigger value="evolution" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Focus</TabsTrigger>
+            <TabsTrigger value="recovery" className="flex-1 rounded-xl px-1 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center justify-center gap-1">
+              Recovery <div className="w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <div ref={dashboardRef} className="space-y-6 bg-background rounded-3xl">
 
           <TabsContent value="overview" className="space-y-6 outline-none">
             {/* Header Cards */}
@@ -1095,7 +1095,7 @@ export default function AnalyticsPage({ onDateSelect }) {
             </div>
           </TabsContent>
         </div>
-        </Tabs>
+      </Tabs>
     </div>
   );
 }
@@ -1138,9 +1138,9 @@ function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend, suf
       <CardContent className={cn("p-0 flex flex-col h-full", !isMicro && "p-5")}>
         <div className="flex items-start justify-between relative">
           <div className={cn(
-            "rounded-2xl transition-transform group-hover:scale-110 flex items-center justify-center shrink-0", 
+            "rounded-2xl transition-transform group-hover:scale-110 flex items-center justify-center shrink-0",
             isMicro ? "p-2 w-8 h-8" : "p-3 w-12 h-12",
-            bgColor, 
+            bgColor,
             iconColor
           )}>
             {icon}
