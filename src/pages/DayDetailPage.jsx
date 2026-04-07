@@ -43,11 +43,14 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
   const statusInfo = useMemo(() => {
     const amOk = plannedAm ? isDayComplete(dateStr, 'am') : true;
     const pmOk = plannedPm ? isDayComplete(dateStr, 'pm') : true;
+    
+    const amDone = isDayComplete(dateStr, 'am');
+    const pmDone = isDayComplete(dateStr, 'pm');
 
     if (amOk && pmOk) return { label: 'Completed', color: 'text-emerald-500 bg-emerald-500/10', icon: <CheckCircle2 size={12} /> };
-    if ((plannedAm && doneAm) || (plannedPm && donePm)) return { label: 'Partial', color: 'text-amber-500 bg-amber-500/10', icon: <AlertCircle size={12} /> };
+    if (amDone || pmDone) return { label: 'Partial', color: 'text-amber-500 bg-amber-500/10', icon: <AlertCircle size={12} /> };
     return { label: 'Missed', color: 'text-rose-500 bg-rose-500/10', icon: <XCircle size={12} /> };
-  }, [dateStr, dayName]);
+  }, [dateStr, dayName, plannedAm, plannedPm]);
 
   const stats = useMemo(() => {
     let totalVolume = 0;

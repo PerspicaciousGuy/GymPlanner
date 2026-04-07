@@ -183,6 +183,11 @@ export default function AnalyticsPage({ onDateSelect }) {
               const reps = parseInt(row.reps) || 0;
               dayVolume += weight * sets * reps;
 
+              // Include legacy drop sets
+              if (row.dropSets && row.dropWeight) {
+                dayVolume += (parseInt(row.dropSets) || 0) * (parseFloat(row.dropWeight) || 0) * reps;
+              }
+
               if (isCurrentPeriod && row.exercise) {
                 exerciseCount++;
                 if (row.muscle) dailyMuscles.add(row.muscle);
@@ -200,6 +205,13 @@ export default function AnalyticsPage({ onDateSelect }) {
                 const weight = parseFloat(set.weight) || 0;
                 const reps = parseInt(set.reps) || 0;
                 dayVolume += weight * reps; // Standing alone, each set row is individual
+
+                // Include advanced drop sets
+                if (set.isDrop) {
+                  const dWeight = parseFloat(set.dropWeight) || 0;
+                  const dReps = parseInt(set.dropReps) || 0;
+                  dayVolume += dWeight * dReps;
+                }
               });
             }
           });

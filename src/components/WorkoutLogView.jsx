@@ -15,16 +15,20 @@ export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
 
   const allExercises = [
     ...groups.flatMap(g => g.rows || []),
-    ...standalone.map(ex => ({
-      exercise: ex.exercise,
-      muscle: ex.muscle,
-      subMuscle: ex.subMuscle,
-      // Summary for standalone: Use first set for weight/reps but indicate total sets
-      sets: ex.sets?.length || 0,
-      reps: ex.sets?.length === 1 ? ex.sets[0].reps : 'Varies',
-      weight: ex.sets?.length === 1 ? ex.sets[0].weight : (ex.sets?.length ? ex.sets[0].weight : 0),
-      isAdvanced: true
-    }))
+    ...standalone.map(ex => {
+      const dropCount = (ex.sets || []).filter(s => s.isDrop).length;
+      return {
+        exercise: ex.exercise,
+        muscle: ex.muscle,
+        subMuscle: ex.subMuscle,
+        sets: ex.sets?.length || 0,
+        reps: ex.sets?.length === 1 ? ex.sets[0].reps : 'Varies',
+        weight: ex.sets?.length === 1 ? ex.sets[0].weight : (ex.sets?.length ? ex.sets[0].weight : 0),
+        dropSets: dropCount > 0 ? dropCount : null,
+        isAdvanced: true,
+        allSets: ex.sets || []
+      };
+    })
   ].filter(r => r.exercise);
 
   if (allExercises.length === 0) {
@@ -112,8 +116,24 @@ export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
                 </div>
               </div>
 
-              {ex.dropSets && (
-                <div className="flex items-center gap-3 p-3 bg-amber-50/50 rounded-xl border border-amber-100/50">
+              {ex.isAdvanced && ex.allSets.some(s => s.isDrop) && (
+                <div className="space-y-2 mt-4">
+                  <p className="text-[9px] font-bold text-amber-600 uppercase tracking-widest pl-1">Drop Set Progressions</p>
+                  <div className="flex flex-wrap gap-2">
+                    {ex.allSets.filter(s => s.isDrop).map((s, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 bg-amber-50/50 rounded-xl border border-amber-100/50">
+                        <Zap size={10} className="text-amber-500 fill-current" />
+                        <span className="text-[10px] font-black text-amber-800">
+                          {s.dropReps} reps @ {s.dropWeight} kg
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!ex.isAdvanced && ex.dropSets && (
+                <div className="flex items-center gap-3 p-3 bg-amber-50/50 rounded-xl border border-amber-100/50 mt-4">
                   <Layers size={14} className="text-amber-500" />
                   <div className="flex-1">
                     <p className="text-[9px] font-bold text-amber-600 uppercase tracking-widest">Drop Set Strategy</p>

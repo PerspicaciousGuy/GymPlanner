@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import { 
-  Plus, 
-  Trash2, 
-  Download, 
-  Upload, 
-  Search, 
-  Filter, 
+import { useEffect, useRef, useState, useMemo } from 'react';
+import {
+  Plus,
+  Trash2,
+  Download,
+  Upload,
+  Search,
+  Filter,
   Settings2,
   LayoutGrid,
   Boxes,
@@ -23,21 +23,21 @@ import {
   Dumbbell,
   Pencil
 } from 'lucide-react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -60,15 +60,17 @@ import {
   saveWorkoutsMapWithSync,
   getCompletionForWeek,
   setCompletionStatusWithSync,
+  getEffectiveSessionTitle,
   loadTemplates,
   deleteTemplate,
   updateTemplate
 } from '../utils/storage';
 import { exportPlannerWorkbook } from '../utils/exportWorkbook';
 import { importPlannerWorkbook } from '../utils/importWorkbook';
-import { 
-  getWeekStart, 
-  formatDateCompact, 
+import { loadTrainingPlan } from '../utils/trainingPlan';
+import {
+  getWeekStart,
+  formatDateCompact,
   formatDateKey,
   getDayOfWeek,
   getDateForDayInWeek,
@@ -110,7 +112,7 @@ function blankWorkoutGridRow(dateOrDay = formatDateKey(new Date()), session = 'a
   const dateKey = normalizeWorkoutDateKey(dateOrDay) || formatDateKey(new Date());
   // If dateOrDay is a date string or Date object, extract the day name
   const day = getDayOfWeek(dateKey);
-  
+
   return {
     dateOrDay: dateKey,
     day,
@@ -131,12 +133,12 @@ function blankWorkoutGridRow(dateOrDay = formatDateKey(new Date()), session = 'a
 function flattenWorkoutsForGrid(workoutsMap, { includeEmpty = false } = {}) {
   const rows = [];
 
-    // Workouts are keyed by date; convert legacy day keys to current-week dates for display.
-    for (const [dateOrDayKey, dayData] of Object.entries(workoutsMap)) {
-      const dateKey = normalizeWorkoutDateKey(dateOrDayKey);
-      if (!dateKey) continue;
-      const data = ensureAmPm(dayData);
-      const dayName = getDayOfWeek(new Date(dateKey));
+  // Workouts are keyed by date; convert legacy day keys to current-week dates for display.
+  for (const [dateOrDayKey, dayData] of Object.entries(workoutsMap)) {
+    const dateKey = normalizeWorkoutDateKey(dateOrDayKey);
+    if (!dateKey) continue;
+    const data = ensureAmPm(dayData);
+    const dayName = getDayOfWeek(new Date(dateKey));
 
     for (const session of ['am', 'pm']) {
       const sessData = data?.[session] ?? {};
@@ -214,24 +216,24 @@ function buildWorkoutsFromGrid(rows) {
     const key = normalizeWorkoutDateKey(row.dateOrDay || row.day);
     if (!key) continue;
     const session = row.session === 'pm' ? 'pm' : 'am';
-    
+
     if (!workouts[key]) {
       workouts[key] = defaultDayWorkout();
     }
 
     const isAdvanced = String(row.groupIndex || '').startsWith('Adv');
-    
+
     if (isAdvanced) {
       if (!workouts[key][session].standaloneExercises) {
         workouts[key][session].standaloneExercises = [];
       }
-      
+
       const repsArr = String(row.reps || '').split(',').map(v => v.trim());
       const weightArr = String(row.weight || '').split(',').map(v => v.trim());
       const setInfo = [];
       const setLen = Math.max(repsArr.length, weightArr.length, Number(row.sets) || 1);
-      
-      for(let i=0; i<setLen; i++) {
+
+      for (let i = 0; i < setLen; i++) {
         setInfo.push({
           reps: repsArr[i] || '',
           weight: weightArr[i] || ''
@@ -338,6 +340,13 @@ function completionStatus(val) {
 export default function DataConsolePage({ hideSidebar }) {
   const [activeTab, setActiveTab] = useState('workouts');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const plan = useMemo(() => loadTrainingPlan(), []);
+  const isSplitLayout = plan.sessionLayout === 'split';
+  const s1Label = isSplitLayout ? 'AM' : 'S1';
+  const s2Label = isSplitLayout ? 'PM' : 'S2';
+  const s1FullLabel = isSplitLayout ? 'AM Status' : 'Session 1';
+  const s2FullLabel = isSplitLayout ? 'PM Status' : 'Session 2';
 
   const [workoutRows, setWorkoutRows] = useState(() => buildInitialWorkoutRows());
   const [workoutsSaved, setWorkoutsSaved] = useState(false);
@@ -454,7 +463,7 @@ export default function DataConsolePage({ hideSidebar }) {
       const sessionOk = workoutFilterSession === 'all' || row.session === workoutFilterSession;
       const dateOk = !workoutFilterDate || row.dateOrDay === workoutFilterDate;
       const q = searchQuery.toLowerCase();
-      const searchMatch = !q || 
+      const searchMatch = !q ||
         (row.exercise || '').toLowerCase().includes(q) ||
         (row.muscle || '').toLowerCase().includes(q) ||
         (row.subMuscle || '').toLowerCase().includes(q);
@@ -599,7 +608,7 @@ export default function DataConsolePage({ hideSidebar }) {
             <h1 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">Data Console</h1>
             <p className="text-[10px] md:text-xs text-slate-400 font-medium">Configure workouts, sessions, and database.</p>
           </div>
-          
+
           <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
             <input
               ref={importInputRef}
@@ -655,11 +664,10 @@ export default function DataConsolePage({ hideSidebar }) {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`pb-3 px-1 text-[11px] md:text-xs font-bold transition-all relative shrink-0 ${
-                activeTab === tab.key 
-                  ? 'text-indigo-600' 
+              className={`pb-3 px-1 text-[11px] md:text-xs font-bold transition-all relative shrink-0 ${activeTab === tab.key
+                  ? 'text-indigo-600'
                   : 'text-slate-400 hover:text-slate-600'
-              }`}
+                }`}
             >
               {tab.label}
               {activeTab === tab.key && (
@@ -674,42 +682,42 @@ export default function DataConsolePage({ hideSidebar }) {
           <div className="px-3 md:px-4 py-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
             <div className="flex-1 w-full sm:max-w-xs relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
-              <Input 
+              <Input
                 placeholder={`Search data...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 h-9 bg-slate-50 border-slate-200 rounded-xl text-[11px] md:text-xs focus-visible:ring-indigo-500/10 focus-visible:border-indigo-500 transition-all font-medium"
               />
             </div>
-            
+
             <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
               {activeTab === 'workouts' && (
                 <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-                    <div 
-                      onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}
-                      className="flex items-center gap-1.5 px-2 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 focus-within:ring-2 focus-within:ring-indigo-500/10 focus-within:border-indigo-500 cursor-pointer"
-                    >
-                      <Calendar size={12} className="text-slate-400 shrink-0" />
-                      <input
-                        type="date"
-                        value={workoutFilterDate}
-                        onFocus={(e) => e.target.showPicker?.()}
-                        onChange={(e) => setWorkoutFilterDate(e.target.value)}
-                        className="bg-transparent py-1.5 text-[10px] md:text-xs font-bold text-slate-700 focus:outline-none w-24 md:w-28 cursor-pointer h-7"
-                      />
-                      {workoutFilterDate && (
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setWorkoutFilterDate('');
-                          }}
-                          className="p-0.5 hover:bg-slate-200 text-slate-400 hover:text-slate-600 rounded-md transition-all shrink-0"
-                          title="Clear Date"
-                        >
-                          <X size={12} strokeWidth={3} />
-                        </button>
-                      )}
-                    </div>
+                  <div
+                    onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}
+                    className="flex items-center gap-1.5 px-2 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 focus-within:ring-2 focus-within:ring-indigo-500/10 focus-within:border-indigo-500 cursor-pointer"
+                  >
+                    <Calendar size={12} className="text-slate-400 shrink-0" />
+                    <input
+                      type="date"
+                      value={workoutFilterDate}
+                      onFocus={(e) => e.target.showPicker?.()}
+                      onChange={(e) => setWorkoutFilterDate(e.target.value)}
+                      className="bg-transparent py-1.5 text-[10px] md:text-xs font-bold text-slate-700 focus:outline-none w-24 md:w-28 cursor-pointer h-7"
+                    />
+                    {workoutFilterDate && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setWorkoutFilterDate('');
+                        }}
+                        className="p-0.5 hover:bg-slate-200 text-slate-400 hover:text-slate-600 rounded-md transition-all shrink-0"
+                        title="Clear Date"
+                      >
+                        <X size={12} strokeWidth={3} />
+                      </button>
+                    )}
+                  </div>
                   <select
                     value={workoutFilterDay}
                     onChange={(e) => setWorkoutFilterDay(e.target.value)}
@@ -726,8 +734,8 @@ export default function DataConsolePage({ hideSidebar }) {
                     className="flex-1 sm:flex-initial border border-slate-200 rounded-lg px-2 md:px-3 py-1.5 text-[10px] md:text-xs bg-slate-50 font-bold text-slate-700 focus:outline-none transition-all"
                   >
                     <option value="all">Ses</option>
-                    <option value="am">AM</option>
-                    <option value="pm">PM</option>
+                    <option value="am">{s1Label}</option>
+                    <option value="pm">{s2Label}</option>
                   </select>
                   <button
                     onClick={addWorkoutGridRow}
@@ -740,9 +748,9 @@ export default function DataConsolePage({ hideSidebar }) {
               )}
 
               {activeTab === 'completion' && (
-                <WeekPicker 
-                  currentWeekStart={selectedWeek} 
-                  onWeekChange={setSelectedWeek} 
+                <WeekPicker
+                  currentWeekStart={selectedWeek}
+                  onWeekChange={setSelectedWeek}
                   compact
                 />
               )}
@@ -810,8 +818,8 @@ export default function DataConsolePage({ hideSidebar }) {
                           onChange={(e) => updateWorkoutRow(idx, 'session', e.target.value)}
                           className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[10px] font-bold uppercase focus:bg-white focus:border-slate-200"
                         >
-                          <option value="am">AM</option>
-                          <option value="pm">PM</option>
+                          <option value="am">{s1Label}</option>
+                          <option value="pm">{s2Label}</option>
                         </select>
                       </TableCell>
                       {showAdvancedCols && (
@@ -898,8 +906,8 @@ export default function DataConsolePage({ hideSidebar }) {
                   <TableRow className="hover:bg-transparent border-none">
                     <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Day</TableHead>
                     <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Date</TableHead>
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">AM Status</TableHead>
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">PM Status</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">{s1FullLabel}</TableHead>
+                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">{s2FullLabel}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-slate-50">
@@ -907,7 +915,7 @@ export default function DataConsolePage({ hideSidebar }) {
                     const dayData = weekCompletion[day];
                     const dateDisplay = dayData ? formatDateCompact(dayData.date) : '';
                     const dateKey = dayData ? dayData.date : null;
-                    
+
                     return (
                       <TableRow key={day} className="group hover:bg-slate-50/50 transition-colors border-none">
                         <TableCell className="px-4 py-3 font-bold text-slate-700 italic">{day}</TableCell>
@@ -915,7 +923,17 @@ export default function DataConsolePage({ hideSidebar }) {
                         {['am', 'pm'].map((session) => {
                           const value = dayData?.[session];
                           const status = value === true ? 'done' : value === 'skipped' ? 'skipped' : '';
-                          
+                          const sessionTitle = getEffectiveSessionTitle(dateKey, session);
+                          const isInactive = !sessionTitle || ['off', 'rest', ''].includes(sessionTitle.trim().toLowerCase());
+
+                          if (isInactive && !status) {
+                            return (
+                              <TableCell key={session} className="px-4 py-2 opacity-20">
+                                <span className="text-[10px] font-black tracking-widest ml-4">—</span>
+                              </TableCell>
+                            );
+                          }
+
                           return (
                             <TableCell key={session} className="px-4 py-2">
                               <select
@@ -924,11 +942,11 @@ export default function DataConsolePage({ hideSidebar }) {
                                 onChange={(e) => setCompletionCell(dateKey, session, e.target.value)}
                                 className={cn(
                                   "px-3 py-1.5 rounded-lg text-[10px] font-bold border underline-offset-2 transition-all focus:outline-none",
-                                  status === 'done' 
-                                    ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
+                                  status === 'done'
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                                     : status === 'skipped'
-                                    ? "bg-amber-50 text-amber-700 border-amber-100"
-                                    : "bg-transparent text-slate-300 border-transparent hover:border-slate-100"
+                                      ? "bg-amber-50 text-amber-700 border-amber-100"
+                                      : "bg-transparent text-slate-300 border-transparent hover:border-slate-100"
                                 )}
                                 disabled={!dateKey}
                               >
@@ -1013,7 +1031,7 @@ export default function DataConsolePage({ hideSidebar }) {
             </div>
 
             <div className="flex items-center gap-1.5">
-              <button 
+              <button
                 onClick={() => setExercisePage(p => Math.max(1, p - 1))}
                 disabled={activeTab !== 'exerciseDb' || exercisePage === 1}
                 className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 disabled:opacity-30 transition-all shadow-sm bg-white"
@@ -1031,7 +1049,7 @@ export default function DataConsolePage({ hideSidebar }) {
                   <span>1</span>
                 )}
               </div>
-              <button 
+              <button
                 onClick={() => setExercisePage(p => Math.min(totalExercisePages, p + 1))}
                 disabled={activeTab !== 'exerciseDb' || exercisePage === totalExercisePages}
                 className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 disabled:opacity-30 transition-all shadow-sm bg-white"
@@ -1061,7 +1079,7 @@ export default function DataConsolePage({ hideSidebar }) {
                 Save Changes
               </Button>
             )}
-            
+
             {(workoutsSaved || exerciseSaved || completionSaved) && (
               <Badge variant="outline" className="text-emerald-500 border-emerald-200 bg-emerald-50/50 animate-pulse font-bold px-3 py-1">
                 ✓ SAVED TO CLOUD

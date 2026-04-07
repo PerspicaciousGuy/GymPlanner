@@ -119,6 +119,15 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   }, [date, workoutDateKey, syncToken]);
 
   useEffect(() => {
+    if (initialSession) {
+      setActiveSession(initialSession);
+    }
+  }, [initialSession]);
+
+  useEffect(() => {
+    // Only auto-jump sessions in the main dashboard/scheduler view (where hideBadge is false)
+    if (hideBadge) return;
+
     const amLocked = amDone || amSkipped;
     const pmLocked = pmDone || pmSkipped;
 
@@ -128,7 +137,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     if (activeSession === 'pm' && pmLocked && !amLocked) {
       setActiveSession('am');
     }
-  }, [activeSession, amDone, amSkipped, pmDone, pmSkipped]);
+  }, [activeSession, amDone, amSkipped, pmDone, pmSkipped, hideBadge]);
 
   const amTitleRef = useRef(null);
   const pmTitleRef = useRef(null);

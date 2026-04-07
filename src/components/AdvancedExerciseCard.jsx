@@ -96,7 +96,7 @@ export default function AdvancedExerciseCard({
   }, [exerciseData, onChange]);
 
   const handleAddSet = () => {
-    const newSets = [...sets, { reps: '', weight: '', dropReps: '', dropWeight: '' }];
+    const newSets = [...sets, { reps: '', weight: '', dropReps: '', dropWeight: '', isDrop: hasDropsets }];
     update({ sets: newSets, totalSets: newSets.length });
   };
 
@@ -115,8 +115,8 @@ export default function AdvancedExerciseCard({
     let newSets = [...sets];
     if (num > sets.length) {
       for (let i = sets.length; i < num; i++) {
-        const lastSet = sets[sets.length - 1] || { reps: '', weight: '' };
-        newSets.push({ ...lastSet });
+        const lastSet = sets[sets.length - 1] || { reps: '', weight: '', isDrop: false };
+        newSets.push({ ...lastSet, isDrop: hasDropsets });
       }
     } else if (num < sets.length) {
       newSets = newSets.slice(0, num);
@@ -332,7 +332,11 @@ export default function AdvancedExerciseCard({
                 </div>
                 
                 <button
-                  onClick={() => update({ hasDropsets: !hasDropsets })}
+                  onClick={() => {
+                    const newState = !hasDropsets;
+                    const newSets = sets.map(s => ({ ...s, isDrop: newState }));
+                    update({ hasDropsets: newState, sets: newSets });
+                  }}
                   className={cn(
                     "h-[48px] px-2.5 flex flex-col items-center justify-center gap-0.5 border rounded-xl transition-all",
                     hasDropsets 
@@ -403,9 +407,28 @@ export default function AdvancedExerciseCard({
                           hasDropsets ? "grid-cols-[1.75rem_1fr_1fr_1fr_1fr_1.5rem]" : "grid-cols-[1.75rem_1fr_1fr_1.5rem]"
                         )}
                       >
-                        <div className="h-10 bg-muted flex items-center justify-center text-[10px] font-black text-foreground border border-border rounded-xl">
-                          {idx + 1}
-                        </div>
+                        <button 
+                          onClick={() => {
+                            const nextIsDrop = !set.isDrop;
+                            if (nextIsDrop && !hasDropsets) {
+                              update({ 
+                                hasDropsets: true, 
+                                sets: sets.map((s, i) => i === idx ? { ...s, isDrop: true } : s) 
+                              });
+                            } else {
+                              handleUpdateSet(idx, { isDrop: nextIsDrop });
+                            }
+                          }}
+                          className={cn(
+                            "h-10 flex flex-col items-center justify-center border rounded-xl transition-all",
+                            set.isDrop 
+                              ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm ring-2 ring-indigo-500/10" 
+                              : "bg-muted text-foreground border-border hover:bg-muted/70"
+                          )}
+                        >
+                          <span className="text-[10px] font-black leading-none">{idx + 1}</span>
+                          {set.isDrop && <Zap size={8} className="fill-current mt-0.5" />}
+                        </button>
                         <Stepper 
                           value={set.reps} 
                           onChange={(v) => handleUpdateSet(idx, { reps: v })}
@@ -421,19 +444,29 @@ export default function AdvancedExerciseCard({
                         />
                         {hasDropsets && (
                           <>
-                            <Stepper 
-                              value={set.dropReps || ''} 
-                              onChange={(v) => handleUpdateSet(idx, { dropReps: v })}
-                              className="h-10 border-indigo-100 bg-indigo-50/30"
-                              placeholder="0"
-                            />
-                            <Stepper 
-                              value={set.dropWeight || ''} 
-                              onChange={(v) => handleUpdateSet(idx, { dropWeight: v })}
-                              className="h-10 border-indigo-100 bg-indigo-50/30"
-                              step={2.5}
-                              placeholder="0"
-                            />
+                            <div className="relative group">
+                              <Stepper 
+                                value={set.dropReps || ''} 
+                                onChange={(v) => handleUpdateSet(idx, { dropReps: v })}
+                                className={cn(
+                                  "h-10 transition-opacity",
+                                  set.isDrop ? "border-indigo-100 bg-indigo-50/30" : "opacity-30 pointer-events-none"
+                                )}
+                                placeholder={set.isDrop ? "0" : "—"}
+                              />
+                            </div>
+                            <div className="relative group">
+                              <Stepper 
+                                value={set.dropWeight || ''} 
+                                onChange={(v) => handleUpdateSet(idx, { dropWeight: v })}
+                                className={cn(
+                                  "h-10 transition-opacity",
+                                  set.isDrop ? "border-indigo-100 bg-indigo-50/30" : "opacity-30 pointer-events-none"
+                                )}
+                                step={2.5}
+                                placeholder={set.isDrop ? "0" : "—"}
+                              />
+                            </div>
                           </>
                         )}
                         <button 
