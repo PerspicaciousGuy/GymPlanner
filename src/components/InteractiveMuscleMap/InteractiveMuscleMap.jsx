@@ -25,7 +25,13 @@ export default function InteractiveMuscleMap({
   noBackground = false
 }) {
   const [mobileView, setMobileView] = useState('anterior'); // 'anterior' | 'posterior'
+  const [selectedMuscle, setSelectedMuscle] = useState(null);
   
+  const handleMuscleClick = (muscle) => {
+    setSelectedMuscle(muscle === selectedMuscle ? null : muscle);
+    onMuscleClick?.(muscle);
+  };
+
   const getMuscleColor = (muscle) => {
     const stat = muscleStats[muscle];
     if (!stat) return COLORS.idle;
@@ -52,10 +58,13 @@ export default function InteractiveMuscleMap({
                 <TooltipTrigger asChild>
                   <motion.g 
                     className="cursor-pointer"
-                    onClick={() => onMuscleClick?.(group.muscle)}
+                    onClick={() => handleMuscleClick(group.muscle)}
                     whileHover={{ 
                       scale: 1.01,
                       filter: 'brightness(1.05)'
+                    }}
+                    animate={{
+                      filter: selectedMuscle === group.muscle ? 'brightness(1.2)' : 'brightness(1)'
                     }}
                     transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   >
@@ -159,6 +168,94 @@ export default function InteractiveMuscleMap({
               </div>
             </>
           )}
+        </div>
+
+        {/* Legend / Analysis Section */}
+        <div className="w-full mt-4 space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+              Target Analysis
+            </h4>
+            {selectedMuscle && (
+              <button 
+                onClick={() => setSelectedMuscle(null)}
+                className="text-[9px] font-bold text-indigo-600 uppercase tracking-tighter hover:underline"
+              >
+                Clear Selection
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2 justify-start px-1">
+            {/* Show Selected Muscle prominently if active */}
+            {selectedMuscle && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full mb-2"
+              >
+                <div className={cn(
+                  "p-3 rounded-2xl border flex items-center justify-between",
+                  muscleStats[selectedMuscle] ? "bg-indigo-50 border-indigo-100" : "bg-slate-50 border-slate-100"
+                )}>
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-3 h-3 rounded-full shadow-sm" 
+                      style={{ backgroundColor: getMuscleColor(selectedMuscle) }} 
+                    />
+                    <div>
+                      <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
+                        {selectedMuscle.replace('-', ' ')}
+                      </p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                        {muscleStats[selectedMuscle] ? `Status: ${muscleStats[selectedMuscle].status}` : 'Not Targeted'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-[8px] font-black text-indigo-400 uppercase border border-indigo-100 px-2 py-0.5 rounded-md">
+                    Selected
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* List current active muscles in view as labels */}
+            {(isBoth || view === 'anterior' || view === 'posterior') && (
+              (isBoth ? (mobileView === 'anterior' ? anteriorData : posteriorData) : (view === 'anterior' ? anteriorData : posteriorData))
+                .filter(group => muscleStats[group.muscle])
+                .map(group => (
+                  <button
+                    key={`legend-${group.muscle}`}
+                    onClick={() => handleMuscleClick(group.muscle)}
+                    className={cn(
+                      "group flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all",
+                      selectedMuscle === group.muscle 
+                        ? "bg-slate-900 border-slate-900 text-white scale-105 shadow-xl" 
+                        : "bg-white border-slate-100 text-slate-600 hover:border-indigo-200"
+                    )}
+                  >
+                    <div 
+                      className="w-1.5 h-1.5 rounded-full" 
+                      style={{ backgroundColor: getMuscleColor(group.muscle) }} 
+                    />
+                    <span className="text-[9px] font-black uppercase tracking-tight group-hover:text-indigo-600 transition-colors">
+                      {group.muscle.replace('-', ' ')}
+                    </span>
+                  </button>
+                ))
+            )}
+
+            {/* No muscles targeted message */}
+            {!(isBoth ? (mobileView === 'anterior' ? anteriorData : posteriorData) : (view === 'anterior' ? anteriorData : posteriorData))
+                .some(group => muscleStats[group.muscle]) && (
+              <div className="w-full py-4 text-center border-2 border-dashed border-slate-100 rounded-2xl">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  Tap muscles below to identify them
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </TooltipProvider>
