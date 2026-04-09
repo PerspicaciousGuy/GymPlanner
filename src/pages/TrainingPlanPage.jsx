@@ -737,7 +737,7 @@ function FixedDayRow({ day, plan, updatePlan }) {
 }
 
 // ─── Main Page ───────────────────────────────────────────────
-export default function TrainingPlanPage({ onBack }) {
+export default function TrainingPlanPage({ onBack, syncKey }) {
   const [savedPlans, setSavedPlans] = useState(() => loadSavedPlans());
   const [activePlanId, setActiveId] = useState(() => getActivePlanId());
   const [selectedPlanId, setSelectedPlanId] = useState(() => getActivePlanId());
@@ -769,6 +769,23 @@ export default function TrainingPlanPage({ onBack }) {
       nameRef.current.select();
     }
   }, [editingName]);
+
+  // Refresh plans when sync key changes or sync event completes
+  useEffect(() => {
+    refreshPlans();
+    setActiveId(getActivePlanId());
+    setTemplates(loadTemplates());
+  }, [syncKey]);
+
+  useEffect(() => {
+    const handleSync = () => {
+      refreshPlans();
+      setActiveId(getActivePlanId());
+      setTemplates(loadTemplates());
+    };
+    window.addEventListener('gymplanner_sync_completed', handleSync);
+    return () => window.removeEventListener('gymplanner_sync_completed', handleSync);
+  }, []);
 
   const refreshPlans = () => {
     const fresh = loadSavedPlans();

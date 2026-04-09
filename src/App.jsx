@@ -152,9 +152,9 @@ export default function App() {
           <div className="p-3 sm:p-4 lg:p-6 mx-auto w-full max-w-[1600px]">
             {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} targetDate={selectedHistoryDate} />}
             {activePage === 'health' && <HealthPage settings={settings} onFullScreenToggle={setFullScreenMode} />}
-            {activePage === 'routines' && <RoutinesPage onEdit={(id) => { setEditRoutineId(id); setActivePage('edit-routine'); }} onOpenTrainingPlan={() => setActivePage('training-plan')} />}
+            {activePage === 'routines' && <RoutinesPage syncKey={syncKey} onEdit={(id) => { setEditRoutineId(id); setActivePage('edit-routine'); }} onOpenTrainingPlan={() => setActivePage('training-plan')} />}
             {activePage === 'edit-routine' && <EditRoutinePage routineId={editRoutineId} onBack={() => setActivePage('routines')} />}
-            {activePage === 'training-plan' && <TrainingPlanPage onBack={() => setActivePage('routines')} />}
+            {activePage === 'training-plan' && <TrainingPlanPage syncKey={syncKey} onBack={() => setActivePage('routines')} />}
             {activePage === 'analytics' && <AnalyticsPage onDateSelect={handleDateSelect} />}
             {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('analytics')} syncKey={syncKey} />}
             {activePage === 'profile' && <ProfilePage authState={authState} onDataRefreshed={() => setSyncNonce(n => n + 1)} onSettingsChange={setSettings} />}

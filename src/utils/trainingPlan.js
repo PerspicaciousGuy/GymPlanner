@@ -1,4 +1,9 @@
 import { formatDateKey } from './dateUtils.js';
+import { 
+  saveCloudSavedPlans, 
+  saveCloudActivePlanId, 
+  isCloudSyncReady 
+} from './cloudSync.js';
 
 // ─── Storage Keys ─────────────────────────────────────────────
 const SAVED_PLANS_KEY   = 'gymplanner_saved_plans';
@@ -67,6 +72,11 @@ export function loadSavedPlans() {
  */
 export function saveSavedPlans(plans) {
   localStorage.setItem(SAVED_PLANS_KEY, JSON.stringify(plans));
+  if (isCloudSyncReady()) {
+    saveCloudSavedPlans(plans).catch((err) =>
+      console.warn('[trainingPlan] Cloud plans sync failed:', err)
+    );
+  }
 }
 
 /**
@@ -78,6 +88,11 @@ export function getActivePlanId() {
 
 export function setActivePlanId(id) {
   localStorage.setItem(ACTIVE_PLAN_KEY, id);
+  if (isCloudSyncReady()) {
+    saveCloudActivePlanId(id).catch((err) =>
+      console.warn('[trainingPlan] Cloud active plan ID sync failed:', err)
+    );
+  }
 }
 
 /**

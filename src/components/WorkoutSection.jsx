@@ -304,7 +304,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     }
 
     if (Object.keys(payload).length > 0) {
-      saveDailyMetadata(date || workoutDateKey, activeSession, payload);
+      saveDailyMetadataWithSync(date || workoutDateKey, activeSession, payload);
       onWorkoutChanged?.();
       setTitleSaveFlash(true);
       setTimeout(() => setTitleSaveFlash(false), 1800);
@@ -337,7 +337,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     setPmTitleState(template.name); // Just in case, but usually we load into active
     
     // Save as daily override immediately
-    saveDailyMetadata(date || workoutDateKey, activeSession, { title: template.name });
+    saveDailyMetadataWithSync(date || workoutDateKey, activeSession, { title: template.name });
     
     setIsDirty(true);
     setShowTemplateDialog(false);

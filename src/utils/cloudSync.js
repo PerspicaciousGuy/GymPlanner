@@ -21,12 +21,28 @@ async function readPlannerDoc(name) {
 export async function fetchCloudPlannerData() {
   if (!isCloudSyncReady()) return null;
 
-  const [schedule, workouts, completion, exerciseDb, sessionTitles] = await Promise.all([
+  const [
+    schedule, 
+    workouts, 
+    completion, 
+    exerciseDb, 
+    sessionTitles,
+    savedPlans,
+    activePlanId,
+    templates,
+    customExercises,
+    dailyMetadata
+  ] = await Promise.all([
     readPlannerDoc('schedule'),
     readPlannerDoc('workouts'),
     readPlannerDoc('completion'),
     readPlannerDoc('exerciseDb'),
     readPlannerDoc('sessionTitles'),
+    readPlannerDoc('savedPlans'),
+    readPlannerDoc('activePlanId'),
+    readPlannerDoc('templates'),
+    readPlannerDoc('customExercises'),
+    readPlannerDoc('dailyMetadata'),
   ]);
 
   return {
@@ -35,7 +51,47 @@ export async function fetchCloudPlannerData() {
     completion: completion || null,
     exerciseDb: exerciseDb || null,
     sessionTitles: sessionTitles || null,
+    savedPlans: savedPlans || null,
+    activePlanId: activePlanId || null,
+    templates: templates || null,
+    customExercises: customExercises || null,
+    dailyMetadata: dailyMetadata || null,
   };
+}
+
+export async function saveCloudSavedPlans(plans) {
+  const ref = getPlannerDoc('savedPlans');
+  if (!ref) return false;
+  await setDoc(ref, { plans: plans || [] }, { merge: false });
+  return true;
+}
+
+export async function saveCloudActivePlanId(id) {
+  const ref = getPlannerDoc('activePlanId');
+  if (!ref) return false;
+  await setDoc(ref, { id: id || '' }, { merge: false });
+  return true;
+}
+
+export async function saveCloudTemplates(templates) {
+  const ref = getPlannerDoc('templates');
+  if (!ref) return false;
+  await setDoc(ref, { templates: templates || [] }, { merge: false });
+  return true;
+}
+
+export async function saveCloudCustomExercises(exercises) {
+  const ref = getPlannerDoc('customExercises');
+  if (!ref) return false;
+  await setDoc(ref, exercises || {}, { merge: false });
+  return true;
+}
+
+export async function saveCloudDailyMetadata(metadata) {
+  const ref = getPlannerDoc('dailyMetadata');
+  if (!ref) return false;
+  await setDoc(ref, metadata || {}, { merge: false });
+  return true;
 }
 
 export async function saveCloudSchedule(schedule) {

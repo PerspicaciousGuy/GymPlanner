@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { loadTemplates, deleteTemplate, saveTemplate, defaultSession } from '../utils/storage';
 import { cn } from "@/lib/utils";
 
-export default function RoutinesPage({ onEdit, onOpenTrainingPlan }) {
+export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
   const [templateRows, setTemplateRows] = useState(() => loadTemplates());
   const [templatesSaved, setTemplatesSaved] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,6 +26,18 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan }) {
     setTemplatesSaved(true);
     setTimeout(() => setTemplatesSaved(false), 1800);
   };
+
+  useEffect(() => {
+    setTemplateRows(loadTemplates());
+  }, [syncKey]);
+
+  useEffect(() => {
+    const handleSync = () => {
+      setTemplateRows(loadTemplates());
+    };
+    window.addEventListener('gymplanner_sync_completed', handleSync);
+    return () => window.removeEventListener('gymplanner_sync_completed', handleSync);
+  }, []);
 
   const removeTemplate = (id) => {
     deleteTemplate(id);

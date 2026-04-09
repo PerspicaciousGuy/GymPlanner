@@ -9,6 +9,11 @@ import {
   saveCloudSchedule,
   saveCloudSessionTitles,
   saveCloudWorkoutsMap,
+  saveCloudSavedPlans,
+  saveCloudActivePlanId,
+  saveCloudTemplates,
+  saveCloudCustomExercises,
+  saveCloudDailyMetadata,
 } from './cloudSync.js';
 import {
   formatDateKey,
@@ -125,6 +130,15 @@ export function saveDailyMetadata(date, session, data) {
   localStorage.setItem(DAILY_METADATA_KEY, JSON.stringify(all));
 }
 
+export function saveDailyMetadataWithSync(date, session, data) {
+  saveDailyMetadata(date, session, data);
+  if (isCloudSyncReady()) {
+    saveCloudDailyMetadata(loadDailyMetadata()).catch(err => 
+      console.warn('[storage] Cloud metadata sync failed:', err)
+    );
+  }
+}
+
 export function getDailyMetadata(date, session) {
   const dateKey = formatDateKey(date);
   const all = loadDailyMetadata();
@@ -182,7 +196,7 @@ export function shiftWorkout(fromDate, toDate, fromSession, toSession = null) {
 
   // 2. Save to destination
   // Save Title
-  saveDailyMetadata(toDate, targetSession, { 
+  saveDailyMetadataWithSync(toDate, targetSession, { 
     title: sourceTitle,
     isShifted: true, 
     originalDate: formatDateKey(fromDate)
@@ -194,7 +208,7 @@ export function shiftWorkout(fromDate, toDate, fromSession, toSession = null) {
   saveDayWorkoutWithSync(toDate, targetWorkouts);
 
   // 3. Update source (Mark as shifted/rest)
-  saveDailyMetadata(fromDate, fromSession, { 
+  saveDailyMetadataWithSync(fromDate, fromSession, { 
     title: `Rest (Shifted to ${formatDateKey(toDate)})`,
     isShiftedFrom: true,
     shiftedToDate: formatDateKey(toDate)
@@ -225,17 +239,26 @@ export async function migrateLocalDataToCloud() {
     const completion = loadCompletion();
     const exerciseDb = loadExerciseDb() || exerciseDatabase;
     const sessionTitles = loadSessionTitles();
+    const savedPlans = safeLoad('gymplanner_saved_plans', []);
+    const activePlanId = localStorage.getItem('gymplanner_active_plan_id');
+    const templates = loadTemplates();
+    const customExercises = loadCustomExercises();
+    const dailyMetadata = loadDailyMetadata();
 
-    await saveCloudSchedule(schedule);
-    await saveCloudCompletionMap(completion);
-    await saveCloudExerciseDb(exerciseDb);
-    await saveCloudSessionTitles(sessionTitles);
-
-    await Promise.all(
-      Object.entries(workouts).map(([day, dayData]) =>
+    await Promise.all([
+      saveCloudSchedule(schedule),
+      saveCloudCompletionMap(completion),
+      saveCloudExerciseDb(exerciseDb),
+      saveCloudSessionTitles(sessionTitles),
+      saveCloudSavedPlans(savedPlans),
+      saveCloudActivePlanId(activePlanId),
+      saveCloudTemplates(templates),
+      saveCloudCustomExercises(customExercises),
+      saveCloudDailyMetadata(dailyMetadata),
+      ...Object.entries(workouts).map(([day, dayData]) =>
         saveCloudDayWorkout(day, ensureAmPm(dayData))
       )
-    );
+    ]);
 
     return { ok: true };
   } catch (err) {
@@ -278,6 +301,11 @@ export async function clearAllDataLocalAndCloud() {
       saveCloudCompletionMap({}),
       saveCloudExerciseDb({}),
       saveCloudSessionTitles({}),
+      saveCloudSavedPlans([]),
+      saveCloudActivePlanId(''),
+      saveCloudTemplates([]),
+      saveCloudCustomExercises({}),
+      saveCloudDailyMetadata({}),
     ]);
 
     clearPlannerLocalData();
@@ -769,6 +797,11 @@ export function saveCustomExercise(muscle, subMuscle, name) {
   if (!all[muscle][subMuscle].includes(name)) {
     all[muscle][subMuscle].push(name);
     localStorage.setItem(CUSTOM_EXERCISES_KEY, JSON.stringify(all));
+    if (isCloudSyncReady()) {
+      saveCloudCustomExercises(all).catch(err => 
+        console.warn('[storage] Cloud custom exercise sync failed:', err)
+      );
+    }
   }
 }
 
@@ -788,6 +821,11 @@ export function saveTemplate(name, groups) {
   };
   templates.push(newTemplate);
   localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+  if (isCloudSyncReady()) {
+    saveCloudTemplates(templates).catch(err => 
+      console.warn('[storage] Cloud templates sync failed:', err)
+    );
+  }
   return newTemplate;
 }
 
@@ -803,12 +841,22 @@ export function updateTemplate(id, name, groups) {
     updatedAt: new Date().toISOString()
   };
   localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+  if (isCloudSyncReady()) {
+    saveCloudTemplates(templates).catch(err => 
+      console.warn('[storage] Cloud templates sync failed:', err)
+    );
+  }
   return templates[idx];
 }
 
 export function deleteTemplate(id) {
   const templates = loadTemplates().filter(t => t.id !== id);
   localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+  if (isCloudSyncReady()) {
+    saveCloudTemplates(templates).catch(err => 
+      console.warn('[storage] Cloud templates delete sync failed:', err)
+    );
+  }
 }
 
 // ─── Exercise Database ────────────────────────────────────────
@@ -911,7 +959,7 @@ export async function syncPlannerData() {
     const result = await fetchCloudPlannerData();
     if (!result) return false;
 
-    const { schedule, workouts, completion, exerciseDb, sessionTitles } = result;
+    const { schedule, workouts, completion, exerciseDb, sessionTitles, savedPlans, activePlanId, templates, customExercises, dailyMetadata } = result;
 
     if (schedule && typeof schedule === 'object') {
       const hasData = Object.values(schedule).some((v) => v && v !== '');
@@ -948,6 +996,27 @@ export async function syncPlannerData() {
       saveSessionTitles(sessionTitles);
     }
 
+    if (savedPlans && Array.isArray(savedPlans.plans)) {
+      localStorage.setItem('gymplanner_saved_plans', JSON.stringify(savedPlans.plans));
+    }
+
+    if (activePlanId && activePlanId.id) {
+      localStorage.setItem('gymplanner_active_plan_id', activePlanId.id);
+    }
+
+    if (templates && Array.isArray(templates.templates)) {
+      localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates.templates));
+    }
+
+    if (customExercises && typeof customExercises === 'object' && Object.keys(customExercises).length > 0) {
+      localStorage.setItem(CUSTOM_EXERCISES_KEY, JSON.stringify(customExercises));
+    }
+
+    if (dailyMetadata && typeof dailyMetadata === 'object' && Object.keys(dailyMetadata).length > 0) {
+      localStorage.setItem(DAILY_METADATA_KEY, JSON.stringify(dailyMetadata));
+    }
+
+    window.dispatchEvent(new CustomEvent('gymplanner_sync_completed'));
     return true;
   } catch (err) {
     console.warn('[storage] Cloud sync failed:', err);
