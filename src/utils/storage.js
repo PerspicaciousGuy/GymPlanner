@@ -1,4 +1,5 @@
 import { exerciseDatabase } from '../data/exerciseDatabase.js';
+import { getCustomFoods, getSavedMeals, getBookmarkedFoods } from './foodDatabase.js';
 import {
   fetchCloudPlannerData,
   isCloudSyncReady,
@@ -14,6 +15,12 @@ import {
   saveCloudTemplates,
   saveCloudCustomExercises,
   saveCloudDailyMetadata,
+  saveCloudSettings,
+  saveCloudFoodLog,
+  saveCloudCustomFoods,
+  saveCloudSavedMeals,
+  saveCloudBookmarkedFoods,
+  saveCloudNotifSettings,
 } from './cloudSync.js';
 import {
   formatDateKey,
@@ -35,6 +42,13 @@ const TEMPLATES_KEY        = 'gymplanner_templates';
 const DAILY_METADATA_KEY   = 'gymplanner_daily_metadata';
 const MIGRATION_FLAG_KEY   = 'gymplanner_migrated_to_dates';
 const WORKOUT_MIGRATION_FLAG_KEY = 'gymplanner_workouts_migrated_to_dates';
+const CUSTOM_FOODS_KEY     = 'gymplanner_custom_foods';
+const SAVED_MEALS_KEY      = 'gymplanner_saved_meals';
+const FOOD_LOG_KEY         = 'gymplanner_food_log';
+const BOOKMARKED_FOODS_KEY = 'gymplanner_bookmarked_foods';
+const SETTINGS_KEY         = 'gymplanner_settings';
+const NOTIFICATION_SETTINGS_KEY = 'workout_reminders_enabled';
+
 const PLANNER_LOCAL_KEYS = [
   SCHEDULE_KEY,
   WORKOUTS_KEY,
@@ -46,6 +60,12 @@ const PLANNER_LOCAL_KEYS = [
   DAILY_METADATA_KEY,
   MIGRATION_FLAG_KEY,
   WORKOUT_MIGRATION_FLAG_KEY,
+  CUSTOM_FOODS_KEY,
+  SAVED_MEALS_KEY,
+  FOOD_LOG_KEY,
+  BOOKMARKED_FOODS_KEY,
+  SETTINGS_KEY,
+  NOTIFICATION_SETTINGS_KEY,
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────
@@ -244,6 +264,12 @@ export async function migrateLocalDataToCloud() {
     const templates = loadTemplates();
     const customExercises = loadCustomExercises();
     const dailyMetadata = loadDailyMetadata();
+    const settings = loadSettings();
+    const foodLog = safeLoad(FOOD_LOG_KEY, {});
+    const customFoods = getCustomFoods();
+    const savedMeals = getSavedMeals();
+    const bookmarkedFoods = getBookmarkedFoods();
+    const notifEnabled = localStorage.getItem(NOTIFICATION_SETTINGS_KEY) === 'true';
 
     await Promise.all([
       saveCloudSchedule(schedule),
@@ -255,6 +281,12 @@ export async function migrateLocalDataToCloud() {
       saveCloudTemplates(templates),
       saveCloudCustomExercises(customExercises),
       saveCloudDailyMetadata(dailyMetadata),
+      saveCloudSettings(settings),
+      saveCloudFoodLog(foodLog),
+      saveCloudCustomFoods(customFoods),
+      saveCloudSavedMeals(savedMeals),
+      saveCloudBookmarkedFoods(bookmarkedFoods),
+      saveCloudNotifSettings(notifEnabled),
       ...Object.entries(workouts).map(([day, dayData]) =>
         saveCloudDayWorkout(day, ensureAmPm(dayData))
       )
@@ -959,7 +991,11 @@ export async function syncPlannerData() {
     const result = await fetchCloudPlannerData();
     if (!result) return false;
 
-    const { schedule, workouts, completion, exerciseDb, sessionTitles, savedPlans, activePlanId, templates, customExercises, dailyMetadata } = result;
+    const { 
+      schedule, workouts, completion, exerciseDb, sessionTitles, 
+      savedPlans, activePlanId, templates, customExercises, dailyMetadata,
+      settings, foodLog, customFoods, savedMeals, bookmarkedFoods, notifSettings
+    } = result;
 
     if (schedule && typeof schedule === 'object') {
       const hasData = Object.values(schedule).some((v) => v && v !== '');
@@ -1014,6 +1050,30 @@ export async function syncPlannerData() {
 
     if (dailyMetadata && typeof dailyMetadata === 'object' && Object.keys(dailyMetadata).length > 0) {
       localStorage.setItem(DAILY_METADATA_KEY, JSON.stringify(dailyMetadata));
+    }
+
+    if (settings && typeof settings === 'object') {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    }
+
+    if (foodLog && typeof foodLog === 'object') {
+      localStorage.setItem(FOOD_LOG_KEY, JSON.stringify(foodLog));
+    }
+
+    if (customFoods && Array.isArray(customFoods.foods)) {
+      localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(customFoods.foods));
+    }
+
+    if (savedMeals && Array.isArray(savedMeals.meals)) {
+      localStorage.setItem(SAVED_MEALS_KEY, JSON.stringify(savedMeals.meals));
+    }
+
+    if (bookmarkedFoods && Array.isArray(bookmarkedFoods.bookmarks)) {
+      localStorage.setItem(BOOKMARKED_FOODS_KEY, JSON.stringify(bookmarkedFoods.bookmarks));
+    }
+
+    if (notifSettings && notifSettings.enabled !== undefined) {
+      localStorage.setItem(NOTIFICATION_SETTINGS_KEY, notifSettings.enabled ? 'true' : 'false');
     }
 
     window.dispatchEvent(new CustomEvent('gymplanner_sync_completed'));

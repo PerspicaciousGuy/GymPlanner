@@ -31,7 +31,13 @@ export async function fetchCloudPlannerData() {
     activePlanId,
     templates,
     customExercises,
-    dailyMetadata
+    dailyMetadata,
+    settings,
+    foodLog,
+    customFoods,
+    savedMeals,
+    bookmarkedFoods,
+    notifSettings
   ] = await Promise.all([
     readPlannerDoc('schedule'),
     readPlannerDoc('workouts'),
@@ -43,6 +49,12 @@ export async function fetchCloudPlannerData() {
     readPlannerDoc('templates'),
     readPlannerDoc('customExercises'),
     readPlannerDoc('dailyMetadata'),
+    readPlannerDoc('settings'),
+    readPlannerDoc('foodLog'),
+    readPlannerDoc('customFoods'),
+    readPlannerDoc('savedMeals'),
+    readPlannerDoc('bookmarkedFoods'),
+    readPlannerDoc('notifSettings'),
   ]);
 
   return {
@@ -56,8 +68,57 @@ export async function fetchCloudPlannerData() {
     templates: templates || null,
     customExercises: customExercises || null,
     dailyMetadata: dailyMetadata || null,
+    settings: settings || null,
+    foodLog: foodLog || null,
+    customFoods: customFoods || null,
+    savedMeals: savedMeals || null,
+    bookmarkedFoods: bookmarkedFoods || null,
+    notifSettings: notifSettings || null,
   };
 }
+
+export async function saveCloudSettings(settings) {
+  const ref = getPlannerDoc('settings');
+  if (!ref) return false;
+  await setDoc(ref, settings || {}, { merge: false });
+  return true;
+}
+
+export async function saveCloudFoodLog(foodLog) {
+  const ref = getPlannerDoc('foodLog');
+  if (!ref) return false;
+  await setDoc(ref, foodLog || {}, { merge: false });
+  return true;
+}
+
+export async function saveCloudCustomFoods(customFoods) {
+  const ref = getPlannerDoc('customFoods');
+  if (!ref) return false;
+  await setDoc(ref, { foods: customFoods || [] }, { merge: false });
+  return true;
+}
+
+export async function saveCloudSavedMeals(savedMeals) {
+  const ref = getPlannerDoc('savedMeals');
+  if (!ref) return false;
+  await setDoc(ref, { meals: savedMeals || [] }, { merge: false });
+  return true;
+}
+
+export async function saveCloudBookmarkedFoods(bookmarks) {
+  const ref = getPlannerDoc('bookmarkedFoods');
+  if (!ref) return false;
+  await setDoc(ref, { bookmarks: bookmarks || [] }, { merge: false });
+  return true;
+}
+
+export async function saveCloudNotifSettings(enabled) {
+  const ref = getPlannerDoc('notifSettings');
+  if (!ref) return false;
+  await setDoc(ref, { enabled: Boolean(enabled) }, { merge: false });
+  return true;
+}
+
 
 export async function saveCloudSavedPlans(plans) {
   const ref = getPlannerDoc('savedPlans');

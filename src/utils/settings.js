@@ -1,3 +1,5 @@
+import { isCloudSyncReady, saveCloudSettings } from './cloudSync';
+
 const SETTINGS_KEY = 'gymplanner_settings';
 
 const defaultSettings = {
@@ -26,6 +28,11 @@ export const loadSettings = () => {
 
 export const saveSettings = (settings) => {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  if (isCloudSyncReady()) {
+    saveCloudSettings(settings).catch(err => 
+      console.warn('[settings] Cloud sync failed:', err)
+    );
+  }
 };
 
 export const updateSetting = (key, value) => {

@@ -26,7 +26,8 @@ import {
   getNotificationPermission,
   showNotification,
   scheduleTomorrowSummary,
-  NOTIFICATION_SETTINGS_KEY
+  NOTIFICATION_SETTINGS_KEY,
+  setNotificationEnabledWithSync
 } from '../utils/notificationService';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -71,7 +72,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
       if (!granted) return;
     }
     
-    localStorage.setItem(NOTIFICATION_SETTINGS_KEY, checked ? 'true' : 'false');
+    setNotificationEnabledWithSync(checked);
     setNotificationsEnabled(checked);
     
     if (checked) {

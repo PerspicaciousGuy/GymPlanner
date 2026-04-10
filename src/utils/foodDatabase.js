@@ -5,6 +5,14 @@
  * plus utilities for searching, custom foods, meal management, and daily logging.
  */
 
+import {
+  isCloudSyncReady,
+  saveCloudFoodLog,
+  saveCloudCustomFoods,
+  saveCloudSavedMeals,
+  saveCloudBookmarkedFoods
+} from './cloudSync';
+
 const CUSTOM_FOODS_KEY = 'gymplanner_custom_foods';
 const SAVED_MEALS_KEY = 'gymplanner_saved_meals';
 const FOOD_LOG_KEY = 'gymplanner_food_log';
@@ -1022,12 +1030,22 @@ export const saveCustomFood = (food) => {
   };
   foods.push(newFood);
   localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(foods));
+  if (isCloudSyncReady()) {
+    saveCloudCustomFoods(foods).catch(err =>
+      console.warn('[foodDb] Cloud custom food sync failed:', err)
+    );
+  }
   return newFood;
 };
 
 export const deleteCustomFood = (id) => {
   const foods = getCustomFoods().filter(f => f.id !== id);
   localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(foods));
+  if (isCloudSyncReady()) {
+    saveCloudCustomFoods(foods).catch(err =>
+      console.warn('[foodDb] Cloud custom food delete failed:', err)
+    );
+  }
 };
 
 
@@ -1050,12 +1068,22 @@ export const saveMeal = (meal) => {
   };
   meals.push(newMeal);
   localStorage.setItem(SAVED_MEALS_KEY, JSON.stringify(meals));
+  if (isCloudSyncReady()) {
+    saveCloudSavedMeals(meals).catch(err =>
+      console.warn('[foodDb] Cloud meal sync failed:', err)
+    );
+  }
   return newMeal;
 };
 
 export const deleteMeal = (id) => {
   const meals = getSavedMeals().filter(m => m.id !== id);
   localStorage.setItem(SAVED_MEALS_KEY, JSON.stringify(meals));
+  if (isCloudSyncReady()) {
+    saveCloudSavedMeals(meals).catch(err =>
+      console.warn('[foodDb] Cloud meal delete failed:', err)
+    );
+  }
 };
 
 /**
@@ -1108,6 +1136,11 @@ export const addFoodToLog = (dateKey, entry) => {
     loggedAt: new Date().toISOString(),
   });
   localStorage.setItem(FOOD_LOG_KEY, JSON.stringify(allLogs));
+  if (isCloudSyncReady()) {
+    saveCloudFoodLog(allLogs).catch(err =>
+      console.warn('[foodDb] Cloud food log sync failed:', err)
+    );
+  }
   return allLogs[dateKey];
 };
 
@@ -1119,6 +1152,11 @@ export const removeFoodFromLog = (dateKey, entryId) => {
   if (allLogs[dateKey]) {
     allLogs[dateKey] = allLogs[dateKey].filter(e => e.id !== entryId);
     localStorage.setItem(FOOD_LOG_KEY, JSON.stringify(allLogs));
+    if (isCloudSyncReady()) {
+      saveCloudFoodLog(allLogs).catch(err =>
+        console.warn('[foodDb] Cloud food log delete failed:', err)
+      );
+    }
   }
   return allLogs[dateKey] || [];
 };
@@ -1161,6 +1199,11 @@ export const toggleBookmark = (foodId) => {
     bookmarks.push(foodId);
   }
   localStorage.setItem(BOOKMARKED_FOODS_KEY, JSON.stringify(bookmarks));
+  if (isCloudSyncReady()) {
+    saveCloudBookmarkedFoods(bookmarks).catch(err =>
+      console.warn('[foodDb] Cloud bookmark sync failed:', err)
+    );
+  }
   return bookmarks;
 };
 
