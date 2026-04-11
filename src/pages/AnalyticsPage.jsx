@@ -38,7 +38,7 @@ import {
   Award,
   Zap
 } from 'lucide-react';
-import { loadWorkouts, loadCompletion, loadSchedule } from '../utils/storage';
+import { loadWorkouts, loadCompletion, getEffectiveSessionTitle } from '../utils/storage';
 import { formatDateDisplay, formatDateKey } from '../utils/dateUtils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -127,7 +127,6 @@ export default function AnalyticsPage({ onDateSelect }) {
 
     // Process Volume over time
     const dateKeys = Object.keys(workouts).sort();
-    const schedule = loadSchedule() || {};
     const isOff = (txt) => {
       if (!txt) return true;
       const t = String(txt).toLowerCase().trim();
@@ -156,10 +155,9 @@ export default function AnalyticsPage({ onDateSelect }) {
       const dayData = workouts[date];
 
       ['am', 'pm'].forEach(session => {
-        // Track stats from schedule
+        // Track stats from plan
         const dayDate = new Date(date);
-        const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayDate.getDay()];
-        const scheduledTitle = schedule[dayName]?.[session] || '';
+        const scheduledTitle = getEffectiveSessionTitle(dayDate, session);
         const isSessionPlanned = !isOff(scheduledTitle);
 
         if (isSessionPlanned) {

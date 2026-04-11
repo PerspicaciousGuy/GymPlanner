@@ -19,7 +19,7 @@ import {
   isSameDay,
   getToday
 } from '../utils/dateUtils';
-import { loadWorkoutByDate, isDayComplete, loadSessionTitles } from '../utils/storage';
+import { loadWorkoutByDate, isDayComplete, getEffectiveSessionTitle } from '../utils/storage';
 import { getDayOfWeek } from '../utils/dateUtils';
 import { loadTrainingPlan } from '../utils/trainingPlan';
 
@@ -133,16 +133,14 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
   const dateKey = formatDateKey(date);
   const dayName = getDayOfWeek(date);
   
-  // Load routine and workout data
-  const titles = loadSessionTitles();
+  const amTitle = getEffectiveSessionTitle(date, 'am');
+  const pmTitle = getEffectiveSessionTitle(date, 'pm');
+  const isOff = (txt) => !txt || ['off', 'rest', ''].includes(txt.trim().toLowerCase()) || txt.trim().toLowerCase().startsWith('off ') || txt.trim().toLowerCase().startsWith('rest ');
+  
   const dayWorkout = loadWorkoutByDate(dateKey);
   const doneAm = isDayComplete(dateKey, 'am');
   const donePm = isDayComplete(dateKey, 'pm');
-  
-  const amTitle = (titles.am?.[dayName] || '').trim().toLowerCase();
-  const pmTitle = (titles.pm?.[dayName] || '').trim().toLowerCase();
-  const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ');
-  
+
   const plannedAm = !isOff(amTitle);
   const plannedPm = !isOff(pmTitle);
   const isPlanned = plannedAm || plannedPm;
@@ -156,8 +154,8 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
   let status = 'none'; // 'completed', 'partial', 'skipped', 'planned', 'none'
   
   if (isPast || isToday) {
-    const amOk = plannedAm ? (doneAm || ((dayWorkout.am?.groups?.length > 0 || dayWorkout.am?.standaloneExercises?.length > 0) && doneAm)) : true;
-    const pmOk = plannedPm ? (donePm || ((dayWorkout.pm?.groups?.length > 0 || dayWorkout.pm?.standaloneExercises?.length > 0) && donePm)) : true;
+    const amOk = plannedAm ? doneAm : true;
+    const pmOk = plannedPm ? donePm : true;
     
     if (isPlanned || hasLoggedWorkout) {
       if (amOk && pmOk) {
