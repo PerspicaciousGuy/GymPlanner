@@ -60,6 +60,14 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   };
 
   const [dayData, setDayData] = useState(() => ensureAdvanced(initialData));
+  const trainingPlan = useMemo(() => {
+    try {
+      return loadTrainingPlan();
+    } catch {
+      return null;
+    }
+  }, [syncToken]);
+
   const hasPlannedPm = useMemo(() => {
      const pmTitle = getEffectiveSessionTitle(date || workoutDateKey, 'pm').trim().toLowerCase();
      const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ') || txt.startsWith('rest ');
@@ -86,12 +94,8 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const [showShiftPicker, setShowShiftPicker] = useState(false);
 
   const loggingStyle = useMemo(() => {
-    try {
-      return loadTrainingPlan()?.loggingStyle || 'advanced';
-    } catch {
-      return 'advanced';
-    }
-  }, [syncToken]);
+    return trainingPlan?.loggingStyle || 'advanced';
+  }, [trainingPlan]);
 
   const sessionSubtitle = useMemo(() => {
     return getPlanSessionSubtitle(date || workoutDateKey, activeSession);
@@ -561,6 +565,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
             sourceDate={date || workoutDateKey}
             sourceSession={activeSession}
             onShift={handleShift}
+            plan={trainingPlan}
           />
 
           <div className="space-y-4">

@@ -144,7 +144,6 @@ function hydratePlan(raw) {
   return {
     ...defaultTrainingPlan(),
     ...raw,
-    sessionLayout: raw.sessionLayout || 'split',
     loggingStyle: raw.loggingStyle || 'advanced',
     fixedWeek: {
       am: raw.fixedWeek?.am ?? {},

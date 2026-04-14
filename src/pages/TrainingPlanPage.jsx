@@ -590,7 +590,7 @@ function FixedDayRow({ day, plan, updatePlan }) {
                 + Subtitle
               </button>
             )}
-            {!hasPm && (
+             {!hasPm && (
               <Button
                 variant="ghost"
                 onClick={() => {
@@ -1083,8 +1083,6 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
             </div>
           </div>
 
-
-
           {/* Dynamic Mode: Cycle Builder */}
           <AnimatePresence mode="wait">
             {plan.mode === 'dynamic' && (
@@ -1148,7 +1146,6 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
                           onUpdate={(updates) => handleUpdateSlot(index, updates)}
                           onDelete={() => handleDeleteSlot(index)}
                           templates={templates}
-                          sessionLayout={plan.sessionLayout || 'split'}
                         />
                       ))}
                     </Reorder.Group>
