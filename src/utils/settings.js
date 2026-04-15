@@ -1,6 +1,11 @@
 import { isCloudSyncReady, saveCloudSettings } from './cloudSync';
+import { SETTINGS_KEY } from '../constants/storageKeys.js';
+import { readJson, writeJson } from './localStorage.js';
 
-const SETTINGS_KEY = 'gymplanner_settings';
+const runCloudSync = (task, warningMessage) => {
+  if (!isCloudSyncReady()) return;
+  task().catch((err) => console.warn(warningMessage, err));
+};
 
 const defaultSettings = {
   units: 'kg', // 'kg' | 'lbs'
@@ -17,22 +22,13 @@ const defaultSettings = {
 };
 
 export const loadSettings = () => {
-  const stored = localStorage.getItem(SETTINGS_KEY);
-  if (!stored) return defaultSettings;
-  try {
-    return { ...defaultSettings, ...JSON.parse(stored) };
-  } catch {
-    return defaultSettings;
-  }
+  const stored = readJson(SETTINGS_KEY, defaultSettings);
+  return { ...defaultSettings, ...stored };
 };
 
 export const saveSettings = (settings) => {
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  if (isCloudSyncReady()) {
-    saveCloudSettings(settings).catch(err => 
-      console.warn('[settings] Cloud sync failed:', err)
-    );
-  }
+  writeJson(SETTINGS_KEY, settings);
+  runCloudSync(() => saveCloudSettings(settings), '[settings] Cloud sync failed:');
 };
 
 export const updateSetting = (key, value) => {

@@ -1,8 +1,14 @@
 import { getTomorrow, getDayOfWeek, formatDateDisplay, formatDateKey } from './dateUtils';
 import { isCloudSyncReady, saveCloudNotifSettings } from './cloudSync';
+import { NOTIFICATION_SETTINGS_KEY } from '../constants/storageKeys.js';
 
-export const NOTIFICATION_SETTINGS_KEY = 'workout_reminders_enabled';
+export { NOTIFICATION_SETTINGS_KEY };
 export const LAST_NOTIFIED_DATE_KEY = 'last_notified_date'; // Store the date (YYYY-MM-DD) when we last showed a summary
+
+const runCloudSync = (task, warningMessage) => {
+  if (!isCloudSyncReady()) return;
+  task().catch((err) => console.warn(warningMessage, err));
+};
 
 export const isNotificationSupported = () => 'Notification' in window;
 
@@ -76,9 +82,8 @@ export const scheduleTomorrowSummary = () => {
 
 export const setNotificationEnabledWithSync = (enabled) => {
   localStorage.setItem(NOTIFICATION_SETTINGS_KEY, enabled ? 'true' : 'false');
-  if (isCloudSyncReady()) {
-    saveCloudNotifSettings(enabled).catch(err => 
-      console.warn('[notif] Cloud preference sync failed:', err)
-    );
-  }
+  runCloudSync(
+    () => saveCloudNotifSettings(enabled),
+    '[notif] Cloud preference sync failed:'
+  );
 };

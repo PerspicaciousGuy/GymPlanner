@@ -18,6 +18,13 @@ async function readPlannerDoc(name) {
   return snap.exists() ? snap.data() : null;
 }
 
+async function savePlannerDoc(name, payload, merge = false) {
+  const ref = getPlannerDoc(name);
+  if (!ref) return false;
+  await setDoc(ref, payload, { merge });
+  return true;
+}
+
 export async function fetchCloudPlannerData() {
   if (!isCloudSyncReady()) return null;
 
@@ -78,128 +85,74 @@ export async function fetchCloudPlannerData() {
 }
 
 export async function saveCloudSettings(settings) {
-  const ref = getPlannerDoc('settings');
-  if (!ref) return false;
-  await setDoc(ref, settings || {}, { merge: false });
-  return true;
+  return savePlannerDoc('settings', settings || {}, false);
 }
 
 export async function saveCloudFoodLog(foodLog) {
-  const ref = getPlannerDoc('foodLog');
-  if (!ref) return false;
-  await setDoc(ref, foodLog || {}, { merge: false });
-  return true;
+  return savePlannerDoc('foodLog', foodLog || {}, false);
 }
 
 export async function saveCloudCustomFoods(customFoods) {
-  const ref = getPlannerDoc('customFoods');
-  if (!ref) return false;
-  await setDoc(ref, { foods: customFoods || [] }, { merge: false });
-  return true;
+  return savePlannerDoc('customFoods', { foods: customFoods || [] }, false);
 }
 
 export async function saveCloudSavedMeals(savedMeals) {
-  const ref = getPlannerDoc('savedMeals');
-  if (!ref) return false;
-  await setDoc(ref, { meals: savedMeals || [] }, { merge: false });
-  return true;
+  return savePlannerDoc('savedMeals', { meals: savedMeals || [] }, false);
 }
 
 export async function saveCloudBookmarkedFoods(bookmarks) {
-  const ref = getPlannerDoc('bookmarkedFoods');
-  if (!ref) return false;
-  await setDoc(ref, { bookmarks: bookmarks || [] }, { merge: false });
-  return true;
+  return savePlannerDoc('bookmarkedFoods', { bookmarks: bookmarks || [] }, false);
 }
 
 export async function saveCloudNotifSettings(enabled) {
-  const ref = getPlannerDoc('notifSettings');
-  if (!ref) return false;
-  await setDoc(ref, { enabled: Boolean(enabled) }, { merge: false });
-  return true;
+  return savePlannerDoc('notifSettings', { enabled: Boolean(enabled) }, false);
 }
 
 
 export async function saveCloudSavedPlans(plans) {
-  const ref = getPlannerDoc('savedPlans');
-  if (!ref) return false;
-  await setDoc(ref, { plans: plans || [] }, { merge: false });
-  return true;
+  return savePlannerDoc('savedPlans', { plans: plans || [] }, false);
 }
 
 export async function saveCloudActivePlanId(id) {
-  const ref = getPlannerDoc('activePlanId');
-  if (!ref) return false;
-  await setDoc(ref, { id: id || '' }, { merge: false });
-  return true;
+  return savePlannerDoc('activePlanId', { id: id || '' }, false);
 }
 
 export async function saveCloudTemplates(templates) {
-  const ref = getPlannerDoc('templates');
-  if (!ref) return false;
-  await setDoc(ref, { templates: templates || [] }, { merge: false });
-  return true;
+  return savePlannerDoc('templates', { templates: templates || [] }, false);
 }
 
 export async function saveCloudCustomExercises(exercises) {
-  const ref = getPlannerDoc('customExercises');
-  if (!ref) return false;
-  await setDoc(ref, exercises || {}, { merge: false });
-  return true;
+  return savePlannerDoc('customExercises', exercises || {}, false);
 }
 
 export async function saveCloudDailyMetadata(metadata) {
-  const ref = getPlannerDoc('dailyMetadata');
-  if (!ref) return false;
-  await setDoc(ref, metadata || {}, { merge: false });
-  return true;
+  return savePlannerDoc('dailyMetadata', metadata || {}, false);
 }
 
 export async function saveCloudSchedule(schedule) {
-  const ref = getPlannerDoc('schedule');
-  if (!ref) return false;
-  await setDoc(ref, schedule || {}, { merge: true });
-  return true;
+  return savePlannerDoc('schedule', schedule || {}, true);
 }
 
 export async function saveCloudDayWorkout(day, dayData) {
-  const ref = getPlannerDoc('workouts');
-  if (!ref) return false;
-  await setDoc(ref, { [day]: dayData }, { merge: true });
-  return true;
+  return savePlannerDoc('workouts', { [day]: dayData }, true);
 }
 
 export async function saveCloudWorkoutsMap(workoutsMap) {
-  const ref = getPlannerDoc('workouts');
-  if (!ref) return false;
-  await setDoc(ref, workoutsMap || {}, { merge: false });
-  return true;
+  return savePlannerDoc('workouts', workoutsMap || {}, false);
 }
 
 export async function saveCloudCompletionEntry(day, session, value) {
-  const ref = getPlannerDoc('completion');
-  if (!ref) return false;
-  await setDoc(ref, { [`${day}_${session}`]: value }, { merge: true });
-  return true;
+  return savePlannerDoc('completion', { [`${day}_${session}`]: value }, true);
 }
 
 export async function saveCloudCompletionMap(completionMap) {
-  const ref = getPlannerDoc('completion');
-  if (!ref) return false;
-  await setDoc(ref, completionMap || {}, { merge: false });
-  return true;
+  return savePlannerDoc('completion', completionMap || {}, false);
 }
 
 export async function saveCloudExerciseDb(exerciseDb) {
-  const ref = getPlannerDoc('exerciseDb');
-  if (!ref) return false;
-  await setDoc(ref, exerciseDb || {}, { merge: false });
-  return true;
+  return savePlannerDoc('exerciseDb', exerciseDb || {}, false);
 }
 
 export async function saveCloudSessionTitles(sessionTitles) {
-  const ref = getPlannerDoc('sessionTitles');
-  if (!ref) return false;
-  await setDoc(ref, sessionTitles || {}, { merge: false });
-  return true;
+  return savePlannerDoc('sessionTitles', sessionTitles || {}, false);
 }

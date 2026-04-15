@@ -12,11 +12,18 @@ import {
   saveCloudSavedMeals,
   saveCloudBookmarkedFoods
 } from './cloudSync';
+import {
+  BOOKMARKED_FOODS_KEY,
+  CUSTOM_FOODS_KEY,
+  FOOD_LOG_KEY,
+  SAVED_MEALS_KEY,
+} from '../constants/storageKeys.js';
+import { readJson, writeJson } from './localStorage.js';
 
-const CUSTOM_FOODS_KEY = 'gymplanner_custom_foods';
-const SAVED_MEALS_KEY = 'gymplanner_saved_meals';
-const FOOD_LOG_KEY = 'gymplanner_food_log';
-const BOOKMARKED_FOODS_KEY = 'gymplanner_bookmarked_foods';
+const runCloudSync = (task, warningMessage) => {
+  if (!isCloudSyncReady()) return;
+  task().catch((err) => console.warn(warningMessage, err));
+};
 
 // ─── Serving size types ───
 export const SERVING_UNITS = {
@@ -1016,9 +1023,7 @@ export const calculateNutrition = (food, servings = 1) => {
 // ═══════════════════════════════════════════
 
 export const getCustomFoods = () => {
-  try {
-    return JSON.parse(localStorage.getItem(CUSTOM_FOODS_KEY)) || [];
-  } catch { return []; }
+  return readJson(CUSTOM_FOODS_KEY, []);
 };
 
 export const saveCustomFood = (food) => {
@@ -1029,23 +1034,21 @@ export const saveCustomFood = (food) => {
     isCustom: true,
   };
   foods.push(newFood);
-  localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(foods));
-  if (isCloudSyncReady()) {
-    saveCloudCustomFoods(foods).catch(err =>
-      console.warn('[foodDb] Cloud custom food sync failed:', err)
-    );
-  }
+  writeJson(CUSTOM_FOODS_KEY, foods);
+  runCloudSync(
+    () => saveCloudCustomFoods(foods),
+    '[foodDb] Cloud custom food sync failed:'
+  );
   return newFood;
 };
 
 export const deleteCustomFood = (id) => {
   const foods = getCustomFoods().filter(f => f.id !== id);
-  localStorage.setItem(CUSTOM_FOODS_KEY, JSON.stringify(foods));
-  if (isCloudSyncReady()) {
-    saveCloudCustomFoods(foods).catch(err =>
-      console.warn('[foodDb] Cloud custom food delete failed:', err)
-    );
-  }
+  writeJson(CUSTOM_FOODS_KEY, foods);
+  runCloudSync(
+    () => saveCloudCustomFoods(foods),
+    '[foodDb] Cloud custom food delete failed:'
+  );
 };
 
 
@@ -1054,9 +1057,7 @@ export const deleteCustomFood = (id) => {
 // ═══════════════════════════════════════════
 
 export const getSavedMeals = () => {
-  try {
-    return JSON.parse(localStorage.getItem(SAVED_MEALS_KEY)) || [];
-  } catch { return []; }
+  return readJson(SAVED_MEALS_KEY, []);
 };
 
 export const saveMeal = (meal) => {
@@ -1067,23 +1068,21 @@ export const saveMeal = (meal) => {
     createdAt: new Date().toISOString(),
   };
   meals.push(newMeal);
-  localStorage.setItem(SAVED_MEALS_KEY, JSON.stringify(meals));
-  if (isCloudSyncReady()) {
-    saveCloudSavedMeals(meals).catch(err =>
-      console.warn('[foodDb] Cloud meal sync failed:', err)
-    );
-  }
+  writeJson(SAVED_MEALS_KEY, meals);
+  runCloudSync(
+    () => saveCloudSavedMeals(meals),
+    '[foodDb] Cloud meal sync failed:'
+  );
   return newMeal;
 };
 
 export const deleteMeal = (id) => {
   const meals = getSavedMeals().filter(m => m.id !== id);
-  localStorage.setItem(SAVED_MEALS_KEY, JSON.stringify(meals));
-  if (isCloudSyncReady()) {
-    saveCloudSavedMeals(meals).catch(err =>
-      console.warn('[foodDb] Cloud meal delete failed:', err)
-    );
-  }
+  writeJson(SAVED_MEALS_KEY, meals);
+  runCloudSync(
+    () => saveCloudSavedMeals(meals),
+    '[foodDb] Cloud meal delete failed:'
+  );
 };
 
 /**
@@ -1116,10 +1115,8 @@ export const calculateMealNutrition = (mealItems) => {
  * @returns {Array} Array of logged food entries
  */
 export const getFoodLog = (dateKey) => {
-  try {
-    const allLogs = JSON.parse(localStorage.getItem(FOOD_LOG_KEY)) || {};
-    return allLogs[dateKey] || [];
-  } catch { return []; }
+  const allLogs = readJson(FOOD_LOG_KEY, {});
+  return allLogs[dateKey] || [];
 };
 
 /**
@@ -1128,19 +1125,18 @@ export const getFoodLog = (dateKey) => {
  * @param {Object} entry - { food, servings, loggedAt }
  */
 export const addFoodToLog = (dateKey, entry) => {
-  const allLogs = JSON.parse(localStorage.getItem(FOOD_LOG_KEY) || '{}');
+  const allLogs = readJson(FOOD_LOG_KEY, {});
   if (!allLogs[dateKey]) allLogs[dateKey] = [];
   allLogs[dateKey].push({
     ...entry,
     id: `log_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     loggedAt: new Date().toISOString(),
   });
-  localStorage.setItem(FOOD_LOG_KEY, JSON.stringify(allLogs));
-  if (isCloudSyncReady()) {
-    saveCloudFoodLog(allLogs).catch(err =>
-      console.warn('[foodDb] Cloud food log sync failed:', err)
-    );
-  }
+  writeJson(FOOD_LOG_KEY, allLogs);
+  runCloudSync(
+    () => saveCloudFoodLog(allLogs),
+    '[foodDb] Cloud food log sync failed:'
+  );
   return allLogs[dateKey];
 };
 
@@ -1148,15 +1144,14 @@ export const addFoodToLog = (dateKey, entry) => {
  * Remove a food entry from the daily log.
  */
 export const removeFoodFromLog = (dateKey, entryId) => {
-  const allLogs = JSON.parse(localStorage.getItem(FOOD_LOG_KEY) || '{}');
+  const allLogs = readJson(FOOD_LOG_KEY, {});
   if (allLogs[dateKey]) {
     allLogs[dateKey] = allLogs[dateKey].filter(e => e.id !== entryId);
-    localStorage.setItem(FOOD_LOG_KEY, JSON.stringify(allLogs));
-    if (isCloudSyncReady()) {
-      saveCloudFoodLog(allLogs).catch(err =>
-        console.warn('[foodDb] Cloud food log delete failed:', err)
-      );
-    }
+    writeJson(FOOD_LOG_KEY, allLogs);
+    runCloudSync(
+      () => saveCloudFoodLog(allLogs),
+      '[foodDb] Cloud food log delete failed:'
+    );
   }
   return allLogs[dateKey] || [];
 };
@@ -1185,9 +1180,7 @@ export const getDailyTotals = (dateKey) => {
 // ═══════════════════════════════════════════
 
 export const getBookmarkedFoods = () => {
-  try {
-    return JSON.parse(localStorage.getItem(BOOKMARKED_FOODS_KEY)) || [];
-  } catch { return []; }
+  return readJson(BOOKMARKED_FOODS_KEY, []);
 };
 
 export const toggleBookmark = (foodId) => {
@@ -1198,12 +1191,11 @@ export const toggleBookmark = (foodId) => {
   } else {
     bookmarks.push(foodId);
   }
-  localStorage.setItem(BOOKMARKED_FOODS_KEY, JSON.stringify(bookmarks));
-  if (isCloudSyncReady()) {
-    saveCloudBookmarkedFoods(bookmarks).catch(err =>
-      console.warn('[foodDb] Cloud bookmark sync failed:', err)
-    );
-  }
+  writeJson(BOOKMARKED_FOODS_KEY, bookmarks);
+  runCloudSync(
+    () => saveCloudBookmarkedFoods(bookmarks),
+    '[foodDb] Cloud bookmark sync failed:'
+  );
   return bookmarks;
 };
 

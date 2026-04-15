@@ -4,10 +4,15 @@ import {
   saveCloudActivePlanId, 
   isCloudSyncReady 
 } from './cloudSync.js';
+import { ACTIVE_PLAN_KEY, SAVED_PLANS_KEY } from '../constants/storageKeys.js';
+import { readJson, writeJson } from './localStorage.js';
+
+const runCloudSync = (task, warningMessage) => {
+  if (!isCloudSyncReady()) return;
+  task().catch((err) => console.warn(warningMessage, err));
+};
 
 // ─── Storage Keys ─────────────────────────────────────────────
-const SAVED_PLANS_KEY   = 'gymplanner_saved_plans';
-const ACTIVE_PLAN_KEY   = 'gymplanner_active_plan_id';
 // Legacy key (single-plan era) – migrated on first load
 const LEGACY_PLAN_KEY   = 'gymplanner_training_plan';
 
@@ -38,45 +43,38 @@ export function defaultTrainingPlan() {
  * @returns {Array} Array of plan objects
  */
 export function loadSavedPlans() {
-  try {
-    const raw = localStorage.getItem(SAVED_PLANS_KEY);
-    if (raw) {
-      const plans = JSON.parse(raw);
-      return plans.map(hydratePlan);
-    }
-
-    // Migration: check for legacy single plan
-    const legacy = localStorage.getItem(LEGACY_PLAN_KEY);
-    if (legacy) {
-      const parsed = JSON.parse(legacy);
-      const migrated = hydratePlan({
-        ...parsed,
-        id: parsed.id || crypto.randomUUID(),
-        name: parsed.name || 'My Plan',
-        createdAt: parsed.createdAt || new Date().toISOString(),
-      });
-      saveSavedPlans([migrated]);
-      setActivePlanId(migrated.id);
-      localStorage.removeItem(LEGACY_PLAN_KEY);
-      return [migrated];
-    }
-
-    return [];
-  } catch {
-    return [];
+  const plans = readJson(SAVED_PLANS_KEY, null);
+  if (Array.isArray(plans)) {
+    return plans.map(hydratePlan);
   }
+
+  // Migration: check for legacy single plan
+  const legacy = readJson(LEGACY_PLAN_KEY, null);
+  if (legacy && typeof legacy === 'object') {
+    const migrated = hydratePlan({
+      ...legacy,
+      id: legacy.id || crypto.randomUUID(),
+      name: legacy.name || 'My Plan',
+      createdAt: legacy.createdAt || new Date().toISOString(),
+    });
+    saveSavedPlans([migrated]);
+    setActivePlanId(migrated.id);
+    localStorage.removeItem(LEGACY_PLAN_KEY);
+    return [migrated];
+  }
+
+  return [];
 }
 
 /**
  * Save the full array of plans.
  */
 export function saveSavedPlans(plans) {
-  localStorage.setItem(SAVED_PLANS_KEY, JSON.stringify(plans));
-  if (isCloudSyncReady()) {
-    saveCloudSavedPlans(plans).catch((err) =>
-      console.warn('[trainingPlan] Cloud plans sync failed:', err)
-    );
-  }
+  writeJson(SAVED_PLANS_KEY, plans);
+  runCloudSync(
+    () => saveCloudSavedPlans(plans),
+    '[trainingPlan] Cloud plans sync failed:'
+  );
 }
 
 /**
@@ -88,11 +86,10 @@ export function getActivePlanId() {
 
 export function setActivePlanId(id) {
   localStorage.setItem(ACTIVE_PLAN_KEY, id);
-  if (isCloudSyncReady()) {
-    saveCloudActivePlanId(id).catch((err) =>
-      console.warn('[trainingPlan] Cloud active plan ID sync failed:', err)
-    );
-  }
+  runCloudSync(
+    () => saveCloudActivePlanId(id),
+    '[trainingPlan] Cloud active plan ID sync failed:'
+  );
 }
 
 /**

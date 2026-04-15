@@ -30,25 +30,28 @@ import {
   getWeekDates,
 } from './dateUtils.js';
 import { loadTrainingPlan, getPlanSessionTitle } from './trainingPlan.js';
+import {
+  ACTIVE_PLAN_KEY,
+  BOOKMARKED_FOODS_KEY,
+  COMPLETION_KEY,
+  CUSTOM_EXERCISES_KEY,
+  CUSTOM_FOODS_KEY,
+  DAILY_METADATA_KEY,
+  EXERCISE_DB_KEY,
+  FOOD_LOG_KEY,
+  MIGRATION_FLAG_KEY,
+  NOTIFICATION_SETTINGS_KEY,
+  SAVED_MEALS_KEY,
+  SAVED_PLANS_KEY,
+  SCHEDULE_KEY,
+  SESSION_TITLES_KEY,
+  SETTINGS_KEY,
+  TEMPLATES_KEY,
+  WORKOUT_MIGRATION_FLAG_KEY,
+  WORKOUTS_KEY,
+} from '../constants/storageKeys.js';
 
 // ─── Storage keys ────────────────────────────────────────────
-const SCHEDULE_KEY         = 'gymplanner_schedule';
-const WORKOUTS_KEY         = 'gymplanner_workouts';
-const COMPLETION_KEY       = 'gymplanner_completion';
-const CUSTOM_EXERCISES_KEY = 'gymplanner_custom_exercises';
-const EXERCISE_DB_KEY      = 'gymplanner_exercise_db';
-const SESSION_TITLES_KEY   = 'gymplanner_session_titles';
-const TEMPLATES_KEY        = 'gymplanner_templates';
-const DAILY_METADATA_KEY   = 'gymplanner_daily_metadata';
-const MIGRATION_FLAG_KEY   = 'gymplanner_migrated_to_dates';
-const WORKOUT_MIGRATION_FLAG_KEY = 'gymplanner_workouts_migrated_to_dates';
-const CUSTOM_FOODS_KEY     = 'gymplanner_custom_foods';
-const SAVED_MEALS_KEY      = 'gymplanner_saved_meals';
-const FOOD_LOG_KEY         = 'gymplanner_food_log';
-const BOOKMARKED_FOODS_KEY = 'gymplanner_bookmarked_foods';
-const SETTINGS_KEY         = 'gymplanner_settings';
-const NOTIFICATION_SETTINGS_KEY = 'workout_reminders_enabled';
-
 const PLANNER_LOCAL_KEYS = [
   SCHEDULE_KEY,
   WORKOUTS_KEY,
@@ -76,6 +79,11 @@ function safeLoad(key, fallback) {
   } catch {
     return fallback;
   }
+}
+
+function runCloudSync(task, warningMessage) {
+  if (!isCloudSyncReady()) return;
+  task().catch((err) => console.warn(warningMessage, err));
 }
 
 const LEGACY_DAY_KEY_REGEX = /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/;
@@ -152,11 +160,10 @@ export function saveDailyMetadata(date, session, data) {
 
 export function saveDailyMetadataWithSync(date, session, data) {
   saveDailyMetadata(date, session, data);
-  if (isCloudSyncReady()) {
-    saveCloudDailyMetadata(loadDailyMetadata()).catch(err => 
-      console.warn('[storage] Cloud metadata sync failed:', err)
-    );
-  }
+  runCloudSync(
+    () => saveCloudDailyMetadata(loadDailyMetadata()),
+    '[storage] Cloud metadata sync failed:'
+  );
 }
 
 export function getDailyMetadata(date, session) {
@@ -241,11 +248,10 @@ export function shiftWorkout(fromDate, toDate, fromSession, toSession = null) {
 
 export function saveSessionTitlesWithSync(titles) {
   saveSessionTitles(titles);
-  if (isCloudSyncReady()) {
-    saveCloudSessionTitles(loadSessionTitles()).catch((err) =>
-      console.warn('[storage] Cloud session titles sync failed:', err)
-    );
-  }
+  runCloudSync(
+    () => saveCloudSessionTitles(loadSessionTitles()),
+    '[storage] Cloud session titles sync failed:'
+  );
 }
 
 export async function migrateLocalDataToCloud() {
@@ -259,8 +265,8 @@ export async function migrateLocalDataToCloud() {
     const completion = loadCompletion();
     const exerciseDb = loadExerciseDb() || exerciseDatabase;
     const sessionTitles = loadSessionTitles();
-    const savedPlans = safeLoad('gymplanner_saved_plans', []);
-    const activePlanId = localStorage.getItem('gymplanner_active_plan_id');
+    const savedPlans = safeLoad(SAVED_PLANS_KEY, []);
+    const activePlanId = localStorage.getItem(ACTIVE_PLAN_KEY);
     const templates = loadTemplates();
     const customExercises = loadCustomExercises();
     const dailyMetadata = loadDailyMetadata();
@@ -829,11 +835,10 @@ export function saveCustomExercise(muscle, subMuscle, name) {
   if (!all[muscle][subMuscle].includes(name)) {
     all[muscle][subMuscle].push(name);
     localStorage.setItem(CUSTOM_EXERCISES_KEY, JSON.stringify(all));
-    if (isCloudSyncReady()) {
-      saveCloudCustomExercises(all).catch(err => 
-        console.warn('[storage] Cloud custom exercise sync failed:', err)
-      );
-    }
+    runCloudSync(
+      () => saveCloudCustomExercises(all),
+      '[storage] Cloud custom exercise sync failed:'
+    );
   }
 }
 
@@ -853,11 +858,10 @@ export function saveTemplate(name, groups) {
   };
   templates.push(newTemplate);
   localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-  if (isCloudSyncReady()) {
-    saveCloudTemplates(templates).catch(err => 
-      console.warn('[storage] Cloud templates sync failed:', err)
-    );
-  }
+  runCloudSync(
+    () => saveCloudTemplates(templates),
+    '[storage] Cloud templates sync failed:'
+  );
   return newTemplate;
 }
 
@@ -873,22 +877,20 @@ export function updateTemplate(id, name, groups) {
     updatedAt: new Date().toISOString()
   };
   localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-  if (isCloudSyncReady()) {
-    saveCloudTemplates(templates).catch(err => 
-      console.warn('[storage] Cloud templates sync failed:', err)
-    );
-  }
+  runCloudSync(
+    () => saveCloudTemplates(templates),
+    '[storage] Cloud templates sync failed:'
+  );
   return templates[idx];
 }
 
 export function deleteTemplate(id) {
   const templates = loadTemplates().filter(t => t.id !== id);
   localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-  if (isCloudSyncReady()) {
-    saveCloudTemplates(templates).catch(err => 
-      console.warn('[storage] Cloud templates delete sync failed:', err)
-    );
-  }
+  runCloudSync(
+    () => saveCloudTemplates(templates),
+    '[storage] Cloud templates delete sync failed:'
+  );
 }
 
 // ─── Exercise Database ────────────────────────────────────────
@@ -903,11 +905,10 @@ export function saveExerciseDbCache(db) {
 
 export function saveExerciseDbWithSync(db) {
   saveExerciseDbCache(db);
-  if (isCloudSyncReady()) {
-    saveCloudExerciseDb(db).catch((err) =>
-      console.warn('[storage] Cloud exercise DB sync failed:', err)
-    );
-  }
+  runCloudSync(
+    () => saveCloudExerciseDb(db),
+    '[storage] Cloud exercise DB sync failed:'
+  );
 }
 
 function isValidDb(db) {
@@ -963,22 +964,22 @@ export function addExerciseWithSync(muscle, subMuscle, name) {
   addExerciseToCache(muscle, subMuscle, name);
   const db = loadExerciseDb();
 
-  if (isCloudSyncReady() && db) {
-    saveCloudExerciseDb(db).catch((err) =>
-      console.warn('[storage] Cloud exercise add sync failed:', err)
-    );
-  }
+  if (!db) return;
+  runCloudSync(
+    () => saveCloudExerciseDb(db),
+    '[storage] Cloud exercise add sync failed:'
+  );
 }
 
 export function removeExerciseWithSync(muscle, subMuscle, name) {
   removeExerciseFromCache(muscle, subMuscle, name);
   const db = loadExerciseDb();
 
-  if (isCloudSyncReady() && db) {
-    saveCloudExerciseDb(db).catch((err) =>
-      console.warn('[storage] Cloud exercise delete sync failed:', err)
-    );
-  }
+  if (!db) return;
+  runCloudSync(
+    () => saveCloudExerciseDb(db),
+    '[storage] Cloud exercise delete sync failed:'
+  );
 }
 
 // ─── Async Cloud sync ─────────────────────────────────────────
@@ -1033,11 +1034,11 @@ export async function syncPlannerData() {
     }
 
     if (savedPlans && Array.isArray(savedPlans.plans)) {
-      localStorage.setItem('gymplanner_saved_plans', JSON.stringify(savedPlans.plans));
+      localStorage.setItem(SAVED_PLANS_KEY, JSON.stringify(savedPlans.plans));
     }
 
     if (activePlanId && activePlanId.id) {
-      localStorage.setItem('gymplanner_active_plan_id', activePlanId.id);
+      localStorage.setItem(ACTIVE_PLAN_KEY, activePlanId.id);
     }
 
     if (templates && Array.isArray(templates.templates)) {
@@ -1088,66 +1089,60 @@ export async function syncPlannerData() {
 export function saveDayWorkoutWithSync(day, dayData) {
   saveDayWorkout(day, dayData);
 
-  if (isCloudSyncReady()) {
-    const dateKey = day instanceof Date || DATE_KEY_REGEX.test(day)
-      ? formatDateKey(day)
-      : day;
-    saveCloudDayWorkout(dateKey, dayData).catch((err) =>
-      console.warn('[storage] Cloud workout sync failed:', err)
-    );
-  }
+  const dateKey = day instanceof Date || DATE_KEY_REGEX.test(day)
+    ? formatDateKey(day)
+    : day;
+  runCloudSync(
+    () => saveCloudDayWorkout(dateKey, dayData),
+    '[storage] Cloud workout sync failed:'
+  );
 }
 
 // Save the entire workouts object so deleted rows/dates are removed as well.
 export function saveWorkoutsMapWithSync(workoutsMap) {
   saveWorkoutsMap(workoutsMap);
 
-  if (isCloudSyncReady()) {
-    saveCloudWorkoutsMap(workoutsMap || {}).catch((err) =>
-      console.warn('[storage] Cloud workouts map sync failed:', err)
-    );
-  }
+  runCloudSync(
+    () => saveCloudWorkoutsMap(workoutsMap || {}),
+    '[storage] Cloud workouts map sync failed:'
+  );
 }
 
 export function markDayCompleteWithSync(date, session = 'am') {
   markDayComplete(date, session);
 
-  if (isCloudSyncReady()) {
-    const dateKey = formatDateKey(date);
-    saveCloudCompletionEntry(dateKey, session, true).catch((err) =>
-      console.warn('[storage] Cloud completion sync failed:', err)
-    );
-  }
+  const dateKey = formatDateKey(date);
+  runCloudSync(
+    () => saveCloudCompletionEntry(dateKey, session, true),
+    '[storage] Cloud completion sync failed:'
+  );
 }
 
 export function markDaySkippedWithSync(date, session = 'am') {
   markDaySkipped(date, session);
 
-  if (isCloudSyncReady()) {
-    const dateKey = formatDateKey(date);
-    saveCloudCompletionEntry(dateKey, session, 'skipped').catch((err) =>
-      console.warn('[storage] Cloud skip sync failed:', err)
-    );
-  }
+  const dateKey = formatDateKey(date);
+  runCloudSync(
+    () => saveCloudCompletionEntry(dateKey, session, 'skipped'),
+    '[storage] Cloud skip sync failed:'
+  );
 }
 
 export function setCompletionStatusWithSync(date, session, status) {
   setCompletionStatus(date, session, status);
 
-  if (isCloudSyncReady()) {
-    const completion = loadCompletion();
-    saveCloudCompletionMap(completion).catch((err) =>
-      console.warn('[storage] Cloud completion sync failed:', err)
-    );
-  }
+  const completion = loadCompletion();
+  runCloudSync(
+    () => saveCloudCompletionMap(completion),
+    '[storage] Cloud completion sync failed:'
+  );
 }
 
 export function saveScheduleWithSync(schedule) {
   saveSchedule(schedule);
 
-  if (isCloudSyncReady()) {
-    saveCloudSchedule(schedule).catch((err) =>
-      console.warn('[storage] Cloud schedule sync failed:', err)
-    );
-  }
+  runCloudSync(
+    () => saveCloudSchedule(schedule),
+    '[storage] Cloud schedule sync failed:'
+  );
 }
