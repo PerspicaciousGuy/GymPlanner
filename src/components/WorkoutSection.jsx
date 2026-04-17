@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { 
-  Plus, 
-  Save, 
-  CheckCircle, 
-  FastForward, 
-  Lock, 
-  Tag, 
+import {
+  Plus,
+  Save,
+  CheckCircle,
+  FastForward,
+  Lock,
+  Tag,
   Sparkles,
   CheckCircle2,
   XCircle,
@@ -19,21 +19,21 @@ import ExerciseGroup from './ExerciseGroup';
 import AdvancedExerciseCard from './AdvancedExerciseCard';
 import TemplateDialog from './TemplateDialog';
 import ShiftPicker from './ShiftPicker';
-import { 
-  saveDayWorkoutWithSync, 
-  markDayCompleteWithSync, 
-  markDaySkippedWithSync, 
-  isDayComplete, 
-  isDaySkipped, 
-  ensureAmPm, 
-  defaultSession, 
-  defaultGroup, 
+import {
+  saveDayWorkoutWithSync,
+  markDayCompleteWithSync,
+  markDaySkippedWithSync,
+  isDayComplete,
+  isDaySkipped,
+  ensureAmPm,
+  defaultSession,
+  defaultGroup,
   defaultRow,
-  loadSessionTitles, 
+  loadSessionTitles,
   saveSessionTitlesWithSync,
   getEffectiveSessionTitle,
   getEffectiveSessionNotes,
-  saveDailyMetadata,
+  saveDailyMetadataWithSync,
   shiftWorkout
 } from '../utils/storage';
 import { loadTrainingPlan, getPlanSessionSubtitle } from '../utils/trainingPlan';
@@ -48,7 +48,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken, onWorkoutChanged, initialSession = 'am' }) {
   const workoutDateKey = (date instanceof Date) ? formatDateKey(date) : (dayName || date);
   const titleDayName = dayName || (date instanceof Date ? getDayOfWeek(date) : getDayOfWeek(new Date(date)));
-  
+
   const [templateDialogMode, setTemplateDialogMode] = useState('load'); // 'load' or 'save'
 
   const ensureAdvanced = (data) => {
@@ -69,9 +69,9 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   }, [syncToken]);
 
   const hasPlannedPm = useMemo(() => {
-     const pmTitle = getEffectiveSessionTitle(date || workoutDateKey, 'pm').trim().toLowerCase();
-     const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ') || txt.startsWith('rest ');
-     return !isOff(pmTitle);
+    const pmTitle = getEffectiveSessionTitle(date || workoutDateKey, 'pm').trim().toLowerCase();
+    const isOff = (txt) => txt === '' || txt === 'off' || txt === 'rest' || txt.startsWith('off ') || txt.startsWith('rest ');
+    return !isOff(pmTitle);
   }, [date, workoutDateKey, syncToken]);
   const [activeSession, setActiveSession] = useState(initialSession);
   const [saveFlash, setSaveFlash] = useState(false);
@@ -312,7 +312,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
       onWorkoutChanged?.();
       setTitleSaveFlash(true);
       setTimeout(() => setTitleSaveFlash(false), 1800);
-      
+
       if (payload.title === null) {
         const fallback = getEffectiveSessionTitle(date || workoutDateKey, activeSession);
         if (activeSession === 'am') setAmTitleState(fallback);
@@ -339,10 +339,10 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     });
     setAmTitleState(template.name); // If loading into AM
     setPmTitleState(template.name); // Just in case, but usually we load into active
-    
+
     // Save as daily override immediately
     saveDailyMetadataWithSync(date || workoutDateKey, activeSession, { title: template.name });
-    
+
     setIsDirty(true);
     setShowTemplateDialog(false);
   };
@@ -359,7 +359,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const tabCls = (session, done, skipped) => {
     const isActive = activeSession === session;
     const isLocked = done || skipped;
-    
+
     return cn(
       "flex items-center gap-2 px-3 md:px-4 py-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wider transition-all relative shrink-0 outline-none",
       isActive ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-600',
@@ -377,7 +377,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
           <div>
             <p className="text-emerald-900 font-bold text-[11px] md:text-xs">Training session finalized!</p>
             <p className="text-emerald-600 text-[9px] md:text-[10px] font-medium uppercase tracking-tight mt-0.5">
-              {!hasPlannedPm ? 
+              {!hasPlannedPm ?
                 `SESSION ${amDone ? '✓ COMPLETED' : '⏭ SKIPPED'}` :
                 `SESSION 1 ${amDone ? '✓ COMPLETED' : '⏭ SKIPPED'}  ·  SESSION 2 ${pmDone ? '✓ COMPLETED' : '⏭ SKIPPED'}`
               }
@@ -394,9 +394,9 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
             {amDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
             {amSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
             {activeSession === 'am' && (
-              <motion.div 
+              <motion.div
                 layoutId="activeSessionIndicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" 
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
               />
             )}
@@ -406,9 +406,9 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
             {pmDone && <CheckCircle size={10} className="text-emerald-500 ml-1" />}
             {pmSkipped && <FastForward size={10} className="text-slate-300 ml-1" />}
             {activeSession === 'pm' && (
-              <motion.div 
+              <motion.div
                 layoutId="activeSessionIndicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" 
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"
                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
               />
             )}
@@ -515,7 +515,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
             </div>
 
             {sessionSubtitle && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="px-6 py-1 -mt-1"
@@ -551,7 +551,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
             </AnimatePresence>
           </div>
 
-          <TemplateDialog 
+          <TemplateDialog
             open={showTemplateDialog}
             onOpenChange={setShowTemplateDialog}
             mode={templateDialogMode}
@@ -641,41 +641,41 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
         ) : (
           <div className="flex items-center gap-2 flex-wrap w-full">
             {isConfirmingFinish ? (
-              <Button 
+              <Button
                 onClick={() => {
                   handleComplete();
                   setIsConfirmingFinish(false);
-                }} 
+                }}
                 className="h-9 gap-2 px-4 bg-emerald-600 text-white font-bold text-[10px] uppercase rounded-lg hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 animate-in fade-in zoom-in-95 duration-200"
               >
                 <CheckCircle2 size={14} /> Confirm Finish
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={() => {
                   setIsConfirmingFinish(true);
                   setTimeout(() => setIsConfirmingFinish(false), 3000);
-                }} 
+                }}
                 className="h-9 gap-2 px-4 bg-indigo-600 text-white font-bold text-[10px] uppercase rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
               >
                 <CheckCircle size={14} /> Finish Session
               </Button>
             )}
-            
-            <Button 
+
+            <Button
               onClick={() => {
                 setTemplateDialogMode('save');
                 setShowTemplateDialog(true);
-              }} 
+              }}
               variant="outline"
               className="h-9 gap-2 px-4 border-indigo-100 text-indigo-600 font-bold text-[10px] uppercase rounded-lg hover:bg-indigo-50 transition-all shadow-sm"
             >
               <Sparkles size={14} /> Save as Routine
             </Button>
-            
-            <Button 
+
+            <Button
               variant="ghost"
-              onClick={handleSkip} 
+              onClick={handleSkip}
               className="h-9 px-4 text-slate-400 font-bold text-[10px] uppercase rounded-lg hover:text-slate-900 transition-all"
             >
               Skip
@@ -684,7 +684,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
             <div className="ml-auto flex items-center gap-2 h-7">
               <AnimatePresence mode="wait">
                 {isDirty ? (
-                  <motion.div 
+                  <motion.div
                     key="saving"
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -695,7 +695,7 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                     <span className="text-[9px] font-bold uppercase tracking-widest">Saving...</span>
                   </motion.div>
                 ) : (
-                  <motion.div 
+                  <motion.div
                     key="saved"
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -712,10 +712,10 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                   </motion.div>
                 )}
               </AnimatePresence>
-              
-              <Button 
+
+              <Button
                 variant="ghost"
-                onClick={handleSave} 
+                onClick={handleSave}
                 className="h-7 px-2 text-slate-300 hover:text-indigo-600 font-bold text-[8px] uppercase tracking-tighter"
               >
                 Force Save
