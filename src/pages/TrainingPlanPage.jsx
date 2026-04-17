@@ -40,8 +40,9 @@ import {
   createCycleSlot,
   defaultTrainingPlan,
   getCycleSlotForDate,
+  loadTrainingPlan,
 } from '../utils/trainingPlan';
-import { loadTemplates } from '../utils/storage';
+import { loadTemplates, freezeHistoryUnderPlan } from '../utils/storage';
 import { formatDateKey, formatDateDisplay, getDayOfWeek } from '../utils/dateUtils';
 
 // ─── Saved Plan Card ─────────────────────────────────────────
@@ -799,6 +800,10 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
 
   const handleSave = () => {
     if (!plan) return;
+    
+    // Freeze all current logged/completed past history using the OLD plan before we overwrite it
+    freezeHistoryUnderPlan(loadTrainingPlan());
+
     saveTrainingPlan(plan);
     refreshPlans();
     setHasChanges(false);

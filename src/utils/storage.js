@@ -457,6 +457,30 @@ export function loadWorkoutByDate(date) {
   return ensureAmPm(all[dateKey]);
 }
 
+/**
+ * Freezes the dynamically computed session title into dailyMetadata
+ * so that future changes to the training plan do not alter historical records.
+ */
+function freezeEffectiveSessionTitle(dateOrDateKey, session) {
+  let localDate;
+  if (dateOrDateKey instanceof Date) {
+    localDate = dateOrDateKey;
+  } else if (typeof dateOrDateKey === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateOrDateKey)) {
+    const [y, m, d] = dateOrDateKey.split('-');
+    localDate = new Date(y, parseInt(m, 10) - 1, d);
+  } else {
+    return;
+  }
+
+  const currentTitle = getEffectiveSessionTitle(localDate, session);
+  if (currentTitle && currentTitle.trim() !== '' && currentTitle.trim().toLowerCase() !== 'workout') {
+    const existingOverride = getDailyMetadata(localDate, session).title;
+    if (existingOverride !== currentTitle && !existingOverride?.startsWith('Rest (Shifted to')) {
+      saveDailyMetadataWithSync(localDate, session, { title: currentTitle });
+    }
+  }
+}
+
 // Save workout for a specific date
 export function saveDayWorkout(dateOrDay, dayData) {
   const all = loadWorkouts();
@@ -466,6 +490,15 @@ export function saveDayWorkout(dateOrDay, dayData) {
     : dateOrDay; // For backward compatibility during migration
   all[key] = dayData;
   localStorage.setItem(WORKOUTS_KEY, JSON.stringify(all));
+
+  if (dayData && typeof dayData === 'object') {
+    if ((dayData.am?.groups?.length > 0) || (dayData.am?.standaloneExercises?.length > 0)) {
+      freezeEffectiveSessionTitle(key, 'am');
+    }
+    if ((dayData.pm?.groups?.length > 0) || (dayData.pm?.standaloneExercises?.length > 0)) {
+      freezeEffectiveSessionTitle(key, 'pm');
+    }
+  }
 }
 
 // Get workouts for a specific week
@@ -730,6 +763,7 @@ function normalizeCompletionMap(raw) {
 // session: 'am' | 'pm'
 // date: Date object or ISO date string (YYYY-MM-DD)
 export function markDayComplete(date, session = 'am') {
+  freezeEffectiveSessionTitle(date, session);
   const dateKey = formatDateKey(date);
   const all = loadCompletion();
   all[`${dateKey}_${session}`] = true;
@@ -748,6 +782,7 @@ export function isDaySkipped(date, session = 'am') {
 }
 
 export function markDaySkipped(date, session = 'am') {
+  freezeEffectiveSessionTitle(date, session);
   const dateKey = formatDateKey(date);
   const all = loadCompletion();
   all[`${dateKey}_${session}`] = 'skipped';
@@ -785,6 +820,9 @@ export function getCompletionStatus(date, session) {
 
 // Set completion status from Data Console dropdown
 export function setCompletionStatus(date, session, status) {
+  if (status === 'done' || status === 'skipped') {
+    freezeEffectiveSessionTitle(date, session);
+  }
   const dateKey = formatDateKey(date);
   const all = loadCompletion();
   
@@ -1145,4 +1183,64 @@ export function saveScheduleWithSync(schedule) {
     () => saveCloudSchedule(schedule),
     '[storage] Cloud schedule sync failed:'
   );
+}
+
+export function freezeHistoryUnderPlan(plan) {
+  const allWorkouts = loadWorkouts();
+  const metadata = loadDailyMetadata();
+  const completion = loadCompletion();
+
+  let modified = false;
+
+  const checkAndFreeze = (dateStr, session) => {
+    const dMeta = metadata[dateStr]?.[session] || {};
+    if (dMeta.isShifted || dMeta.isShiftedFrom) return;
+    
+    // Check if it already has a valid override
+    if (
+      dMeta.title !== undefined &&
+      dMeta.title !== null &&
+      dMeta.title.trim() !== '' &&
+      dMeta.title.trim().toLowerCase() !== 'workout'
+    ) {
+      return;
+    }
+
+    const title = getPlanSessionTitle(dateStr, session, plan);
+    if (!metadata[dateStr]) metadata[dateStr] = { am: {}, pm: {} };
+    metadata[dateStr][session] = {
+      ...(metadata[dateStr][session] || {}),
+      title: title || 'Workout'
+    };
+    modified = true;
+  };
+
+  // Freeze all logged workouts
+  for (const [dateStr, sessions] of Object.entries(allWorkouts)) {
+    for (const session of ['am', 'pm']) {
+      const workout = sessions[session];
+      if (workout && workout.exercises && workout.exercises.length > 0) {
+        checkAndFreeze(dateStr, session);
+      }
+    }
+  }
+
+  // Freeze all completed/skipped workouts
+  for (const key of Object.keys(completion)) {
+    const isCompleted = completion[key] === true || completion[key] === 'skipped';
+    if (isCompleted) {
+      const match = key.match(/^(\d{4}-\d{2}-\d{2})_(am|pm)$/);
+      if (match) {
+        checkAndFreeze(match[1], match[2]);
+      }
+    }
+  }
+
+  if (modified) {
+    localStorage.setItem(DAILY_METADATA_KEY, JSON.stringify(metadata));
+    runCloudSync(
+      () => saveCloudDailyMetadata(metadata),
+      '[storage] Cloud metadata sync failed during global freeze:'
+    );
+  }
 }

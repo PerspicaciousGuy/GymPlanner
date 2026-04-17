@@ -162,6 +162,8 @@ export function getCyclePosition(date, plan) {
   const d = date instanceof Date ? date : new Date(date);
   const start = new Date(plan.startDate);
 
+  if (Number.isNaN(d.getTime()) || Number.isNaN(start.getTime())) return -1;
+
   d.setHours(0, 0, 0, 0);
   start.setHours(0, 0, 0, 0);
 
@@ -201,7 +203,7 @@ export function getPlanSessionTitle(date, session, plan) {
   }
 
   const info = getCycleSlotForDate(date, p);
-  if (!info) return '';
+  if (!info || !info.slot) return '';
 
   const { slot } = info;
 
@@ -230,7 +232,7 @@ export function getPlanSessionSubtitle(date, session, plan) {
   }
 
   const info = getCycleSlotForDate(date, p);
-  if (!info) return '';
+  if (!info || !info.slot) return '';
 
   const { slot } = info;
   return session === 'am' ? (slot.amSubtitle || '') : (slot.pmSubtitle || '');
@@ -253,7 +255,7 @@ export function isRestDay(date, plan) {
   }
 
   const info = getCycleSlotForDate(date, p);
-  if (!info) return false;
+  if (!info || !info.slot) return false;
   return info.slot.type === 'rest';
 }
 
