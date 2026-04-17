@@ -447,7 +447,6 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                     }
                   }}
                   placeholder="Designate Training Protocol..."
-                  disabled={sessionDone || sessionSkipped}
                   className="w-full pl-11 pr-36 bg-slate-50 shadow-sm border-slate-100 rounded-[1.25rem] text-[13px] font-black text-slate-800 placeholder:text-slate-200 focus-visible:bg-white focus-visible:border-indigo-200 focus-visible:ring-indigo-500/5 transition-all min-h-[3rem] h-auto italic py-3 resize-none overflow-hidden"
                 />
                 <div className="absolute right-2 top-2 flex items-center gap-1 z-20">
@@ -543,7 +542,6 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
                     onChange={(e) => handleSessionNotesChange(activeSession, e.target.value)}
                     onBlur={handleSessionTitleSave}
                     placeholder="Add session notes, warm-ups, or bodyweight here..."
-                    disabled={sessionDone || sessionSkipped}
                     className="w-full p-4 bg-slate-50/50 border border-slate-100/80 rounded-2xl text-xs font-medium text-slate-600 placeholder:text-slate-300 focus-visible:bg-white focus-visible:border-indigo-200 focus-visible:ring-2 focus-visible:ring-indigo-500/5 transition-all outline-none resize-none min-h-[80px]"
                   />
                 </motion.div>
