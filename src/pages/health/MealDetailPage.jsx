@@ -8,8 +8,10 @@ import {
   Droplet,
   Cookie,
   Plus,
+  Search,
+  X,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -18,6 +20,8 @@ import {
   saveMeal,
   deleteMeal,
   getSavedMeals,
+  searchFoods,
+  DEFAULT_FOODS,
 } from '../../utils/foodDatabase';
 
 /**
@@ -35,14 +39,44 @@ export default function MealDetailPage({
   const [mealName, setMealName] = useState(meal?.name || 'Unnamed Meal');
   const [editingName, setEditingName] = useState(false);
   const [items, setItems] = useState(meal?.items || []);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Total nutrition across all items
   const totals = useMemo(() => {
     return calculateMealNutrition(items);
   }, [items]);
 
+  // Search results for adding items
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) {
+      const popularIds = [
+        'egg', 'chicken_breast_raw', 'white_rice_raw', 'banana', 'peanut_butter',
+        'oats', 'almonds', 'whey_protein', 'honey',
+      ];
+      return DEFAULT_FOODS.filter(f => popularIds.includes(f.id));
+    }
+    return searchFoods(searchQuery);
+  }, [searchQuery]);
+
+  const addItem = (food) => {
+    // Add default with 1 serving
+    setItems(prev => [...prev, { food, servings: 1 }]);
+    setShowSearch(false);
+    setSearchQuery('');
+  };
+
   const handleRemoveItem = (idx) => {
     setItems(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateServings = (index, delta) => {
+    setItems(prev => prev.map((item, i) => {
+      if (i !== index) return item;
+      const currentServings = item.servings || 1;
+      const newServings = Math.max(0.5, currentServings + delta);
+      return { ...item, servings: newServings };
+    }));
   };
 
   const handleDeleteMeal = () => {
@@ -164,34 +198,57 @@ export default function MealDetailPage({
           </div>
         ) : (
           <div className="space-y-3">
-            {items.map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between p-4 bg-card border border-border rounded-xl"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground truncate">{item.food?.name}</p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <Flame size={12} className="text-muted-foreground/80" />
-                    <span className="text-xs font-medium text-foreground">
-                      {Math.round((item.food?.calories || 0) * (item.servings || 1))} cal
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleRemoveItem(idx)}
-                  className="w-10 h-10 flex items-center justify-center rounded-2xl bg-muted/50 text-foreground hover:bg-red-500/10 hover:text-red-500 transition-colors ml-3 flex-shrink-0"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
+            <AnimatePresence>
+              {items.map((item, idx) => {
+                const currentServings = item.servings || 1;
+                return (
+                  <motion.div
+                    key={`${item.food?.id}-${idx}`}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -100 }}
+                    className="flex items-center gap-3 p-4 bg-card border border-border rounded-xl"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-foreground truncate">{item.food?.name}</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <Flame size={12} className="text-muted-foreground/80" />
+                        <span className="text-xs font-medium text-foreground">
+                          {Math.round((item.food?.calories || 0) * currentServings)} cal
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => updateServings(idx, -0.5)}
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground text-xs font-bold"
+                      >
+                        −
+                      </button>
+                      <span className="text-xs font-black text-foreground w-5 text-center">{currentServings}</span>
+                      <button
+                        onClick={() => updateServings(idx, 0.5)}
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground text-xs font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveItem(idx)}
+                      className="p-1.5 text-muted-foreground/40 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         )}
 
         {/* Add Items Button */}
         <button
-          onClick={onAddItems}
+          onClick={() => setShowSearch(true)}
           className="w-full mt-4 mb-2 flex items-center justify-center gap-2 py-3.5 border border-border rounded-full hover:bg-muted/30 transition-all text-foreground"
         >
           <Plus size={18} strokeWidth={2} />
@@ -230,6 +287,80 @@ export default function MealDetailPage({
           Log Meal ({items.length} items)
         </Button>
       </div>
+
+      {/* Inline Search Overlay */}
+      <AnimatePresence>
+        {showSearch && (
+          <motion.div
+            initial={{ opacity: 0, y: '100%' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '100%' }}
+            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            className="fixed inset-0 bg-background z-[120] flex flex-col"
+          >
+            {/* Search Header */}
+            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
+              <button
+                onClick={() => { setShowSearch(false); setSearchQuery(''); }}
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+              >
+                <ArrowLeft size={22} className="text-foreground" />
+              </button>
+              <h1 className="text-lg font-black text-foreground tracking-tight">Add Item</h1>
+            </div>
+
+            {/* Search Input */}
+            <div className="px-4 py-3">
+              <div className="flex items-center bg-muted/50 border border-border rounded-2xl px-4 py-3 gap-3 focus-within:ring-2 focus-within:ring-foreground/20 transition-all">
+                <Search size={18} className="text-muted-foreground flex-shrink-0" />
+                <input
+                  autoFocus
+                  type="text"
+                  placeholder="Search foods..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 bg-transparent text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none"
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')} className="text-muted-foreground hover:text-foreground">
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Search Results */}
+            <div className="flex-1 overflow-y-auto px-4 pb-8">
+              {!searchQuery.trim() && (
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Popular Items</p>
+              )}
+              <div className="space-y-2">
+                {searchResults.map(food => (
+                  <motion.button
+                    key={food.id}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => addItem(food)}
+                    className="w-full flex items-center justify-between p-4 bg-card border border-border rounded-2xl hover:shadow-md transition-all group text-left"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-foreground truncate">{food.name}</p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <Flame size={12} className="text-muted-foreground/50" />
+                        <span className="text-xs text-muted-foreground">
+                          {food.calories} cal · {food.servingSize}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-9 h-9 rounded-full border-2 border-border flex items-center justify-center text-muted-foreground group-hover:border-foreground group-hover:text-foreground transition-colors flex-shrink-0 ml-3">
+                      <Plus size={18} strokeWidth={2.5} />
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
