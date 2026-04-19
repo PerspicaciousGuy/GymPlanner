@@ -25,7 +25,7 @@ import {
   SERVING_UNITS,
   saveCustomFood,
 } from '../../utils/foodDatabase';
-import { getFatSecretFoodDetail } from '../../utils/fatSecretApi';
+
 
 // Micro nutrient display config
 const MICRO_NUTRIENTS = [
@@ -55,6 +55,7 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
   const [servings, setServings] = useState(1);
   const [gramAmount, setGramAmount] = useState(food?.servingGrams || 100);
   const [editingGrams, setEditingGrams] = useState(false);
+  const [editingServings, setEditingServings] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(
     food?.availableUnits?.[0] || SERVING_UNITS.SERVING
   );
@@ -62,8 +63,6 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
     food ? checkBookmarked(food.id) : false
   );
   const [editingField, setEditingField] = useState(null);
-  const [loadingDetail, setLoadingDetail] = useState(false);
-  const [enrichedFood, setEnrichedFood] = useState(food);
 
   // For manual entry, allow free-form macro editing
   const [manualValues, setManualValues] = useState({
@@ -86,39 +85,9 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
     ingredients: food?.ingredients || '',
   });
 
-  // Fetch full detail from FatSecret if needed
-  useEffect(() => {
-    if (food?.isFatSecret && food?._needsDetailFetch && food?.fatSecretId) {
-      setLoadingDetail(true);
-      getFatSecretFoodDetail(food.fatSecretId).then(detail => {
-        if (detail) {
-          setEnrichedFood(detail);
-          setGramAmount(detail.servingGrams || 100);
-          setManualValues({
-            calories: detail.calories || 0,
-            protein: detail.protein || 0,
-            carbs: detail.carbs || 0,
-            fats: detail.fats || 0,
-            saturatedFat: detail.saturatedFat || 0,
-            polyunsaturatedFat: detail.polyunsaturatedFat || 0,
-            monounsaturatedFat: detail.monounsaturatedFat || 0,
-            cholesterol: detail.cholesterol || 0,
-            sodium: detail.sodium || 0,
-            fiber: detail.fiber || 0,
-            sugar: detail.sugar || 0,
-            potassium: detail.potassium || 0,
-            vitaminA: detail.vitaminA || 0,
-            vitaminC: detail.vitaminC || 0,
-            calcium: detail.calcium || 0,
-            iron: detail.iron || 0,
-          });
-        }
-      }).finally(() => setLoadingDetail(false));
-    }
-  }, [food]);
 
-  // Use enriched food for calculations
-  const activeFood = enrichedFood || food;
+
+  const activeFood = food;
 
   // Are we in gram mode?
   const isGramMode = selectedUnit === SERVING_UNITS.GRAM;
@@ -332,7 +301,34 @@ export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
                 </button>
               )
             ) : (
-              <span className="text-xl font-black text-foreground w-8 text-center">{servings}</span>
+              editingServings ? (
+                <input
+                  autoFocus
+                  type="number"
+                  step="any"
+                  defaultValue={servings}
+                  onBlur={(e) => {
+                    const val = parseFloat(e.target.value) || 0.5;
+                    setServings(Math.max(0.1, val));
+                    setEditingServings(false);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const val = parseFloat(e.target.value) || 0.5;
+                      setServings(Math.max(0.1, val));
+                      setEditingServings(false);
+                    }
+                  }}
+                  className="text-xl font-black text-foreground w-16 text-center bg-transparent outline-none border-b-2 border-foreground"
+                />
+              ) : (
+                <button
+                  onClick={() => setEditingServings(true)}
+                  className="text-xl font-black text-foreground min-w-[3rem] text-center"
+                >
+                  {servings}
+                </button>
+              )
             )}
             <button
               onClick={() => {

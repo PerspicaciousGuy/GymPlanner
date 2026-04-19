@@ -41,6 +41,7 @@ export default function MealDetailPage({
   const [items, setItems] = useState(meal?.items || []);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingIndex, setEditingIndex] = useState(null);
 
   // Total nutrition across all items
   const totals = useMemo(() => {
@@ -221,14 +222,41 @@ export default function MealDetailPage({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => updateServings(idx, -0.5)}
-                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground text-xs font-bold"
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground text-xs font-bold flex-shrink-0"
                       >
                         −
                       </button>
-                      <span className="text-xs font-black text-foreground w-5 text-center">{currentServings}</span>
+                      {editingIndex === idx ? (
+                        <input
+                          autoFocus
+                          type="number"
+                          step="any"
+                          defaultValue={currentServings}
+                          onBlur={(e) => {
+                             const val = parseFloat(e.target.value) || 0.5;
+                             setItems(prev => prev.map((it, i) => i === idx ? { ...it, servings: Math.max(0.1, val) } : it));
+                             setEditingIndex(null);
+                          }}
+                          onKeyDown={(e) => {
+                             if (e.key === 'Enter') {
+                                 const val = parseFloat(e.target.value) || 0.5;
+                                 setItems(prev => prev.map((it, i) => i === idx ? { ...it, servings: Math.max(0.1, val) } : it));
+                                 setEditingIndex(null);
+                             }
+                          }}
+                          className="text-xs font-black text-foreground w-10 text-center bg-transparent outline-none border-b-2 border-foreground"
+                        />
+                      ) : (
+                        <span 
+                          onClick={() => setEditingIndex(idx)}
+                          className="text-xs font-black text-foreground w-10 text-center cursor-pointer hover:text-muted-foreground"
+                        >
+                            {currentServings}
+                        </span>
+                      )}
                       <button
                         onClick={() => updateServings(idx, 0.5)}
-                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground text-xs font-bold"
+                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground text-xs font-bold flex-shrink-0"
                       >
                         +
                       </button>
