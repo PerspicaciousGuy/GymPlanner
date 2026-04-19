@@ -1,19 +1,14 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import {
   ArrowLeft,
   Search,
   Plus,
   Flame,
-  Bookmark,
   ClipboardList,
   Utensils,
   X,
-  Loader2,
-  Wifi,
-  WifiOff,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent } from "@/components/ui/card";
+import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -23,10 +18,6 @@ import {
   getBookmarkedFoods,
   searchFoods,
 } from '../../utils/foodDatabase';
-import {
-  searchFatSecretFoods,
-  getCachedFatSecretFoods,
-} from '../../utils/fatSecretApi';
 
 const TABS = [
   { id: 'all', label: 'All' },
@@ -38,45 +29,14 @@ const TABS = [
 export default function LogFoodPage({ onBack, onSelectFood, onSelectMeal, onCreateMeal }) {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [apiResults, setApiResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState(false);
 
   // Get data
   const bookmarkedIds = getBookmarkedFoods();
   const customFoods = getCustomFoods();
   const savedMeals = getSavedMeals();
-  const cachedFoods = getCachedFatSecretFoods();
-
-  // Debounced FatSecret API search
-  useEffect(() => {
-    if (activeTab !== 'all' || searchQuery.trim().length < 2) {
-      setApiResults([]);
-      setIsSearching(false);
-      setSearchError(false);
-      return;
-    }
-
-    setIsSearching(true);
-    setSearchError(false);
-    const timeout = setTimeout(async () => {
-      try {
-        const { foods } = await searchFatSecretFoods(searchQuery);
-        setApiResults(foods);
-        setSearchError(false);
-      } catch {
-        setSearchError(true);
-        setApiResults([]);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 400); // 400ms debounce
-
-    return () => clearTimeout(timeout);
-  }, [searchQuery, activeTab]);
 
   // Local search results (for My Foods / Saved tabs, or as fallback)
-  const localResults = useMemo(() => {
+  const displayItems = useMemo(() => {
     if (activeTab === 'my_meals') return [];
     if (activeTab === 'my_foods') {
       if (!searchQuery.trim()) return customFoods;
@@ -89,31 +49,16 @@ export default function LogFoodPage({ onBack, onSelectFood, onSelectMeal, onCrea
     }
     // 'all' tab - show local suggestions when no query
     if (!searchQuery.trim()) {
-      // Mix cached fatsecret foods (recently used) with popular defaults
+      // Just popular IDs for suggestions
       const popularIds = [
-        'peanut_butter', 'avocado', 'egg', 'banana', 'chicken_breast',
-        'apple', 'oats', 'greek_yogurt', 'white_rice', 'spinach',
-        'almonds', 'whey_protein',
+        'peanut_butter', 'egg', 'banana', 'chicken_breast_raw',
+        'oats', 'white_rice_raw', 'almonds', 'whey_protein',
       ];
-      const localSuggestions = DEFAULT_FOODS.filter(f => popularIds.includes(f.id));
-      // Show cached FatSecret foods first (recently logged), then local
-      const recentCached = cachedFoods.slice(0, 8);
-      return [...recentCached, ...localSuggestions];
+      return DEFAULT_FOODS.filter(f => popularIds.includes(f.id));
     }
-    // When searching, also search local as a fallback/complement
+    // When searching
     return searchFoods(searchQuery);
-  }, [searchQuery, activeTab, customFoods, bookmarkedIds, cachedFoods]);
-
-  // Combine results: API first, then local (deduplicated)
-  const displayItems = useMemo(() => {
-    if (activeTab !== 'all') return localResults;
-    if (!searchQuery.trim()) return localResults; // Suggestions mode
-
-    // Merge: API results first, then local that aren't duplicated
-    const apiIds = new Set(apiResults.map(f => f.name.toLowerCase()));
-    const uniqueLocal = localResults.filter(f => !apiIds.has(f.name.toLowerCase()));
-    return [...apiResults, ...uniqueLocal];
-  }, [activeTab, searchQuery, apiResults, localResults]);
+  }, [searchQuery, activeTab, customFoods, bookmarkedIds]);
 
   return (
     <motion.div
@@ -157,14 +102,10 @@ export default function LogFoodPage({ onBack, onSelectFood, onSelectMeal, onCrea
       <div className="px-4 py-3">
         <div className="relative">
           <div className="flex items-center bg-muted/50 border border-border rounded-2xl px-4 py-3 gap-3 focus-within:ring-2 focus-within:ring-foreground/20 transition-all">
-            {isSearching ? (
-              <Loader2 size={18} className="text-muted-foreground flex-shrink-0 animate-spin" />
-            ) : (
-              <Search size={18} className="text-muted-foreground flex-shrink-0" />
-            )}
+            <Search size={18} className="text-muted-foreground flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search foods (powered by FatSecret)"
+              placeholder="Search foods"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 bg-transparent text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none"
@@ -187,11 +128,6 @@ export default function LogFoodPage({ onBack, onSelectFood, onSelectMeal, onCrea
             {activeTab === 'all' && !searchQuery.trim() && (
               <div className="flex items-center gap-2 mb-3">
                 <h2 className="text-base font-black text-foreground tracking-tight">Suggestions</h2>
-                {cachedFoods.length > 0 && (
-                  <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                    Recently Used
-                  </span>
-                )}
               </div>
             )}
             {activeTab === 'all' && searchQuery.trim() && (
@@ -199,31 +135,11 @@ export default function LogFoodPage({ onBack, onSelectFood, onSelectMeal, onCrea
                 <h2 className="text-base font-black text-foreground tracking-tight">
                   Results for "{searchQuery}"
                 </h2>
-                {searchError && (
-                  <div className="flex items-center gap-1 text-amber-500">
-                    <WifiOff size={12} />
-                    <span className="text-[10px] font-bold">Offline</span>
-                  </div>
-                )}
-                {!searchError && apiResults.length > 0 && (
-                  <div className="flex items-center gap-1 text-emerald-500">
-                    <Wifi size={12} />
-                    <span className="text-[10px] font-bold">FatSecret</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Loading state */}
-            {isSearching && displayItems.length === 0 && (
-              <div className="text-center py-16">
-                <Loader2 size={32} className="mx-auto text-muted-foreground/40 mb-4 animate-spin" />
-                <p className="text-sm font-bold text-muted-foreground">Searching...</p>
               </div>
             )}
 
             {/* Empty state */}
-            {!isSearching && displayItems.length === 0 && (
+            {displayItems.length === 0 && (
               <div className="text-center py-16">
                 <Utensils size={40} className="mx-auto text-muted-foreground/30 mb-4" />
                 <p className="text-sm font-bold text-muted-foreground">
@@ -252,11 +168,6 @@ export default function LogFoodPage({ onBack, onSelectFood, onSelectMeal, onCrea
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-bold text-foreground truncate">{food.name}</p>
-                        {food.brand && (
-                          <span className="text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md truncate max-w-[100px]">
-                            {food.brand}
-                          </span>
-                        )}
                       </div>
                       <div className="flex items-center gap-1.5 mt-1">
                         <Flame size={12} className="text-muted-foreground/50" />
