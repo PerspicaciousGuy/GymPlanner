@@ -8,6 +8,7 @@ import { loadTrainingPlan } from '../utils/trainingPlan';
 import { calculateRecovery, getDailyFocus } from '../utils/recoveryLogic';
 import InteractiveMuscleMap from '../components/InteractiveMuscleMap/InteractiveMuscleMap';
 import { getFoodLog, getDailyTotals } from '../utils/foodDatabase';
+import { getWeightForDate } from '../utils/vitalsDatabase';
 import { cn } from "@/lib/utils";
 
 export default function DayDetailPage({ date, onBack, syncKey }) {
@@ -21,6 +22,7 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
   const dayData = useMemo(() => loadWorkoutByDate(dateStr), [dateStr, syncKey, refreshTrigger]);
   const foodLog = useMemo(() => getFoodLog(dateStr), [dateStr, syncKey, refreshTrigger]);
   const foodTotals = useMemo(() => getDailyTotals(dateStr), [dateStr, syncKey, refreshTrigger]);
+  const bodyWeight = useMemo(() => getWeightForDate(dateStr), [dateStr, syncKey, refreshTrigger]);
   
   const amTitle = getEffectiveSessionTitle(date, 'am');
   const pmTitle = getEffectiveSessionTitle(date, 'pm');
@@ -167,6 +169,13 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
               label="Total Sets" 
               value={stats.totalSets} 
             />
+            {bodyWeight && (
+              <StatBox 
+                icon={<Weight size={18} className="text-indigo-600" />} 
+                label="Body Weight" 
+                value={`${bodyWeight} kg`} 
+              />
+            )}
             <div className="col-span-2 bg-card rounded-2xl border border-border p-4 flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
                 <Zap size={20} className="text-amber-500" />
