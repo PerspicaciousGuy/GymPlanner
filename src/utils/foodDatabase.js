@@ -921,19 +921,31 @@ export const deleteCustomFood = (id) => {
 
 export const getSavedMeals = () => {
   const saved = readJson(SAVED_MEALS_KEY, null);
+  
+  // If no saved meals exist, return a COPY of the defaults
   if (saved === null || (Array.isArray(saved) && saved.length === 0)) {
-    return DEFAULT_MEALS;
+    return [...DEFAULT_MEALS];
   }
-  return saved;
+
+  // Defensive: Ensure IDs are unique in case of storage corruption
+  const seen = new Set();
+  return saved.filter(meal => {
+    if (seen.has(meal.id)) return false;
+    seen.add(meal.id);
+    return true;
+  });
 };
 
 export const saveMeal = (meal) => {
+  // Get existing meals (this already returns a copy now)
   const meals = getSavedMeals();
+  
   const newMeal = {
     ...meal,
-    id: meal.id || `meal_${Date.now()}`,
+    id: meal.id || `meal_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
     createdAt: new Date().toISOString(),
   };
+  
   meals.push(newMeal);
   writeJson(SAVED_MEALS_KEY, meals);
   runCloudSync(
