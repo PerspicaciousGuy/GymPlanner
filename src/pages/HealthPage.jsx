@@ -59,14 +59,23 @@ import {
   AreaChart
 } from 'recharts';
 
-export default function HealthPage({ settings, onFullScreenToggle }) {
+export default function HealthPage({ settings, onFullScreenToggle, initialSubView, onSubViewConsumed }) {
   const [activeTab, setActiveTab] = useState('nutrition');
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [currentSlide, setCurrentSlide] = useState(0);
   const [healthSubView, setHealthSubView] = useState(null); // null | 'log-food' | 'food-detail' | 'create-meal' | 'meal-detail'
+  
+  useEffect(() => {
+    if (initialSubView) {
+      setHealthSubView(initialSubView);
+      if (onSubViewConsumed) onSubViewConsumed();
+    }
+  }, [initialSubView, onSubViewConsumed]);
+
   const [selectedFood, setSelectedFood] = useState(null);
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [logVersion, setLogVersion] = useState(0); // trigger re-render on logs (food, weight, water)
+
   useEffect(() => {
     if (onFullScreenToggle) {
       onFullScreenToggle(!!healthSubView);
@@ -588,14 +597,6 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
       </Tabs>
 
       {/* Floating Action Button */}
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setHealthSubView('log-food')}
-        className="fixed bottom-28 right-6 md:bottom-12 md:right-12 w-14 h-14 bg-foreground text-background rounded-full shadow-2xl flex items-center justify-center z-[50]"
-      >
-        <Plus size={24} strokeWidth={3.5} />
-      </motion.button>
 
       {/* Sub-views */}
       <AnimatePresence>
