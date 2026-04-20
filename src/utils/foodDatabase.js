@@ -736,6 +736,91 @@ export const DEFAULT_FOODS = [
     "iron": 0
   }
 ];
+ 
+const getFood = (id) => DEFAULT_FOODS.find(f => f.id === id);
+ 
+export const DEFAULT_MEALS = [
+  {
+    id: "meal_early_morning",
+    name: "Early Morning",
+    items: [
+      { food: getFood("almonds"), servings: 1 },
+      { food: getFood("raisins"), servings: 1 },
+      { food: getFood("figs"), servings: 1 },
+      { food: getFood("chia_seeds"), servings: 1 },
+      { food: getFood("sabja_seeds"), servings: 1 },
+      { food: getFood("gond_katira"), servings: 1 }
+    ]
+  },
+  {
+    id: "meal_breakfast",
+    name: "Breakfast",
+    items: [
+      { food: getFood("oats"), servings: 1 },
+      { food: getFood("whey_isolate"), servings: 1 },
+      { food: getFood("milk_whole"), servings: 3 },
+      { food: getFood("peanut_butter"), servings: 1 },
+      { food: getFood("banana"), servings: 1 },
+      { food: getFood("watermelon"), servings: 1 }
+    ]
+  },
+  {
+    id: "meal_mid_snack",
+    name: "Mid Snack",
+    items: [
+      { food: getFood("mixed_fruit"), servings: 1 },
+      { food: getFood("milk_whole"), servings: 1 }
+    ]
+  },
+  {
+    id: "meal_lunch",
+    name: "Lunch",
+    items: [
+      { food: getFood("white_rice_raw"), servings: 1.15 },
+      { food: getFood("egg"), servings: 1 },
+      { food: getFood("egg_whites"), servings: 1 },
+      { food: getFood("soya_chunks"), servings: 1 },
+      { food: getFood("onion_tomato_mix"), servings: 1 },
+      { food: getFood("cooking_oil"), servings: 1 },
+      { food: getFood("watermelon"), servings: 2 }
+    ]
+  },
+  {
+    id: "meal_pre_workout",
+    name: "Pre-Workout",
+    items: [
+      { food: getFood("potato"), servings: 1 },
+      { food: getFood("banana"), servings: 1 },
+      { food: getFood("honey"), servings: 1 }
+    ]
+  },
+  {
+    id: "meal_post_workout",
+    name: "Post-Workout",
+    items: [
+      { food: getFood("whey_protein"), servings: 1 },
+      { food: getFood("milk_whole"), servings: 3 }
+    ]
+  },
+  {
+    id: "meal_dinner",
+    name: "Dinner",
+    items: [
+      { food: getFood("chicken_breast_raw"), servings: 1 },
+      { food: getFood("white_rice_raw"), servings: 0.65 },
+      { food: getFood("mixed_vegetables"), servings: 1 },
+      { food: getFood("cooking_oil"), servings: 0.4 },
+      { food: getFood("papaya"), servings: 1 }
+    ]
+  },
+  {
+    id: "meal_before_sleep",
+    name: "Before Sleep",
+    items: [
+      { food: getFood("milk_whole"), servings: 2 }
+    ]
+  }
+];
 
 
 
@@ -835,7 +920,11 @@ export const deleteCustomFood = (id) => {
 // ═══════════════════════════════════════════
 
 export const getSavedMeals = () => {
-  return readJson(SAVED_MEALS_KEY, []);
+  const saved = readJson(SAVED_MEALS_KEY, null);
+  if (saved === null || (Array.isArray(saved) && saved.length === 0)) {
+    return DEFAULT_MEALS;
+  }
+  return saved;
 };
 
 export const saveMeal = (meal) => {
