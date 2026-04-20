@@ -785,6 +785,16 @@ export function markDayComplete(date, session = 'am') {
 export function isDayComplete(date, session = 'am') {
   const dateKey = formatDateKey(date);
   const val = loadCompletion()[`${dateKey}_${session}`];
+  return val === true;
+}
+
+/**
+ * Returns true if the session is either completed or explicitly skipped.
+ * Used for filtering/hub logic.
+ */
+export function isSessionFinished(date, session = 'am') {
+  const dateKey = formatDateKey(date);
+  const val = loadCompletion()[`${dateKey}_${session}`];
   return val === true || val === 'skipped';
 }
 

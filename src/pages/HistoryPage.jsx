@@ -19,7 +19,7 @@ import {
   isSameDay,
   getToday
 } from '../utils/dateUtils';
-import { loadWorkoutByDate, isDayComplete, getEffectiveSessionTitle } from '../utils/storage';
+import { loadWorkoutByDate, isDayComplete, isDaySkipped, getEffectiveSessionTitle } from '../utils/storage';
 import { getDayOfWeek } from '../utils/dateUtils';
 import { loadTrainingPlan } from '../utils/trainingPlan';
 
@@ -113,10 +113,16 @@ export default function HistoryPage({ onDateSelect }) {
           Partial
         </div>
         <div className="flex items-center gap-2.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+          <div className="w-4 h-4 rounded-full bg-yellow-500/20 flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-yellow-500" />
+          </div>
+          Skipped
+        </div>
+        <div className="flex items-center gap-2.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
           <div className="w-4 h-4 rounded-full bg-rose-500/20 flex items-center justify-center">
             <div className="w-2 h-2 rounded-full bg-rose-500" />
           </div>
-          Skipped
+          Missed
         </div>
         <div className="flex items-center gap-2.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
           <Circle size={16} className="text-muted" />
@@ -140,6 +146,8 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
   const dayWorkout = loadWorkoutByDate(dateKey);
   const doneAm = isDayComplete(dateKey, 'am');
   const donePm = isDayComplete(dateKey, 'pm');
+  const skipAm = isDaySkipped(dateKey, 'am');
+  const skipPm = isDaySkipped(dateKey, 'pm');
 
   const plannedAm = !isOff(amTitle);
   const plannedPm = !isOff(pmTitle);
@@ -154,16 +162,19 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
   let status = 'none'; // 'completed', 'partial', 'skipped', 'planned', 'none'
   
   if (isPast || isToday) {
-    const amOk = plannedAm ? doneAm : true;
-    const pmOk = plannedPm ? donePm : true;
-    
     if (isPlanned || hasLoggedWorkout) {
-      if (amOk && pmOk) {
+      const allOk = (plannedAm ? doneAm : true) && (plannedPm ? donePm : true);
+      const anyDone = (plannedAm && doneAm) || (plannedPm && donePm);
+      const anySkipped = (plannedAm && skipAm) || (plannedPm && skipPm);
+
+      if (allOk) {
         status = 'completed';
-      } else if ((plannedAm && doneAm) || (plannedPm && donePm)) {
+      } else if (anyDone) {
         status = 'partial';
-      } else {
+      } else if (anySkipped) {
         status = 'skipped';
+      } else {
+        status = 'missed';
       }
     }
   } else if (isPlanned) {
@@ -223,7 +234,12 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
             </div>
           )}
           {status === 'skipped' && (
-            <div className="bg-rose-500/10 p-1 rounded-full border border-rose-500/20">
+            <div className="bg-yellow-500/10 p-1 rounded-full border border-yellow-500/20 shadow-[0_0_12px_rgba(234,179,8,0.1)]">
+               <Circle size={16} className="text-yellow-500" fill="currentColor" fillOpacity={0.2} />
+            </div>
+          )}
+          {status === 'missed' && (
+            <div className="bg-rose-500/10 p-1 rounded-full border border-rose-500/20 shadow-[0_0_12px_rgba(244,63,94,0.1)]">
                <Circle size={16} className="text-rose-500" fill="currentColor" fillOpacity={0.2} />
             </div>
           )}
@@ -242,14 +258,15 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
 
         {/* Mobile Dot Markers */}
         <div className="flex sm:hidden items-center gap-1 mt-1">
-           <div className={cn(
-             "w-1.5 h-1.5 rounded-full",
-             status === 'completed' && "bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.4)]",
-             status === 'partial' && "bg-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.4)]",
-             status === 'skipped' && "bg-rose-400 shadow-[0_0_4px_rgba(251,113,113,0.4)]",
-             status === 'planned' && "bg-muted-foreground opacity-30",
-             status === 'none' && "hidden"
-           )} />
+            <div className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              status === 'completed' && "bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.4)]",
+              status === 'partial' && "bg-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.4)]",
+              status === 'skipped' && "bg-yellow-400 shadow-[0_0_4px_rgba(234,179,8,0.4)]",
+              status === 'missed' && "bg-rose-400 shadow-[0_0_4px_rgba(244,63,94,0.4)]",
+              status === 'planned' && "bg-muted-foreground opacity-30",
+              status === 'none' && "hidden"
+            )} />
         </div>
       </div>
     </button>

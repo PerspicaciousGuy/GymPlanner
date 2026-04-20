@@ -76,8 +76,8 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const [activeSession, setActiveSession] = useState(initialSession);
   const [saveFlash, setSaveFlash] = useState(false);
   const [titleSaveFlash, setTitleSaveFlash] = useState(false);
-  const [amDone, setAmDone] = useState(() => isDayComplete(date || workoutDateKey, 'am') && !isDaySkipped(date || workoutDateKey, 'am'));
-  const [pmDone, setPmDone] = useState(() => isDayComplete(date || workoutDateKey, 'pm') && !isDaySkipped(date || workoutDateKey, 'pm'));
+  const [amDone, setAmDone] = useState(() => isDayComplete(date || workoutDateKey, 'am'));
+  const [pmDone, setPmDone] = useState(() => isDayComplete(date || workoutDateKey, 'pm'));
   const [amSkipped, setAmSkipped] = useState(() => isDaySkipped(date || workoutDateKey, 'am'));
   const [pmSkipped, setPmSkipped] = useState(() => isDaySkipped(date || workoutDateKey, 'pm'));
   const [amTitleState, setAmTitleState] = useState(() => getEffectiveSessionTitle(date || workoutDateKey, 'am'));
@@ -118,8 +118,8 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
     const pmIsSkipped = isDaySkipped(dateOrDay, 'pm');
     setAmSkipped(amIsSkipped);
     setPmSkipped(pmIsSkipped);
-    setAmDone(isDayComplete(dateOrDay, 'am') && !amIsSkipped);
-    setPmDone(isDayComplete(dateOrDay, 'pm') && !pmIsSkipped);
+    setAmDone(isDayComplete(dateOrDay, 'am'));
+    setPmDone(isDayComplete(dateOrDay, 'pm'));
   }, [date, workoutDateKey, syncToken]);
 
   useEffect(() => {

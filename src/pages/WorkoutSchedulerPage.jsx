@@ -5,6 +5,7 @@ import {
   loadSessionTitles, 
   loadWorkoutByDate, 
   isDayComplete, 
+  isSessionFinished, 
   ensureAmPm, 
   syncPlannerData,
   getEffectiveSessionTitle,
@@ -213,12 +214,12 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
 
         const yesterdayMissed =
           hasPlannedTraining(yesterday) &&
-          !isDayComplete(yesterday, 'am') &&
-          (!hasPlannedPm(yesterday) || !isDayComplete(yesterday, 'pm'));
+          !isSessionFinished(yesterday, 'am') &&
+          (!hasPlannedPm(yesterday) || !isSessionFinished(yesterday, 'pm'));
         
         const focusedList = [];
         if (yesterdayMissed) {
-        const yesterdayComplete = isDayComplete(yesterday, 'am') && (!hasPlannedPm(yesterday) || isDayComplete(yesterday, 'pm'));
+        const yesterdayComplete = isSessionFinished(yesterday, 'am') && (!hasPlannedPm(yesterday) || isSessionFinished(yesterday, 'pm'));
         focusedList.push({ 
           date: yesterday, 
           dayName: yesterdayName, 
@@ -238,7 +239,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
         });
       }
       
-      const todayComplete = isDayComplete(today, 'am') && (!hasPlannedPm(today) || isDayComplete(today, 'pm'));
+      const todayComplete = isSessionFinished(today, 'am') && (!hasPlannedPm(today) || isSessionFinished(today, 'pm'));
       const todayAmMeta = getDailyMetadata(today, 'am');
       const todayPmMeta = getDailyMetadata(today, 'pm');
       focusedList.push({ 
@@ -259,7 +260,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
           ? `${getDayOfWeek(todayAmMeta.shiftedToDate || todayPmMeta.shiftedToDate).slice(0,3)}, ${formatDateCompact(todayAmMeta.shiftedToDate || todayPmMeta.shiftedToDate)}` : null,
       });
 
-      const tomorrowComplete = isDayComplete(tomorrow, 'am') && (!hasPlannedPm(tomorrow) || isDayComplete(tomorrow, 'pm'));
+      const tomorrowComplete = isSessionFinished(tomorrow, 'am') && (!hasPlannedPm(tomorrow) || isSessionFinished(tomorrow, 'pm'));
       const tomorrowAmMeta = getDailyMetadata(tomorrow, 'am');
       const tomorrowPmMeta = getDailyMetadata(tomorrow, 'pm');
       focusedList.push({ 
@@ -286,7 +287,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       const weekDates = getWeekDates(selectedWeek);
       const list = weekDates.map((date) => {
         const dayName = getDayOfWeek(date);
-        const isFullyComplete = isDayComplete(date, 'am') && (!hasPlannedPm(date) || isDayComplete(date, 'pm'));
+        const isFullyComplete = isSessionFinished(date, 'am') && (!hasPlannedPm(date) || isSessionFinished(date, 'pm'));
         const amMeta = getDailyMetadata(date, 'am');
         const pmMeta = getDailyMetadata(date, 'pm');
         return {

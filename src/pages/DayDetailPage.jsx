@@ -3,7 +3,7 @@ import { ChevronLeft, Calendar as CalendarIcon, Weight, Layers, Zap, List, Layou
 import WorkoutSection from '../components/WorkoutSection';
 import WorkoutLogView from '../components/WorkoutLogView';
 import { formatDateDisplay, formatDateKey, getDayOfWeek } from '../utils/dateUtils';
-import { loadWorkoutByDate, isDayComplete, loadSessionTitles, getEffectiveSessionTitle } from '../utils/storage';
+import { loadWorkoutByDate, isDayComplete, isDaySkipped, loadSessionTitles, getEffectiveSessionTitle } from '../utils/storage';
 import { loadTrainingPlan } from '../utils/trainingPlan';
 import { calculateRecovery, getDailyFocus } from '../utils/recoveryLogic';
 import InteractiveMuscleMap from '../components/InteractiveMuscleMap/InteractiveMuscleMap';
@@ -43,15 +43,32 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
   const shouldShowSessionSwitcher = plannedPm || hasDataInPm;
 
   const statusInfo = useMemo(() => {
-    const amOk = plannedAm ? isDayComplete(dateStr, 'am') : true;
-    const pmOk = plannedPm ? isDayComplete(dateStr, 'pm') : true;
-    
     const amDone = isDayComplete(dateStr, 'am');
     const pmDone = isDayComplete(dateStr, 'pm');
+    const amSkipped = isDaySkipped(dateStr, 'am');
+    const pmSkipped = isDaySkipped(dateStr, 'pm');
 
-    if (amOk && pmOk) return { label: 'Completed', color: 'text-emerald-500 bg-emerald-500/10', icon: <CheckCircle2 size={12} /> };
+    const amOk = plannedAm ? (amDone || amSkipped) : true;
+    const pmOk = plannedPm ? (pmDone || pmSkipped) : true;
+
+    // Both sessions (if planned) are addressed
+    if (amOk && pmOk) {
+      if ((plannedAm && amSkipped) || (plannedPm && pmSkipped)) {
+        // At least one was skipped, so it's not a pure "Completed"
+        if ((plannedAm && amDone) || (plannedPm && pmDone)) {
+          return { label: 'Partial', color: 'text-amber-500 bg-amber-500/10', icon: <AlertCircle size={12} /> };
+        }
+        return { label: 'Skipped', color: 'text-yellow-500 bg-yellow-500/10', icon: <XCircle size={12} className="rotate-45" /> };
+      }
+      return { label: 'Completed', color: 'text-emerald-500 bg-emerald-500/10', icon: <CheckCircle2 size={12} /> };
+    }
+
     if (amDone || pmDone) return { label: 'Partial', color: 'text-amber-500 bg-amber-500/10', icon: <AlertCircle size={12} /> };
-    return { label: 'Missed', color: 'text-rose-500 bg-rose-500/10', icon: <XCircle size={12} /> };
+    
+    // If we're here and any sessions were skipped but not ALL planned sessions are addressed
+    if (amSkipped || pmSkipped) return { label: 'Skipped', color: 'text-yellow-500 bg-yellow-500/10', icon: <XCircle size={12} className="rotate-45" /> };
+
+    return { label: 'Missed', color: 'text-rose-500 bg-rose-500/10', icon: <AlertCircle size={12} /> };
   }, [dateStr, dayName, plannedAm, plannedPm]);
 
   const stats = useMemo(() => {
