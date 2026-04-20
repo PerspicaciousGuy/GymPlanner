@@ -39,17 +39,34 @@ import FoodDetailPage from './health/FoodDetailPage';
 import CreateMealPage from './health/CreateMealPage';
 import MealDetailPage from './health/MealDetailPage';
 
+import {
+  getVitalsLog,
+  getWeightForDate,
+  getWaterForDate,
+  logWeight,
+  logWater,
+  getWeightHistory
+} from '../utils/vitalsDatabase';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Area,
+  AreaChart
+} from 'recharts';
+
 export default function HealthPage({ settings, onFullScreenToggle }) {
   const [activeTab, setActiveTab] = useState('nutrition');
   const [selectedDate, setSelectedDate] = useState(getToday());
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [waterIntake, setWaterIntake] = useState(0);
   const [healthSubView, setHealthSubView] = useState(null); // null | 'log-food' | 'food-detail' | 'create-meal' | 'meal-detail'
   const [selectedFood, setSelectedFood] = useState(null);
   const [selectedMeal, setSelectedMeal] = useState(null);
-  const [logVersion, setLogVersion] = useState(0); // trigger re-render on food log
-
-  // Update parent full screen mode
+  const [logVersion, setLogVersion] = useState(0); // trigger re-render on logs (food, weight, water)
   useEffect(() => {
     if (onFullScreenToggle) {
       onFullScreenToggle(!!healthSubView);
@@ -81,8 +98,8 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
       }
     }
   }, [dates]);
-
   const dateKey = formatDateKey(selectedDate);
+  const waterIntake = useMemo(() => getWaterForDate(dateKey), [dateKey, logVersion]);
   const isToday = dateKey === formatDateKey(getToday());
 
   // Mock data for goals (these would eventually come from user settings)
@@ -352,13 +369,19 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
                       </div>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => setWaterIntake(prev => Math.max(0, prev - 250))}
+                          onClick={() => {
+                            logWater(dateKey, -250);
+                            setLogVersion(v => v + 1);
+                          }}
                           className="w-10 h-10 rounded-full flex items-center justify-center text-foreground border border-foreground hover:bg-muted/50 transition-colors"
                         >
                           <Minus size={18} strokeWidth={2} />
                         </button>
                         <button
-                          onClick={() => setWaterIntake(prev => prev + 250)}
+                          onClick={() => {
+                            logWater(dateKey, 250);
+                            setLogVersion(v => v + 1);
+                          }}
                           className="w-10 h-10 rounded-full flex items-center justify-center bg-foreground text-background hover:scale-105 transition-transform"
                         >
                           <Plus size={18} strokeWidth={2.5} />
@@ -407,17 +430,15 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
             ) : (
               <div className="space-y-3">
                 {getFoodLog(dateKey).map((entry) => (
-                  <motion.button
+                  <motion.div
                     key={entry.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     onClick={() => {
                       setSelectedFood(entry.food);
-                      // We pass the whole entry for editing in the future, 
-                      // but for now detail page just needs the food object.
                       setHealthSubView('food-detail');
                     }}
-                    className="w-full text-left group bg-card border border-border rounded-[32px] p-4 flex items-center justify-between hover:shadow-md transition-all active:scale-[0.98]"
+                    className="w-full text-left group bg-card border border-border rounded-[32px] p-4 flex items-center justify-between hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
                   >
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="w-12 h-12 bg-muted/50 rounded-2xl flex items-center justify-center flex-shrink-0">
@@ -450,16 +471,112 @@ export default function HealthPage({ settings, onFullScreenToggle }) {
                     >
                       <Trash2 size={18} />
                     </button>
-                  </motion.button>
+                  </motion.div>
                 ))}
               </div>
             )}
           </div>
         </TabsContent>
 
-        <TabsContent value="vitals">
-          <div className="p-12 text-center text-muted-foreground italic">
-            Body weight and vitals tracking coming soon...
+        <TabsContent value="vitals" className="space-y-6 pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Weight Stats Overview */}
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="rounded-[32px] border border-border p-6 bg-gradient-to-br from-card to-indigo-50/10">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Today's Weight</p>
+              <h3 className="text-2xl font-black text-foreground">
+                {getWeightForDate(dateKey) ? `${getWeightForDate(dateKey)} kg` : '--'}
+              </h3>
+            </Card>
+            <Card className="rounded-[32px] border border-border p-6 bg-gradient-to-br from-card to-emerald-50/10">
+              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">7D Trend</p>
+              <h3 className="text-2xl font-black text-foreground">Stable</h3>
+            </Card>
+          </div>
+
+          {/* Weight Chart */}
+          <Card className="rounded-[32px] border border-border p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-sm font-black text-foreground uppercase tracking-[0.2em]">Weight Trend</h3>
+                <p className="text-[10px] font-bold text-muted-foreground mt-1">Last 14 days</p>
+              </div>
+              <Activity className="w-5 h-5 text-indigo-500 opacity-50" />
+            </div>
+
+            <div className="h-[240px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={getWeightHistory(14)}>
+                  <defs>
+                    <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis
+                    dataKey="date"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }}
+                    tickFormatter={(str) => {
+                      const d = new Date(str);
+                      return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+                    }}
+                  />
+                  <YAxis
+                    hide
+                    domain={['dataMin - 2', 'dataMax + 2']}
+                  />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="bg-slate-900 text-white px-3 py-2 rounded-xl border border-slate-800 shadow-xl text-[10px] font-black">
+                            <p>{new Date(payload[0].payload.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                            <p className="text-indigo-400 mt-0.5">{payload[0].value} kg</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="weight"
+                    stroke="#6366f1"
+                    strokeWidth={4}
+                    fillOpacity={1}
+                    fill="url(#colorWeight)"
+                    animationDuration={1500}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          {/* History List */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-black text-foreground uppercase tracking-[0.2em] px-2 mb-4">Weight History</h3>
+            {getWeightHistory(10).length === 0 ? (
+              <p className="text-xs font-bold text-muted-foreground italic text-center py-8">No weight data available.</p>
+            ) : (
+              getWeightHistory(10).map((entry, idx) => (
+                <div key={idx} className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
+                      <Scale size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-foreground">{entry.weight} kg</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+                        {new Date(entry.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight size={16} className="text-muted-foreground/30" />
+                </div>
+              ))
+            )}
           </div>
         </TabsContent>
 
