@@ -21,6 +21,8 @@ import {
   saveCloudSavedMeals,
   saveCloudBookmarkedFoods,
   saveCloudNotifSettings,
+  saveCloudVitalsLog,
+  saveCloudWaterLog,
 } from './cloudSync.js';
 import {
   formatDateKey,
@@ -47,6 +49,8 @@ import {
   SESSION_TITLES_KEY,
   SETTINGS_KEY,
   TEMPLATES_KEY,
+  VITALS_LOG_KEY,
+  WATER_LOG_KEY,
   WORKOUT_MIGRATION_FLAG_KEY,
   WORKOUTS_KEY,
 } from '../constants/storageKeys.js';
@@ -69,6 +73,8 @@ const PLANNER_LOCAL_KEYS = [
   BOOKMARKED_FOODS_KEY,
   SETTINGS_KEY,
   NOTIFICATION_SETTINGS_KEY,
+  VITALS_LOG_KEY,
+  WATER_LOG_KEY,
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────
@@ -130,9 +136,9 @@ export function saveSchedule(schedule) {
 
 export function loadSessionTitles() {
   const raw = safeLoad(SESSION_TITLES_KEY, { am: {}, pm: {} }) || { am: {}, pm: {} };
-  return { 
-    am: raw.am || {}, 
-    pm: raw.pm || {} 
+  return {
+    am: raw.am || {},
+    pm: raw.pm || {}
   };
 }
 
@@ -149,12 +155,12 @@ export function saveDailyMetadata(date, session, data) {
   const dateKey = formatDateKey(date);
   const all = loadDailyMetadata();
   if (!all[dateKey]) all[dateKey] = { am: {}, pm: {} };
-  
+
   all[dateKey][session] = {
     ...(all[dateKey][session] || {}),
     ...data
   };
-  
+
   localStorage.setItem(DAILY_METADATA_KEY, JSON.stringify(all));
 }
 
@@ -183,9 +189,9 @@ export function getDailyMetadata(date, session) {
 export function getEffectiveSessionTitle(date, session) {
   const override = getDailyMetadata(date, session);
   if (
-    override.title !== undefined && 
-    override.title !== null && 
-    override.title.trim() !== '' && 
+    override.title !== undefined &&
+    override.title !== null &&
+    override.title.trim() !== '' &&
     override.title.trim().toLowerCase() !== 'workout'
   ) {
     return override.title;
@@ -215,7 +221,7 @@ export function getEffectiveSessionNotes(date, session) {
  */
 export function shiftWorkout(fromDate, toDate, fromSession, toSession = null) {
   const targetSession = toSession || fromSession;
-  
+
   // 1. Get source data
   const sourceTitle = getEffectiveSessionTitle(fromDate, fromSession);
   const sourceWorkouts = loadWorkoutByDate(fromDate);
@@ -223,24 +229,24 @@ export function shiftWorkout(fromDate, toDate, fromSession, toSession = null) {
 
   // 2. Save to destination
   // Save Title
-  saveDailyMetadataWithSync(toDate, targetSession, { 
+  saveDailyMetadataWithSync(toDate, targetSession, {
     title: sourceTitle,
-    isShifted: true, 
+    isShifted: true,
     originalDate: formatDateKey(fromDate)
   });
-  
+
   // Save Exercises
   const targetWorkouts = loadWorkoutByDate(toDate);
   targetWorkouts[targetSession] = JSON.parse(JSON.stringify(sourceSessionData));
   saveDayWorkoutWithSync(toDate, targetWorkouts);
 
   // 3. Update source (Mark as shifted/rest)
-  saveDailyMetadataWithSync(fromDate, fromSession, { 
+  saveDailyMetadataWithSync(fromDate, fromSession, {
     title: `Rest (Shifted to ${formatDateKey(toDate)})`,
     isShiftedFrom: true,
     shiftedToDate: formatDateKey(toDate)
   });
-  
+
   // Clear source exercises
   sourceWorkouts[fromSession] = defaultSession();
   saveDayWorkoutWithSync(fromDate, sourceWorkouts);
@@ -276,6 +282,8 @@ export async function migrateLocalDataToCloud() {
     const savedMeals = getSavedMeals();
     const bookmarkedFoods = getBookmarkedFoods();
     const notifEnabled = localStorage.getItem(NOTIFICATION_SETTINGS_KEY) === 'true';
+    const vitalsLog = safeLoad(VITALS_LOG_KEY, {});
+    const waterLog = safeLoad(WATER_LOG_KEY, {});
 
     await Promise.all([
       saveCloudSchedule(schedule),
@@ -293,6 +301,8 @@ export async function migrateLocalDataToCloud() {
       saveCloudSavedMeals(savedMeals),
       saveCloudBookmarkedFoods(bookmarkedFoods),
       saveCloudNotifSettings(notifEnabled),
+      saveCloudVitalsLog(vitalsLog),
+      saveCloudWaterLog(waterLog),
       ...Object.entries(workouts).map(([day, dayData]) =>
         saveCloudDayWorkout(day, ensureAmPm(dayData))
       )
@@ -344,6 +354,8 @@ export async function clearAllDataLocalAndCloud() {
       saveCloudTemplates([]),
       saveCloudCustomExercises({}),
       saveCloudDailyMetadata({}),
+      saveCloudVitalsLog({}),
+      saveCloudWaterLog({}),
     ]);
 
     clearPlannerLocalData();
@@ -375,7 +387,7 @@ export function defaultDayWorkout() {
 // Migrate old single-session format to new am/pm format
 export function ensureAmPm(dayData) {
   const result = defaultDayWorkout();
-  
+
   if (!dayData) return result;
 
   // 1. If it's already in the am/pm format, merge them in to catch any new fields (like standaloneExercises)
@@ -401,7 +413,7 @@ export function migrateWorkoutsToDateBased() {
   if (migrated === 'true') return; // Already migrated
 
   const workouts = safeLoad(WORKOUTS_KEY, {});
-  const hasOldFormat = Object.keys(workouts).some(key => 
+  const hasOldFormat = Object.keys(workouts).some(key =>
     /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/.test(key)
   );
 
@@ -411,7 +423,7 @@ export function migrateWorkoutsToDateBased() {
   }
 
   console.log('[storage] Migrating workouts data to date-based format...');
-  
+
   // Get current week's Monday
   const currentWeekStart = getWeekStart(new Date());
   const newWorkouts = {};
@@ -543,7 +555,7 @@ export function findPreviousExerciseEntry({ exercise, beforeDate, session }) {
 
     for (const sessionKey of ['am', 'pm']) {
       const sessionData = normalizedDay[sessionKey] || {};
-      
+
       // 1. Search in Traditional Groups
       const groups = sessionData.groups ?? [];
       for (const group of groups) {
@@ -556,10 +568,10 @@ export function findPreviousExerciseEntry({ exercise, beforeDate, session }) {
           const bucketIndex = isSameWeekday && isSameSession
             ? 0
             : isSameSession
-            ? 1
-            : isSameWeekday
-            ? 2
-            : 3;
+              ? 1
+              : isSameWeekday
+                ? 2
+                : 3;
 
           if (!buckets[bucketIndex]) {
             buckets[bucketIndex] = {
@@ -641,7 +653,7 @@ export function getExerciseOccurrenceCount({ exercise, reps, weight, beforeDate 
     const normalizedDay = ensureAmPm(dayData);
     for (const sessionKey of ['am', 'pm']) {
       const sessionData = normalizedDay[sessionKey] || {};
-      
+
       // Check Groups
       const groups = sessionData.groups ?? [];
       for (const group of groups) {
@@ -661,7 +673,7 @@ export function getExerciseOccurrenceCount({ exercise, reps, weight, beforeDate 
       for (const ex of standalone) {
         const exEx = String(ex?.exercise || '').trim().toLowerCase();
         if (exEx !== exName) continue;
-        
+
         for (const s of ex.sets || []) {
           const sReps = String(s.reps || '').trim();
           const sWeight = String(s.weight || '').trim();
@@ -682,7 +694,7 @@ export function migrateCompletionToDateBased() {
   if (migrated === 'true') return; // Already migrated
 
   const completion = safeLoad(COMPLETION_KEY, {});
-  const hasOldFormat = Object.keys(completion).some(key => 
+  const hasOldFormat = Object.keys(completion).some(key =>
     /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)_(am|pm)/.test(key)
   );
 
@@ -692,13 +704,13 @@ export function migrateCompletionToDateBased() {
   }
 
   console.log('[storage] Migrating completion data to date-based format...');
-  
+
   // Get previous week's Monday (the week that just ended)
   // This is more logical since completion data is typically historical
   const currentWeekStart = getWeekStart(new Date());
   const previousWeekStart = new Date(currentWeekStart);
   previousWeekStart.setDate(currentWeekStart.getDate() - 7);
-  
+
   const newCompletion = {};
 
   // Migrate old day-based keys to previous week's dates
@@ -798,7 +810,7 @@ export function getCompletionForWeek(weekStartDate) {
   for (const date of weekDates) {
     const dateKey = formatDateKey(date);
     const dayName = getDayOfWeek(date);
-    
+
     weekCompletion[dayName] = {
       date: dateKey,
       am: completion[`${dateKey}_am`],
@@ -825,7 +837,7 @@ export function setCompletionStatus(date, session, status) {
   }
   const dateKey = formatDateKey(date);
   const all = loadCompletion();
-  
+
   if (status === 'done') {
     all[`${dateKey}_${session}`] = true;
   } else if (status === 'skipped') {
@@ -834,7 +846,7 @@ export function setCompletionStatus(date, session, status) {
     // Remove the key if status is empty/none
     delete all[`${dateKey}_${session}`];
   }
-  
+
   localStorage.setItem(COMPLETION_KEY, JSON.stringify(all));
 }
 
@@ -907,7 +919,7 @@ export function updateTemplate(id, name, groups) {
   const templates = loadTemplates();
   const idx = templates.findIndex(t => t.id === id);
   if (idx === -1) return null;
-  
+
   templates[idx] = {
     ...templates[idx],
     name,
@@ -1030,10 +1042,11 @@ export async function syncPlannerData() {
     const result = await fetchCloudPlannerData();
     if (!result) return false;
 
-    const { 
-      schedule, workouts, completion, exerciseDb, sessionTitles, 
+    const {
+      schedule, workouts, completion, exerciseDb, sessionTitles,
       savedPlans, activePlanId, templates, customExercises, dailyMetadata,
-      settings, foodLog, customFoods, savedMeals, bookmarkedFoods, notifSettings
+      settings, foodLog, customFoods, savedMeals, bookmarkedFoods, 
+      vitalsLog, waterLog, notifSettings
     } = result;
 
     if (schedule && typeof schedule === 'object') {
@@ -1109,6 +1122,14 @@ export async function syncPlannerData() {
 
     if (bookmarkedFoods && Array.isArray(bookmarkedFoods.bookmarks)) {
       localStorage.setItem(BOOKMARKED_FOODS_KEY, JSON.stringify(bookmarkedFoods.bookmarks));
+    }
+
+    if (vitalsLog && typeof vitalsLog === 'object') {
+      localStorage.setItem(VITALS_LOG_KEY, JSON.stringify(vitalsLog));
+    }
+
+    if (waterLog && typeof waterLog === 'object') {
+      localStorage.setItem(WATER_LOG_KEY, JSON.stringify(waterLog));
     }
 
     if (notifSettings && notifSettings.enabled !== undefined) {
@@ -1195,7 +1216,7 @@ export function freezeHistoryUnderPlan(plan) {
   const checkAndFreeze = (dateStr, session) => {
     const dMeta = metadata[dateStr]?.[session] || {};
     if (dMeta.isShifted || dMeta.isShiftedFrom) return;
-    
+
     // Check if it already has a valid override
     if (
       dMeta.title !== undefined &&
