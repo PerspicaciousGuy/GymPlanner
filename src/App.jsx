@@ -11,6 +11,7 @@ import RoutinesPage from './pages/RoutinesPage';
 import EditRoutinePage from './pages/EditRoutinePage';
 import TrainingPlanPage from './pages/TrainingPlanPage';
 import HealthPage from './pages/HealthPage';
+import QuickActionHub from './components/health/QuickActionHub';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ export default function App() {
   const [editRoutineId, setEditRoutineId] = useState(null);
   const [syncNonce, setSyncNonce] = useState(0);
   const [fullScreenMode, setFullScreenMode] = useState(false);
+  const [healthInitialView, setHealthInitialView] = useState(null);
   const authState = useFirebaseAuth();
   const syncScope = authState.user?.uid || (authState.isConfigured ? 'signed-out' : 'local');
   const syncKey = `${syncScope}:${syncNonce}`;
@@ -151,7 +153,14 @@ export default function App() {
         <main className="flex-1 overflow-auto">
           <div className="p-3 sm:p-4 lg:p-6 mx-auto w-full max-w-[1600px]">
             {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} targetDate={selectedHistoryDate} />}
-            {activePage === 'health' && <HealthPage settings={settings} onFullScreenToggle={setFullScreenMode} />}
+            {activePage === 'health' && (
+              <HealthPage 
+                settings={settings} 
+                onFullScreenToggle={setFullScreenMode} 
+                initialSubView={healthInitialView}
+                onSubViewConsumed={() => setHealthInitialView(null)}
+              />
+            )}
             {activePage === 'routines' && <RoutinesPage syncKey={syncKey} onEdit={(id) => { setEditRoutineId(id); setActivePage('edit-routine'); }} onOpenTrainingPlan={() => setActivePage('training-plan')} />}
             {activePage === 'edit-routine' && <EditRoutinePage routineId={editRoutineId} onBack={() => setActivePage('routines')} />}
             {activePage === 'training-plan' && <TrainingPlanPage syncKey={syncKey} onBack={() => setActivePage('routines')} />}
@@ -159,8 +168,16 @@ export default function App() {
             {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('analytics')} syncKey={syncKey} />}
             {activePage === 'profile' && <ProfilePage authState={authState} onDataRefreshed={() => setSyncNonce(n => n + 1)} onSettingsChange={setSettings} />}
           </div>
-
         </main>
+
+        {!fullScreenMode && (
+          <QuickActionHub 
+            onNavigateToHealth={(view) => {
+              setHealthInitialView(view);
+              setActivePage('health');
+            }}
+          />
+        )}
       </div>
 
       {/* Floating Bottom Navigation for Mobile */}
