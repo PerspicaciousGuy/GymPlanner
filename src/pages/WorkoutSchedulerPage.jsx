@@ -25,6 +25,7 @@ import WeekPicker from '../components/WeekPicker';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from "@/lib/utils";
 import { loadTrainingPlan, getCycleSlotForDate } from '../utils/trainingPlan';
+import QuickHealthWidgets from '../components/health/QuickHealthWidgets';
 
 function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged }) {
   const [open, setOpen] = useState(defaultOpen && !section.isFullyComplete);
@@ -350,6 +351,8 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
           />
         </div>
       </div>
+
+      <QuickHealthWidgets />
 
       <div className="flex flex-col">
         <AnimatePresence initial={false} mode="popLayout">
