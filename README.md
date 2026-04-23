@@ -128,7 +128,6 @@ GymPlanner/
 │   │   ├── LoginDialog.jsx
 │   │   ├── MuscleMap.jsx
 │   │   ├── Navbar.jsx
-│   │   ├── SchedulerTable.jsx
 │   │   ├── ShiftPicker.jsx
 │   │   ├── TemplateDialog.jsx
 │   │   ├── WeekPicker.jsx
@@ -141,12 +140,10 @@ GymPlanner/
 │   │   ├── DataConsolePage.jsx
 │   │   ├── DayDetailPage.jsx
 │   │   ├── EditRoutinePage.jsx
-│   │   ├── ExercisePlannerPage.jsx
 │   │   ├── HealthPage.jsx
 │   │   ├── HistoryPage.jsx
 │   │   ├── ProfilePage.jsx
 │   │   ├── RoutinesPage.jsx
-│   │   ├── SchedulerPage.jsx
 │   │   ├── TrainingPlanPage.jsx
 │   │   ├── WorkoutSchedulerPage.jsx
 │   │   └── health/          # Health page subpages
@@ -163,7 +160,7 @@ GymPlanner/
 │   │   ├── foodDatabase.js  # Food/nutrition data management
 │   │   ├── importWorkbook.js # Excel import functionality
 │   │   ├── localStorage.js  # Deprecated - use storage.js
-│   │   ├── notificationService.js # Push notification management
+agement
 │   │   ├── recoveryLogic.js # Recovery recommendation algorithm
 │   │   ├── settings.js      # User settings persistence
 │   │   ├── storage.js       # Main data persistence and sync layer
@@ -747,7 +744,6 @@ Excel export functionality.
 - **ExerciseGroup.jsx** - Group of exercises within a session.
 - **AdvancedExerciseCard.jsx** - Detailed exercise card for comprehensive logging.
 - **ShiftPicker.jsx** - UI for shifting workouts to other days.
-- **SchedulerTable.jsx** - Spreadsheet-style schedule editor.
 - **TemplateDialog.jsx** - Dialog for creating/editing templates.
 - **LoginDialog.jsx** - Email/password authentication dialog.
 - **MuscleMap.jsx** - Muscle group visualization.
