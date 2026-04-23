@@ -31,6 +31,7 @@ import {
   getDateForDayInWeek,
   getWeekDates,
 } from './dateUtils.js';
+import { loadSettings } from './settings.js';
 import { loadTrainingPlan, getPlanSessionTitle } from './trainingPlan.js';
 import {
   ACTIVE_PLAN_KEY,
