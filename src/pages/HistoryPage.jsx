@@ -2,11 +2,8 @@ import { useState, useMemo } from 'react';
 import { 
   ChevronLeft,
   ChevronRight, 
-  Calendar as CalendarIcon, 
   CheckCircle2, 
-  Circle,
-  Dumbbell,
-  History
+  Circle
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,8 +17,6 @@ import {
   getToday
 } from '../utils/dateUtils';
 import { loadWorkoutByDate, isDayComplete, isDaySkipped, getEffectiveSessionTitle } from '../utils/storage';
-import { getDayOfWeek } from '../utils/dateUtils';
-import { loadTrainingPlan } from '../utils/trainingPlan';
 
 export default function HistoryPage({ onDateSelect }) {
   const [viewDate, setViewDate] = useState(getToday());
@@ -137,7 +132,6 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
   const isToday = isSameDay(date, getToday());
   const isPast = date < getToday();
   const dateKey = formatDateKey(date);
-  const dayName = getDayOfWeek(date);
   
   const amTitle = getEffectiveSessionTitle(date, 'am');
   const pmTitle = getEffectiveSessionTitle(date, 'pm');

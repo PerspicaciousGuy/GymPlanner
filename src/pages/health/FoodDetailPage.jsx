@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   ArrowLeft,
   MoreVertical,
@@ -47,7 +47,7 @@ const MICRO_NUTRIENTS = [
  * FoodDetailPage — Nutrition detail / editing screen.
  * If `food` is null, acts as a "Manual Add" blank form.
  */
-export default function FoodDetailPage({ food, onBack, onSave, dateKey }) {
+export default function FoodDetailPage({ food, onBack, onSave }) {
   const isManual = !food;
 
   // Editable state

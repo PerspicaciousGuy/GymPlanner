@@ -1,4 +1,4 @@
-import { Zap, Weight, Layers, ChevronRight, Activity, Dumbbell } from 'lucide-react';
+import { Zap, Weight, Layers, ChevronRight, Activity } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -6,7 +6,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
 export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
   const session = dayData?.[sessionKey];

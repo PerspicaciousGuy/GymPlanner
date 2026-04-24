@@ -26,8 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { getToday, formatDateKey, formatDateDisplay } from '../utils/dateUtils';
-import { loadSettings } from '../utils/settings';
+import { getToday, formatDateKey } from '../utils/dateUtils';
 import {
   getDailyTotals,
   addFoodToLog,
@@ -40,10 +39,8 @@ import CreateMealPage from './health/CreateMealPage';
 import MealDetailPage from './health/MealDetailPage';
 
 import {
-  getVitalsLog,
   getWeightForDate,
   getWaterForDate,
-  logWeight,
   logWater,
   getWeightHistory
 } from '../utils/vitalsDatabase';
@@ -109,7 +106,6 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
   }, [dates]);
   const dateKey = formatDateKey(selectedDate);
   const waterIntake = useMemo(() => getWaterForDate(dateKey), [dateKey, logVersion]);
-  const isToday = dateKey === formatDateKey(getToday());
 
   // Mock data for goals (these would eventually come from user settings)
   const nutritionGoals = settings.nutritionGoals || { enabled: false, calories: 0, protein: 0, carbs: 0, fats: 0 };
@@ -163,7 +159,6 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
       >
         {dates.map((date, i) => {
           const isSelected = formatDateKey(date) === dateKey;
-          const isTodayItem = formatDateKey(date) === formatDateKey(getToday());
           const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
           const dayNum = date.getDate();
 
@@ -657,7 +652,7 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
               // TODO: Navigate to a food picker that adds items back to the meal
               setHealthSubView('log-food');
             }}
-            onDone={(updatedMeal) => {
+            onDone={() => {
               setHealthSubView(null);
               setSelectedMeal(null);
             }}

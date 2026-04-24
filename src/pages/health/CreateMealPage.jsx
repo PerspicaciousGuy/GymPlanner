@@ -15,7 +15,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import {
   searchFoods,
   DEFAULT_FOODS,
@@ -68,15 +67,6 @@ export default function CreateMealPage({ onBack, onSaveMeal }) {
       const newServings = Math.max(0.5, item.servings + delta);
       return { ...item, servings: newServings };
     }));
-  };
-
-  const handleCreate = () => {
-    const meal = saveMeal({
-      name: mealName || 'Unnamed Meal',
-      items: mealItems,
-      totalNutrition: totals,
-    });
-    onSaveMeal(meal);
   };
 
   return (

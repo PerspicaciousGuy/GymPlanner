@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Calendar, LogIn, LogOut, Cloud, Trash2, RefreshCw, BarChart3, History, User, Activity } from 'lucide-react';
+import { Sparkles, Calendar, Cloud, RefreshCw, BarChart3, User, Activity } from 'lucide-react';
 
 
 import WorkoutSchedulerPage from './pages/WorkoutSchedulerPage';
 import AnalyticsPage from './pages/AnalyticsPage';
-import HistoryPage from './pages/HistoryPage';
 import DayDetailPage from './pages/DayDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import RoutinesPage from './pages/RoutinesPage';
@@ -16,10 +15,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import useFirebaseAuth from './hooks/useFirebaseAuth';
-import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isDayComplete, isSessionFinished, getEffectiveSessionTitle } from './utils/storage';
+import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isSessionFinished, getEffectiveSessionTitle } from './utils/storage';
 import { scheduleTomorrowSummary } from './utils/notificationService';
 import { loadSettings } from './utils/settings';
-import { loadTrainingPlan } from './utils/trainingPlan';
 
 export default function App() {
   const [activePage, setActivePage] = useState('workout');
@@ -222,4 +220,3 @@ export default function App() {
     </div>
   );
 }
-

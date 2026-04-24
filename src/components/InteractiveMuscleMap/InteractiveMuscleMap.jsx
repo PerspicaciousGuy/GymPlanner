@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { anteriorData, posteriorData, MuscleType } from './AnatomyData';
+import { anteriorData, posteriorData } from './AnatomyData';
 import {
   Tooltip,
   TooltipContent,
@@ -40,7 +40,7 @@ export default function InteractiveMuscleMap({
 
   // ... (rest of helper functions)
 
-  const renderModel = (data, title, type) => (
+  const renderModel = (data, title) => (
     <div className="flex flex-col items-center w-full min-w-0">
       <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{title}</span>
       <div className="w-full flex justify-center">

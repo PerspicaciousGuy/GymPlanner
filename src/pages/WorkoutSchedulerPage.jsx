@@ -2,11 +2,8 @@ import { useMemo, useState, useEffect } from 'react';
 import { ChevronDown, Calendar, AlertCircle, CheckCircle2, Clock, RefreshCw, Repeat, BedDouble } from 'lucide-react';
 import WorkoutSection from '../components/WorkoutSection';
 import { 
-  loadSessionTitles, 
   loadWorkoutByDate, 
-  isDayComplete, 
   isSessionFinished, 
-  ensureAmPm, 
   syncPlannerData,
   getEffectiveSessionTitle,
   getDailyMetadata
@@ -188,7 +185,6 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
   }, [syncKey]);
 
   const sections = useMemo(() => {
-    const titles = loadSessionTitles();
     const plan = loadTrainingPlan();
     const isDynamic = plan.mode === 'dynamic' && plan.cycle?.length > 0;
     const hasPlannedTraining = (date) => {

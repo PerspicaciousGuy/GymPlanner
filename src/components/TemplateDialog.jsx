@@ -20,7 +20,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { loadTemplates, deleteTemplate, saveTemplate } from '../utils/storage';
-import { cn } from "@/lib/utils";
 
 export default function TemplateDialog({ open, onOpenChange, mode = 'load', currentGroups = [], onSelect }) {
   const [templates, setTemplates] = useState([]);

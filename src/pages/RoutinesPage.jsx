@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { loadTemplates, deleteTemplate, saveTemplate, defaultSession } from '../utils/storage';
-import { cn } from "@/lib/utils";
 
 export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
   const [templateRows, setTemplateRows] = useState(() => loadTemplates());

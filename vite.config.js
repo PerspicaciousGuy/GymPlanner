@@ -55,12 +55,12 @@ export default defineConfig({
       '/fatsecret-token': {
         target: 'https://oauth.fatsecret.com',
         changeOrigin: true,
-        rewrite: (path) => '/connect/token',
+        rewrite: () => '/connect/token',
       },
       '/fatsecret-api': {
         target: 'https://platform.fatsecret.com',
         changeOrigin: true,
-        rewrite: (path) => '/rest/server.api',
+        rewrite: () => '/rest/server.api',
       },
     },
   },

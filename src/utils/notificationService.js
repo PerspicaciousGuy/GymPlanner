@@ -1,4 +1,4 @@
-import { getTomorrow, getDayOfWeek, formatDateDisplay, formatDateKey } from './dateUtils';
+import { getTomorrow, getDayOfWeek, formatDateKey } from './dateUtils';
 import { isCloudSyncReady, saveCloudNotifSettings } from './cloudSync';
 import { NOTIFICATION_SETTINGS_KEY } from '../constants/storageKeys.js';
 import { loadWorkoutByDate, loadSessionTitles } from './storage';

@@ -26,11 +26,7 @@ import {
   isDayComplete,
   isDaySkipped,
   ensureAmPm,
-  defaultSession,
   defaultGroup,
-  defaultRow,
-  loadSessionTitles,
-  saveSessionTitlesWithSync,
   getEffectiveSessionTitle,
   getEffectiveSessionNotes,
   saveDailyMetadataWithSync,
@@ -45,9 +41,8 @@ import { cn } from "@/lib/utils";
 import { formatDateKey } from '../utils/dateUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, isTomorrow, initialData, hideBadge, syncToken, onWorkoutChanged, initialSession = 'am' }) {
+export default function WorkoutSection({ date, dayName, initialData, hideBadge, syncToken, onWorkoutChanged, initialSession = 'am' }) {
   const workoutDateKey = (date instanceof Date) ? formatDateKey(date) : (dayName || date);
-  const titleDayName = dayName || (date instanceof Date ? getDayOfWeek(date) : getDayOfWeek(new Date(date)));
 
   const [templateDialogMode, setTemplateDialogMode] = useState('load'); // 'load' or 'save'
 
@@ -154,8 +149,6 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
       ref.current.style.height = `${ref.current.scrollHeight}px`;
     }
   }, [amTitleState, pmTitleState, activeSession]);
-
-  const canEdit = !amDone && !amSkipped; // Simplified for checks if needed
 
   const [isDirty, setIsDirty] = useState(false);
 
@@ -352,8 +345,6 @@ export default function WorkoutSection({ date, dayName, muscleGroup, isMissed, i
   const standaloneExercises = sessionData.standaloneExercises || [];
   const sessionDone = activeSession === 'am' ? amDone : pmDone;
   const sessionSkipped = activeSession === 'am' ? amSkipped : pmSkipped;
-  const amTitle = amTitleState;
-  const pmTitle = pmTitleState;
   const bothDone = !hasPlannedPm ? (amDone || amSkipped) : (amDone || amSkipped) && (pmDone || pmSkipped);
 
   const tabCls = (session, done, skipped) => {

@@ -3,9 +3,9 @@ import { ChevronLeft, Calendar as CalendarIcon, Weight, Layers, Zap, List, Layou
 import WorkoutSection from '../components/WorkoutSection';
 import WorkoutLogView from '../components/WorkoutLogView';
 import { formatDateDisplay, formatDateKey, getDayOfWeek } from '../utils/dateUtils';
-import { loadWorkoutByDate, isDayComplete, isDaySkipped, loadSessionTitles, getEffectiveSessionTitle } from '../utils/storage';
+import { loadWorkoutByDate, isDayComplete, isDaySkipped, getEffectiveSessionTitle } from '../utils/storage';
 import { loadTrainingPlan } from '../utils/trainingPlan';
-import { calculateRecovery, getDailyFocus } from '../utils/recoveryLogic';
+import { getDailyFocus } from '../utils/recoveryLogic';
 import InteractiveMuscleMap from '../components/InteractiveMuscleMap/InteractiveMuscleMap';
 import { getFoodLog, getDailyTotals } from '../utils/foodDatabase';
 import { getWeightForDate } from '../utils/vitalsDatabase';
@@ -368,4 +368,3 @@ function StatBox({ icon, label, value }) {
     </div>
   );
 }
-

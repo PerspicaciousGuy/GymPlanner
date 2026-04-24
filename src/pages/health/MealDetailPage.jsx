@@ -14,12 +14,10 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import {
   calculateMealNutrition,
   saveMeal,
   deleteMeal,
-  getSavedMeals,
   searchFoods,
   DEFAULT_FOODS,
 } from '../../utils/foodDatabase';
@@ -31,7 +29,6 @@ import {
 export default function MealDetailPage({
   meal,
   onBack,
-  onAddItems,
   onDone,
   onLogMeal,
   onDeleteMeal,

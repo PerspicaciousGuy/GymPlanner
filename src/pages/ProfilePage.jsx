@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   User, 
   Settings, 
@@ -42,7 +42,7 @@ import DataConsolePage from './DataConsolePage';
 
 export default function ProfilePage({ authState, onDataRefreshed, onSettingsChange }) {
   const [settings, setSettings] = useState(loadSettings());
-  const [busy, setBusy] = useState(false);
+  const [, setBusy] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     localStorage.getItem(NOTIFICATION_SETTINGS_KEY) === 'true'
@@ -390,4 +390,3 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
     </div>
   );
 }
-

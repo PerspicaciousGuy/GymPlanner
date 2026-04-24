@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, memo } from 'react';
+import { useState, useCallback, useEffect, memo } from 'react';
 import { Plus, Trash2, Layers, ChevronDown, X } from 'lucide-react';
 import { defaultRow } from '../utils/storage';
 import ExerciseRow from './ExerciseRow';
@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const COLS = ['Muscle Group', 'Sub Muscle', 'Exercise', 'Sets', 'Reps', 'Weight', 'Drop Reps', 'Drop Weight', ''];
 
-const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange, onDeleteGroup, groupCount = 1, workoutDate, sessionKey }) {
+const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange, onDeleteGroup, workoutDate, sessionKey }) {
   const [isOpen, setIsOpen] = useState(true);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 

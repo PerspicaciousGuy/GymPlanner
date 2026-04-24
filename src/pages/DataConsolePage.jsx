@@ -61,9 +61,6 @@ import {
   getCompletionForWeek,
   setCompletionStatusWithSync,
   getEffectiveSessionTitle,
-  loadTemplates,
-  deleteTemplate,
-  updateTemplate
 } from '../utils/storage';
 import { exportPlannerWorkbook } from '../utils/exportWorkbook';
 import { importPlannerWorkbook } from '../utils/importWorkbook';
@@ -331,12 +328,6 @@ function buildDbFromRows(rows) {
   return db;
 }
 
-function completionStatus(val) {
-  if (val === 'skipped') return 'skipped';
-  if (val === true) return 'done';
-  return '';
-}
-
 export default function DataConsolePage({ hideSidebar }) {
   const [activeTab, setActiveTab] = useState('workouts');
   const [searchQuery, setSearchQuery] = useState('');
@@ -404,22 +395,13 @@ export default function DataConsolePage({ hideSidebar }) {
   );
 
   const [exporting, setExporting] = useState(false);
-  const [exportNote, setExportNote] = useState('');
   const [importing, setImporting] = useState(false);
-  const [importNote, setImportNote] = useState('');
   const importInputRef = useRef(null);
 
   const flashSaved = (setter) => {
     setter(true);
     setTimeout(() => setter(false), 1800);
   };
-
-  const tabClass = (tabKey) => [
-    'px-4 py-2 text-sm font-semibold border-b-2 transition-colors',
-    activeTab === tabKey
-      ? 'text-blue-700 border-blue-600'
-      : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300',
-  ].join(' ');
 
   const updateWorkoutRow = (idx, field, value) => {
     setWorkoutRows((prev) =>
@@ -514,12 +496,10 @@ export default function DataConsolePage({ hideSidebar }) {
         mode: mode === 'all' ? 'all' : 'current',
         activeTab,
       });
-      setExportNote(mode === 'all' ? 'All tabs exported' : 'Current tab exported');
-    } catch {
-      setExportNote('Export failed');
+    } catch (error) {
+      console.warn('[data-console] Export failed:', error);
     } finally {
       setExporting(false);
-      setTimeout(() => setExportNote(''), 2200);
     }
   };
 
@@ -558,14 +538,11 @@ export default function DataConsolePage({ hideSidebar }) {
         saveExerciseDbWithSync(db);
         setExerciseRows(flattenDbRows(db));
       }
-
-      setImportNote('Import complete');
-    } catch {
-      setImportNote('Import failed');
+    } catch (error) {
+      console.warn('[data-console] Import failed:', error);
     } finally {
       setImporting(false);
       event.target.value = '';
-      setTimeout(() => setImportNote(''), 2400);
     }
   };
 

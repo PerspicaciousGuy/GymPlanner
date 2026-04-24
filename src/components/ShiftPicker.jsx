@@ -19,7 +19,7 @@ import {
 import { Calendar, ArrowRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
-export default function ShiftPicker({ open, onOpenChange, sourceDate, sourceSession, onShift, plan }) {
+export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift, plan }) {
   const sourceDateKey = formatDateKey(sourceDate);
   
   const nextDays = React.useMemo(() => {

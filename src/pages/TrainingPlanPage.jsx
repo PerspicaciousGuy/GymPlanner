@@ -32,7 +32,6 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import {
   loadSavedPlans,
-  saveSavedPlans,
   saveTrainingPlan,
   getActivePlanId,
   setActivePlanId,
@@ -43,7 +42,7 @@ import {
   loadTrainingPlan,
 } from '../utils/trainingPlan';
 import { loadTemplates, freezeHistoryUnderPlan } from '../utils/storage';
-import { formatDateKey, formatDateDisplay, getDayOfWeek } from '../utils/dateUtils';
+import { getDayOfWeek } from '../utils/dateUtils';
 
 // ─── Saved Plan Card ─────────────────────────────────────────
 function SavedPlanCard({ plan, isActive, isSelected, onSelect, onSetActive, onDelete, onDuplicate }) {
@@ -139,7 +138,9 @@ function SavedPlanCard({ plan, isActive, isSelected, onSelect, onSetActive, onDe
 }
 
 // ─── Mode Selector Card ──────────────────────────────────────
-function ModeCard({ icon: Icon, title, description, active, onClick }) {
+function ModeCard({ icon, title, description, active, onClick }) {
+  const Icon = icon;
+
   return (
     <motion.button
       whileHover={{ scale: 1.02 }}
@@ -771,6 +772,11 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
     }
   }, [editingName]);
 
+  function refreshPlans() {
+    const fresh = loadSavedPlans();
+    setSavedPlans(fresh);
+  }
+
   // Refresh plans when sync key changes or sync event completes
   useEffect(() => {
     refreshPlans();
@@ -787,11 +793,6 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
     window.addEventListener('gymplanner_sync_completed', handleSync);
     return () => window.removeEventListener('gymplanner_sync_completed', handleSync);
   }, []);
-
-  const refreshPlans = () => {
-    const fresh = loadSavedPlans();
-    setSavedPlans(fresh);
-  };
 
   const updatePlan = (updates) => {
     setPlan(prev => ({ ...prev, ...updates }));

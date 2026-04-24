@@ -795,7 +795,7 @@ export default function AnalyticsPage({ onDateSelect }) {
                     </div>
                   </div>
 
-                  {analyticsData.muscleData.slice(0, 3).map((item, i) => {
+                  {analyticsData.muscleData.slice(0, 3).map((item) => {
                     const pastItem = analyticsData.prevMuscleData.find(m => m.name === item.name);
                     const pastVal = pastItem ? pastItem[muscleMetric] : 0;
                     const currVal = item[muscleMetric];
@@ -1095,14 +1095,14 @@ export default function AnalyticsPage({ onDateSelect }) {
                         <h4 className="text-xs font-black uppercase tracking-[0.2em] mb-3">Fresh Capacity</h4>
                         <div className="flex flex-wrap gap-2">
                           {Object.entries(analyticsData.recoveryData || {})
-                            .filter(([_, d]) => d.status === 'recovered')
+                            .filter((entry) => entry[1].status === 'recovered')
                             .slice(0, 3)
                             .map(([m]) => (
                               <span key={m} className="px-2.5 py-1.5 bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-tighter">
                                 {m.replace('-', ' ')}
                               </span>
                             ))}
-                          {Object.entries(analyticsData.recoveryData || {}).filter(([_, d]) => d.status === 'recovered').length === 0 && (
+                          {Object.entries(analyticsData.recoveryData || {}).filter((entry) => entry[1].status === 'recovered').length === 0 && (
                             <span className="text-[10px] font-black text-indigo-200">Processing recovery...</span>
                           )}
                         </div>
