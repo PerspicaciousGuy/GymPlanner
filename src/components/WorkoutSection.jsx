@@ -327,7 +327,8 @@ export default function WorkoutSection({ date, dayName, initialData, hideBadge, 
   const handleApplyTemplate = (template) => {
     setDayData((prev) => {
       const s = { ...prev[activeSession] };
-      s.groups = JSON.parse(JSON.stringify(template.groups));
+      s.groups = JSON.parse(JSON.stringify(template.groups || []));
+      s.standaloneExercises = JSON.parse(JSON.stringify(template.standaloneExercises || []));
       return { ...prev, [activeSession]: s };
     });
     setAmTitleState(template.name); // If loading into AM
@@ -545,6 +546,7 @@ export default function WorkoutSection({ date, dayName, initialData, hideBadge, 
             onOpenChange={setShowTemplateDialog}
             mode={templateDialogMode}
             currentGroups={groups}
+            currentStandaloneExercises={standaloneExercises}
             onSelect={handleApplyTemplate}
           />
 

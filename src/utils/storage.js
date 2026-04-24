@@ -909,12 +909,13 @@ export function loadTemplates() {
   return Array.isArray(res) ? res : [];
 }
 
-export function saveTemplate(name, groups) {
+export function saveTemplate(name, groups, standaloneExercises) {
   const templates = loadTemplates();
   const newTemplate = {
     id: crypto.randomUUID(),
     name,
     groups: groups ? JSON.parse(JSON.stringify(groups)) : [], // Deep clone to avoid references
+    standaloneExercises: standaloneExercises ? JSON.parse(JSON.stringify(standaloneExercises)) : [],
     createdAt: new Date().toISOString()
   };
   templates.push(newTemplate);
@@ -926,7 +927,7 @@ export function saveTemplate(name, groups) {
   return newTemplate;
 }
 
-export function updateTemplate(id, name, groups) {
+export function updateTemplate(id, name, groups, standaloneExercises) {
   const templates = loadTemplates();
   const idx = templates.findIndex(t => t.id === id);
   if (idx === -1) return null;
@@ -935,6 +936,7 @@ export function updateTemplate(id, name, groups) {
     ...templates[idx],
     name,
     groups: groups ? JSON.parse(JSON.stringify(groups)) : [],
+    standaloneExercises: standaloneExercises ? JSON.parse(JSON.stringify(standaloneExercises)) : [],
     updatedAt: new Date().toISOString()
   };
   localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));

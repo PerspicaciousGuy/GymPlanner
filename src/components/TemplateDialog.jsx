@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { loadTemplates, deleteTemplate, saveTemplate } from '../utils/storage';
 
-export default function TemplateDialog({ open, onOpenChange, mode = 'load', currentGroups = [], onSelect }) {
+export default function TemplateDialog({ open, onOpenChange, mode = 'load', currentGroups = [], currentStandaloneExercises = [], onSelect }) {
   const [templates, setTemplates] = useState([]);
   const [templateName, setTemplateName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,7 +36,7 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
 
   const handleSave = () => {
     if (!templateName.trim()) return;
-    saveTemplate(templateName.trim(), currentGroups);
+    saveTemplate(templateName.trim(), currentGroups, currentStandaloneExercises);
     onOpenChange(false);
   };
 
@@ -104,7 +104,7 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
                 <div>
                   <p className="text-[11px] font-black text-slate-800 uppercase tracking-wider mb-1">Session Summary</p>
                   <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                    Will preserve <span className="text-indigo-600 font-bold">{currentGroups.length} exercise {currentGroups.length === 1 ? 'group' : 'groups'}</span> with all target sets, reps, and load benchmarks.
+                    Will preserve <span className="text-indigo-600 font-bold">{currentGroups.length} {currentGroups.length === 1 ? 'group' : 'groups'}</span> and <span className="text-indigo-600 font-bold">{currentStandaloneExercises.length} standalone {currentStandaloneExercises.length === 1 ? 'exercise' : 'exercises'}</span> with all target sets, reps, and load benchmarks.
                   </p>
                 </div>
               </div>

@@ -46,7 +46,7 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
 
   const handleCreateNew = () => {
     const session = defaultSession();
-    const newT = saveTemplate("New Routine", session.groups);
+    const newT = saveTemplate("New Routine", session.groups, session.standaloneExercises);
     onEdit(newT.id);
   };
 
@@ -128,9 +128,9 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredTemplates.map((t) => {
             // Find target muscles
-            const muscles = Array.from(new Set(
-              (t.groups || []).flatMap(g => (g.rows || []).map(r => r.muscle).filter(Boolean))
-            )).slice(0, 3);
+            const groupMuscles = (t.groups || []).flatMap(g => (g.rows || []).map(r => r.muscle));
+            const standaloneMuscles = (t.standaloneExercises || []).map(ex => ex.muscle);
+            const muscles = Array.from(new Set([...groupMuscles, ...standaloneMuscles].filter(Boolean))).slice(0, 3);
 
             return (
             <div key={t.id} className="bg-card rounded-[2rem] border border-border shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group relative overflow-hidden active:scale-[0.99] flex flex-col p-5 md:p-6">
@@ -186,31 +186,41 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
                     Overview
                   </span>
                   <Badge variant="secondary" className="bg-muted text-foreground border border-border font-black text-[10px] px-3 py-1 rounded-xl uppercase tracking-wider shadow-sm">
-                    {t.groups?.length || 0} SECTIONS
+                    {(t.groups?.length || 0) + (t.standaloneExercises?.length || 0)} SECTIONS
                   </Badge>
                 </div>
                 
                 <div className="bg-muted/50 rounded-[1.5rem] md:rounded-[2rem] p-3 md:p-4 space-y-2.5 md:space-y-3 border border-border/50 group-hover:bg-card group-hover:border-primary/20 transition-all">
-                  {(t.groups || []).slice(0, 3).map((group, gIdx) => (
-                    <div key={gIdx} className="flex items-center gap-4 group/ex text-ellipsis overflow-hidden">
-                      <div className="w-2 h-2 rounded-full bg-border group-hover/ex:bg-primary transition-colors shrink-0" />
-                      <span className="text-xs font-black text-muted-foreground truncate tracking-tight group-hover/ex:text-foreground">
-                        {group.rows?.[0]?.exercise || 'Unnamed'}
-                        {(group.rows || []).length > 1 && (
-                          <span className="text-primary ml-2 font-black text-[9px] bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
-                            +{(group.rows || []).length - 1} MORE
-                          </span>
+                  {(() => {
+                    const combined = [
+                      ...(t.standaloneExercises || []).map(ex => ({ name: ex.exercise || 'Unnamed', more: 0 })),
+                      ...(t.groups || []).map(g => ({ name: g.rows?.[0]?.exercise || 'Unnamed', more: (g.rows || []).length - 1 }))
+                    ];
+                    return (
+                      <>
+                        {combined.slice(0, 3).map((item, iIdx) => (
+                          <div key={iIdx} className="flex items-center gap-4 group/ex text-ellipsis overflow-hidden">
+                            <div className="w-2 h-2 rounded-full bg-border group-hover/ex:bg-primary transition-colors shrink-0" />
+                            <span className="text-xs font-black text-muted-foreground truncate tracking-tight group-hover/ex:text-foreground">
+                              {item.name}
+                              {item.more > 0 && (
+                                <span className="text-primary ml-2 font-black text-[9px] bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
+                                  +{item.more} MORE
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        ))}
+                        {combined.length > 3 && (
+                          <div className="pt-3 mt-2 border-t border-border/50 flex items-center justify-center">
+                            <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em]">
+                              + {combined.length - 3} OTHERS
+                            </p>
+                          </div>
                         )}
-                      </span>
-                    </div>
-                  ))}
-                  {(t.groups || []).length > 3 && (
-                    <div className="pt-3 mt-2 border-t border-border/50 flex items-center justify-center">
-                      <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em]">
-                        + {(t.groups || []).length - 3} OTHERS
-                      </p>
-                    </div>
-                  )}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
