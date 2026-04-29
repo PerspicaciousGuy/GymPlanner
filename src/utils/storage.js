@@ -538,23 +538,22 @@ function hasTrackedWorkoutValues(row) {
   );
 }
 
-export function findPreviousExerciseEntry({ exercise, beforeDate, session }) {
+export function findPreviousExerciseEntry({ exercise, beforeDate }) {
   const exerciseName = String(exercise || '').trim().toLowerCase();
   if (!exerciseName) return null;
 
   const beforeDateKey = formatDateKey(beforeDate);
-  const targetWeekday = getDayOfWeek(beforeDate);
-  const buckets = [null, null, null, null];
 
   const workouts = loadWorkouts();
   const workoutEntries = Object.entries(workouts)
     .filter(([dateKey]) => DATE_KEY_REGEX.test(dateKey) && dateKey < beforeDateKey)
-    .sort(([dateA], [dateB]) => dateB.localeCompare(dateA));
+    .sort(([dateA], [dateB]) => dateB.localeCompare(dateA)); // latest first
 
   for (const [dateKey, dayData] of workoutEntries) {
     const normalizedDay = ensureAmPm(dayData);
 
-    for (const sessionKey of ['am', 'pm']) {
+    // We check pm then am so we get the absolutely latest session in that day
+    for (const sessionKey of ['pm', 'am']) {
       const sessionData = normalizedDay[sessionKey] || {};
 
       // 1. Search in Traditional Groups
@@ -564,29 +563,18 @@ export function findPreviousExerciseEntry({ exercise, beforeDate, session }) {
           const rowExercise = String(row?.exercise || '').trim().toLowerCase();
           if (rowExercise !== exerciseName || !hasTrackedWorkoutValues(row)) continue;
 
-          const isSameWeekday = getDayOfWeek(dateKey) === targetWeekday;
-          const isSameSession = sessionKey === session;
-          const bucketIndex = isSameWeekday && isSameSession
-            ? 0
-            : isSameSession
-              ? 1
-              : isSameWeekday
-                ? 2
-                : 3;
-
-          if (!buckets[bucketIndex]) {
-            buckets[bucketIndex] = {
-              date: dateKey,
-              session: sessionKey,
-              row: {
-                sets: row.sets || '',
-                reps: row.reps || '',
-                weight: row.weight || '',
-                dropSets: row.dropSets || '',
-                dropWeight: row.dropWeight || '',
-              },
-            };
-          }
+          // Found the most recent! Return immediately.
+          return {
+            date: dateKey,
+            session: sessionKey,
+            row: {
+              sets: row.sets || '',
+              reps: row.reps || '',
+              weight: row.weight || '',
+              dropSets: row.dropSets || '',
+              dropWeight: row.dropWeight || '',
+            },
+          };
         }
       }
 
@@ -600,34 +588,27 @@ export function findPreviousExerciseEntry({ exercise, beforeDate, session }) {
         const validSets = (ex.sets || []).filter(s => String(s.reps || '').trim() !== '' || String(s.weight || '').trim() !== '');
         if (validSets.length === 0) continue;
 
-        const isSameWeekday = getDayOfWeek(dateKey) === targetWeekday;
-        const isSameSession = sessionKey === session;
-        const bucketIndex = isSameWeekday && isSameSession ? 0 : isSameSession ? 1 : isSameWeekday ? 2 : 3;
-
-        if (!buckets[bucketIndex]) {
-          // Format the first set for backward compatibility with row-based consumers
-          const firstSet = validSets[0];
-          buckets[bucketIndex] = {
-            date: dateKey,
-            session: sessionKey,
-            row: {
-              sets: String(ex.sets?.length || ''),
-              reps: String(firstSet.reps || ''),
-              weight: String(firstSet.weight || ''),
-              dropSets: '',
-              dropWeight: '',
-              // Include the full sets for smarter consumers
-              allSets: ex.sets
-            },
-          };
-        }
+        const firstSet = validSets[0];
+        
+        // Found the most recent! Return immediately.
+        return {
+          date: dateKey,
+          session: sessionKey,
+          row: {
+            sets: String(ex.sets?.length || ''),
+            reps: String(firstSet.reps || ''),
+            weight: String(firstSet.weight || ''),
+            dropSets: '',
+            dropWeight: '',
+            // Include the full sets for smarter consumers
+            allSets: ex.sets
+          },
+        };
       }
     }
-
-    if (buckets[0]) break;
   }
 
-  return buckets.find(Boolean) || null;
+  return null;
 }
 
 /**
