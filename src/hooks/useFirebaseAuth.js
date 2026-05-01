@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '../utils/firebase';
 
 export default function useFirebaseAuth() {
@@ -36,6 +36,14 @@ export default function useFirebaseAuth() {
     await signInWithEmailAndPassword(auth, email, password);
   }
 
+  async function signup(email, password) {
+    if (!isFirebaseConfigured || !auth) {
+      throw new Error('Firebase is not configured yet');
+    }
+    setError('');
+    await createUserWithEmailAndPassword(auth, email, password);
+  }
+
   async function logout() {
     if (!isFirebaseConfigured || !auth) return;
     setError('');
@@ -53,6 +61,7 @@ export default function useFirebaseAuth() {
       loading,
       error,
       login,
+      signup,
       logout,
       clearError,
     }),
