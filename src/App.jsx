@@ -11,6 +11,7 @@ import EditRoutinePage from './pages/EditRoutinePage';
 import TrainingPlanPage from './pages/TrainingPlanPage';
 import HealthPage from './pages/HealthPage';
 import QuickActionHub from './components/health/QuickActionHub';
+import LoginPage from './pages/LoginPage';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -66,7 +67,7 @@ export default function App() {
     setFullScreenMode(false);
   }, [activePage]);
 
-  const showNavBar = !fullScreenMode && !['training-plan', 'edit-routine', 'dayDetail'].includes(activePage);
+  const showNavBar = !fullScreenMode && !['training-plan', 'edit-routine', 'dayDetail', 'login'].includes(activePage);
 
   const handleDateSelect = (date) => {
     setSelectedHistoryDate(date);
@@ -164,11 +165,12 @@ export default function App() {
             {activePage === 'training-plan' && <TrainingPlanPage syncKey={syncKey} onBack={() => setActivePage('routines')} />}
             {activePage === 'analytics' && <AnalyticsPage onDateSelect={handleDateSelect} />}
             {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('analytics')} syncKey={syncKey} />}
-            {activePage === 'profile' && <ProfilePage authState={authState} onDataRefreshed={() => setSyncNonce(n => n + 1)} onSettingsChange={setSettings} />}
+            {activePage === 'profile' && <ProfilePage authState={authState} onDataRefreshed={() => setSyncNonce(n => n + 1)} onSettingsChange={setSettings} onNavigateToLogin={() => setActivePage('login')} />}
+            {activePage === 'login' && <LoginPage authState={authState} onLoginSuccess={() => setActivePage('profile')} onBack={() => setActivePage('profile')} />}
           </div>
         </main>
 
-        {!fullScreenMode && (
+        {!fullScreenMode && activePage !== 'login' && (
           <QuickActionHub 
             onNavigateToHealth={(view) => {
               setHealthInitialView(view);

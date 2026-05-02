@@ -37,13 +37,11 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { loadSettings, updateSetting } from '../utils/settings';
 import { formatDateKey } from '../utils/dateUtils';
-import LoginDialog from '../components/LoginDialog';
 import DataConsolePage from './DataConsolePage';
 
-export default function ProfilePage({ authState, onDataRefreshed, onSettingsChange }) {
+export default function ProfilePage({ authState, onDataRefreshed, onSettingsChange, onNavigateToLogin }) {
   const [settings, setSettings] = useState(loadSettings());
   const [, setBusy] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     localStorage.getItem(NOTIFICATION_SETTINGS_KEY) === 'true'
   );
@@ -134,13 +132,6 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12 px-4">
-      {/* Auth Modal */}
-      <LoginDialog 
-        open={loginOpen} 
-        onOpenChange={setLoginOpen} 
-        authState={authState} 
-      />
-
       {/* Header Profile Section - Centered */}
       <div className="bg-white rounded-[2rem] border border-slate-100 p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center text-center relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/30 rounded-full -mr-16 -mt-16 blur-3xl opacity-50" />
@@ -177,7 +168,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
           ) : (
             <Button 
               variant="outline" 
-              onClick={() => setLoginOpen(true)}
+              onClick={() => onNavigateToLogin?.()}
               className="w-full rounded-full border-indigo-200 text-indigo-600 font-black uppercase tracking-widest text-[11px] h-12 hover:bg-indigo-50 border-2"
             >
               Sign In to Sync
