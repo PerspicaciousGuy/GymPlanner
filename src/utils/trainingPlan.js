@@ -2,15 +2,10 @@ import { formatDateKey } from './dateUtils.js';
 import { 
   saveCloudSavedPlans, 
   saveCloudActivePlanId, 
-  isCloudSyncReady 
 } from './cloudSync.js';
 import { ACTIVE_PLAN_KEY, SAVED_PLANS_KEY } from '../constants/storageKeys.js';
 import { readJson, writeJson } from './localStorage.js';
-
-const runCloudSync = (task, warningMessage) => {
-  if (!isCloudSyncReady()) return;
-  task().catch((err) => console.warn(warningMessage, err));
-};
+import { runCloudSync } from './cloudSyncRunner.js';
 
 // ─── Storage Keys ─────────────────────────────────────────────
 // Legacy key (single-plan era) – migrated on first load

@@ -1,11 +1,7 @@
-import { isCloudSyncReady, saveCloudSettings } from './cloudSync';
+import { saveCloudSettings } from './cloudSync';
 import { SETTINGS_KEY } from '../constants/storageKeys.js';
 import { readJson, writeJson } from './localStorage.js';
-
-const runCloudSync = (task, warningMessage) => {
-  if (!isCloudSyncReady()) return;
-  task().catch((err) => console.warn(warningMessage, err));
-};
+import { runCloudSync } from './cloudSyncRunner.js';
 
 const defaultSettings = {
   units: 'kg', // 'kg' | 'lbs'

@@ -6,7 +6,6 @@
  */
 
 import {
-  isCloudSyncReady,
   saveCloudFoodLog,
   saveCloudCustomFoods,
   saveCloudSavedMeals,
@@ -19,11 +18,7 @@ import {
   SAVED_MEALS_KEY,
 } from '../constants/storageKeys.js';
 import { readJson, writeJson } from './localStorage.js';
-
-const runCloudSync = (task, warningMessage) => {
-  if (!isCloudSyncReady()) return;
-  task().catch((err) => console.warn(warningMessage, err));
-};
+import { runCloudSync } from './cloudSyncRunner.js';
 
 // ─── Serving size types ───
 export const SERVING_UNITS = {

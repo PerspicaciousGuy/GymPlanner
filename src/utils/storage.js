@@ -33,6 +33,7 @@ import {
 } from './dateUtils.js';
 import { loadSettings } from './settings.js';
 import { loadTrainingPlan, getPlanSessionTitle } from './trainingPlan.js';
+import { runCloudSync } from './cloudSyncRunner.js';
 import {
   ACTIVE_PLAN_KEY,
   BOOKMARKED_FOODS_KEY,
@@ -86,11 +87,6 @@ function safeLoad(key, fallback) {
   } catch {
     return fallback;
   }
-}
-
-function runCloudSync(task, warningMessage) {
-  if (!isCloudSyncReady()) return;
-  task().catch((err) => console.warn(warningMessage, err));
 }
 
 const LEGACY_DAY_KEY_REGEX = /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/;

@@ -18,9 +18,12 @@ import {
   calculateMealNutrition,
   saveMeal,
   deleteMeal,
-  searchFoods,
-  DEFAULT_FOODS,
 } from '../../utils/foodDatabase';
+import {
+  adjustMealItemServings,
+  getMealSearchResults,
+  setMealItemServings,
+} from './mealPageHelpers';
 
 /**
  * MealDetailPage — View / Edit a saved meal.
@@ -47,14 +50,7 @@ export default function MealDetailPage({
 
   // Search results for adding items
   const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) {
-      const popularIds = [
-        'egg', 'chicken_breast_raw', 'white_rice_raw', 'banana', 'peanut_butter',
-        'oats', 'almonds', 'whey_protein', 'honey',
-      ];
-      return DEFAULT_FOODS.filter(f => popularIds.includes(f.id));
-    }
-    return searchFoods(searchQuery);
+    return getMealSearchResults(searchQuery);
   }, [searchQuery]);
 
   const addItem = (food) => {
@@ -69,12 +65,7 @@ export default function MealDetailPage({
   };
 
   const updateServings = (index, delta) => {
-    setItems(prev => prev.map((item, i) => {
-      if (i !== index) return item;
-      const currentServings = item.servings || 1;
-      const newServings = Math.max(0.5, currentServings + delta);
-      return { ...item, servings: newServings };
-    }));
+    setItems(prev => adjustMealItemServings(prev, index, delta));
   };
 
   const handleDeleteMeal = () => {
@@ -231,13 +222,13 @@ export default function MealDetailPage({
                           defaultValue={currentServings}
                           onBlur={(e) => {
                              const val = parseFloat(e.target.value) || 0.5;
-                             setItems(prev => prev.map((it, i) => i === idx ? { ...it, servings: Math.max(0.1, val) } : it));
+                             setItems(prev => setMealItemServings(prev, idx, val));
                              setEditingIndex(null);
                           }}
                           onKeyDown={(e) => {
                              if (e.key === 'Enter') {
                                  const val = parseFloat(e.target.value) || 0.5;
-                                 setItems(prev => prev.map((it, i) => i === idx ? { ...it, servings: Math.max(0.1, val) } : it));
+                                 setItems(prev => setMealItemServings(prev, idx, val));
                                  setEditingIndex(null);
                              }
                           }}

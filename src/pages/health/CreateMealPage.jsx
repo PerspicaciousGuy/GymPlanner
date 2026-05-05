@@ -16,12 +16,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  searchFoods,
-  DEFAULT_FOODS,
   calculateNutrition,
   saveMeal,
   calculateMealNutrition,
 } from '../../utils/foodDatabase';
+import {
+  adjustMealItemServings,
+  getMealSearchResults,
+  setMealItemServings,
+} from './mealPageHelpers';
 
 /**
  * CreateMealPage — Build a multi-item meal.
@@ -41,14 +44,7 @@ export default function CreateMealPage({ onBack, onSaveMeal }) {
 
   // Search results for adding items
   const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) {
-      const popularIds = [
-        'egg', 'chicken_breast_raw', 'white_rice_raw', 'banana', 'peanut_butter',
-        'oats', 'almonds', 'whey_protein', 'honey',
-      ];
-      return DEFAULT_FOODS.filter(f => popularIds.includes(f.id));
-    }
-    return searchFoods(searchQuery);
+    return getMealSearchResults(searchQuery);
   }, [searchQuery]);
 
   const addItem = (food) => {
@@ -62,11 +58,7 @@ export default function CreateMealPage({ onBack, onSaveMeal }) {
   };
 
   const updateServings = (index, delta) => {
-    setMealItems(prev => prev.map((item, i) => {
-      if (i !== index) return item;
-      const newServings = Math.max(0.5, item.servings + delta);
-      return { ...item, servings: newServings };
-    }));
+    setMealItems(prev => adjustMealItemServings(prev, index, delta));
   };
 
   return (
@@ -180,13 +172,13 @@ export default function CreateMealPage({ onBack, onSaveMeal }) {
                           defaultValue={item.servings}
                           onBlur={(e) => {
                              const val = parseFloat(e.target.value) || 0.5;
-                             setMealItems(prev => prev.map((it, i) => i === idx ? { ...it, servings: Math.max(0.1, val) } : it));
+                             setMealItems(prev => setMealItemServings(prev, idx, val));
                              setEditingIndex(null);
                           }}
                           onKeyDown={(e) => {
                              if (e.key === 'Enter') {
                                  const val = parseFloat(e.target.value) || 0.5;
-                                 setMealItems(prev => prev.map((it, i) => i === idx ? { ...it, servings: Math.max(0.1, val) } : it));
+                                 setMealItems(prev => setMealItemServings(prev, idx, val));
                                  setEditingIndex(null);
                              }
                           }}
