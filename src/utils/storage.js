@@ -419,8 +419,6 @@ export function migrateWorkoutsToDateBased() {
     return; // No old data to migrate
   }
 
-  console.log('[storage] Migrating workouts data to date-based format...');
-
   // Get current week's Monday
   const currentWeekStart = getWeekStart(new Date());
   const newWorkouts = {};
@@ -431,7 +429,6 @@ export function migrateWorkoutsToDateBased() {
       const date = getDateForDayInWeek(currentWeekStart, dayName);
       const dateKey = formatDateKey(date);
       newWorkouts[dateKey] = ensureAmPm(dayData);
-      console.log(`  Migrated ${dayName} → ${dateKey}`);
     } else if (/^\d{4}-\d{2}-\d{2}$/.test(dayName)) {
       // Already date-based, keep it
       newWorkouts[dayName] = ensureAmPm(dayData);
@@ -440,7 +437,6 @@ export function migrateWorkoutsToDateBased() {
 
   localStorage.setItem(WORKOUTS_KEY, JSON.stringify(newWorkouts));
   localStorage.setItem(WORKOUT_MIGRATION_FLAG_KEY, 'true');
-  console.log('[storage] Workout migration complete. Migrated to current week.');
 }
 
 export function loadWorkouts() {
@@ -681,8 +677,6 @@ export function migrateCompletionToDateBased() {
     return; // No old data to migrate
   }
 
-  console.log('[storage] Migrating completion data to date-based format...');
-
   // Get previous week's Monday (the week that just ended)
   // This is more logical since completion data is typically historical
   const currentWeekStart = getWeekStart(new Date());
@@ -699,7 +693,6 @@ export function migrateCompletionToDateBased() {
       const date = getDateForDayInWeek(previousWeekStart, dayName);
       const dateKey = formatDateKey(date);
       newCompletion[`${dateKey}_${session}`] = value;
-      console.log(`  Migrated ${key} → ${dateKey}_${session}`);
     } else if (/^\d{4}-\d{2}-\d{2}_(am|pm)/.test(key)) {
       // Already date-based, keep it
       newCompletion[key] = value;
@@ -708,7 +701,6 @@ export function migrateCompletionToDateBased() {
 
   localStorage.setItem(COMPLETION_KEY, JSON.stringify(newCompletion));
   localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
-  console.log('[storage] Migration complete. Migrated to previous week (', formatDateKey(previousWeekStart), '- week that just ended).');
 }
 
 export function loadCompletion() {

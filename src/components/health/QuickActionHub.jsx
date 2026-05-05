@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Plus, Scale, Utensils, Droplet, X, Minus, PencilLine } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { logWeight, logWater, getWeightForDate, getWaterForDate } from '../../utils/vitalsDatabase';
 import { getToday } from '../../utils/dateUtils';
 

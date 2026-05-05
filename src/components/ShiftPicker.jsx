@@ -19,9 +19,7 @@ import {
 import { Calendar, ArrowRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
-export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift, plan }) {
-  const sourceDateKey = formatDateKey(sourceDate);
-  
+export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift }) {
   const nextDays = React.useMemo(() => {
     const start = new Date(sourceDate);
     const days = [];
@@ -49,7 +47,7 @@ export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift, p
       });
     }
     return days;
-  }, [sourceDateKey, plan]);
+  }, [sourceDate]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

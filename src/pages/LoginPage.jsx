@@ -3,265 +3,226 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, Loader2, LogIn, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 
 export default function LoginPage({ authState, onLoginSuccess, onBack }) {
   const [email, setEmail] = useState('');
-const [password, setPassword] = useState('');
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState('');
-const [isSignUp, setIsSignUp] = useState(false);
-const [showPassword, setShowPassword] = useState(false);
-const [rememberMe, setRememberMe] = useState(false);
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-// Validate password strength
-const validatePassword = (pass) => {
-  const minLength = 8;
-  const hasUpper = /[A-Z]/.test(pass);
-  const hasLower = /[a-z]/.test(pass);
-  const hasNumber = /[0-9]/.test(pass);
-  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
+  // Validate password strength
+  const validatePassword = (pass) => {
+    const minLength = 8;
+    const hasUpper = /[A-Z]/.test(pass);
+    const hasLower = /[a-z]/.test(pass);
+    const hasNumber = /[0-9]/.test(pass);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
 
-  if (pass.length < minLength) return "Password must be at least 8 characters long.";
-  if (!hasUpper) return "Password must contain at least one uppercase letter.";
-  if (!hasLower) return "Password must contain at least one lowercase letter.";
-  if (!hasNumber) return "Password must contain at least one number.";
-  if (!hasSpecial) return "Password must contain at least one special character.";
+    if (pass.length < minLength) return "Password must be at least 8 characters long.";
+    if (!hasUpper) return "Password must contain at least one uppercase letter.";
+    if (!hasLower) return "Password must contain at least one lowercase letter.";
+    if (!hasNumber) return "Password must contain at least one number.";
+    if (!hasSpecial) return "Password must contain at least one special character.";
 
-  return null;
-};
+    return null;
+  };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!email || !password) {
-    setError('Please enter both email and password');
-    return;
-  }
-
-  if (isSignUp) {
-    const passError = validatePassword(password);
-    if (passError) {
-      setError(passError);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email || !password) {
+      setError('Please enter both email and password');
       return;
     }
-  }
 
-  try {
-    setLoading(true);
-    setError('');
     if (isSignUp) {
-      await authState.signup(email, password);
-    } else {
-      await authState.login(email, password);
+      const passError = validatePassword(password);
+      if (passError) {
+        setError(passError);
+        return;
+      }
     }
-    onLoginSuccess();
-  } catch (err) {
-    setError(err?.message || (isSignUp ? 'Failed to create account. Please try again.' : 'Failed to sign in. Please check your credentials.'));
-  } finally {
-    setLoading(false);
-  }
-};
 
-const toggleMode = () => {
-  setIsSignUp(!isSignUp);
-  setError('');
-  setPassword('');
-};
+    try {
+      setLoading(true);
+      setError('');
+      if (isSignUp) {
+        await authState.signup(email, password);
+      } else {
+        await authState.login(email, password);
+      }
+      onLoginSuccess();
+    } catch (err) {
+      setError(err?.message || (isSignUp ? 'Failed to create account. Please try again.' : 'Failed to sign in. Please check your credentials.'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-return (
-  <div className="flex min-h-screen bg-white w-full absolute inset-0 z-50">
-    {/* Left side: Hero Image (Hidden on mobile) */}
-    <div className="hidden lg:flex w-1/2 relative bg-black items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-      <img
-        src="/gym_hero_bg.png"
-        alt="Gym planner hero"
-        className="absolute inset-0 w-full h-full object-cover opacity-80"
-      />
-      <div className="relative z-20 text-white p-12 flex flex-col items-start w-full max-w-lg mt-auto pb-20">
-        <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/50 mb-6">
-          <span className="text-4xl font-bold">G</span>
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp);
+    setError('');
+    setPassword('');
+  };
+
+  return (
+    <div className="flex min-h-screen bg-[#0A0A0A] w-full absolute inset-0 z-50 text-white font-inter">
+      {/* Left side: Hero Image (Hidden on mobile) */}
+      <div className="hidden lg:flex w-1/2 relative bg-black items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/60 to-transparent" />
+        <img
+          src="/gym_hero_bg.png"
+          alt="Gym planner hero"
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
+        />
+        <div className="relative z-20 p-12 flex flex-col items-start w-full max-w-lg mt-auto pb-20">
+          <div className="mb-6 flex items-center justify-center w-16 h-16 rounded-xl border border-white/10 bg-[#121212]/80 backdrop-blur-md">
+            <span className="text-4xl font-lexend font-black text-white">G</span>
+          </div>
+          <h1 className="text-5xl font-lexend font-bold mb-4 leading-[1.1] tracking-tight">
+            Elevate Your<br />Training Journey.
+          </h1>
+          <p className="text-[#c4c9ac] text-lg max-w-sm">
+            Track your progress, build routines, and achieve your fitness goals with our intelligent planner.
+          </p>
         </div>
-        <h1 className="text-5xl font-black mb-4 leading-tight">Elevate Your<br />Training Journey.</h1>
-        <p className="text-slate-300 text-lg">Track your progress, build routines, and achieve your fitness goals with our intelligent planner.</p>
       </div>
-    </div>
 
-    {/* Right side: Auth Form */}
-    <div className="w-full lg:w-1/2 flex flex-col relative bg-white">
+      {/* Right side: Auth Form */}
+      <div className="w-full lg:w-1/2 flex flex-col relative bg-[#0A0A0A] lg:border-l lg:border-[#262626]">
+        {/* Back Button */}
+        <button
+          onClick={onBack}
+          className="absolute top-8 left-8 z-50 flex items-center gap-2 text-slate-400 hover:text-white font-space text-[12px] uppercase tracking-widest transition-colors"
+        >
+          <ArrowRight size={14} className="rotate-180" strokeWidth={2} />
+          Back
+        </button>
 
-      {/* Back Button */}
-      <button
-        onClick={onBack}
-        className="absolute top-6 left-6 z-50 flex items-center gap-2 text-slate-400 hover:text-slate-600 font-black text-[10px] uppercase tracking-widest transition-colors"
-      >
-        <ArrowRight size={14} className="rotate-180" strokeWidth={3} />
-        Back
-      </button>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 w-full max-w-md mx-auto">
 
-      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8">
-        <div className="w-full max-w-[420px] bg-white rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden relative">
-
-          {/* Top Header Section */}
-          <div className="relative bg-[#161a2b] pt-10 px-10 pb-20 text-white">
-            {/* Subtle background glow/gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#161a2b] via-[#1a1f35] to-[#252c4a]" />
-
-            {/* Icon top left */}
-            <div className="relative z-10 w-16 h-16 bg-transparent border border-white/10 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-              <LogIn size={26} className="text-white" strokeWidth={1.5} />
-            </div>
-
-            <div className="relative z-10">
-              <h2 className="text-4xl font-bold tracking-tight mb-2">
+          <div className="w-full space-y-10">
+            {/* Header */}
+            <div>
+              <div className="inline-block px-3 py-1 mb-4 rounded border border-[#262626] bg-[#1C1C1C]">
+                <span className="text-[11px] font-space text-[#CCFF00] tracking-widest uppercase font-medium">
+                  Secure Authentication
+                </span>
+              </div>
+              <h2 className="text-4xl font-lexend font-bold tracking-tight mb-3">
                 {isSignUp ? 'Create ' : 'Welcome '}
-                <span className="text-[#8470ff]">{isSignUp ? 'Account' : 'Back'}</span>
+                <span className="text-white">{isSignUp ? 'Account' : 'Back'}</span>
               </h2>
-              <p className="text-slate-300 font-medium text-[15px]">
-                {isSignUp ? 'Sign up to start tracking your workouts.' : 'Sign in to sync your workouts to the cloud.'}
+              <p className="text-[#8e9379] font-medium text-[16px]">
+                {isSignUp ? 'Sign up to start tracking your workouts.' : 'Sign in to access your training data.'}
               </p>
             </div>
 
-            {/* Wavy bottom SVG */}
-            <svg className="absolute bottom-0 left-0 w-full h-16 text-white translate-y-[2px]" viewBox="0 0 1440 320" preserveAspectRatio="none">
-              <path fill="currentColor" fillOpacity="1" d="M0,224L60,202.7C120,181,240,139,360,133.3C480,128,600,160,720,176C840,192,960,192,1080,170.7C1200,149,1320,107,1380,85.3L1440,64L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path>
-            </svg>
-          </div>
-
-          {/* Form Section */}
-          <form onSubmit={handleSubmit} className="px-10 pb-10 pt-2 space-y-6 relative z-10 bg-white">
-            <AnimatePresence mode="wait">
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2 text-red-600 mb-2">
-                    <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                    <p className="text-xs font-semibold">{error}</p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <div className="space-y-5">
-              {/* Email Field */}
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-widest text-slate-500 ml-1">Email Address</Label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                    <Mail size={18} className="text-[#8470ff]" strokeWidth={2} />
-                  </div>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="athlete@gymplanner.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-[60px] rounded-[1.2rem] border-slate-200 bg-slate-50 focus:bg-white focus:border-[#8470ff] focus:ring-1 focus:ring-[#8470ff] transition-all font-medium pl-14 pr-6 text-[15px] shadow-sm"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Password Field */}
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-widest text-slate-500 ml-1">Password</Label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                    <Lock size={18} className="text-[#8470ff]" strokeWidth={2} />
-                  </div>
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="h-[60px] rounded-[1.2rem] border-slate-200 bg-slate-50 focus:bg-white focus:border-[#8470ff] focus:ring-1 focus:ring-[#8470ff] transition-all font-medium pl-14 pr-12 text-[15px] tracking-widest placeholder:tracking-widest shadow-sm"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <AnimatePresence mode="wait">
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
                   >
-                    {showPassword ? <EyeOff size={20} strokeWidth={1.5} /> : <Eye size={20} strokeWidth={1.5} />}
-                  </button>
+                    <div className="p-4 bg-[#93000a]/20 border border-[#93000a] rounded-lg flex items-start gap-3 text-[#ffb4ab] mb-2">
+                      <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                      <p className="text-sm font-medium">{error}</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="space-y-5">
+                {/* Email Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-[12px] font-space uppercase tracking-widest text-slate-400">Email Address</Label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail size={18} className="text-slate-500" strokeWidth={2} />
+                    </div>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="athlete@gymplanner.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-[56px] rounded-lg border-[#262626] bg-[#121212] text-white focus:bg-[#1C1C1C] focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00] transition-all font-inter pl-12 pr-6 text-[15px]"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Password Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-[12px] font-space uppercase tracking-widest text-slate-400">Password</Label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Lock size={18} className="text-slate-500" strokeWidth={2} />
+                    </div>
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="h-[56px] rounded-lg border-[#262626] bg-[#121212] text-white focus:bg-[#1C1C1C] focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00] transition-all font-inter pl-12 pr-12 text-[15px] tracking-widest placeholder:tracking-widest"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={20} strokeWidth={1.5} /> : <Eye size={20} strokeWidth={1.5} />}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Remember me & Forgot Password */}
-            {!isSignUp && (
-              <div className="flex items-center justify-between pt-1">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <div className={`w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center transition-colors ${rememberMe ? 'bg-transparent border-[#8470ff]' : 'border-slate-300 bg-white group-hover:border-[#8470ff]'}`}>
-                    {rememberMe && <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5 text-[#8470ff]"><path d="M3 7.5L5.5 10L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                  </div>
-                  <input
-                    type="checkbox"
-                    className="hidden"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                  />
-                  <span className="text-[13px] font-medium text-slate-500">Remember me</span>
-                </label>
-
-                <button type="button" className="text-[13px] font-medium text-[#3b82f6] hover:text-[#8470ff] transition-colors">
-                  Forgot password?
-                </button>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <div className="pt-2">
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-[60px] bg-gradient-to-r from-[#4262dd] to-[#9254f1] hover:opacity-90 text-white rounded-[1.2rem] font-bold text-[16px] shadow-lg shadow-indigo-200/50 transition-all active:scale-[0.98] relative overflow-hidden"
-              >
-                <span className="relative z-10 flex items-center justify-center w-full">
+              {/* Submit Button */}
+              <div className="pt-4">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-[56px] bg-[#CCFF00] hover:bg-[#abd600] text-[#0A0A0A] rounded-lg font-lexend font-bold text-[16px] transition-all active:scale-[0.98] border-none"
+                >
                   {loading ? (
-                    <>
+                    <span className="flex items-center justify-center">
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       {isSignUp ? 'Creating...' : 'Authenticating...'}
-                    </>
+                    </span>
                   ) : (
-                    <>
-                      {isSignUp ? 'Create Account' : 'Sign In Now'}
-                      <ArrowRight size={20} className="absolute right-6" />
-                    </>
+                    <span className="flex items-center justify-center gap-2">
+                      {isSignUp ? 'Create Account' : 'Sign In'}
+                      <ArrowRight size={20} />
+                    </span>
                   )}
+                </Button>
+              </div>
+
+              {/* Toggle Sign Up / Sign In */}
+              <div className="text-center pt-6 mt-6 border-t border-[#262626]">
+                <span className="text-[14px] font-inter text-[#8e9379] mr-2">
+                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}
                 </span>
-              </Button>
-            </div>
-
-            {/* Divider */}
-            <div className="flex items-center justify-center gap-4 pt-1">
-              <div className="h-px bg-slate-200 w-16" />
-              <span className="text-[13px] font-medium text-slate-400">or</span>
-              <div className="h-px bg-slate-200 w-16" />
-            </div>
-
-            {/* Toggle Sign Up / Sign In */}
-            <div className="text-center pb-2">
-              <span className="text-[13px] font-medium text-slate-500 mr-1">
-                {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-              </span>
-              <button
-                type="button"
-                onClick={toggleMode}
-                className="text-[13px] font-bold text-[#3b82f6] hover:text-[#8470ff] transition-colors"
-              >
-                {isSignUp ? 'Sign in' : 'Sign up'}
-              </button>
-            </div>
-          </form>
+                <button
+                  type="button"
+                  onClick={toggleMode}
+                  className="text-[14px] font-inter font-semibold text-[#FF5C00] hover:text-[#ffb59a] transition-colors underline underline-offset-4"
+                >
+                  {isSignUp ? 'Sign In' : 'Create Account'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-  </div>
   );
 }

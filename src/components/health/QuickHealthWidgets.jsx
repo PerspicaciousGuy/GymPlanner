@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Scale, GlassWater, Plus, Minus, PencilLine } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { getToday, formatDateKey } from '../../utils/dateUtils';
 import { getWeightForDate, getWaterForDate, logWeight, logWater, getLatestWeight } from '../../utils/vitalsDatabase';
 
@@ -13,7 +11,6 @@ export default function QuickHealthWidgets() {
   const [latestWeight, setLatestWeight] = useState(null);
   const [showWeightInput, setShowWeightInput] = useState(false);
   const [weightInputValue, setWeightInputValue] = useState('');
-  const [waterGoal] = useState(2500); // Could be from settings later
 
   const todayKey = formatDateKey(getToday());
 
