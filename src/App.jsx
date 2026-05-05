@@ -20,6 +20,14 @@ import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isSessionFini
 import { scheduleTomorrowSummary } from './utils/notificationService';
 import { loadSettings } from './utils/settings';
 
+const navItems = [
+  { id: 'workout', name: 'Training', icon: Calendar },
+  { id: 'health', name: 'Health', icon: Activity },
+  { id: 'routines', name: 'Routines', icon: Sparkles },
+  { id: 'analytics', name: 'Insights', icon: BarChart3 },
+  { id: 'profile', name: 'Profile', icon: User },
+];
+
 export default function App() {
   const [activePage, setActivePage] = useState('workout');
   const [selectedHistoryDate, setSelectedHistoryDate] = useState(null);
@@ -97,13 +105,7 @@ export default function App() {
         </div>
 
         <nav className="flex flex-col gap-6 flex-1">
-          {[
-            { id: 'workout', name: 'Training', icon: Calendar },
-            { id: 'health', name: 'Health', icon: Activity },
-            { id: 'routines', name: 'Routines', icon: Sparkles },
-            { id: 'analytics', name: 'Insights', icon: BarChart3 },
-            { id: 'profile', name: 'Profile', icon: User },
-          ].map((item) => (
+          {navItems.map((item) => (
             <Button
               key={item.id}
               variant="ghost"
@@ -187,13 +189,7 @@ export default function App() {
             backdropFilter: 'blur(30px) saturate(210%) contrast(110%)',
             WebkitBackdropFilter: 'blur(30px) saturate(210%) contrast(110%)'
           }}>
-        {[
-          { id: 'workout', name: 'Training', icon: Calendar },
-          { id: 'health', name: 'Health', icon: Activity },
-          { id: 'routines', name: 'Routines', icon: Sparkles },
-          { id: 'analytics', name: 'Insights', icon: BarChart3 },
-          { id: 'profile', name: 'Profile', icon: User },
-        ].map((item) => (
+        {navItems.map((item) => (
           <Button
             key={item.id}
             variant="ghost"
