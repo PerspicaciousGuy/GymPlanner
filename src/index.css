@@ -93,6 +93,21 @@ svg.recharts-surface {
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
+  --app-bg: #f6f7f9;
+  --app-surface: #ffffff;
+  --app-surface-muted: #f2f4f7;
+  --app-surface-raised: #fbfcfd;
+  --app-border: #e4e7ec;
+  --app-border-strong: #cdd3dd;
+  --app-text-soft: #667085;
+  --app-accent: #2563eb;
+  --app-accent-soft: #eff6ff;
+  --app-radius-sm: 0.5rem;
+  --app-radius-md: 0.75rem;
+  --app-radius-lg: 1rem;
+  --app-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.05);
+  --app-shadow-md: 0 10px 24px -18px rgb(15 23 42 / 0.45);
+
   /* Light Theme Specific Colors */
   --color-white: #ffffff;
   --color-indigo-50: #F2F2F7;
@@ -149,6 +164,18 @@ svg.recharts-surface {
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.91 0.23 108 / 30%);
+
+  --app-bg: #15161a;
+  --app-surface: #1d1f24;
+  --app-surface-muted: #24272e;
+  --app-surface-raised: #22252b;
+  --app-border: rgb(255 255 255 / 0.09);
+  --app-border-strong: rgb(255 255 255 / 0.16);
+  --app-text-soft: #a5adba;
+  --app-accent: #f8fafc;
+  --app-accent-soft: rgb(255 255 255 / 0.08);
+  --app-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.25);
+  --app-shadow-md: 0 12px 28px -18px rgb(0 0 0 / 0.8);
 
   /* Dark Theme Specific Overrides (mapped to Lime/Charcoal) */
   --color-white: #1e1e20;
