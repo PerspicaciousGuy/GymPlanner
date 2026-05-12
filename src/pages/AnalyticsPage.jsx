@@ -10,11 +10,7 @@ import {
   Radar,
   RadarChart,
   PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  PieChart,
-  Pie,
-  Cell
+  PolarAngleAxis
 } from 'recharts';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -32,33 +28,24 @@ import {
   TrendingUp,
   TrendingDown,
   History,
-  Calendar,
-  Download,
   Share2,
   Award,
   Zap
 } from 'lucide-react';
 import { loadWorkouts, loadCompletion, getEffectiveSessionTitle } from '../utils/storage';
 import { formatDateDisplay, formatDateKey } from '../utils/dateUtils';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
+import { PageShell } from "@/components/layout/PageShell";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Panel } from "@/components/layout/Panel";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip as ShadTooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import { Button } from "@/components/ui/button";
 
 import { calculateRecovery } from '../utils/recoveryLogic';
 import InteractiveMuscleMap from '../components/InteractiveMuscleMap/InteractiveMuscleMap';
 import HistoryPage from './HistoryPage';
-
-const COLORS = ['oklch(0.91 0.23 108)', 'oklch(0.8 0.18 108)', 'oklch(0.7 0.15 108)', 'oklch(0.6 0.12 108)'];
 
 export default function AnalyticsPage({ onDateSelect }) {
   const [exerciseFilter, setExerciseFilter] = useState('All');
@@ -464,22 +451,21 @@ export default function AnalyticsPage({ onDateSelect }) {
   }, { scope: dashboardRef });
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-500 analytics-page">
-      {/* Page Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
-            Performance Insights
-          </h1>
-          <p className="text-[10px] md:text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">Data-driven training analysis</p>
-        </div>
-
-        <div className="flex items-center gap-2">
+    <PageShell className="analytics-page">
+      <PageHeader
+        title="Insights"
+        meta={(
+          <span className="text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
+            Performance analysis
+          </span>
+        )}
+        actions={(
+          <>
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[140px] h-9 bg-card border-border text-[11px] font-bold text-foreground rounded-lg">
+            <SelectTrigger className="h-10 w-[140px] rounded-[var(--app-radius-md)] border-[var(--app-border)] bg-[var(--app-surface)] text-[11px] font-semibold text-foreground shadow-[var(--app-shadow-sm)]">
               <SelectValue placeholder="Time Range" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-slate-200">
+            <SelectContent className="rounded-xl border-[var(--app-border)]">
               <SelectItem value="30d" className="text-xs font-semibold">Last 30 Days</SelectItem>
               <SelectItem value="90d" className="text-xs font-semibold">Last 3 Months</SelectItem>
               <SelectItem value="1y" className="text-xs font-semibold">This Year</SelectItem>
@@ -490,13 +476,14 @@ export default function AnalyticsPage({ onDateSelect }) {
           <Button
             onClick={handleExportImage}
             disabled={isExporting}
-            className="flex items-center gap-2 h-9 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-bold px-4 shadow-lg shadow-indigo-100"
+            className="flex h-10 items-center gap-2 rounded-[var(--app-radius-md)] bg-foreground px-4 text-[11px] font-semibold text-background shadow-[var(--app-shadow-sm)] hover:bg-foreground/90"
           >
             {isExporting ? <Activity size={14} className="animate-spin text-white" /> : <Share2 size={14} />}
             <span className="hidden sm:inline">Snapshot</span>
           </Button>
-        </div>
-      </div>
+          </>
+        )}
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Sentinel: when this scrolls out of view, tabs become fixed */}
@@ -504,14 +491,14 @@ export default function AnalyticsPage({ onDateSelect }) {
 
         {/* Fixed floating tabs overlay (appears when scrolled past sentinel) */}
         <div
-          className={`fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-xl py-3 px-3 sm:px-4 lg:px-6 border-b border-border/30 shadow-sm transition-all duration-200 ${isTabsSticky ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'}`}
+          className={`fixed top-0 left-0 right-0 z-50 bg-[var(--app-bg)]/85 backdrop-blur-xl py-3 px-3 sm:px-4 lg:px-6 border-b border-[var(--app-border)] shadow-[var(--app-shadow-sm)] transition-all duration-200 ${isTabsSticky ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'}`}
         >
           <div className="flex justify-center mx-auto max-w-[1600px]">
-            <TabsList className="bg-muted/60 p-1 rounded-2xl border border-border/40 h-auto gap-0.5 w-full max-w-[400px] shadow-sm">
-              <TabsTrigger value="overview" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
-              <TabsTrigger value="history" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">History</TabsTrigger>
-              <TabsTrigger value="evolution" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Focus</TabsTrigger>
-              <TabsTrigger value="recovery" className="flex-1 rounded-xl px-1 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center justify-center gap-1">
+            <TabsList className="h-auto w-full max-w-[420px] gap-1 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1 shadow-[var(--app-shadow-sm)]">
+              <TabsTrigger value="overview" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-semibold uppercase tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">Overview</TabsTrigger>
+              <TabsTrigger value="history" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-semibold uppercase tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">History</TabsTrigger>
+              <TabsTrigger value="evolution" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-semibold uppercase tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">Focus</TabsTrigger>
+              <TabsTrigger value="recovery" className="flex-1 rounded-xl px-1 py-2.5 text-[10px] font-semibold uppercase tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background transition-all flex items-center justify-center gap-1">
                 Recovery <div className="w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
               </TabsTrigger>
             </TabsList>
@@ -520,17 +507,17 @@ export default function AnalyticsPage({ onDateSelect }) {
 
         {/* Inline tabs (always rendered to prevent layout shift) */}
         <div className="flex justify-center mb-4">
-          <TabsList className="bg-muted/60 p-1 rounded-2xl border border-border/40 h-auto gap-0.5 w-full max-w-[400px] shadow-sm">
-            <TabsTrigger value="overview" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Overview</TabsTrigger>
-            <TabsTrigger value="history" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">History</TabsTrigger>
-            <TabsTrigger value="evolution" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Focus</TabsTrigger>
-            <TabsTrigger value="recovery" className="flex-1 rounded-xl px-1 py-2.5 text-[10px] font-black uppercase tracking-tight data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all flex items-center justify-center gap-1">
+          <TabsList className="h-auto w-full max-w-[420px] gap-1 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1 shadow-[var(--app-shadow-sm)]">
+            <TabsTrigger value="overview" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-semibold uppercase tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">Overview</TabsTrigger>
+            <TabsTrigger value="history" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-semibold uppercase tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">History</TabsTrigger>
+            <TabsTrigger value="evolution" className="flex-1 rounded-xl px-2 py-2.5 text-[10px] font-semibold uppercase tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">Focus</TabsTrigger>
+            <TabsTrigger value="recovery" className="flex-1 rounded-xl px-1 py-2.5 text-[10px] font-semibold uppercase tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background transition-all flex items-center justify-center gap-1">
               Recovery <div className="w-1 h-1 rounded-full bg-emerald-500 shrink-0" />
             </TabsTrigger>
           </TabsList>
         </div>
 
-        <div ref={dashboardRef} className="space-y-6 bg-background rounded-3xl">
+        <div ref={dashboardRef} className="space-y-6 rounded-[var(--app-radius-lg)]">
 
           <TabsContent value="overview" className="space-y-6 outline-none">
             {/* Header Cards */}
@@ -631,18 +618,18 @@ export default function AnalyticsPage({ onDateSelect }) {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Main Volume Chart */}
-              <div className="lg:col-span-2 bg-card rounded-3xl border border-border p-6 shadow-sm hover:shadow-md transition-all chart-container">
+              <Panel className="lg:col-span-2 p-5 md:p-6 transition-all chart-container">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
                       <Activity size={16} className="text-primary" />
                       Training Volume Trend
                     </h3>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Total load per session over time</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-normal mt-1">Total load per session over time</p>
                   </div>
                 </div>
                 {analyticsData.volumeHistory.length === 0 ? (
-                  <div className="h-[300px] flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
+                  <div className="h-[300px] flex flex-col items-center justify-center text-muted-foreground bg-[var(--app-surface-muted)] rounded-2xl border border-dashed border-[var(--app-border)]">
                     <Activity size={32} className="mb-2 opacity-20" />
                     <p className="text-[10px] font-bold uppercase tracking-widest mt-2">No volume data for this period</p>
                     <p className="text-[10px] text-muted-foreground font-medium max-w-[200px] text-center mt-1">Log workouts and mark them as complete to see trends.</p>
@@ -688,24 +675,24 @@ export default function AnalyticsPage({ onDateSelect }) {
                     </ResponsiveContainer>
                   </div>
                 )}
-              </div>
+              </Panel>
 
               {/* Muscle Distribution */}
-              <div className="bg-card rounded-3xl border border-border p-6 shadow-sm hover:shadow-md transition-all">
+              <Panel className="p-5 md:p-6 transition-all">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
                       <Target size={16} className="text-primary" />
                       Body Focus
                     </h3>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Muscle group distribution</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-normal mt-1">Muscle group distribution</p>
                   </div>
-                  <div className="flex bg-muted p-1 rounded-xl border border-border">
+                  <div className="flex rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-1">
                     <button
                       onClick={() => setMuscleMetric('sets')}
                       className={cn(
                         "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-tight transition-all",
-                        muscleMetric === 'sets' ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                        muscleMetric === 'sets' ? "bg-[var(--app-surface)] text-foreground shadow-sm" : "text-muted-foreground"
                       )}
                     >
                       Sets
@@ -714,7 +701,7 @@ export default function AnalyticsPage({ onDateSelect }) {
                       onClick={() => setMuscleMetric('volume')}
                       className={cn(
                         "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-tight transition-all",
-                        muscleMetric === 'volume' ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                        muscleMetric === 'volume' ? "bg-[var(--app-surface)] text-foreground shadow-sm" : "text-muted-foreground"
                       )}
                     >
                       Volume
@@ -723,7 +710,7 @@ export default function AnalyticsPage({ onDateSelect }) {
                 </div>
 
                 {analyticsData.muscleData.length === 0 ? (
-                  <div className="h-[250px] flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
+                  <div className="h-[250px] flex flex-col items-center justify-center text-muted-foreground bg-[var(--app-surface-muted)] rounded-2xl border border-dashed border-[var(--app-border)]">
                     <Target size={32} className="mb-2 opacity-20" />
                     <p className="text-[10px] font-bold uppercase tracking-widest">No muscle data yet</p>
                   </div>
@@ -802,7 +789,7 @@ export default function AnalyticsPage({ onDateSelect }) {
                     const diff = pastVal > 0 ? Math.round(((currVal - pastVal) / pastVal) * 100) : 0;
 
                     return (
-                      <div key={item.name} className="group relative flex items-center justify-between p-3 rounded-2xl bg-slate-50/50 border border-slate-100 hover:bg-white hover:border-indigo-100 hover:shadow-sm transition-all overflow-hidden">
+                      <div key={item.name} className="group relative flex items-center justify-between p-3 rounded-2xl bg-[var(--app-surface-muted)] border border-[var(--app-border)] hover:border-[var(--app-border-strong)] transition-all overflow-hidden">
                         <div className="flex items-center gap-3">
                           <div className="w-2 h-2 rounded-full bg-indigo-500" />
                           <span className="text-[10px] font-extrabold text-slate-700 uppercase tracking-tight">{item.name}</span>
@@ -824,25 +811,25 @@ export default function AnalyticsPage({ onDateSelect }) {
                     );
                   })}
                 </div>
-              </div>
+              </Panel>
             </div>
 
             {/* PR Board */}
             {analyticsData.personalRecords.length > 0 && (
-              <div className="bg-card rounded-3xl border border-border p-6 shadow-sm">
+              <Panel className="p-5 md:p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                   <div>
                     <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
                       <Trophy size={16} className="text-amber-500" />
                       Personal Records
                     </h3>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">All-time best lifts</p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-normal mt-1">All-time best lifts</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                   {analyticsData.personalRecords.map((pr, idx) => (
-                    <div key={idx} className="bg-gradient-to-br from-muted/50 to-card rounded-2xl border border-border p-4 relative overflow-hidden group hover:border-amber-500/30 hover:shadow-md transition-all">
+                    <div key={idx} className="bg-gradient-to-br from-[var(--app-surface-muted)] to-[var(--app-surface)] rounded-2xl border border-[var(--app-border)] p-4 relative overflow-hidden group hover:border-amber-500/30 transition-all">
                       <div className="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 group-hover:scale-110 group-hover:rotate-12 transition-all">
                         <Trophy size={64} className="text-foreground" />
                       </div>
@@ -860,7 +847,7 @@ export default function AnalyticsPage({ onDateSelect }) {
                     </div>
                   ))}
                 </div>
-              </div>
+              </Panel>
             )}
           </TabsContent>
 
@@ -870,18 +857,18 @@ export default function AnalyticsPage({ onDateSelect }) {
 
           <TabsContent value="evolution" className="outline-none">
             {/* Strength Evolution */}
-            <div className="bg-card rounded-3xl border border-border p-6 shadow-sm chart-container">
+            <Panel className="p-5 md:p-6 chart-container">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
                   <h3 className="text-sm font-bold text-foreground uppercase tracking-tight flex items-center gap-2">
                     <Dumbbell size={16} className="text-primary" />
                     Strength Evolution
                   </h3>
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Individual exercise progression</p>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-normal mt-1">Individual exercise progression</p>
                 </div>
 
                 <Select value={exerciseFilter} onValueChange={setExerciseFilter}>
-                  <SelectTrigger className="w-[180px] h-9 bg-muted/50 border-border text-xs font-bold text-foreground rounded-xl">
+                  <SelectTrigger className="w-[180px] h-9 bg-[var(--app-surface-muted)] border-[var(--app-border)] text-xs font-bold text-foreground rounded-xl">
                     <SelectValue placeholder="Select Exercise" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-border">
@@ -894,15 +881,15 @@ export default function AnalyticsPage({ onDateSelect }) {
               </div>
 
               {!exerciseFilter || exerciseFilter === 'All' ? (
-                <div className="h-[300px] flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border border-spacing-4">
-                  <div className="p-4 bg-muted rounded-full mb-4 animate-pulse">
+                <div className="h-[300px] flex flex-col items-center justify-center text-muted-foreground bg-[var(--app-surface-muted)] rounded-2xl border border-dashed border-[var(--app-border)] border-spacing-4">
+                  <div className="p-4 bg-[var(--app-surface)] rounded-full mb-4 animate-pulse">
                     <History size={32} className="opacity-20 translate-x-[1px]" />
                   </div>
                   <p className="text-xs font-black uppercase tracking-widest">Select an exercise</p>
                   <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1 opacity-60">to view your progression history</p>
                 </div>
               ) : selectedExerciseData.length === 0 ? (
-                <div className="h-[300px] flex flex-col items-center justify-center text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
+                <div className="h-[300px] flex flex-col items-center justify-center text-muted-foreground bg-[var(--app-surface-muted)] rounded-2xl border border-dashed border-[var(--app-border)]">
                   <Activity size={32} className="mb-2 opacity-20" />
                   <p className="text-[10px] font-bold uppercase tracking-widest">No history recorded yet</p>
                   <p className="text-[10px] text-muted-foreground font-medium mt-1">Check back once you've logged this exercise in a completed session.</p>
@@ -910,19 +897,19 @@ export default function AnalyticsPage({ onDateSelect }) {
               ) : (
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-3 bg-muted/30 rounded-2xl border border-border/50">
+                    <div className="p-3 bg-[var(--app-surface-muted)] rounded-2xl border border-[var(--app-border)]">
                       <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Max Weight</p>
                       <p className="text-xl font-black text-foreground">{Math.max(...selectedExerciseData.map(d => d.weight))}kg</p>
                     </div>
-                    <div className="p-3 bg-muted/30 rounded-2xl border border-border/50">
+                    <div className="p-3 bg-[var(--app-surface-muted)] rounded-2xl border border-[var(--app-border)]">
                       <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Peak 1RM (Est)</p>
                       <p className="text-xl font-black text-indigo-600">{Math.max(...selectedExerciseData.map(d => d.est1RM))}kg</p>
                     </div>
-                    <div className="p-3 bg-muted/30 rounded-2xl border border-border/50">
+                    <div className="p-3 bg-[var(--app-surface-muted)] rounded-2xl border border-[var(--app-border)]">
                       <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Sessions</p>
                       <p className="text-xl font-black text-foreground">{selectedExerciseData.length}</p>
                     </div>
-                    <div className="p-3 bg-muted/30 rounded-2xl border border-border/50">
+                    <div className="p-3 bg-[var(--app-surface-muted)] rounded-2xl border border-[var(--app-border)]">
                       <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Growth</p>
                       <div className="flex items-center gap-1">
                         {selectedExerciseData.length > 1 ? (
@@ -1002,14 +989,14 @@ export default function AnalyticsPage({ onDateSelect }) {
                   </div>
                 </div>
               )}
-            </div>
+            </Panel>
           </TabsContent>
 
           <TabsContent value="recovery" className="outline-none">
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Recovery Map Section */}
-                <div className="lg:col-span-2 bg-gradient-to-b from-card to-muted/20 rounded-[2.5rem] border border-border p-8 shadow-sm">
+                <Panel className="lg:col-span-2 bg-gradient-to-b from-[var(--app-surface)] to-[var(--app-surface-muted)] p-6 md:p-8">
                   <div className="flex items-start justify-between mb-8">
                     <div>
                       <h3 className="text-xl font-black text-foreground tracking-tight">Anatomy Recovery</h3>
@@ -1048,11 +1035,11 @@ export default function AnalyticsPage({ onDateSelect }) {
                       </p>
                     </div>
                   </div>
-                </div>
+                </Panel>
 
                 {/* Recovery Sidebar */}
                 <div className="space-y-6">
-                  <div className="bg-card rounded-[2.5rem] border border-border p-8 shadow-sm h-full flex flex-col">
+                  <Panel className="p-6 md:p-8 h-full flex flex-col">
                     <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-6">Status Feed</h3>
 
                     <div className="space-y-3 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar flex-grow">
@@ -1060,7 +1047,7 @@ export default function AnalyticsPage({ onDateSelect }) {
                         Object.entries(analyticsData.recoveryData)
                           .sort((a, b) => a[1].hoursSince - b[1].hoursSince)
                           .map(([muscle, data]) => (
-                            <div key={muscle} className="group flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-transparent hover:border-border hover:bg-muted/50 transition-all">
+                            <div key={muscle} className="group flex items-center justify-between p-4 bg-[var(--app-surface-muted)] rounded-2xl border border-transparent hover:border-[var(--app-border)] transition-all">
                               <div className="flex items-center gap-3">
                                 <div className={`w-2.5 h-2.5 rounded-full ${data.status === 'fatigued' ? 'bg-rose-500 shadow-lg shadow-rose-200' :
                                   data.status === 'recovering' ? 'bg-amber-500 shadow-lg shadow-amber-100' :
@@ -1108,14 +1095,14 @@ export default function AnalyticsPage({ onDateSelect }) {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Panel>
                 </div>
               </div>
             </div>
           </TabsContent>
         </div>
       </Tabs>
-    </div>
+    </PageShell>
   );
 }
 
@@ -1145,16 +1132,16 @@ function GlowCounter({ value, suffix = "", decimals = 0 }) {
 
 function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend, suffix = "", className, isMicro }) {
   return (
-    <Card className={cn(
-      "rounded-3xl bg-muted/30 border border-border transition-all group overflow-hidden relative min-w-0",
-      isMicro ? "p-3" : "p-0",
+    <Panel className={cn(
+      "transition-all group overflow-hidden relative min-w-0",
+      isMicro ? "p-3" : "",
       className
     )}>
       <div className={cn(
         "absolute top-0 right-0 rotate-12 translate-x-4 -translate-y-4 opacity-5 bg-primary rounded-full group-hover:scale-110 transition-transform",
         isMicro ? "p-4" : "p-8"
       )} />
-      <CardContent className={cn("p-0 flex flex-col h-full", !isMicro && "p-5")}>
+      <div className={cn("p-0 flex flex-col h-full", !isMicro && "p-5")}>
         <div className="flex items-start justify-between relative">
           <div className={cn(
             "rounded-2xl transition-transform group-hover:scale-110 flex items-center justify-center shrink-0",
@@ -1195,8 +1182,8 @@ function StatCard({ title, value, subtitle, icon, iconColor, bgColor, trend, suf
             {subtitle}
           </p>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Panel>
   );
 }
 
