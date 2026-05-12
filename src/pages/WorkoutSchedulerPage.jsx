@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { ChevronDown, Calendar, AlertCircle, CheckCircle2, Clock, RefreshCw, Repeat, BedDouble } from 'lucide-react';
+import { ChevronDown, AlertCircle, CheckCircle2, Clock, RefreshCw, Repeat } from 'lucide-react';
 import WorkoutSection from '../components/WorkoutSection';
 import { 
   loadWorkoutByDate, 
@@ -24,6 +24,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from "@/lib/utils";
 import { loadTrainingPlan, getCycleSlotForDate } from '../utils/trainingPlan';
 import QuickHealthWidgets from '../components/health/QuickHealthWidgets';
+import { PageShell } from '../components/layout/PageShell';
+import { PageHeader } from '../components/layout/PageHeader';
+import { Panel } from '../components/layout/Panel';
 
 function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged }) {
   const [open, setOpen] = useState(defaultOpen && !section.isFullyComplete);
@@ -75,28 +78,29 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
   ) : null;
 
   return (
-    <div className={cn(
-      "overflow-hidden transition-all duration-500 rounded-[2rem] group/card",
-      open 
-        ? "mb-6 md:mb-8 shadow-[0_15px_45px_-12px_rgba(0,0,0,0.08)] bg-white border border-slate-100" 
-        : "mb-3 md:mb-4 border border-slate-100/50 bg-white/50 hover:bg-white hover:border-slate-200 shadow-sm"
-    )}>
+    <Panel
+      className={cn(
+        "mb-3 overflow-hidden transition-colors group/card",
+        open ? "border-[var(--app-border-strong)]" : "bg-[var(--app-surface)]/80"
+      )}
+      interactive={!open}
+    >
       <button
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "w-full flex items-center justify-between px-4 md:px-6 py-4 md:py-5 bg-transparent transition-all",
-          open && "border-b border-slate-50/80"
+          "w-full flex items-center justify-between px-4 md:px-5 py-4 bg-transparent transition-colors",
+          open && "border-b border-[var(--app-border)]"
         )}
       >
         <div className="flex items-center gap-2 md:gap-4">
           <div className="flex flex-col items-start min-w-[80px] md:min-w-[100px]">
-            <span className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${open ? 'text-indigo-600' : 'text-slate-400'}`}>
+            <span className={`text-[10px] md:text-xs font-bold uppercase tracking-normal ${open ? 'text-foreground' : 'text-muted-foreground'}`}>
               {section.dayName}
             </span>
-            <span className="text-[9px] md:text-[10px] font-bold text-slate-400">{formatDateDisplay(section.date)}</span>
+            <span className="text-[10px] font-medium text-muted-foreground">{formatDateDisplay(section.date)}</span>
           </div>
           
-          <div className="w-px h-6 md:h-8 bg-slate-100 mx-0.5 md:mx-1 hidden xs:block" />
+          <div className="w-px h-6 md:h-8 bg-[var(--app-border)] mx-0.5 md:mx-1 hidden xs:block" />
           
           <div className="scale-90 md:scale-100 origin-left flex items-center gap-2">
             {badgeEl}
@@ -123,10 +127,10 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
           )}
         </div>
         
-        <motion.div 
+        <motion.div
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className="p-1.5 rounded-lg bg-slate-50 text-slate-400 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-all"
+          className="p-1.5 rounded-[var(--app-radius-sm)] bg-[var(--app-surface-muted)] text-muted-foreground group-hover:text-foreground transition-colors"
         >
           <ChevronDown size={14} strokeWidth={3} />
         </motion.div>
@@ -141,7 +145,7 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="bg-transparent overflow-hidden"
           >
-            <div className="px-3 md:px-4 py-4 md:py-5">
+            <div className="px-3 md:px-4 py-4">
               <WorkoutSection
                 date={section.date}
                 dayName={section.dayName}
@@ -157,7 +161,7 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </Panel>
   );
 }
 
@@ -317,37 +321,33 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
   }, [syncState, selectedWeek, today, yesterday, tomorrow, plannerRefreshNonce, targetDate]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-2">
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-tight">Training Hub</h1>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.1em] whitespace-nowrap">
-              Today is {formatDateDisplay(new Date())}
-            </span>
+    <PageShell>
+      <PageHeader
+        title="Training Hub"
+        meta={(
+          <>
             {syncState === 'loading' && (
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 animate-pulse border border-indigo-100/50">
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-[var(--app-accent-soft)] text-foreground animate-pulse border border-[var(--app-border)]">
                 <RefreshCw size={10} className="animate-spin" />
-                <span className="text-[9px] font-black uppercase tracking-widest">Syncing</span>
+                <span className="text-[10px] font-bold uppercase tracking-normal">Syncing</span>
               </div>
             )}
             {syncState === 'offline' && (
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
                 <AlertCircle size={10} />
-                <span className="text-[9px] font-black uppercase tracking-widest">Offline</span>
+                <span className="text-[10px] font-bold uppercase tracking-normal">Offline</span>
               </div>
             )}
-          </div>
-        </div>
-
-        <div className="flex items-center self-start sm:self-auto">
+          </>
+        )}
+        actions={(
           <WeekPicker 
             currentWeekStart={selectedWeek} 
             onWeekChange={setSelectedWeek} 
             compact
           />
-        </div>
-      </div>
+        )}
+      />
 
       <QuickHealthWidgets />
 
@@ -374,28 +374,30 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="py-20 flex flex-col items-center justify-center text-center gap-6 bg-slate-50/50 rounded-[3rem] border border-dashed border-slate-200 mt-4"
+              className="mt-2"
             >
-              <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 shadow-sm border border-emerald-100 ring-4 ring-emerald-50/50">
-                <CheckCircle2 size={40} strokeWidth={1.5} />
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Focus Achieved!</h2>
-                <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em] max-w-[240px] leading-relaxed mx-auto">
-                  All items for this period have been cleared. History updated with your progress.
-                </p>
-              </div>
-              <button 
-                onClick={() => setPlannerRefreshNonce(n => n + 1)}
-                className="inline-flex items-center justify-center rounded-xl border border-slate-200 text-slate-400 font-black uppercase text-[10px] tracking-widest h-10 px-6 hover:bg-slate-50 group transition-all"
-              >
-                Refresh Hub <RefreshCw size={14} className="ml-2 group-hover:rotate-180 transition-transform duration-500" />
-              </button>
+              <Panel className="flex flex-col items-center justify-center gap-5 border-dashed py-16 text-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600">
+                  <CheckCircle2 size={34} strokeWidth={1.75} />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-xl font-semibold tracking-normal text-foreground">Focus achieved</h2>
+                  <p className="mx-auto max-w-sm text-sm font-medium leading-6 text-muted-foreground">
+                    All items for this period have been cleared. History updated with your progress.
+                  </p>
+                </div>
+                <button 
+                  onClick={() => setPlannerRefreshNonce(n => n + 1)}
+                  className="inline-flex h-10 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] px-4 text-xs font-bold uppercase tracking-normal text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
+                >
+                  Refresh <RefreshCw size={14} className="ml-2" />
+                </button>
+              </Panel>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </PageShell>
   );
 }
 
