@@ -15,6 +15,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { loadTemplates, deleteTemplate, saveTemplate, defaultSession } from '../utils/storage';
+import { PageShell } from '../components/layout/PageShell';
+import { PageHeader } from '../components/layout/PageHeader';
+import { Panel } from '../components/layout/Panel';
 
 export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
   const [templateRows, setTemplateRows] = useState(() => loadTemplates());
@@ -55,75 +58,72 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
   );
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1">
-
-          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight leading-none uppercase">Routines</h1>
-          <p className="text-sm text-muted-foreground font-medium tracking-tight">Manage workout templates and session structures.</p>
-        </div>
-
-        <div className="flex flex-col lg:flex-row lg:items-center gap-3 w-full md:w-auto">
+    <PageShell size="default" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <PageHeader
+        title="Routines"
+        description="Manage reusable workout templates and session structures."
+        actions={(
+          <div className="flex flex-col gap-3 w-full md:w-auto lg:flex-row lg:items-center">
           <div className="grid grid-cols-2 gap-2 shrink-0">
             <Button
               onClick={onOpenTrainingPlan}
               variant="outline"
-              className="h-10 px-3 rounded-xl border-indigo-200 text-indigo-600 hover:bg-indigo-50 font-black uppercase text-[9px] tracking-widest transition-all flex items-center justify-center gap-2 shadow-sm"
+              className="h-10 rounded-[var(--app-radius-md)] border-[var(--app-border)] px-3 text-xs font-bold uppercase tracking-normal text-foreground shadow-none hover:bg-[var(--app-surface-muted)]"
             >
               <Repeat size={12} strokeWidth={3} />
               <span className="truncate">Training Plan</span>
             </Button>
             <Button
               onClick={handleCreateNew}
-              className="h-10 px-3 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 font-black uppercase text-[9px] tracking-widest shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2"
+              className="h-10 rounded-[var(--app-radius-md)] px-3 text-xs font-bold uppercase tracking-normal shadow-none"
             >
               <Plus size={12} strokeWidth={3} />
               <span className="truncate">New Routine</span>
             </Button>
           </div>
 
-          <div className="flex flex-1 items-center gap-2 bg-card p-1.5 rounded-xl border border-border shadow-sm backdrop-blur-sm">
+          <div className="flex flex-1 items-center gap-2 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1.5 shadow-[var(--app-shadow-sm)]">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" size={14} />
               <Input
                 placeholder="Search routines..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-8 rounded-lg border-border bg-muted/50 hover:bg-muted text-[11px] font-bold transition-all focus-visible:bg-card focus-visible:border-primary focus-visible:ring-primary/5 shadow-none"
+                className="h-8 rounded-[var(--app-radius-sm)] border-transparent bg-[var(--app-surface-muted)] pl-9 text-xs font-semibold shadow-none focus-visible:border-[var(--app-border-strong)] focus-visible:bg-[var(--app-surface)] focus-visible:ring-0"
               />
             </div>
-            <div className="hidden xs:flex h-6 w-[1px] bg-border mx-1" />
-            <div className="hidden xs:block px-3 py-1.5 text-[9px] font-black text-muted-foreground uppercase tracking-widest bg-muted rounded-lg border border-border/50 whitespace-nowrap">
+            <div className="hidden xs:flex h-6 w-px bg-[var(--app-border)] mx-1" />
+            <div className="hidden xs:block rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-normal text-muted-foreground whitespace-nowrap">
               <span className="text-primary">{templateRows.length}</span>
             </div>
           </div>
         </div>
-      </div>
+        )}
+      />
 
       {templatesSaved && (
         <div className="fixed top-8 right-8 z-[100] animate-in slide-in-from-right-10 fade-in duration-300">
-          <Badge className="bg-emerald-500 text-white border-none shadow-xl shadow-emerald-200/50 font-black px-6 py-3 rounded-2xl text-xs flex items-center gap-2">
+          <Badge className="bg-emerald-600 text-white border-none shadow-[var(--app-shadow-md)] font-bold px-4 py-2 rounded-[var(--app-radius-md)] text-xs flex items-center gap-2">
              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-             SYNCHRONIZED TO CLOUD
+             Synchronized
           </Badge>
         </div>
       )}
 
       {filteredTemplates.length === 0 ? (
-        <div className="py-12 md:py-24 text-center bg-card rounded-[3.5rem] border border-dashed border-border/60 shadow-inner group transition-all hover:bg-muted/30">
-          <div className="relative inline-block mb-6">
-            <div className="absolute inset-0 bg-primary/5 rounded-full blur-3xl opacity-40 animate-pulse" />
-            <div className="relative bg-card w-20 h-20 rounded-[2.5rem] flex items-center justify-center mx-auto text-muted-foreground shadow-2xl border border-border rotate-12 transition-transform group-hover:rotate-0">
+        <Panel className="py-16 text-center border-dashed">
+          <div className="mb-5 inline-block">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--app-radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] text-muted-foreground">
               <Sparkles size={32} strokeWidth={1.5} />
             </div>
           </div>
           <div className="max-w-md mx-auto px-6 space-y-2">
-            <h3 className="text-xl font-black text-foreground uppercase tracking-tight">Library Empty</h3>
-            <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest leading-relaxed">
+            <h3 className="text-xl font-semibold text-foreground tracking-normal">Library empty</h3>
+            <p className="text-sm text-muted-foreground font-medium leading-6">
               No routines found. Save active sessions as routines to build your library.
             </p>
           </div>
-        </div>
+        </Panel>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredTemplates.map((t) => {
@@ -133,9 +133,7 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
             const muscles = Array.from(new Set([...groupMuscles, ...standaloneMuscles].filter(Boolean))).slice(0, 3);
 
             return (
-            <div key={t.id} className="bg-card rounded-[2rem] border border-border shadow-sm hover:shadow-xl hover:border-primary/20 transition-all group relative overflow-hidden active:scale-[0.99] flex flex-col p-5 md:p-6">
-              <div className="absolute top-0 right-0 -mr-20 -mt-20 w-48 h-48 bg-primary/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-              
+            <Panel key={t.id} className="group relative flex flex-col overflow-hidden p-5 transition-colors active:scale-[0.99]" interactive>
               <div className="absolute top-4 right-4 md:top-5 md:right-5 flex items-center gap-1.5 z-20">
                 <Button 
                   variant="ghost" 
@@ -144,7 +142,7 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
                     e.stopPropagation();
                     onEdit(t.id);
                   }}
-                  className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all shadow-sm bg-card border border-border md:opacity-0 md:group-hover:opacity-100 md:translate-y-1 md:group-hover:translate-y-0"
+                  className="h-8 w-8 rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)] text-muted-foreground shadow-none transition-all hover:bg-[var(--app-surface-muted)] hover:text-foreground md:opacity-0 md:group-hover:opacity-100 md:translate-y-1 md:group-hover:translate-y-0"
                 >
                   <Pencil size={14} />
                 </Button>
@@ -155,23 +153,23 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
                     e.stopPropagation();
                     removeTemplate(t.id);
                   }}
-                  className="h-8 w-8 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all shadow-sm bg-card border border-border md:opacity-0 md:group-hover:opacity-100 md:translate-y-1 md:group-hover:translate-y-0 delay-75"
+                  className="h-8 w-8 rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)] text-muted-foreground shadow-none transition-all hover:bg-rose-50 hover:text-rose-600 md:opacity-0 md:group-hover:opacity-100 md:translate-y-1 md:group-hover:translate-y-0 delay-75"
                 >
                   <Trash2 size={14} />
                 </Button>
               </div>
               
               <div className="flex items-start gap-4 mb-5 relative z-10">
-                <div className="bg-primary text-primary-foreground h-10 w-10 md:h-12 md:w-12 flex items-center justify-center rounded-xl shadow-lg shadow-primary/10 shrink-0 transform group-hover:-rotate-6 transition-transform group-hover:scale-110">
+                <div className="bg-foreground text-background h-10 w-10 md:h-11 md:w-11 flex items-center justify-center rounded-[var(--app-radius-md)] shadow-[var(--app-shadow-sm)] shrink-0 transition-transform group-hover:scale-105">
                   <Dumbbell className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
                 <div className="flex-1 pr-16 md:pr-10 pt-0.5">
-                  <h3 className="text-base md:text-lg font-black text-foreground tracking-tight leading-none group-hover:text-primary transition-colors uppercase break-words">{t.name}</h3>
+                  <h3 className="text-base md:text-lg font-semibold text-foreground tracking-normal leading-tight break-words">{t.name}</h3>
                   <div className="flex flex-wrap items-center gap-1 mt-2">
                     {muscles.length > 0 ? muscles.map(m => (
-                      <span key={m} className="px-1.5 py-0.5 bg-muted text-[7px] font-black text-foreground/70 rounded-md border border-border uppercase tracking-widest">{m}</span>
+                      <span key={m} className="px-1.5 py-0.5 bg-[var(--app-surface-muted)] text-[9px] font-bold text-muted-foreground rounded-[var(--app-radius-sm)] border border-[var(--app-border)] uppercase tracking-normal">{m}</span>
                     )) : (
-                      <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest flex items-center gap-2">
+                      <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-normal flex items-center gap-2">
                          Saved {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'recently'}
                       </span>
                     )}
@@ -182,15 +180,15 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
               <div className="mt-auto space-y-5 relative z-10">
                 <div className="flex items-center justify-between px-2">
                   <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em] flex items-center gap-2.5">
-                    <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(212,255,0,0.5)]" />
+                    <div className="w-2 h-2 rounded-full bg-foreground" />
                     Overview
                   </span>
-                  <Badge variant="secondary" className="bg-muted text-foreground border border-border font-black text-[10px] px-3 py-1 rounded-xl uppercase tracking-wider shadow-sm">
+                  <Badge variant="secondary" className="bg-[var(--app-surface-muted)] text-foreground border border-[var(--app-border)] font-bold text-[10px] px-3 py-1 rounded-[var(--app-radius-sm)] uppercase tracking-normal shadow-none">
                     {(t.groups?.length || 0) + (t.standaloneExercises?.length || 0)} SECTIONS
                   </Badge>
                 </div>
                 
-                <div className="bg-muted/50 rounded-[1.5rem] md:rounded-[2rem] p-3 md:p-4 space-y-2.5 md:space-y-3 border border-border/50 group-hover:bg-card group-hover:border-primary/20 transition-all">
+                <div className="bg-[var(--app-surface-muted)] rounded-[var(--app-radius-md)] p-3 md:p-4 space-y-2.5 md:space-y-3 border border-[var(--app-border)] transition-colors">
                   {(() => {
                     const combined = [
                       ...(t.standaloneExercises || []).map(ex => ({ name: ex.exercise || 'Unnamed', more: 0 })),
@@ -200,12 +198,12 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
                       <>
                         {combined.slice(0, 3).map((item, iIdx) => (
                           <div key={iIdx} className="flex items-center gap-4 group/ex text-ellipsis overflow-hidden">
-                            <div className="w-2 h-2 rounded-full bg-border group-hover/ex:bg-primary transition-colors shrink-0" />
+                            <div className="w-2 h-2 rounded-full bg-[var(--app-border-strong)] shrink-0" />
                             <span className="text-xs font-black text-muted-foreground truncate tracking-tight group-hover/ex:text-foreground">
                               {item.name}
                               {item.more > 0 && (
                                 <span className="text-primary ml-2 font-black text-[9px] bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
-                                  +{item.more} MORE
+                                  +{item.more}
                                 </span>
                               )}
                             </span>
@@ -213,7 +211,7 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
                         ))}
                         {combined.length > 3 && (
                           <div className="pt-3 mt-2 border-t border-border/50 flex items-center justify-center">
-                            <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em]">
+                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-normal">
                               + {combined.length - 3} OTHERS
                             </p>
                           </div>
@@ -223,11 +221,11 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
                   })()}
                 </div>
               </div>
-            </div>
+            </Panel>
             );
           })}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }
