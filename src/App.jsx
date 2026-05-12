@@ -1,17 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Sparkles, Calendar, Cloud, RefreshCw, BarChart3, User, Activity } from 'lucide-react';
 
 
 import WorkoutSchedulerPage from './pages/WorkoutSchedulerPage';
-import AnalyticsPage from './pages/AnalyticsPage';
-import DayDetailPage from './pages/DayDetailPage';
-import ProfilePage from './pages/ProfilePage';
-import RoutinesPage from './pages/RoutinesPage';
-import EditRoutinePage from './pages/EditRoutinePage';
-import TrainingPlanPage from './pages/TrainingPlanPage';
-import HealthPage from './pages/HealthPage';
 import QuickActionHub from './components/health/QuickActionHub';
-import LoginPage from './pages/LoginPage';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +12,15 @@ import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isSessionFini
 import { scheduleTomorrowSummary } from './utils/notificationService';
 import { loadSettings } from './utils/settings';
 
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
+const DayDetailPage = lazy(() => import('./pages/DayDetailPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const RoutinesPage = lazy(() => import('./pages/RoutinesPage'));
+const EditRoutinePage = lazy(() => import('./pages/EditRoutinePage'));
+const TrainingPlanPage = lazy(() => import('./pages/TrainingPlanPage'));
+const HealthPage = lazy(() => import('./pages/HealthPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+
 const navItems = [
   { id: 'workout', name: 'Training', icon: Calendar },
   { id: 'health', name: 'Health', icon: Activity },
@@ -27,6 +28,14 @@ const navItems = [
   { id: 'analytics', name: 'Insights', icon: BarChart3 },
   { id: 'profile', name: 'Profile', icon: User },
 ];
+
+function PageFallback() {
+  return (
+    <div className="flex min-h-[240px] items-center justify-center">
+      <div className="h-8 w-8 rounded-full border-2 border-slate-200 border-t-indigo-600 animate-spin" />
+    </div>
+  );
+}
 
 export default function App() {
   const [activePage, setActivePage] = useState('workout');
@@ -154,21 +163,25 @@ export default function App() {
         <main className="flex-1 overflow-auto">
           <div className="p-3 sm:p-4 lg:p-6 mx-auto w-full max-w-[1600px]">
             {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} targetDate={selectedHistoryDate} />}
-            {activePage === 'health' && (
-              <HealthPage 
-                settings={settings} 
-                onFullScreenToggle={setFullScreenMode} 
-                initialSubView={healthInitialView}
-                onSubViewConsumed={() => setHealthInitialView(null)}
-              />
+            {activePage !== 'workout' && (
+              <Suspense fallback={<PageFallback />}>
+                {activePage === 'health' && (
+                  <HealthPage 
+                    settings={settings} 
+                    onFullScreenToggle={setFullScreenMode} 
+                    initialSubView={healthInitialView}
+                    onSubViewConsumed={() => setHealthInitialView(null)}
+                  />
+                )}
+                {activePage === 'routines' && <RoutinesPage syncKey={syncKey} onEdit={(id) => { setEditRoutineId(id); setActivePage('edit-routine'); }} onOpenTrainingPlan={() => setActivePage('training-plan')} />}
+                {activePage === 'edit-routine' && <EditRoutinePage routineId={editRoutineId} onBack={() => setActivePage('routines')} />}
+                {activePage === 'training-plan' && <TrainingPlanPage syncKey={syncKey} onBack={() => setActivePage('routines')} />}
+                {activePage === 'analytics' && <AnalyticsPage onDateSelect={handleDateSelect} />}
+                {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('analytics')} syncKey={syncKey} />}
+                {activePage === 'profile' && <ProfilePage authState={authState} onDataRefreshed={() => setSyncNonce(n => n + 1)} onSettingsChange={setSettings} onNavigateToLogin={() => setActivePage('login')} />}
+                {activePage === 'login' && <LoginPage authState={authState} onLoginSuccess={() => setActivePage('profile')} onBack={() => setActivePage('profile')} />}
+              </Suspense>
             )}
-            {activePage === 'routines' && <RoutinesPage syncKey={syncKey} onEdit={(id) => { setEditRoutineId(id); setActivePage('edit-routine'); }} onOpenTrainingPlan={() => setActivePage('training-plan')} />}
-            {activePage === 'edit-routine' && <EditRoutinePage routineId={editRoutineId} onBack={() => setActivePage('routines')} />}
-            {activePage === 'training-plan' && <TrainingPlanPage syncKey={syncKey} onBack={() => setActivePage('routines')} />}
-            {activePage === 'analytics' && <AnalyticsPage onDateSelect={handleDateSelect} />}
-            {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('analytics')} syncKey={syncKey} />}
-            {activePage === 'profile' && <ProfilePage authState={authState} onDataRefreshed={() => setSyncNonce(n => n + 1)} onSettingsChange={setSettings} onNavigateToLogin={() => setActivePage('login')} />}
-            {activePage === 'login' && <LoginPage authState={authState} onLoginSuccess={() => setActivePage('profile')} onBack={() => setActivePage('profile')} />}
           </div>
         </main>
 
