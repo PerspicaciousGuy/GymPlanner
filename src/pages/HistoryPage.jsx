@@ -8,6 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Panel } from "@/components/layout/Panel";
 import { 
   getMonthCalendarDays, 
   getPreviousMonth, 
@@ -32,52 +34,49 @@ export default function HistoryPage({ onDateSelect }) {
   const handleToday = () => setViewDate(getToday());
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
-            Workout History
-          </h1>
-          <p className="text-[10px] md:text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">Review and manage past sessions</p>
-        </div>
-
-        <div className="flex items-center gap-1 sm:gap-2 bg-card p-1 rounded-2xl border border-border shadow-sm ring-1 ring-border/50 max-w-full">
+    <div className="animate-in fade-in duration-500 space-y-6">
+      <PageHeader
+        title="Workout History"
+        description="Review and manage past sessions."
+        actions={(
+          <div className="flex max-w-full items-center gap-1 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1 shadow-[var(--app-shadow-sm)] sm:gap-2">
           <Button 
             variant="ghost"
             size="icon-sm"
             onClick={handlePrevMonth}
-            className="h-7 w-7 sm:h-8 sm:w-8 hover:bg-muted text-muted-foreground hover:text-indigo-600 rounded-lg transition-colors"
+            className="h-8 w-8 rounded-lg text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
           >
             <ChevronLeft size={16} className="sm:size-[18px]" />
           </Button>
-          <div className="flex-1 px-1 sm:px-4 py-1.5 text-[11px] sm:text-sm font-black text-foreground min-w-[120px] sm:min-w-[160px] text-center uppercase tracking-tight truncate">
+          <div className="min-w-[120px] flex-1 truncate px-1 py-1.5 text-center text-[11px] font-semibold uppercase tracking-normal text-foreground sm:min-w-[160px] sm:px-4 sm:text-sm">
             {monthLabel}
           </div>
           <Button 
             variant="ghost"
             size="icon-sm"
             onClick={handleNextMonth}
-            className="h-7 w-7 sm:h-8 sm:w-8 hover:bg-muted text-muted-foreground hover:text-indigo-600 rounded-lg transition-colors"
+            className="h-8 w-8 rounded-lg text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
           >
             <ChevronRight size={16} className="sm:size-[18px]" />
           </Button>
-          <div className="w-px h-5 bg-border mx-1 sm:mx-2" />
+          <div className="mx-1 h-5 w-px bg-[var(--app-border)] sm:mx-2" />
           <Button 
             variant="ghost"
             size="sm"
             onClick={handleToday}
-            className="px-2 sm:px-4 py-1.5 h-7 sm:h-8 hover:bg-muted text-[9px] sm:text-[11px] font-black text-indigo-600 uppercase tracking-widest transition-colors"
+            className="h-8 px-2 py-1.5 text-[10px] font-semibold uppercase tracking-normal text-foreground transition-colors hover:bg-[var(--app-surface-muted)] sm:px-4"
           >
             Today
           </Button>
-        </div>
-      </div>
+          </div>
+        )}
+      />
 
-      <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden p-2 md:p-6">
+      <Panel className="overflow-hidden p-2 md:p-6">
         {/* Day Headers */}
         <div className="grid grid-cols-7 mb-4">
           {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-            <div key={day} className="py-2 text-center text-[12px] font-black text-muted-foreground uppercase tracking-widest">
+            <div key={day} className="py-2 text-center text-[12px] font-semibold uppercase tracking-normal text-muted-foreground">
               {day}
             </div>
           ))}
@@ -94,33 +93,33 @@ export default function HistoryPage({ onDateSelect }) {
             />
           ))}
         </div>
-      </div>
+      </Panel>
 
-      <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 py-6 border-t border-border mt-4">
-        <div className="flex items-center gap-2.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 border-t border-[var(--app-border)] py-6">
+        <div className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
           <CheckCircle2 size={16} className="text-emerald-500" />
           Completed
         </div>
-        <div className="flex items-center gap-2.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-          <div className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-amber-500" />
+        <div className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
+          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500/20">
+            <div className="h-2 w-2 rounded-full bg-amber-500" />
           </div>
           Partial
         </div>
-        <div className="flex items-center gap-2.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-          <div className="w-4 h-4 rounded-full bg-yellow-500/20 flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-yellow-500" />
+        <div className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
+          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-yellow-500/20">
+            <div className="h-2 w-2 rounded-full bg-yellow-500" />
           </div>
           Skipped
         </div>
-        <div className="flex items-center gap-2.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-          <div className="w-4 h-4 rounded-full bg-rose-500/20 flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-rose-500" />
+        <div className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
+          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-rose-500/20">
+            <div className="h-2 w-2 rounded-full bg-rose-500" />
           </div>
           Missed
         </div>
-        <div className="flex items-center gap-2.5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-          <Circle size={16} className="text-muted" />
+        <div className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
+          <Circle size={16} className="text-muted-foreground/40" />
           Planned
         </div>
       </div>
@@ -201,15 +200,15 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
     <button
       onClick={onClick}
       className={cn(
-        "relative aspect-square md:aspect-[4/3] rounded-lg sm:rounded-2xl flex flex-col items-center justify-center p-1 sm:p-2 border transition-all",
-        isCurrentMonth ? 'bg-card shadow-sm' : 'bg-muted opacity-40',
-        isToday ? 'border-indigo-600 ring-2 ring-indigo-600/10' : 'border-border',
-        "hover:border-indigo-200 hover:shadow-lg active:scale-95 group overflow-hidden"
+        "group relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-lg border p-1 transition-all active:scale-95 sm:rounded-[var(--app-radius-md)] sm:p-2 md:aspect-[4/3]",
+        isCurrentMonth ? 'bg-[var(--app-surface)] shadow-[var(--app-shadow-sm)]' : 'bg-[var(--app-surface-muted)] opacity-40',
+        isToday ? 'border-foreground ring-2 ring-foreground/10' : 'border-[var(--app-border)]',
+        "hover:border-[var(--app-border-strong)] hover:bg-[var(--app-surface-raised)]"
       )}
     >
       <span className={cn(
-        "text-[11px] sm:text-[15px] font-black sm:mb-1.5",
-        isToday ? 'text-indigo-600' : 'text-foreground'
+        "text-[11px] font-semibold sm:mb-1.5 sm:text-[15px]",
+        isToday ? 'text-foreground' : 'text-foreground'
       )}>
         {date.getDate()}
       </span>
@@ -244,7 +243,7 @@ function CalendarDay({ date, isCurrentMonth, onClick }) {
           )}
           
           {primaryMuscle && (
-            <Badge variant="outline" className="flex text-[8px] font-black text-muted-foreground border-border px-1 py-0 uppercase tracking-widest max-w-[90%] truncate">
+            <Badge variant="outline" className="flex max-w-[90%] truncate border-[var(--app-border)] px-1 py-0 text-[8px] font-semibold uppercase tracking-normal text-muted-foreground">
               {primaryMuscle}
             </Badge>
           )}
