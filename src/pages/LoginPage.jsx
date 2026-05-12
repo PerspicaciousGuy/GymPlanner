@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle, Loader2, LogIn, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function LoginPage({ authState, onLoginSuccess, onBack }) {
   const [email, setEmail] = useState('');
