@@ -11,13 +11,11 @@ import {
   Zap,
   Droplet,
   Cookie,
-  Loader2,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { Panel } from "@/components/layout/Panel";
 import {
   calculateNutrition,
   toggleBookmark,
@@ -172,21 +170,21 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-      className="fixed inset-0 bg-background z-[110] flex flex-col"
+      className="fixed inset-0 z-[110] flex flex-col bg-[var(--app-bg)]"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
+      <div className="flex items-center justify-between border-b border-[var(--app-border)] bg-[var(--app-surface)] px-4 pb-3 pt-4 shadow-[var(--app-shadow-sm)]">
         <button
           onClick={onBack}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+          className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
         >
-          <ArrowLeft size={22} className="text-foreground" />
+          <ArrowLeft size={22} />
         </button>
-        <h1 className="text-lg font-black text-foreground tracking-tight">
+        <h1 className="text-lg font-semibold tracking-normal text-foreground">
           {isManual ? 'Manual Add' : 'Nutrition'}
         </h1>
-        <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors">
-          <MoreVertical size={20} className="text-muted-foreground" />
+        <button className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground">
+          <MoreVertical size={20} />
         </button>
       </div>
 
@@ -202,12 +200,12 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
               onChange={(e) => setName(e.target.value)}
               onBlur={() => setEditingField(null)}
               placeholder="Tap to name"
-              className="text-2xl font-black text-foreground tracking-tight bg-transparent outline-none border-b-2 border-foreground/20 focus:border-foreground pb-1 flex-1 mr-4"
+              className="mr-4 flex-1 border-b-2 border-[var(--app-border)] bg-transparent pb-1 text-2xl font-semibold tracking-normal text-foreground outline-none focus:border-[var(--app-border-strong)]"
             />
           ) : (
             <button
               onClick={() => setEditingField('name')}
-              className="text-2xl font-black text-foreground tracking-tight text-left flex-1 mr-4"
+              className="mr-4 flex-1 text-left text-2xl font-semibold tracking-normal text-foreground"
             >
               {name || 'Tap to name'}
             </button>
@@ -227,7 +225,7 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
         </div>
 
         {/* Serving Size Measurement */}
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-normal text-muted-foreground">
           Serving Size Measurement
         </p>
         <div className="flex gap-2 mb-6">
@@ -236,10 +234,10 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
               key={unit}
               onClick={() => setSelectedUnit(unit)}
               className={cn(
-                "px-4 py-2 rounded-full text-xs font-bold border-2 transition-all capitalize",
+                "rounded-full border px-4 py-2 text-xs font-semibold capitalize transition-colors",
                 selectedUnit === unit
                   ? "bg-foreground text-background border-foreground"
-                  : "border-border text-muted-foreground hover:border-foreground/30"
+                  : "border-[var(--app-border)] text-muted-foreground hover:border-[var(--app-border-strong)]"
               )}
             >
               {unit}
@@ -250,7 +248,7 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
         {/* Serving Amount */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <p className="text-sm font-bold text-foreground">
+            <p className="text-sm font-semibold text-foreground">
               {isGramMode ? 'Amount (grams)' : 'Serving Amount'}
             </p>
             {isGramMode && activeFood?.servingSize && (
@@ -268,7 +266,7 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
                   setServings(prev => Math.max(0.5, prev - 0.5));
                 }
               }}
-              className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--app-border)] text-foreground transition-colors hover:bg-[var(--app-surface-muted)]"
             >
               <Minus size={18} strokeWidth={2.5} />
             </button>
@@ -290,12 +288,12 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
                       setEditingGrams(false);
                     }
                   }}
-                  className="text-xl font-black text-foreground w-16 text-center bg-transparent outline-none border-b-2 border-foreground"
+                  className="w-16 border-b-2 border-foreground bg-transparent text-center text-xl font-semibold text-foreground outline-none"
                 />
               ) : (
                 <button
                   onClick={() => setEditingGrams(true)}
-                  className="text-xl font-black text-foreground min-w-[3rem] text-center"
+                  className="min-w-[3rem] text-center text-xl font-semibold text-foreground"
                 >
                   {gramAmount}<span className="text-xs text-muted-foreground ml-0.5">g</span>
                 </button>
@@ -319,12 +317,12 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
                       setEditingServings(false);
                     }
                   }}
-                  className="text-xl font-black text-foreground w-16 text-center bg-transparent outline-none border-b-2 border-foreground"
+                  className="w-16 border-b-2 border-foreground bg-transparent text-center text-xl font-semibold text-foreground outline-none"
                 />
               ) : (
                 <button
                   onClick={() => setEditingServings(true)}
-                  className="text-xl font-black text-foreground min-w-[3rem] text-center"
+                  className="min-w-[3rem] text-center text-xl font-semibold text-foreground"
                 >
                   {servings}
                 </button>
@@ -338,7 +336,7 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
                   setServings(prev => prev + 0.5);
                 }
               }}
-              className="w-10 h-10 rounded-full border-2 border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--app-border)] text-foreground transition-colors hover:bg-[var(--app-surface-muted)]"
             >
               <Plus size={18} strokeWidth={2.5} />
             </button>
@@ -346,14 +344,14 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
         </div>
 
         {/* Calories Card */}
-        <Card className="rounded-2xl border border-border shadow-sm mb-4">
-          <CardContent className="py-2.5 px-5 flex items-center justify-between">
+        <Panel className="mb-4">
+          <div className="flex items-center justify-between px-5 py-3">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--app-surface-muted)]">
                 <Flame size={20} className="text-muted-foreground" />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Calories</p>
+                <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">Calories</p>
                 {editingField === 'calories' ? (
                   <input
                     autoFocus
@@ -361,10 +359,10 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
                     defaultValue={isManual ? manualValues.calories : food?.calories || 0}
                     onBlur={(e) => handleManualValueChange('calories', e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleManualValueChange('calories', e.target.value)}
-                    className="text-2xl font-black text-foreground bg-transparent outline-none border-b-2 border-foreground w-24 leading-none"
+                    className="w-24 border-b-2 border-foreground bg-transparent text-2xl font-semibold leading-none text-foreground outline-none"
                   />
                 ) : (
-                  <p className="text-2xl font-black text-foreground leading-none">{nutrition.calories}</p>
+                  <p className="text-2xl font-semibold leading-none text-foreground">{nutrition.calories}</p>
                 )}
               </div>
             </div>
@@ -376,8 +374,8 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
                 <Pencil size={16} />
               </button>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </Panel>
 
         {/* Macro Cards Row */}
         <div className="grid grid-cols-3 gap-3 mb-8">
@@ -386,11 +384,10 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
             { key: 'carbs', label: 'Carbs', icon: Cookie, color: 'text-amber-500' },
             { key: 'fats', label: 'Fats', icon: Droplet, color: 'text-blue-500' },
           ].map(macro => (
-            <Card key={macro.key} className="rounded-xl border border-border shadow-sm">
-              <CardContent className="p-3 flex flex-col items-start gap-1">
+            <Panel key={macro.key} className="flex flex-col items-start gap-1 p-3">
                 <div className="flex items-center gap-1.5">
                   <macro.icon size={12} className={macro.color} />
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">{macro.label}</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">{macro.label}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   {editingField === macro.key ? (
@@ -400,10 +397,10 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
                       defaultValue={isManual ? manualValues[macro.key] : food?.[macro.key] || 0}
                       onBlur={(e) => handleManualValueChange(macro.key, e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleManualValueChange(macro.key, e.target.value)}
-                      className="text-lg font-black text-foreground bg-transparent outline-none border-b-2 border-foreground w-12"
+                      className="w-12 border-b-2 border-foreground bg-transparent text-lg font-semibold text-foreground outline-none"
                     />
                   ) : (
-                    <span className="text-lg font-black text-foreground">{nutrition[macro.key]}g</span>
+                    <span className="text-lg font-semibold text-foreground">{nutrition[macro.key]}g</span>
                   )}
                   <button
                     onClick={() => setEditingField(macro.key)}
@@ -412,15 +409,14 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
                     <Pencil size={10} />
                   </button>
                 </div>
-              </CardContent>
-            </Card>
+            </Panel>
           ))}
         </div>
         
         {/* Ingredients section for manual entry */}
         {isManual && (
           <div className="mb-8">
-            <h3 className="text-base font-black text-foreground tracking-tight mb-4 flex items-center justify-between">
+            <h3 className="mb-4 flex items-center justify-between text-base font-semibold tracking-normal text-foreground">
               Ingredients
               <span className="text-[10px] text-muted-foreground font-normal tracking-normal uppercase">Optional</span>
             </h3>
@@ -428,13 +424,13 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
               placeholder="e.g. 2 eggs, 1 slice cheese, 1 cup spinach..."
               value={manualValues.ingredients || ''}
               onChange={(e) => setManualValues(prev => ({ ...prev, ingredients: e.target.value }))}
-              className="w-full min-h-[100px] p-4 bg-muted/30 border border-border rounded-2xl text-sm font-medium text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20 resize-none transition-all"
+              className="min-h-[100px] w-full resize-none rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-4 text-sm font-medium text-foreground transition-colors placeholder:text-muted-foreground focus:border-[var(--app-border-strong)] focus:outline-none"
             />
           </div>
         )}
 
         {/* Other Nutrition Facts */}
-        <h3 className="text-base font-black text-foreground tracking-tight mb-4">
+        <h3 className="mb-4 text-base font-semibold tracking-normal text-foreground">
           Other nutrition facts
         </h3>
         <div className="space-y-0">
@@ -443,7 +439,7 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
               key={micro.key}
               className={cn(
                 "flex items-center justify-between py-4 px-1",
-                idx < MICRO_NUTRIENTS.length - 1 && "border-b border-border/50"
+                idx < MICRO_NUTRIENTS.length - 1 && "border-b border-[var(--app-border)]"
               )}
             >
               <span className="text-sm text-foreground font-medium">{micro.label}</span>
@@ -486,13 +482,13 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
       <div
         className="fixed bottom-0 left-0 right-0 px-4 py-4 z-[111]"
         style={{
-          background: 'linear-gradient(to top, var(--background) 60%, transparent)',
+          background: 'linear-gradient(to top, var(--app-bg) 60%, transparent)',
         }}
       >
         <Button
           onClick={handleSave}
           disabled={isManual && !name.trim()}
-          className="w-full h-14 rounded-2xl bg-foreground text-background font-black text-base hover:bg-foreground/90 transition-all shadow-xl disabled:opacity-40"
+          className="h-14 w-full rounded-[var(--app-radius-md)] bg-foreground text-base font-semibold text-background shadow-[var(--app-shadow-md)] transition-colors hover:bg-foreground/90 disabled:opacity-40"
         >
           Save
         </Button>
