@@ -1,15 +1,12 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Plus,
-  ChevronLeft,
   ChevronRight,
   Settings,
   Utensils,
   Flame,
   Droplet,
-  Moon,
   Scale,
-  ChevronDown,
   Activity,
   Zap,
   Leaf,
@@ -21,10 +18,11 @@ import {
   GlassWater
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
+import { PageShell } from "@/components/layout/PageShell";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Panel } from "@/components/layout/Panel";
 import { cn } from "@/lib/utils";
 import { getToday, formatDateKey } from '../utils/dateUtils';
 import {
@@ -45,8 +43,6 @@ import {
   getWeightHistory
 } from '../utils/vitalsDatabase';
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -137,24 +133,20 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
   };
 
   return (
-    <div className="space-y-6 pb-24 animate-in fade-in duration-500 max-w-4xl mx-auto px-1">
-      {/* Branding Header */}
-      <div className="flex items-center justify-between px-4 pt-2">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-foreground dark:bg-card rounded-2xl flex items-center justify-center shadow-sm">
-            <Leaf className="text-background dark:text-foreground w-6 h-6 fill-current" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-foreground tracking-tighter leading-none">Health Hub</h1>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Daily Log</p>
-          </div>
-        </div>
-      </div>
+    <PageShell>
+      <PageHeader
+        title="Health"
+        meta={(
+          <span className="text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
+            Daily log
+          </span>
+        )}
+      />
 
       {/* Date Selector Scroller */}
       <div
         ref={dateScrollRef}
-        className="flex items-center gap-2 overflow-x-auto pb-6 no-scrollbar scroll-smooth px-4"
+        className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar scroll-smooth"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {dates.map((date, i) => {
@@ -167,23 +159,25 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
               key={i}
               onClick={() => setSelectedDate(date)}
               className={cn(
-                "flex flex-col items-center justify-center min-w-[64px] transition-all duration-300 group",
-                isSelected ? "scale-110" : "opacity-60 hover:opacity-100"
+                "flex min-w-[58px] flex-col items-center justify-center rounded-[var(--app-radius-md)] border px-2 py-2 transition-all duration-200 group",
+                isSelected
+                  ? "border-[var(--app-border-strong)] bg-[var(--app-surface)] shadow-[var(--app-shadow-sm)]"
+                  : "border-transparent text-muted-foreground hover:border-[var(--app-border)] hover:bg-[var(--app-surface-muted)]"
               )}
             >
               <span className={cn(
-                "text-[10px] font-bold uppercase tracking-wider mb-2",
-                isSelected ? "text-foreground font-black" : "text-muted-foreground"
+                "mb-1 text-[10px] font-bold uppercase tracking-normal",
+                isSelected ? "text-foreground" : "text-muted-foreground"
               )}>
                 {dayName}
               </span>
               <div className={cn(
-                "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300",
+                "flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-200",
                 isSelected
-                  ? "bg-foreground text-background shadow-lg shadow-slate-200 dark:shadow-none"
-                  : "border-2 border-dashed border-slate-200 dark:border-slate-800 text-foreground"
+                  ? "bg-foreground text-background"
+                  : "bg-[var(--app-surface)] text-foreground"
               )}>
-                <span className="text-base font-black">
+                <span className="text-sm font-semibold">
                   {dayNum}
                 </span>
               </div>
@@ -193,11 +187,11 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="flex justify-center mb-8 sticky top-[72px] z-10 bg-background/80 backdrop-blur-md py-2 -mx-4 px-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
-          <TabsList className="bg-muted/50 p-1 rounded-2xl border border-border/50 h-auto gap-1">
-            <TabsTrigger value="nutrition" className="rounded-xl px-6 py-2.5 text-xs font-black uppercase tracking-widest data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">Nutrition</TabsTrigger>
-            <TabsTrigger value="vitals" className="rounded-xl px-6 py-2.5 text-xs font-black uppercase tracking-widest data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">Vitals</TabsTrigger>
-            <TabsTrigger value="library" className="rounded-xl px-6 py-2.5 text-xs font-black uppercase tracking-widest data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">Library</TabsTrigger>
+        <div className="sticky top-2 z-10 -mx-1 flex justify-center overflow-x-auto whitespace-nowrap bg-[var(--app-bg)]/85 px-1 py-2 backdrop-blur-xl scrollbar-hide">
+          <TabsList className="h-auto gap-1 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1 shadow-[var(--app-shadow-sm)]">
+            <TabsTrigger value="nutrition" className="rounded-xl px-5 py-2.5 text-[11px] font-semibold uppercase tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">Nutrition</TabsTrigger>
+            <TabsTrigger value="vitals" className="rounded-xl px-5 py-2.5 text-[11px] font-semibold uppercase tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">Vitals</TabsTrigger>
+            <TabsTrigger value="library" className="rounded-xl px-5 py-2.5 text-[11px] font-semibold uppercase tracking-normal data-[state=active]:bg-foreground data-[state=active]:text-background transition-all">Library</TabsTrigger>
           </TabsList>
         </div>
 
@@ -222,8 +216,8 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                 {currentSlide === 0 && (
                   <div className="space-y-4">
                     {/* Slide 1: Primary Macros */}
-                    <Card className="rounded-[32px] border border-border shadow-sm overflow-hidden group">
-                      <CardContent className="p-4 md:p-6 flex items-center justify-between relative !pb-4">
+                    <Panel className="overflow-hidden">
+                      <div className="p-4 md:p-6 flex items-center justify-between relative !pb-4">
                         <div className="relative z-10">
                           <h2 className="text-3xl md:text-4xl font-black text-foreground tracking-tighter">
                             {eaten.calories}{showGoals && <span className="text-lg md:text-xl text-muted-foreground font-black opacity-30"> / {goals.calories}</span>}
@@ -239,16 +233,16 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                             <Flame className="w-5 h-5 md:w-6 md:h-6 text-amber-500 fill-current opacity-80" />
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </Panel>
                     <div className="grid grid-cols-3 gap-3">
                       {[
                         { label: 'Protein', eaten: eaten.protein, goal: goals.protein, icon: Drumstick, color: 'text-rose-500', ringColor: 'stroke-rose-400' },
                         { label: 'Carbs', eaten: eaten.carbs, goal: goals.carbs, icon: Zap, color: 'text-amber-500', ringColor: 'stroke-amber-400' },
                         { label: 'Fats', eaten: eaten.fats, goal: goals.fats, icon: Droplet, color: 'text-blue-500', ringColor: 'stroke-blue-400' },
                       ].map((macro, idx) => (
-                        <Card key={idx} className="rounded-[32px] border border-border shadow-sm h-full">
-                          <CardContent className="p-3 md:p-6 flex flex-col h-full">
+                        <Panel key={idx} className="h-full">
+                          <div className="p-3 md:p-6 flex flex-col h-full">
                             <div className="mb-4">
                               <p className="text-xs font-black text-foreground truncate">
                                 {macro.eaten}{showGoals && <span className="text-[10px] text-muted-foreground opacity-30 font-bold whitespace-nowrap"> /{macro.goal}g</span>}
@@ -264,8 +258,8 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                                 <div className="absolute inset-0 flex items-center justify-center"><macro.icon className={cn("w-4 h-4", macro.color)} /></div>
                               </div>
                             </div>
-                          </CardContent>
-                        </Card>
+                          </div>
+                        </Panel>
                       ))}
                     </div>
                   </div>
@@ -280,8 +274,8 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                         { label: 'Sugar', eaten: eaten.sugar || 0, goal: goals.sugar || 84, icon: Cookie, color: 'text-purple-500', ringColor: 'stroke-purple-400' },
                         { label: 'Sodium', eaten: eaten.sodium || 0, goal: goals.sodium || 2300, icon: Activity, color: 'text-amber-500', ringColor: 'stroke-amber-400', unit: 'mg' },
                       ].map((micro, idx) => (
-                        <Card key={idx} className="rounded-[32px] border border-border shadow-sm h-full">
-                          <CardContent className="p-3 md:p-6 flex flex-col h-full min-h-[140px]">
+                        <Panel key={idx} className="h-full">
+                          <div className="p-3 md:p-6 flex flex-col h-full min-h-[140px]">
                             <div className="mb-4">
                               <p className="text-xs font-black text-foreground truncate">{micro.eaten}<span className="text-[10px] text-muted-foreground opacity-30 font-bold whitespace-nowrap"> /{micro.goal}{micro.unit || 'g'}</span></p>
                               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-tight mt-0.5">{micro.label} <span className="text-foreground font-black">eaten</span></p>
@@ -295,11 +289,11 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                                 <div className="absolute inset-0 flex items-center justify-center"><micro.icon className={cn("w-4 h-4", micro.color)} /></div>
                               </div>
                             </div>
-                          </CardContent>
-                        </Card>
+                          </div>
+                        </Panel>
                       ))}
                     </div>
-                    <Card className="rounded-[32px] border border-border shadow-sm p-6 bg-gradient-to-br from-card to-slate-50/50">
+                    <Panel className="p-6 bg-gradient-to-br from-[var(--app-surface)] to-[var(--app-surface-muted)]">
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="text-sm font-black text-foreground uppercase tracking-[0.2em]">Health Score</h3>
                         <span className="text-lg font-black text-foreground">0<span className="text-xs text-muted-foreground opacity-30"> / 10</span></span>
@@ -310,7 +304,7 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                       <p className="text-xs font-bold text-muted-foreground leading-relaxed italic opacity-80">
                         Carbs and fats are on track. You’re low on calories and protein, which can slow weight loss and impact muscle retention.
                       </p>
-                    </Card>
+                    </Panel>
                   </div>
                 )}
 
@@ -319,7 +313,7 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                     {/* Slide 3: Activity & Habits */}
                     <div className="grid grid-cols-2 gap-3">
                       {/* Steps Card */}
-                      <Card className="rounded-[32px] border border-border shadow-sm p-4 md:p-5 flex flex-col h-60 relative overflow-hidden">
+                      <Panel className="p-4 md:p-5 flex flex-col h-60 relative overflow-hidden">
                         <div className="z-10 text-left">
                           <p className="text-2xl md:text-3xl font-black text-foreground">107<span className="text-sm md:text-base text-muted-foreground font-black opacity-50"> /10000</span></p>
                           <p className="text-[11px] md:text-xs font-bold text-foreground mt-0.5">Steps Today</p>
@@ -335,10 +329,10 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                             </div>
                           </div>
                         </div>
-                      </Card>
+                      </Panel>
 
                       {/* Calories Burned Card */}
-                      <Card className="rounded-[32px] border border-border shadow-sm p-4 md:p-5 flex flex-col h-60 relative overflow-hidden">
+                      <Panel className="p-4 md:p-5 flex flex-col h-60 relative overflow-hidden">
                         <div className="flex items-center gap-1.5 z-10">
                           <Flame className="w-5 h-5 text-foreground fill-foreground" />
                           <p className="text-2xl md:text-3xl font-black text-foreground">2</p>
@@ -354,11 +348,11 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                             <span className="text-[10px] font-black text-muted-foreground bg-muted/60 rounded-full px-2 py-0.5 leading-none mt-0.5">+2</span>
                           </div>
                         </div>
-                      </Card>
+                      </Panel>
                     </div>
 
                     {/* Water Card */}
-                    <Card className="rounded-[32px] border border-border shadow-sm p-4 md:p-5 flex-row! items-center justify-between! w-full !gap-0">
+                    <Panel className="flex w-full items-center justify-between gap-0 p-4 md:p-5">
                       <div className="flex items-center gap-4">
                         <div className="w-14 h-14 bg-[#F2F4F7] dark:bg-slate-800/60 rounded-[20px] flex items-center justify-center shrink-0">
                           <GlassWater className="w-6 h-6 text-[#4F8CEF] fill-[#4F8CEF]" strokeWidth={1.5} />
@@ -391,7 +385,7 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                           <Plus size={18} strokeWidth={2.5} />
                         </button>
                       </div>
-                    </Card>
+                    </Panel>
                   </div>
                 )}
               </motion.div>
@@ -414,23 +408,23 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
 
           {/* Activity / Logs Section */}
           <div className="space-y-4 pt-4">
-            <h3 className="text-xl font-black text-foreground tracking-tight flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-foreground tracking-normal flex items-center justify-between">
               Recently Logged
-              <Button variant="ghost" size="sm" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">See All</Button>
+              <Button variant="ghost" size="sm" className="text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">See All</Button>
             </h3>
 
 
             {getFoodLog(dateKey).length === 0 ? (
-              <Card className="rounded-3xl border border-dashed border-border/60 bg-muted/20">
-                <CardContent className="p-12 flex flex-col items-center justify-center text-center">
-                  <div className="w-20 h-20 bg-card rounded-2xl shadow-sm border border-border flex items-center justify-center mb-6">
+              <Panel className="border-dashed bg-[var(--app-surface-muted)]">
+                <div className="p-12 flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 bg-[var(--app-surface)] rounded-2xl shadow-sm border border-[var(--app-border)] flex items-center justify-center mb-5">
                     <Cookie className="w-10 h-10 text-muted-foreground/40" />
                   </div>
                   <p className="text-sm font-bold text-muted-foreground leading-relaxed">
                     Tap <span className="text-foreground">+</span> to add your <br /> first meal of the day
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </Panel>
             ) : (
               <div className="space-y-3">
                 {getFoodLog(dateKey).map((entry) => (
@@ -442,7 +436,7 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                       setSelectedFood(entry.food);
                       setHealthSubView('food-detail');
                     }}
-                    className="w-full text-left group bg-card border border-border rounded-[32px] p-4 flex items-center justify-between hover:shadow-md transition-all active:scale-[0.98] cursor-pointer"
+                    className="w-full text-left group bg-[var(--app-surface)] border border-[var(--app-border)] rounded-[var(--app-radius-lg)] p-4 flex items-center justify-between hover:border-[var(--app-border-strong)] transition-all active:scale-[0.98] cursor-pointer shadow-[var(--app-shadow-sm)]"
                   >
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="w-12 h-12 bg-muted/50 rounded-2xl flex items-center justify-center flex-shrink-0">
@@ -485,23 +479,23 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
         <TabsContent value="vitals" className="space-y-6 pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* Weight Stats Overview */}
           <div className="grid grid-cols-2 gap-4">
-            <Card className="rounded-[32px] border border-border p-6 bg-gradient-to-br from-card to-indigo-50/10">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Today's Weight</p>
-              <h3 className="text-2xl font-black text-foreground">
+            <Panel className="p-5">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-normal mb-1">Today's Weight</p>
+              <h3 className="text-2xl font-semibold text-foreground">
                 {getWeightForDate(dateKey) ? `${getWeightForDate(dateKey)} kg` : '--'}
               </h3>
-            </Card>
-            <Card className="rounded-[32px] border border-border p-6 bg-gradient-to-br from-card to-emerald-50/10">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">7D Trend</p>
-              <h3 className="text-2xl font-black text-foreground">Stable</h3>
-            </Card>
+            </Panel>
+            <Panel className="p-5">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-normal mb-1">7D Trend</p>
+              <h3 className="text-2xl font-semibold text-foreground">Stable</h3>
+            </Panel>
           </div>
 
           {/* Weight Chart */}
-          <Card className="rounded-[32px] border border-border p-6 shadow-sm">
+          <Panel className="p-5 md:p-6">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-sm font-black text-foreground uppercase tracking-[0.2em]">Weight Trend</h3>
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-normal">Weight Trend</h3>
                 <p className="text-[10px] font-bold text-muted-foreground mt-1">Last 14 days</p>
               </div>
               <Activity className="w-5 h-5 text-indigo-500 opacity-50" />
@@ -556,7 +550,7 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </Card>
+          </Panel>
 
           {/* History List */}
           <div className="space-y-3">
@@ -565,7 +559,7 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
               <p className="text-xs font-bold text-muted-foreground italic text-center py-8">No weight data available.</p>
             ) : (
               getWeightHistory(10).map((entry, idx) => (
-                <div key={idx} className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between">
+                <div key={idx} className="bg-[var(--app-surface)] border border-[var(--app-border)] rounded-[var(--app-radius-md)] p-4 flex items-center justify-between shadow-[var(--app-shadow-sm)]">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
                       <Scale size={18} />
@@ -674,6 +668,6 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
           />
         )}
       </AnimatePresence>
-    </div>
+    </PageShell>
   );
 }
