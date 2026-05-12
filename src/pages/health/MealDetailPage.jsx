@@ -96,22 +96,22 @@ export default function MealDetailPage({
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-      className="fixed inset-0 bg-background z-[110] flex flex-col"
+      className="fixed inset-0 z-[110] flex flex-col bg-[var(--app-bg)]"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
+      <div className="flex items-center justify-between border-b border-[var(--app-border)] bg-[var(--app-surface)] px-4 pb-3 pt-4 shadow-[var(--app-shadow-sm)]">
         <button
           onClick={onBack}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+          className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
         >
-          <ArrowLeft size={22} className="text-foreground" />
+          <ArrowLeft size={22} />
         </button>
-        <h1 className="text-lg font-black text-foreground tracking-tight">Edit Meal</h1>
+        <h1 className="text-lg font-semibold tracking-normal text-foreground">Edit Meal</h1>
         <button
           onClick={handleDeleteMeal}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-500/10 transition-colors"
+          className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500"
         >
-          <Trash2 size={20} className="text-muted-foreground hover:text-red-500" />
+          <Trash2 size={20} />
         </button>
       </div>
 
@@ -120,7 +120,7 @@ export default function MealDetailPage({
         {/* Meal Name */}
         <div className="mt-4 mb-6">
           {editingName ? (
-            <div className="flex items-center gap-3 bg-muted/40 border border-border rounded-xl px-4 py-3">
+            <div className="flex items-center gap-3 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-3 shadow-[var(--app-shadow-sm)]">
               <input
                 autoFocus
                 type="text"
@@ -128,30 +128,30 @@ export default function MealDetailPage({
                 onChange={(e) => setMealName(e.target.value)}
                 onBlur={() => setEditingName(false)}
                 onKeyDown={(e) => e.key === 'Enter' && setEditingName(false)}
-                className="flex-1 text-lg font-black text-foreground bg-transparent outline-none"
+                className="flex-1 bg-transparent text-lg font-semibold text-foreground outline-none"
                 placeholder="Meal name"
               />
             </div>
           ) : (
             <button
               onClick={() => setEditingName(true)}
-              className="w-full flex items-center justify-between bg-muted/40 border border-border rounded-xl px-4 py-3 group"
+              className="group flex w-full items-center justify-between rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-3 shadow-[var(--app-shadow-sm)]"
             >
-              <span className="text-lg font-black text-foreground">{mealName}</span>
+              <span className="text-lg font-semibold text-foreground">{mealName}</span>
               <Pencil size={16} className="text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
             </button>
           )}
         </div>
 
         {/* Calories Card */}
-        <Card className="rounded-2xl border border-border shadow-sm mb-4">
+        <Card className="mb-4 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--app-shadow-sm)]">
           <CardContent className="py-0.5 px-5 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--app-surface-muted)]">
               <Flame size={20} className="text-muted-foreground" />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Calories</p>
-              <p className="text-2xl font-black text-foreground leading-none">{Math.round(totals.calories)}</p>
+              <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">Calories</p>
+              <p className="text-2xl font-semibold leading-none text-foreground">{Math.round(totals.calories)}</p>
             </div>
           </CardContent>
         </Card>
@@ -163,26 +163,26 @@ export default function MealDetailPage({
             { key: 'carbs', label: 'Carbs', icon: Cookie, color: 'text-amber-500' },
             { key: 'fats', label: 'Fats', icon: Droplet, color: 'text-blue-500' },
           ].map(macro => (
-            <Card key={macro.key} className="rounded-xl border border-border shadow-sm">
+            <Card key={macro.key} className="rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--app-shadow-sm)]">
               <CardContent className="p-0.5 px-4 flex flex-col items-start gap-1">
                 <div className="flex items-center gap-1.5">
                   <macro.icon size={12} className={macro.color} />
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">{macro.label}</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">{macro.label}</span>
                 </div>
-                <span className="text-lg font-black text-foreground">{Math.round(totals[macro.key])}g</span>
+                <span className="text-lg font-semibold text-foreground">{Math.round(totals[macro.key])}g</span>
               </CardContent>
             </Card>
           ))}
         </div>
 
         {/* Meal Items */}
-        <h3 className="text-base font-black text-foreground tracking-tight mb-4">
+        <h3 className="mb-4 text-base font-semibold tracking-normal text-foreground">
           Meal Items
         </h3>
 
         {items.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-sm font-bold text-muted-foreground">No items yet</p>
+            <p className="text-sm font-semibold text-muted-foreground">No items yet</p>
             <p className="text-xs text-muted-foreground/60 mt-1">Tap below to add foods to this meal</p>
           </div>
         ) : (
@@ -196,10 +196,10 @@ export default function MealDetailPage({
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -100 }}
-                    className="flex items-center gap-3 p-4 bg-card border border-border rounded-xl"
+                    className="flex items-center gap-3 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-4 shadow-[var(--app-shadow-sm)]"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground truncate">{item.food?.name}</p>
+                      <p className="truncate text-sm font-semibold text-foreground">{item.food?.name}</p>
                       <div className="flex items-center gap-1 mt-1">
                         <Flame size={12} className="text-muted-foreground/80" />
                         <span className="text-xs font-medium text-foreground">
@@ -210,7 +210,7 @@ export default function MealDetailPage({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => updateServings(idx, -0.5)}
-                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground text-xs font-bold flex-shrink-0"
+                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] text-xs font-semibold text-muted-foreground hover:text-foreground"
                       >
                         −
                       </button>
@@ -232,19 +232,19 @@ export default function MealDetailPage({
                                  setEditingIndex(null);
                              }
                           }}
-                          className="text-xs font-black text-foreground w-10 text-center bg-transparent outline-none border-b-2 border-foreground"
+                          className="w-10 border-b-2 border-foreground bg-transparent text-center text-xs font-semibold text-foreground outline-none"
                         />
                       ) : (
                         <span 
                           onClick={() => setEditingIndex(idx)}
-                          className="text-xs font-black text-foreground w-10 text-center cursor-pointer hover:text-muted-foreground"
+                          className="w-10 cursor-pointer text-center text-xs font-semibold text-foreground hover:text-muted-foreground"
                         >
                             {currentServings}
                         </span>
                       )}
                       <button
                         onClick={() => updateServings(idx, 0.5)}
-                        className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:text-foreground text-xs font-bold flex-shrink-0"
+                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] text-xs font-semibold text-muted-foreground hover:text-foreground"
                       >
                         +
                       </button>
@@ -265,7 +265,7 @@ export default function MealDetailPage({
         {/* Add Items Button */}
         <button
           onClick={() => setShowSearch(true)}
-          className="w-full mt-4 mb-2 flex items-center justify-center gap-2 py-3.5 border border-border rounded-full hover:bg-muted/30 transition-all text-foreground"
+          className="mb-2 mt-4 flex w-full items-center justify-center gap-2 rounded-[var(--app-radius-md)] border border-dashed border-[var(--app-border)] py-3.5 text-foreground transition-colors hover:bg-[var(--app-surface-muted)]"
         >
           <Plus size={18} strokeWidth={2} />
           <span className="text-sm font-medium">Add items to this meal</span>
@@ -274,12 +274,12 @@ export default function MealDetailPage({
 
       {/* Bottom Action Bar */}
       <div
-        className="fixed bottom-0 left-0 right-0 px-4 py-4 z-[111] flex gap-3 bg-background/90 backdrop-blur-md border-t border-border"
+        className="fixed bottom-0 left-0 right-0 z-[111] flex gap-3 border-t border-[var(--app-border)] bg-[var(--app-surface)]/90 px-4 py-4 backdrop-blur-md"
       >
         <Button
           variant="outline"
           onClick={handleDone}
-          className="flex-1 h-14 rounded-2xl font-black text-base transition-all border-2 border-border"
+          className="h-14 flex-1 rounded-[var(--app-radius-md)] border border-[var(--app-border)] text-base font-semibold transition-colors"
         >
           Save Details
         </Button>
@@ -298,7 +298,7 @@ export default function MealDetailPage({
             }
           }}
           disabled={items.length === 0}
-          className="flex-[2] h-14 rounded-2xl bg-foreground text-background font-black text-base hover:bg-foreground/90 transition-all shadow-xl disabled:opacity-50"
+          className="h-14 flex-[2] rounded-[var(--app-radius-md)] bg-foreground text-base font-semibold text-background shadow-[var(--app-shadow-md)] transition-colors hover:bg-foreground/90 disabled:opacity-50"
         >
           Log Meal ({items.length} items)
         </Button>
@@ -312,22 +312,22 @@ export default function MealDetailPage({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="fixed inset-0 bg-background z-[120] flex flex-col"
+            className="fixed inset-0 z-[120] flex flex-col bg-[var(--app-bg)]"
           >
             {/* Search Header */}
             <div className="flex items-center gap-3 px-4 pt-4 pb-2">
               <button
                 onClick={() => { setShowSearch(false); setSearchQuery(''); }}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+                className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
               >
                 <ArrowLeft size={22} className="text-foreground" />
               </button>
-              <h1 className="text-lg font-black text-foreground tracking-tight">Add Item</h1>
+              <h1 className="text-lg font-semibold tracking-normal text-foreground">Add Item</h1>
             </div>
 
             {/* Search Input */}
             <div className="px-4 py-3">
-              <div className="flex items-center bg-muted/50 border border-border rounded-2xl px-4 py-3 gap-3 focus-within:ring-2 focus-within:ring-foreground/20 transition-all">
+              <div className="flex items-center gap-3 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-3 shadow-[var(--app-shadow-sm)] transition-colors focus-within:border-[var(--app-border-strong)]">
                 <Search size={18} className="text-muted-foreground flex-shrink-0" />
                 <input
                   autoFocus
@@ -348,7 +348,7 @@ export default function MealDetailPage({
             {/* Search Results */}
             <div className="flex-1 overflow-y-auto px-4 pb-8">
               {!searchQuery.trim() && (
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-3">Popular Items</p>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-normal text-muted-foreground">Popular Items</p>
               )}
               <div className="space-y-2">
                 {searchResults.map(food => (
@@ -356,10 +356,10 @@ export default function MealDetailPage({
                     key={food.id}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => addItem(food)}
-                    className="w-full flex items-center justify-between p-4 bg-card border border-border rounded-2xl hover:shadow-md transition-all group text-left"
+                    className="group flex w-full items-center justify-between rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-4 text-left shadow-[var(--app-shadow-sm)] transition-colors hover:border-[var(--app-border-strong)] hover:bg-[var(--app-surface-raised)]"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground truncate">{food.name}</p>
+                      <p className="truncate text-sm font-semibold text-foreground">{food.name}</p>
                       <div className="flex items-center gap-1.5 mt-1">
                         <Flame size={12} className="text-muted-foreground/50" />
                         <span className="text-xs text-muted-foreground">
@@ -367,7 +367,7 @@ export default function MealDetailPage({
                         </span>
                       </div>
                     </div>
-                    <div className="w-9 h-9 rounded-full border-2 border-border flex items-center justify-center text-muted-foreground group-hover:border-foreground group-hover:text-foreground transition-colors flex-shrink-0 ml-3">
+                    <div className="ml-3 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] text-muted-foreground transition-colors group-hover:border-[var(--app-border-strong)] group-hover:text-foreground">
                       <Plus size={18} strokeWidth={2.5} />
                     </div>
                   </motion.button>
