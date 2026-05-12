@@ -16,6 +16,9 @@ import { cn } from "@/lib/utils";
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PageShell } from "@/components/layout/PageShell";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Panel } from "@/components/layout/Panel";
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -143,59 +146,64 @@ export default function EditRoutinePage({ routineId, onBack }) {
   }, { scope: '.edit-page' });
 
   return (
-    <div className="max-w-3xl mx-auto pb-24 edit-page">
-      {/* Top Header/Action Bar */}
-      <div className="flex items-center justify-between mb-8 edit-header">
-        <Button 
-          variant="ghost" 
-          onClick={onBack}
-          className="rounded-xl h-10 px-3 text-muted-foreground hover:text-foreground hover:bg-muted font-bold text-xs flex items-center gap-2"
-        >
-          <ArrowLeft size={16} />
-          Back to Routines
-        </Button>
-
-        <Button 
-          onClick={handleSave}
-          disabled={isSaved}
-          className={cn(
-            "rounded-xl h-10 px-6 font-black uppercase text-[10px] tracking-widest transition-all shadow-lg",
-            isSaved ? "bg-emerald-500 text-white shadow-emerald-500/20" : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20"
-          )}
-        >
-          {isSaved ? "Saved!" : "Save Changes"}
-        </Button>
-      </div>
+    <PageShell size="narrow" className="edit-page">
+      <PageHeader
+        title="Edit Routine"
+        description="Refine your session structure and naming."
+        className="edit-header"
+        actions={(
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={onBack}
+              className="flex h-10 items-center gap-2 rounded-[var(--app-radius-md)] border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-xs font-semibold text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={isSaved}
+              className={cn(
+                "h-10 rounded-[var(--app-radius-md)] px-5 text-[10px] font-semibold uppercase tracking-normal transition-colors shadow-[var(--app-shadow-sm)]",
+                isSaved ? "bg-emerald-500 text-white hover:bg-emerald-500" : "bg-foreground text-background hover:bg-foreground/90"
+              )}
+            >
+              {isSaved ? "Saved" : "Save Changes"}
+            </Button>
+          </div>
+        )}
+      />
 
       <div className="space-y-10">
         {/* Title Section */}
-        <div className="space-y-4 edit-header">
-          <Badge className="bg-primary/10 text-primary border-none font-black text-[9px] px-3 py-1 rounded-full uppercase tracking-widest">
+        <Panel className="space-y-4 p-5 md:p-6 edit-header">
+          <Badge className="rounded-full border-none bg-[var(--app-accent-soft)] px-3 py-1 text-[9px] font-semibold uppercase tracking-normal text-foreground">
             Routing Configuration
           </Badge>
           <div className="relative group">
-             <div className="absolute left-0 top-1/2 -translate-y-1/2 -ml-3 w-1.5 h-12 bg-primary rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
+             <div className="absolute left-0 top-1/2 -translate-y-1/2 -ml-3 w-1.5 h-12 bg-foreground rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
              <input 
                value={name}
                onChange={(e) => setName(e.target.value)}
-               className="bg-transparent border-none text-4xl md:text-5xl font-black text-foreground tracking-tight outline-none w-full italic uppercase"
+               className="w-full border-none bg-transparent text-3xl font-semibold uppercase tracking-normal text-foreground outline-none md:text-4xl"
                placeholder="Untitled Routine"
              />
           </div>
-          <p className="text-muted-foreground font-semibold text-sm">Refine your session structure and naming.</p>
-        </div>
+          <p className="text-sm font-medium text-muted-foreground">Routine templates are reused when building weekly and cycle plans.</p>
+        </Panel>
 
         {/* Exercises Section */}
         <div className="space-y-6">
           <div className="flex items-center justify-between px-2">
-            <h2 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.3em] flex items-center gap-2">
+            <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
                <div className="w-2 h-2 rounded-full bg-emerald-500" />
                Exercise Flow
             </h2>
             <Button 
               variant="outline" 
               onClick={addGroup}
-              className="h-8 rounded-lg border-border bg-card hover:bg-muted text-[10px] font-black uppercase tracking-widest px-3"
+              className="h-8 rounded-[var(--app-radius-sm)] border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground"
             >
               <Plus size={14} className="mr-1.5" /> Add Section
             </Button>
@@ -211,12 +219,12 @@ export default function EditRoutinePage({ routineId, onBack }) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, height: 0, marginBottom: 0, transition: { duration: 0.2 } }}
                 transition={{ type: "spring", stiffness: 350, damping: 25, mass: 1 }}
-                className="border border-border rounded-[2.5rem] bg-card p-6 md:p-8 shadow-sm hover:border-primary/20 transition-all relative overflow-hidden group/card routine-section"
+                className="group/card routine-section relative overflow-hidden rounded-[var(--app-radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] p-5 shadow-[var(--app-shadow-sm)] transition-colors hover:border-[var(--app-border-strong)] md:p-6"
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-muted/20 rounded-bl-[4rem] -mr-16 -mt-16 pointer-events-none" />
+                <div className="pointer-events-none absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-bl-[4rem] bg-[var(--app-surface-muted)]" />
                 
                 <div className="flex items-center justify-between mb-6 relative z-10">
-                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                  <span className="rounded-full border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 py-1 text-[10px] font-semibold uppercase tracking-normal text-foreground">
                     Section {gIdx + 1}
                   </span>
                   <Button 
@@ -244,26 +252,26 @@ export default function EditRoutinePage({ routineId, onBack }) {
                       animate={{ opacity: 1, x: 0, scale: 1 }}
                       exit={{ opacity: 0, x: 50, scale: 0.9, height: 0, marginBottom: 0, padding: 0 }}
                       transition={{ type: "spring", stiffness: 450, damping: 30 }}
-                      className="bg-muted/20 rounded-[1.8rem] border border-border/40 p-3 md:p-4 space-y-3 group/row hover:border-primary/20 transition-all overflow-hidden"
+                      className="group/row space-y-3 overflow-hidden rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-3 transition-colors hover:border-[var(--app-border-strong)] md:p-4"
                     >
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
                         <div className="space-y-1">
-                          <label className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest pl-2">Muscle Group</label>
+                          <label className="pl-2 text-[8px] font-semibold uppercase tracking-normal text-muted-foreground">Muscle Group</label>
                           <select 
                             value={row.muscle || ''}
                             onChange={(e) => handleGroupTextChange(gIdx, rIdx, 'muscle', e.target.value)}
-                            className="w-full h-10 rounded-xl border border-border bg-muted/50 text-[10px] font-black text-foreground px-3 outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer"
+                            className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors focus:border-[var(--app-border-strong)]"
                           >
                             <option value="">Select Muscle...</option>
                             {muscleList.map(m => <option key={m} value={m}>{m.toUpperCase()}</option>)}
                           </select>
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest pl-2">Sub-Muscle</label>
+                          <label className="pl-2 text-[8px] font-semibold uppercase tracking-normal text-muted-foreground">Sub-Muscle</label>
                           <select 
                             value={row.subMuscle || ''}
                             onChange={(e) => handleGroupTextChange(gIdx, rIdx, 'subMuscle', e.target.value)}
-                            className="w-full h-10 rounded-xl border border-border bg-muted/50 text-[10px] font-black text-foreground px-3 outline-none focus:border-primary/50 transition-all disabled:opacity-50 appearance-none cursor-pointer"
+                            className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
                             disabled={!row.muscle}
                           >
                             <option value="">Select Sub-Muscle...</option>
@@ -271,11 +279,11 @@ export default function EditRoutinePage({ routineId, onBack }) {
                           </select>
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest pl-2">Exercise</label>
+                          <label className="pl-2 text-[8px] font-semibold uppercase tracking-normal text-muted-foreground">Exercise</label>
                           <select 
                             value={row.exercise || ''}
                             onChange={(e) => handleGroupTextChange(gIdx, rIdx, 'exercise', e.target.value)}
-                            className="w-full h-10 rounded-xl border border-border bg-muted/50 text-[10px] font-black text-foreground px-3 outline-none focus:border-primary/50 transition-all disabled:opacity-50 appearance-none cursor-pointer"
+                            className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
                             disabled={!row.subMuscle}
                           >
                             <option value="">Select Exercise...</option>
@@ -286,20 +294,20 @@ export default function EditRoutinePage({ routineId, onBack }) {
 
                       <div className="flex items-center justify-between pt-1">
                         <div className="flex items-center gap-3">
-                           <div className="flex items-center gap-2 bg-muted/80 px-4 py-1.5 rounded-xl border border-border shadow-sm">
-                              <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Sets</span>
+                           <div className="flex items-center gap-2 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
+                              <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Sets</span>
                               <input 
                                 value={row.sets || ''} 
                                 onChange={(e) => handleGroupTextChange(gIdx, rIdx, 'sets', e.target.value)}
-                                className="w-8 bg-transparent text-xs font-black text-foreground text-center outline-none"
+                                className="w-8 bg-transparent text-center text-xs font-semibold text-foreground outline-none"
                               />
                            </div>
-                           <div className="flex items-center gap-2 bg-muted/80 px-4 py-1.5 rounded-xl border border-border shadow-sm">
-                              <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Reps</span>
+                           <div className="flex items-center gap-2 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
+                              <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Reps</span>
                               <input 
                                 value={row.reps || ''} 
                                 onChange={(e) => handleGroupTextChange(gIdx, rIdx, 'reps', e.target.value)}
-                                className="w-10 bg-transparent text-xs font-black text-foreground text-center outline-none"
+                                className="w-10 bg-transparent text-center text-xs font-semibold text-foreground outline-none"
                               />
                            </div>
                         </div>
@@ -320,7 +328,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                   <Button 
                     variant="ghost" 
                     onClick={() => addRowToGroup(gIdx)}
-                    className="w-full mt-2 h-10 rounded-xl border border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 text-[10px] font-black uppercase tracking-widest"
+                    className="mt-2 h-10 w-full rounded-xl border border-dashed border-[var(--app-border)] text-[10px] font-semibold uppercase tracking-normal text-muted-foreground hover:border-[var(--app-border-strong)] hover:bg-[var(--app-surface)] hover:text-foreground"
                   >
                     <Plus size={14} className="mr-2" /> Add Exercise to Section
                   </Button>
@@ -334,14 +342,14 @@ export default function EditRoutinePage({ routineId, onBack }) {
         {/* Standalone Exercises Section */}
         <div className="space-y-6">
           <div className="flex items-center justify-between px-2">
-            <h2 className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.3em] flex items-center gap-2">
+            <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
                <div className="w-2 h-2 rounded-full bg-amber-500" />
                Advanced Exercises
             </h2>
             <Button 
               variant="outline" 
               onClick={addStandaloneExercise}
-              className="h-8 rounded-lg border-border bg-card hover:bg-muted text-[10px] font-black uppercase tracking-widest px-3"
+              className="h-8 rounded-[var(--app-radius-sm)] border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground"
             >
               <Plus size={14} className="mr-1.5" /> Add Advanced
             </Button>
@@ -362,26 +370,26 @@ export default function EditRoutinePage({ routineId, onBack }) {
                 animate={{ opacity: 1, x: 0, scale: 1 }}
                 exit={{ opacity: 0, x: 50, scale: 0.9, height: 0, marginBottom: 0, padding: 0 }}
                 transition={{ type: "spring", stiffness: 450, damping: 30 }}
-                className="bg-card rounded-[1.8rem] border border-border p-3 md:p-4 space-y-3 group/row hover:border-primary/20 hover:shadow-md transition-all overflow-hidden"
+                className="group/row space-y-3 overflow-hidden rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-3 shadow-[var(--app-shadow-sm)] transition-colors hover:border-[var(--app-border-strong)] md:p-4"
               >
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
                   <div className="space-y-1">
-                    <label className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest pl-2">Muscle Group</label>
+                    <label className="pl-2 text-[8px] font-semibold uppercase tracking-normal text-muted-foreground">Muscle Group</label>
                     <select 
                       value={row.muscle || ''}
                       onChange={(e) => handleStandaloneTextChange(rIdx, 'muscle', e.target.value)}
-                      className="w-full h-10 rounded-xl border border-border bg-muted/50 text-[10px] font-black text-foreground px-3 outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer"
+                      className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors focus:border-[var(--app-border-strong)]"
                     >
                       <option value="">Select Muscle...</option>
                       {muscleList.map(m => <option key={m} value={m}>{m.toUpperCase()}</option>)}
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest pl-2">Sub-Muscle</label>
+                    <label className="pl-2 text-[8px] font-semibold uppercase tracking-normal text-muted-foreground">Sub-Muscle</label>
                     <select 
                       value={row.subMuscle || ''}
                       onChange={(e) => handleStandaloneTextChange(rIdx, 'subMuscle', e.target.value)}
-                      className="w-full h-10 rounded-xl border border-border bg-muted/50 text-[10px] font-black text-foreground px-3 outline-none focus:border-primary/50 transition-all disabled:opacity-50 appearance-none cursor-pointer"
+                      className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
                       disabled={!row.muscle}
                     >
                       <option value="">Select Sub-Muscle...</option>
@@ -389,11 +397,11 @@ export default function EditRoutinePage({ routineId, onBack }) {
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[8px] font-black text-muted-foreground/60 uppercase tracking-widest pl-2">Exercise</label>
+                    <label className="pl-2 text-[8px] font-semibold uppercase tracking-normal text-muted-foreground">Exercise</label>
                     <select 
                       value={row.exercise || ''}
                       onChange={(e) => handleStandaloneTextChange(rIdx, 'exercise', e.target.value)}
-                      className="w-full h-10 rounded-xl border border-border bg-muted/50 text-[10px] font-black text-foreground px-3 outline-none focus:border-primary/50 transition-all disabled:opacity-50 appearance-none cursor-pointer"
+                      className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
                       disabled={!row.subMuscle}
                     >
                       <option value="">Select Exercise...</option>
@@ -404,8 +412,8 @@ export default function EditRoutinePage({ routineId, onBack }) {
 
                 <div className="flex items-center justify-between pt-1">
                   <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2 bg-muted/80 px-4 py-1.5 rounded-xl border border-border shadow-sm">
-                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Sets</span>
+                      <div className="flex items-center gap-2 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
+                        <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Sets</span>
                         <input 
                           value={row.totalSets || ''} 
                           onChange={(e) => {
@@ -416,11 +424,11 @@ export default function EditRoutinePage({ routineId, onBack }) {
                             next[rIdx] = { ...next[rIdx], totalSets: val === '' ? '' : num, sets: newSets };
                             setStandaloneExercises(next);
                           }}
-                          className="w-8 bg-transparent text-xs font-black text-foreground text-center outline-none"
+                          className="w-8 bg-transparent text-center text-xs font-semibold text-foreground outline-none"
                         />
                      </div>
-                     <div className="flex items-center gap-2 bg-muted/80 px-4 py-1.5 rounded-xl border border-border shadow-sm">
-                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Reps</span>
+                     <div className="flex items-center gap-2 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
+                        <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Reps</span>
                         <input 
                           value={row.sets?.[0]?.reps || ''} 
                           onChange={(e) => {
@@ -433,7 +441,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                             next[rIdx] = { ...next[rIdx], sets: newSets, totalSets: next[rIdx].totalSets || 1 };
                             setStandaloneExercises(next);
                           }}
-                          className="w-10 bg-transparent text-xs font-black text-foreground text-center outline-none"
+                          className="w-10 bg-transparent text-center text-xs font-semibold text-foreground outline-none"
                         />
                      </div>
                   </div>
@@ -453,6 +461,6 @@ export default function EditRoutinePage({ routineId, onBack }) {
           </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
