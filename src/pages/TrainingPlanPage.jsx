@@ -28,6 +28,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { PageShell } from "@/components/layout/PageShell";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Panel } from "@/components/layout/Panel";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import {
@@ -63,19 +66,19 @@ function SavedPlanCard({ plan, isActive, isSelected, onSelect, onSetActive, onDe
       whileTap={{ scale: 0.98 }}
       onClick={onSelect}
       className={cn(
-        "relative shrink-0 w-40 sm:w-44 p-3 rounded-[1.2rem] border-2 cursor-pointer transition-all group select-none",
+        "relative shrink-0 w-40 sm:w-44 p-3 rounded-[var(--app-radius-lg)] border cursor-pointer transition-all group select-none shadow-[var(--app-shadow-sm)]",
         isActive
-          ? "border-emerald-500 bg-white shadow-md shadow-emerald-50"
+          ? "border-emerald-500 bg-[var(--app-surface)]"
           : isSelected
-          ? "border-indigo-500 bg-indigo-50/60 shadow-md shadow-indigo-100"
-          : "border-slate-100 bg-white hover:border-slate-200 hover:shadow-sm",
-        isSelected && isActive && "bg-indigo-50/30"
+          ? "border-[var(--app-border-strong)] bg-[var(--app-accent-soft)]"
+          : "border-[var(--app-border)] bg-[var(--app-surface)] hover:border-[var(--app-border-strong)]",
+        isSelected && isActive && "bg-[var(--app-accent-soft)]"
       )}
     >
       {/* Plan Name */}
       <h4 className={cn(
-        "text-xs font-black tracking-tight truncate mt-1 pr-14",
-        isSelected ? "text-indigo-900" : "text-slate-700"
+        "text-xs font-semibold tracking-normal truncate mt-1 pr-14",
+        isSelected ? "text-foreground" : "text-foreground"
       )}>
         {plan.name}
       </h4>
@@ -83,10 +86,10 @@ function SavedPlanCard({ plan, isActive, isSelected, onSelect, onSetActive, onDe
       {/* Meta */}
       <div className="flex items-center gap-1.5 mt-1.5">
         <Badge variant="outline" className={cn(
-          "text-[7px] font-black uppercase tracking-widest px-1.5 py-0 rounded-md border",
+          "text-[7px] font-semibold uppercase tracking-normal px-1.5 py-0 rounded-md border",
           plan.mode === 'dynamic'
             ? "bg-violet-50 text-violet-500 border-violet-200"
-            : "bg-slate-50 text-slate-400 border-slate-200"
+            : "bg-[var(--app-surface-muted)] text-muted-foreground border-[var(--app-border)]"
         )}>
           {plan.mode === 'dynamic' ? <Repeat size={8} className="mr-0.5" /> : <Calendar size={8} className="mr-0.5" />}
           {slotSummary}
@@ -96,11 +99,11 @@ function SavedPlanCard({ plan, isActive, isSelected, onSelect, onSetActive, onDe
       {/* Slot breakdown for dynamic */}
       {plan.mode === 'dynamic' && plan.cycle.length > 0 && (
         <div className="flex items-center gap-2 mt-2">
-          <span className="text-[9px] font-bold text-slate-400">
+          <span className="text-[9px] font-bold text-muted-foreground">
             <span className="text-indigo-500">{workoutCount}</span> train
           </span>
-          <span className="text-[9px] font-bold text-slate-400">
-            <span className="text-slate-500">{restCount}</span> rest
+          <span className="text-[9px] font-bold text-muted-foreground">
+            <span className="text-foreground/70">{restCount}</span> rest
           </span>
         </div>
       )}
@@ -147,34 +150,34 @@ function ModeCard({ icon, title, description, active, onClick }) {
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={cn(
-        "relative flex flex-col items-start gap-2.5 p-4 rounded-[1.5rem] border-2 transition-all text-left w-full overflow-hidden group",
+        "relative flex flex-col items-start gap-2.5 p-4 rounded-[var(--app-radius-lg)] border transition-all text-left w-full overflow-hidden group shadow-[var(--app-shadow-sm)]",
         active
-          ? "border-indigo-500 bg-indigo-50/80 shadow-lg shadow-indigo-100"
-          : "border-slate-100 bg-white hover:border-slate-200 hover:shadow-md"
+          ? "border-[var(--app-border-strong)] bg-[var(--app-accent-soft)]"
+          : "border-[var(--app-border)] bg-[var(--app-surface)] hover:border-[var(--app-border-strong)]"
       )}
     >
       <div className={cn(
         "absolute top-0 right-0 -mr-12 -mt-12 w-32 h-32 rounded-full blur-3xl transition-opacity",
-        active ? "bg-indigo-200/40 opacity-100" : "bg-slate-100/50 opacity-0 group-hover:opacity-100"
+        active ? "bg-[var(--app-accent-soft)] opacity-100" : "bg-[var(--app-surface-muted)] opacity-0 group-hover:opacity-100"
       )} />
 
       <div className={cn(
         "h-9 w-9 rounded-xl flex items-center justify-center transition-all",
         active
-          ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100"
-          : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
+          ? "bg-foreground text-background shadow-[var(--app-shadow-sm)]"
+          : "bg-[var(--app-surface-muted)] text-muted-foreground group-hover:bg-[var(--app-surface-raised)]"
       )}>
         <Icon size={18} strokeWidth={2.5} />
       </div>
 
       <div className="relative z-10">
         <h3 className={cn(
-          "font-black text-xs uppercase tracking-tight",
-          active ? "text-indigo-900" : "text-slate-700"
+          "font-semibold text-xs uppercase tracking-normal",
+          active ? "text-foreground" : "text-foreground"
         )}>{title}</h3>
         <p className={cn(
           "text-[10px] font-medium mt-0.5 leading-tight",
-          active ? "text-indigo-600" : "text-slate-400"
+          active ? "text-muted-foreground" : "text-muted-foreground"
         )}>{description}</p>
       </div>
 
@@ -184,8 +187,8 @@ function ModeCard({ icon, title, description, active, onClick }) {
           animate={{ scale: 1 }}
           className="absolute top-3 right-3"
         >
-          <div className="h-5 w-5 rounded-full bg-indigo-600 flex items-center justify-center">
-            <CheckCircle2 size={12} className="text-white" />
+          <div className="h-5 w-5 rounded-full bg-foreground flex items-center justify-center">
+            <CheckCircle2 size={12} className="text-background" />
           </div>
         </motion.div>
       )}
@@ -212,10 +215,10 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, templates }) {
       exit={{ opacity: 0, scale: 0.95, height: 0, marginBottom: 0 }}
       transition={{ type: "spring", stiffness: 450, damping: 30 }}
       className={cn(
-        "rounded-[1.4rem] border overflow-hidden transition-all group",
+        "rounded-[var(--app-radius-lg)] border overflow-hidden transition-all group shadow-[var(--app-shadow-sm)]",
         isRest
-          ? "bg-slate-50/50 border-slate-100 hover:border-slate-200"
-          : "bg-white border-slate-100 hover:border-indigo-200 shadow-sm hover:shadow-md"
+          ? "bg-[var(--app-surface-muted)] border-[var(--app-border)] hover:border-[var(--app-border-strong)]"
+          : "bg-[var(--app-surface)] border-[var(--app-border)] hover:border-[var(--app-border-strong)]"
       )}
     >
       {/* Main Row */}
@@ -225,15 +228,15 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, templates }) {
           <div 
             onPointerDown={(e) => controls.start(e)}
             style={{ touchAction: 'none' }}
-            className="text-slate-300 cursor-grab active:cursor-grabbing hover:text-slate-500 transition-colors p-2 -ml-2"
+            className="text-muted-foreground/40 cursor-grab active:cursor-grabbing hover:text-muted-foreground transition-colors p-2 -ml-2"
           >
             <GripVertical size={16} />
           </div>
           <div className={cn(
             "w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0",
             isRest
-              ? "bg-slate-100 text-slate-400"
-              : "bg-indigo-600 text-white shadow-md shadow-indigo-100"
+              ? "bg-[var(--app-surface)] text-muted-foreground"
+              : "bg-foreground text-background shadow-[var(--app-shadow-sm)]"
           )}>
             {index + 1}
           </div>
@@ -246,7 +249,7 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, templates }) {
             onChange={(e) => onUpdate({ name: e.target.value })}
             className={cn(
               "bg-transparent border-none outline-none text-sm font-black tracking-tight w-full",
-              isRest ? "text-slate-400 italic" : "text-slate-800"
+              isRest ? "text-muted-foreground italic" : "text-foreground"
             )}
             placeholder={isRest ? "Rest Day" : "Workout Name..."}
           />
@@ -258,8 +261,8 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, templates }) {
           className={cn(
             "text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shrink-0",
             isRest
-              ? "bg-slate-50 text-slate-400 border-slate-200"
-              : "bg-indigo-50 text-indigo-600 border-indigo-200"
+              ? "bg-[var(--app-surface-muted)] text-muted-foreground border-[var(--app-border)]"
+              : "bg-[var(--app-accent-soft)] text-foreground border-[var(--app-border)]"
           )}
         >
           {isRest ? (
@@ -289,7 +292,7 @@ function CycleSlotCard({ slot, index, onUpdate, onDelete, templates }) {
           <Button
             variant="ghost" size="icon"
             onClick={onDelete}
-            className="h-7 w-7 text-slate-400 hover:text-rose-500 hover:bg-rose-50 bg-slate-50/50 rounded-full transition-all"
+            className="h-7 w-7 text-muted-foreground hover:text-rose-500 hover:bg-rose-50 bg-[var(--app-surface-muted)] rounded-full transition-all"
           >
             <Trash2 size={12} strokeWidth={2.5} />
           </Button>
@@ -501,12 +504,12 @@ function CyclePreview({ plan }) {
   }
 
   return (
-    <div className="bg-white rounded-[1.5rem] border border-slate-100 p-4 shadow-sm">
+    <Panel className="p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+        <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal flex items-center gap-2">
           <Calendar size={12} /> 14-Day Preview
         </h3>
-        <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest bg-slate-50 text-slate-500 border-slate-200 px-2 py-0.5 rounded-lg">
+        <Badge variant="outline" className="text-[8px] font-semibold uppercase tracking-normal bg-[var(--app-surface-muted)] text-muted-foreground border-[var(--app-border)] px-2 py-0.5 rounded-lg">
           {plan.cycle.length}-Day Cycle
         </Badge>
       </div>
@@ -521,15 +524,15 @@ function CyclePreview({ plan }) {
             className={cn(
               "flex flex-col items-center gap-1 py-2 md:py-3 rounded-xl transition-all",
               day.isToday
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100"
+                ? "bg-foreground text-background shadow-[var(--app-shadow-sm)]"
                 : day.slot?.type === 'rest'
-                ? "bg-slate-50 text-slate-400"
-                : "bg-white border border-slate-100 text-slate-700 hover:border-indigo-200"
+                ? "bg-[var(--app-surface-muted)] text-muted-foreground"
+                : "bg-[var(--app-surface)] border border-[var(--app-border)] text-foreground hover:border-[var(--app-border-strong)]"
             )}
           >
             <span className={cn(
               "text-[8px] font-black uppercase tracking-wider",
-              day.isToday ? "text-indigo-100" : "text-slate-300"
+              day.isToday ? "text-background/70" : "text-muted-foreground/60"
             )}>
               {day.dayName}
             </span>
@@ -541,14 +544,14 @@ function CyclePreview({ plan }) {
             </span>
             <span className={cn(
               "text-[7px] font-bold uppercase tracking-wider truncate max-w-full px-1",
-              day.isToday ? "text-indigo-200" : day.slot?.type === 'rest' ? "text-slate-300" : "text-indigo-500"
+              day.isToday ? "text-background/70" : day.slot?.type === 'rest' ? "text-muted-foreground/60" : "text-foreground"
             )}>
               {day.slot?.type === 'rest' ? 'REST' : (day.slot?.name || '').slice(0, 6)}
             </span>
           </motion.div>
         ))}
       </div>
-    </div>
+    </Panel>
   );
 }
 
@@ -558,13 +561,13 @@ function FixedDayRow({ day, plan, updatePlan }) {
   const hasPmSubtitle = !!plan.fixedWeek?.pmSubtitles?.[day];
 
   return (
-    <div className="flex flex-col gap-2 p-3 rounded-xl bg-slate-50/50 border border-slate-50 hover:border-slate-200 transition-all">
+    <div className="flex flex-col gap-2 p-3 rounded-xl bg-[var(--app-surface-muted)] border border-[var(--app-border)] hover:border-[var(--app-border-strong)] transition-all">
       <div className="flex items-center gap-2">
-        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest w-16 shrink-0">
+        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal w-16 shrink-0">
           {day.slice(0, 3)}
         </span>
         <div className="flex-1 flex items-center gap-1.5">
-          <Sun size={10} className="text-slate-300 shrink-0" />
+          <Sun size={10} className="text-muted-foreground/50 shrink-0" />
             <Textarea
               value={plan.fixedWeek?.am?.[day] || ''}
               onChange={(e) => {
@@ -576,7 +579,7 @@ function FixedDayRow({ day, plan, updatePlan }) {
               }}
               placeholder="Session 1 Title..."
               rows={1}
-              className="w-full min-h-[2rem] h-auto rounded-lg text-[10px] font-bold bg-white border-slate-100 focus-visible:border-indigo-200 shadow-none resize-none overflow-hidden py-1.5"
+              className="w-full min-h-[2rem] h-auto rounded-lg text-[10px] font-bold bg-[var(--app-surface)] border-[var(--app-border)] shadow-none resize-none overflow-hidden py-1.5"
             />
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -587,7 +590,7 @@ function FixedDayRow({ day, plan, updatePlan }) {
                   fw.amSubtitles = { ...fw.amSubtitles, [day]: ' ' };
                   updatePlan({ fixedWeek: fw });
                 }}
-                className="text-[8px] font-black text-slate-400 hover:text-indigo-600 uppercase tracking-widest px-2"
+                className="text-[8px] font-semibold text-muted-foreground hover:text-foreground uppercase tracking-normal px-2"
               >
                 + Subtitle
               </button>
@@ -600,7 +603,7 @@ function FixedDayRow({ day, plan, updatePlan }) {
                   fw.pm = { ...fw.pm, [day]: '' };
                   updatePlan({ fixedWeek: fw });
                 }}
-                className="text-[8px] h-8 px-2 font-black text-indigo-500 hover:text-indigo-600 bg-white shadow-sm hover:shadow-md uppercase tracking-widest shrink-0 rounded-lg"
+                className="text-[8px] h-8 px-2 font-semibold text-foreground hover:bg-[var(--app-surface)] bg-[var(--app-surface)] shadow-sm uppercase tracking-normal shrink-0 rounded-lg"
               >
                 + Add Session 2
               </Button>
@@ -893,26 +896,33 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
   const isActive = plan?.id === activePlanId;
 
   return (
-    <div className="max-w-2xl mx-auto pb-24 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <PageShell size="narrow" className="animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
-      <div className="flex items-center justify-between gap-4 mb-6">
+      <PageHeader
+        title="Training Plan"
+        meta={(
+          <span className="text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
+            Schedule builder
+          </span>
+        )}
+        actions={(
+          <>
         <Button
           variant="ghost"
           onClick={onBack}
-          className="rounded-full h-9 px-4 text-slate-500 hover:text-slate-900 hover:bg-slate-100 bg-slate-50 font-black text-[10px] uppercase tracking-widest transition-all"
+          className="h-10 rounded-[var(--app-radius-md)] bg-[var(--app-surface)] px-4 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground hover:bg-[var(--app-surface-muted)] hover:text-foreground"
         >
           <ArrowLeft size={14} className="mr-2" strokeWidth={3} />
           Back
         </Button>
 
-        <div className="flex items-center gap-2">
           {plan && (
             <>
               {!isActive && (
                 <Button
                   variant="outline"
                   onClick={() => handleSetActive(plan.id)}
-                  className="h-9 px-4 rounded-full text-emerald-600 hover:bg-emerald-50 border-emerald-200 text-[9px] font-black uppercase tracking-widest shadow-sm transition-all"
+                  className="h-10 px-4 rounded-[var(--app-radius-md)] text-emerald-600 hover:bg-emerald-50 border-emerald-200 text-[9px] font-semibold uppercase tracking-normal shadow-sm transition-all"
                 >
                   <Zap size={11} className="mr-1.5" strokeWidth={3} /> Set Active
                 </Button>
@@ -921,12 +931,12 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
                 onClick={handleSave}
                 disabled={!hasChanges}
                 className={cn(
-                  "h-9 px-5 rounded-full font-black uppercase text-[9px] tracking-widest transition-all shadow-lg",
+                  "h-10 px-5 rounded-[var(--app-radius-md)] font-semibold uppercase text-[9px] tracking-normal transition-all shadow-[var(--app-shadow-sm)]",
                   saveFlash
                     ? "bg-emerald-500 text-white shadow-emerald-100"
                     : hasChanges
-                    ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-100"
-                    : "bg-slate-100 text-slate-400 shadow-none cursor-not-allowed"
+                    ? "bg-foreground text-background hover:bg-foreground/90"
+                    : "bg-[var(--app-surface-muted)] text-muted-foreground shadow-none cursor-not-allowed"
                 )}
               >
                 {saveFlash ? (
@@ -937,19 +947,20 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
               </Button>
             </>
           )}
-        </div>
-      </div>
+          </>
+        )}
+      />
 
       {/* ── Saved Plans Carousel ──────────────────────────────── */}
-      <div className="space-y-3 mb-8">
+      <Panel className="space-y-3 p-4 md:p-5">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2">
+          <h2 className="text-[9px] font-semibold text-muted-foreground uppercase tracking-normal flex items-center gap-2">
             <Save size={11} /> My Plans
           </h2>
           <Button
             variant="outline"
             onClick={handleCreateNew}
-            className="h-7 px-3 rounded-full border-dashed border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-[8px] font-black uppercase tracking-widest transition-all"
+            className="h-8 px-3 rounded-[var(--app-radius-md)] border-dashed border-[var(--app-border)] text-foreground hover:bg-[var(--app-surface-muted)] text-[8px] font-semibold uppercase tracking-normal transition-all"
           >
             <Plus size={10} className="mr-1.5" strokeWidth={3} /> New Plan
           </Button>
@@ -959,13 +970,13 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="py-8 text-center bg-slate-50/50 rounded-[1.5rem] border border-dashed border-slate-200"
+            className="py-8 text-center bg-[var(--app-surface-muted)] rounded-[var(--app-radius-lg)] border border-dashed border-[var(--app-border)]"
           >
-            <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center mx-auto mb-3 shadow-sm">
-              <Plus size={18} className="text-slate-300" />
+            <div className="w-12 h-12 rounded-xl bg-[var(--app-surface)] border border-[var(--app-border)] flex items-center justify-center mx-auto mb-3 shadow-sm">
+              <Plus size={18} className="text-muted-foreground/40" />
             </div>
-            <h3 className="text-xs font-black text-slate-500 uppercase tracking-tight">No Plans Yet</h3>
-            <p className="text-[10px] text-slate-400 font-medium mt-1">
+            <h3 className="text-xs font-semibold text-foreground uppercase tracking-normal">No Plans Yet</h3>
+            <p className="text-[10px] text-muted-foreground font-medium mt-1">
               Create your first training plan to get started.
             </p>
           </motion.div>
@@ -995,11 +1006,11 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
             </AnimatePresence>
           </div>
         )}
-      </div>
+      </Panel>
 
       {/* ── Plan Editor ───────────────────────────────────────── */}
       {plan && (
-        <div className="space-y-6">
+        <Panel className="space-y-6 p-4 md:p-5">
           {/* Plan Name + Active Status */}
           <div className="flex items-center gap-3">
             {editingName ? (
@@ -1009,7 +1020,7 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
                   value={nameInput}
                   onChange={(e) => setNameInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleNameSave()}
-                  className="h-8 rounded-lg text-sm font-black bg-slate-50 border-slate-200 focus-visible:border-indigo-300 flex-1"
+                  className="h-8 rounded-lg text-sm font-semibold bg-[var(--app-surface-muted)] border-[var(--app-border)] flex-1"
                   placeholder="Plan name..."
                 />
                 <Button
@@ -1022,19 +1033,19 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
                 <Button
                   variant="ghost" size="icon"
                   onClick={() => setEditingName(false)}
-                  className="h-7 w-7 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100"
+                  className="h-7 w-7 rounded-full bg-[var(--app-surface-muted)] text-muted-foreground hover:bg-[var(--app-surface-raised)]"
                 >
                   <X size={12} strokeWidth={3} />
                 </Button>
               </div>
             ) : (
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <h2 className="text-base font-black text-slate-800 tracking-tight truncate">
+                <h2 className="text-base font-semibold text-foreground tracking-normal truncate">
                   {plan.name}
                 </h2>
                 <button
                   onClick={() => { setNameInput(plan.name); setEditingName(true); }}
-                  className="h-6 w-6 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-600 flex items-center justify-center transition-all shrink-0"
+                  className="h-6 w-6 rounded-full bg-[var(--app-surface-muted)] text-muted-foreground hover:bg-[var(--app-surface-raised)] hover:text-foreground flex items-center justify-center transition-all shrink-0"
                 >
                   <Pencil size={10} strokeWidth={3} />
                 </button>
@@ -1045,7 +1056,7 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
 
           {/* Mode Selector */}
           <div className="space-y-3">
-            <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2 px-1">
+            <h2 className="text-[9px] font-semibold text-muted-foreground uppercase tracking-normal flex items-center gap-2 px-1">
               <Repeat size={11} /> Training Mode
             </h2>
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
@@ -1068,7 +1079,7 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
 
           {/* Logging Style Selector */}
           <div className="space-y-3">
-            <h2 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.25em] flex items-center gap-2 px-1">
+            <h2 className="text-[9px] font-semibold text-muted-foreground uppercase tracking-normal flex items-center gap-2 px-1">
               <Sparkles size={11} /> Logging Experience
             </h2>
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
@@ -1101,39 +1112,39 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
                 className="space-y-6"
               >
                 {/* Start Date */}
-                <div className="bg-white rounded-[1.5rem] border border-slate-100 p-4 shadow-sm space-y-2">
-                  <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                <Panel className="p-4 space-y-2">
+                  <h3 className="text-[9px] font-semibold text-muted-foreground uppercase tracking-normal flex items-center gap-2">
                     <Calendar size={12} /> Cycle Start Date
                   </h3>
-                  <p className="text-[10px] text-slate-400 font-medium">
+                  <p className="text-[10px] text-muted-foreground font-medium">
                     When did your Day 1 begin? The cycle loops from this point.
                   </p>
                   <Input
                     type="date"
                     value={plan.startDate}
                     onChange={(e) => updatePlan({ startDate: e.target.value })}
-                    className="h-9 w-40 rounded-xl text-xs font-bold bg-slate-50 border-slate-100 focus-visible:border-indigo-200"
+                    className="h-9 w-40 rounded-xl text-xs font-bold bg-[var(--app-surface-muted)] border-[var(--app-border)]"
                   />
-                </div>
+                </Panel>
 
                 {/* Cycle Slots */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between px-1">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal flex items-center gap-2">
                       <Dumbbell size={12} /> Cycle Sequence
                     </h3>
-                    <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest bg-slate-50 text-slate-500 border-slate-200 px-2.5 py-1 rounded-lg">
+                    <Badge variant="outline" className="text-[8px] font-semibold uppercase tracking-normal bg-[var(--app-surface-muted)] text-muted-foreground border-[var(--app-border)] px-2.5 py-1 rounded-lg">
                       {plan.cycle.length} Day{plan.cycle.length !== 1 ? 's' : ''} Total
                     </Badge>
                   </div>
 
                   {plan.cycle.length === 0 ? (
-                    <div className="py-10 text-center bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
-                      <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center mx-auto mb-3 shadow-sm">
-                        <Plus size={18} className="text-slate-300" />
+                    <div className="py-10 text-center bg-[var(--app-surface-muted)] rounded-[var(--app-radius-lg)] border border-dashed border-[var(--app-border)]">
+                      <div className="w-12 h-12 rounded-xl bg-[var(--app-surface)] border border-[var(--app-border)] flex items-center justify-center mx-auto mb-3 shadow-sm">
+                        <Plus size={18} className="text-muted-foreground/40" />
                       </div>
-                      <h3 className="text-xs font-black text-slate-500 uppercase tracking-tight">No Days Defined</h3>
-                      <p className="text-[10px] text-slate-400 font-medium mt-1">
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-normal">No Days Defined</h3>
+                      <p className="text-[10px] text-muted-foreground font-medium mt-1">
                         Add workout or rest days to build your cycle.
                       </p>
                     </div>
@@ -1162,14 +1173,14 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
                     <Button
                       variant="outline"
                       onClick={handleAddWorkout}
-                      className="h-10 rounded-full border-dashed border-indigo-200 bg-indigo-50/30 text-indigo-600 hover:bg-indigo-50 text-[9px] font-black uppercase tracking-widest px-5 shadow-sm transition-all"
+                      className="h-10 rounded-[var(--app-radius-md)] border-dashed border-[var(--app-border)] bg-[var(--app-accent-soft)] text-foreground hover:bg-[var(--app-surface-muted)] text-[9px] font-semibold uppercase tracking-normal px-5 shadow-sm transition-all"
                     >
                       <Plus size={14} className="mr-2" strokeWidth={3} /> Add Workout Day
                     </Button>
                     <Button
                       variant="outline"
                       onClick={handleAddRest}
-                      className="h-10 rounded-full border-dashed border-slate-200 bg-slate-50/30 text-slate-500 hover:bg-slate-50 text-[9px] font-black uppercase tracking-widest px-5 shadow-sm transition-all"
+                      className="h-10 rounded-[var(--app-radius-md)] border-dashed border-[var(--app-border)] bg-[var(--app-surface-muted)] text-muted-foreground hover:bg-[var(--app-surface-raised)] text-[9px] font-semibold uppercase tracking-normal px-5 shadow-sm transition-all"
                     >
                       <Plus size={14} className="mr-2" strokeWidth={3} /> Add Rest Day
                     </Button>
@@ -1177,7 +1188,7 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
 
                   {/* Quick Presets */}
                   <div className="flex flex-wrap gap-2 pt-2">
-                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest self-center mr-1">
+                    <span className="text-[9px] font-semibold text-muted-foreground/60 uppercase tracking-normal self-center mr-1">
                       Quick:
                     </span>
                     {[
@@ -1209,7 +1220,7 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
                           const newCycle = preset.slots.map(s => createCycleSlot(s.n, s.t));
                           updatePlan({ cycle: newCycle });
                         }}
-                        className="h-8 rounded-full border-slate-100 bg-slate-50 text-slate-500 hover:text-indigo-600 hover:border-indigo-200 hover:bg-white text-[8px] font-black uppercase tracking-widest px-4 shadow-sm transition-all"
+                        className="h-8 rounded-full border-[var(--app-border)] bg-[var(--app-surface-muted)] text-muted-foreground hover:text-foreground hover:border-[var(--app-border-strong)] hover:bg-[var(--app-surface)] text-[8px] font-semibold uppercase tracking-normal px-4 shadow-sm transition-all"
                       >
                         {preset.label}
                       </Button>
@@ -1223,14 +1234,14 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
                 {/* Cycle Loop Indicator */}
                 {plan.cycle.length > 0 && (
                   <div className="flex items-center justify-center gap-3 py-4">
-                    <div className="h-px flex-1 bg-slate-100" />
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 border border-slate-100">
-                      <Repeat size={12} className="text-indigo-400" />
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                    <div className="h-px flex-1 bg-[var(--app-border)]" />
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--app-surface-muted)] border border-[var(--app-border)]">
+                      <Repeat size={12} className="text-muted-foreground" />
+                      <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-normal">
                         Cycle repeats every {plan.cycle.length} days
                       </span>
                     </div>
-                    <div className="h-px flex-1 bg-slate-100" />
+                    <div className="h-px flex-1 bg-[var(--app-border)]" />
                   </div>
                 )}
               </motion.div>
@@ -1245,11 +1256,11 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 className="space-y-4"
               >
-                <div className="bg-white rounded-[1.5rem] border border-slate-100 p-4 shadow-sm space-y-4">
-                  <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                <Panel className="p-4 space-y-4">
+                  <h3 className="text-[9px] font-semibold text-muted-foreground uppercase tracking-normal flex items-center gap-2">
                     <Calendar size={12} /> Weekly Schedule
                   </h3>
-                  <p className="text-[10px] text-slate-400 font-medium">
+                  <p className="text-[10px] text-muted-foreground font-medium">
                     Define titles for each day. These repeat weekly.
                   </p>
 
@@ -1258,12 +1269,12 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
                       <FixedDayRow key={day} day={day} plan={plan} updatePlan={updatePlan} />
                     ))}
                   </div>
-                </div>
+                </Panel>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </Panel>
       )}
-    </div>
+    </PageShell>
   );
 }
