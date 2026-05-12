@@ -7,30 +7,15 @@ import {
   Search,
   Filter,
   Settings2,
-  LayoutGrid,
   Boxes,
   CheckCircle2,
   Database,
   ChevronLeft,
   ChevronRight,
   Save,
-  Grid,
   Calendar,
-  X,
-  ArrowUpDown,
-  MoreHorizontal,
-  Sparkles,
-  Dumbbell,
-  Pencil
+  X
 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -79,6 +64,41 @@ const TABS = [
   { key: 'completion', label: 'Completion' },
   { key: 'exerciseDb', label: 'Exercise DB' },
 ];
+
+const consoleButtonClass =
+  "flex shrink-0 items-center gap-2 rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)] px-2.5 py-1.5 text-[10px] font-semibold text-muted-foreground shadow-[var(--app-shadow-sm)] transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground md:px-3 md:text-xs";
+
+const consolePrimaryButtonClass =
+  "flex shrink-0 items-center gap-2 rounded-[var(--app-radius-sm)] bg-foreground px-2.5 py-1.5 text-[10px] font-semibold text-background shadow-[var(--app-shadow-sm)] transition-colors hover:bg-foreground/90 md:px-3 md:text-xs";
+
+const compactControlClass =
+  "rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-2 py-1.5 text-[10px] font-semibold text-foreground outline-none transition-colors focus:border-[var(--app-border-strong)] md:px-3 md:text-xs";
+
+const consoleTableHeaderClass =
+  "sticky top-0 z-10 border-b border-[var(--app-border)] bg-[var(--app-surface-muted)]/80 backdrop-blur-sm";
+
+const consoleTableBodyClass = "divide-y divide-[var(--app-border)]";
+
+const consoleRowClass =
+  "border-none transition-colors hover:bg-[var(--app-surface-muted)]/70";
+
+const consoleHeadCellClass =
+  "px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-normal text-muted-foreground";
+
+const consoleHeadCellWideClass =
+  "px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-normal text-muted-foreground";
+
+const consoleInputClass =
+  "h-8 rounded-[var(--app-radius-sm)] border-transparent bg-transparent text-[11px] font-medium text-foreground transition-colors focus:border-[var(--app-border)] focus:bg-[var(--app-surface)]";
+
+const consoleStrongInputClass =
+  "h-8 rounded-[var(--app-radius-sm)] border-transparent bg-transparent text-[11px] font-semibold text-foreground transition-colors focus:border-[var(--app-border)] focus:bg-[var(--app-surface)]";
+
+const consoleCompactInputClass =
+  "h-8 rounded-[var(--app-radius-sm)] border-transparent bg-transparent text-center text-[10px] font-semibold text-foreground transition-colors focus:border-[var(--app-border)] focus:bg-[var(--app-surface)]";
+
+const consoleDeleteButtonClass =
+  "p-1.5 text-muted-foreground/45 transition-colors hover:bg-red-500/10 hover:text-red-500";
 
 const WORKOUT_FIELDS = [
   'muscle',
@@ -548,29 +568,29 @@ export default function DataConsolePage({ hideSidebar }) {
 
 
   return (
-    <div className={`flex flex-col gap-6 ${!hideSidebar ? 'min-h-screen bg-[#f8fafc]' : ''}`}>
+    <div className={`flex flex-col gap-6 ${!hideSidebar ? 'min-h-screen bg-[var(--app-bg)]' : ''}`}>
       {!hideSidebar && (
-        <aside className="fixed left-0 top-0 bottom-0 w-20 lg:w-24 bg-white border-r border-slate-200 flex flex-col items-center py-8 gap-10 z-50">
+        <aside className="fixed bottom-0 left-0 top-0 z-50 flex w-20 flex-col items-center gap-8 border-r border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-8 shadow-[var(--app-shadow-sm)] lg:w-24">
 
           <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('workouts')}>
-            <div className={`p-3 rounded-xl transition-all ${activeTab === 'workouts' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+            <div className={`rounded-[var(--app-radius-md)] p-3 transition-colors ${activeTab === 'workouts' ? 'bg-foreground text-background shadow-[var(--app-shadow-sm)]' : 'text-muted-foreground hover:bg-[var(--app-surface-muted)] hover:text-foreground'}`}>
               <Boxes size={24} />
             </div>
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'workouts' ? 'text-indigo-600' : 'text-slate-400'}`}>Workouts</span>
+            <span className={`text-[10px] font-semibold uppercase tracking-normal ${activeTab === 'workouts' ? 'text-foreground' : 'text-muted-foreground'}`}>Workouts</span>
           </div>
 
           <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('completion')}>
-            <div className={`p-3 rounded-xl transition-all ${activeTab === 'completion' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+            <div className={`rounded-[var(--app-radius-md)] p-3 transition-colors ${activeTab === 'completion' ? 'bg-foreground text-background shadow-[var(--app-shadow-sm)]' : 'text-muted-foreground hover:bg-[var(--app-surface-muted)] hover:text-foreground'}`}>
               <CheckCircle2 size={24} />
             </div>
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'completion' ? 'text-indigo-600' : 'text-slate-400'}`}>Completion</span>
+            <span className={`text-[10px] font-semibold uppercase tracking-normal ${activeTab === 'completion' ? 'text-foreground' : 'text-muted-foreground'}`}>Completion</span>
           </div>
 
           <div className="flex flex-col items-center gap-1 group cursor-pointer" onClick={() => setActiveTab('exerciseDb')}>
-            <div className={`p-3 rounded-xl transition-all ${activeTab === 'exerciseDb' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-400 hover:bg-slate-50'}`}>
+            <div className={`rounded-[var(--app-radius-md)] p-3 transition-colors ${activeTab === 'exerciseDb' ? 'bg-foreground text-background shadow-[var(--app-shadow-sm)]' : 'text-muted-foreground hover:bg-[var(--app-surface-muted)] hover:text-foreground'}`}>
               <Database size={24} />
             </div>
-            <span className={`text-[10px] font-bold uppercase tracking-wider ${activeTab === 'exerciseDb' ? 'text-indigo-600' : 'text-slate-400'}`}>Exercise DB</span>
+            <span className={`text-[10px] font-semibold uppercase tracking-normal ${activeTab === 'exerciseDb' ? 'text-foreground' : 'text-muted-foreground'}`}>Exercise DB</span>
           </div>
         </aside>
       )}
@@ -580,10 +600,10 @@ export default function DataConsolePage({ hideSidebar }) {
 
 
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 md:mb-6">
+        <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center md:mb-6">
           <div className="flex-1">
-            <h1 className="text-lg md:text-xl font-bold text-slate-800 tracking-tight">Data Console</h1>
-            <p className="text-[10px] md:text-xs text-slate-400 font-medium">Configure workouts, sessions, and database.</p>
+            <h1 className="text-lg font-semibold tracking-normal text-foreground md:text-xl">Data Console</h1>
+            <p className="text-[10px] font-medium text-muted-foreground md:text-xs">Configure workouts, sessions, and database.</p>
           </div>
 
           <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
@@ -597,38 +617,38 @@ export default function DataConsolePage({ hideSidebar }) {
             <button
               onClick={handleImportClick}
               disabled={importing}
-              className="group flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold text-[10px] md:text-xs hover:bg-slate-50 transition-all shadow-sm shrink-0"
+              className={consoleButtonClass}
               title="Import Data"
             >
-              <Upload size={14} className="text-slate-400 group-hover:text-indigo-600 transition-colors" />
+              <Upload size={14} />
               <span className="hidden xs:inline">Import</span>
             </button>
             <button
               onClick={() => handleExport('current')}
               disabled={exporting}
-              className="flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold text-[10px] md:text-xs hover:bg-slate-50 transition-all shadow-sm shrink-0"
+              className={consoleButtonClass}
               title="Export Current Tab"
             >
-              <Download size={14} className="text-slate-400" />
+              <Download size={14} />
               <span className="hidden xs:inline">Export</span>
             </button>
             <button
               onClick={() => handleExport('all')}
               disabled={exporting}
-              className="flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-[10px] md:text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 shrink-0"
+              className={consolePrimaryButtonClass}
               title="Export All Data"
             >
               <Database size={14} />
               <span className="hidden xs:inline">Export All</span>
             </button>
 
-            <div className="hidden xs:block w-px h-6 bg-slate-100 mx-0.5 md:mx-1" />
+            <div className="hidden h-6 w-px bg-[var(--app-border)] xs:block mx-0.5 md:mx-1" />
             <button
               onClick={() => setShowAdvancedCols(!showAdvancedCols)}
-              className="flex items-center gap-2 px-2.5 md:px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold text-[10px] md:text-xs hover:bg-slate-50 transition-all shadow-sm shrink-0"
+              className={consoleButtonClass}
               title="Display Options"
             >
-              <Settings2 size={14} className="text-slate-400" />
+              <Settings2 size={14} />
               <span className="hidden xs:inline">Display</span>
             </button>
           </div>
@@ -636,34 +656,34 @@ export default function DataConsolePage({ hideSidebar }) {
 
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-4 md:gap-6 border-b border-slate-100 mb-4 md:mb-6 px-1 overflow-x-auto scrollbar-none whitespace-nowrap">
+        <div className="mb-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap border-b border-[var(--app-border)] px-1 scrollbar-none md:mb-6">
           {TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`pb-3 px-1 text-[11px] md:text-xs font-bold transition-all relative shrink-0 ${activeTab === tab.key
-                  ? 'text-indigo-600'
-                  : 'text-slate-400 hover:text-slate-600'
+              className={`relative shrink-0 px-3 pb-3 text-[11px] font-semibold uppercase tracking-normal transition-colors md:text-xs ${activeTab === tab.key
+                  ? 'text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
                 }`}
             >
               {tab.label}
               {activeTab === tab.key && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />
+                <div className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-foreground" />
               )}
             </button>
           ))}
         </div>
 
-        <div className="bg-white rounded-xl md:rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex-1 flex flex-col min-h-0">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--app-radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--app-shadow-sm)]">
           {/* Table Toolbar */}
-          <div className="px-3 md:px-4 py-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
+          <div className="flex flex-col justify-between gap-3 border-b border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-3 sm:flex-row sm:items-center md:px-4">
             <div className="flex-1 w-full sm:max-w-xs relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60" size={14} />
               <Input
                 placeholder={`Search data...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 bg-slate-50 border-slate-200 rounded-xl text-[11px] md:text-xs focus-visible:ring-indigo-500/10 focus-visible:border-indigo-500 transition-all font-medium"
+                className="h-9 rounded-[var(--app-radius-md)] border-[var(--app-border)] bg-[var(--app-surface-muted)] pl-9 text-[11px] font-medium transition-colors focus-visible:border-[var(--app-border-strong)] focus-visible:ring-0 md:text-xs"
               />
             </div>
 
@@ -672,15 +692,15 @@ export default function DataConsolePage({ hideSidebar }) {
                 <div className="flex items-center gap-2 flex-1 sm:flex-initial">
                   <div
                     onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}
-                    className="flex items-center gap-1.5 px-2 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 focus-within:ring-2 focus-within:ring-indigo-500/10 focus-within:border-indigo-500 cursor-pointer"
+                    className="flex cursor-pointer items-center gap-1.5 rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-2 transition-colors hover:border-[var(--app-border-strong)] focus-within:border-[var(--app-border-strong)]"
                   >
-                    <Calendar size={12} className="text-slate-400 shrink-0" />
+                    <Calendar size={12} className="shrink-0 text-muted-foreground" />
                     <input
                       type="date"
                       value={workoutFilterDate}
                       onFocus={(e) => e.target.showPicker?.()}
                       onChange={(e) => setWorkoutFilterDate(e.target.value)}
-                      className="bg-transparent py-1.5 text-[10px] md:text-xs font-bold text-slate-700 focus:outline-none w-24 md:w-28 cursor-pointer h-7"
+                      className="h-7 w-24 cursor-pointer bg-transparent py-1.5 text-[10px] font-semibold text-foreground focus:outline-none md:w-28 md:text-xs"
                     />
                     {workoutFilterDate && (
                       <button
@@ -688,7 +708,7 @@ export default function DataConsolePage({ hideSidebar }) {
                           e.stopPropagation();
                           setWorkoutFilterDate('');
                         }}
-                        className="p-0.5 hover:bg-slate-200 text-slate-400 hover:text-slate-600 rounded-md transition-all shrink-0"
+                        className="shrink-0 rounded-md p-0.5 text-muted-foreground transition-colors hover:bg-[var(--app-surface)] hover:text-foreground"
                         title="Clear Date"
                       >
                         <X size={12} strokeWidth={3} />
@@ -698,7 +718,7 @@ export default function DataConsolePage({ hideSidebar }) {
                   <select
                     value={workoutFilterDay}
                     onChange={(e) => setWorkoutFilterDay(e.target.value)}
-                    className="flex-1 sm:flex-initial border border-slate-200 rounded-lg px-2 md:px-3 py-1.5 text-[10px] md:text-xs bg-slate-50 font-bold text-slate-700 focus:outline-none transition-all"
+                    className={`${compactControlClass} flex-1 sm:flex-initial`}
                   >
                     <option value="all">Day</option>
                     {DAYS.map((day) => (
@@ -708,7 +728,7 @@ export default function DataConsolePage({ hideSidebar }) {
                   <select
                     value={workoutFilterSession}
                     onChange={(e) => setWorkoutFilterSession(e.target.value)}
-                    className="flex-1 sm:flex-initial border border-slate-200 rounded-lg px-2 md:px-3 py-1.5 text-[10px] md:text-xs bg-slate-50 font-bold text-slate-700 focus:outline-none transition-all"
+                    className={`${compactControlClass} flex-1 sm:flex-initial`}
                   >
                     <option value="all">Ses</option>
                     <option value="am">{s1Label}</option>
@@ -716,7 +736,7 @@ export default function DataConsolePage({ hideSidebar }) {
                   </select>
                   <button
                     onClick={addWorkoutGridRow}
-                    className="p-1.5 rounded-lg border border-dashed border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors shrink-0"
+                    className="shrink-0 rounded-[var(--app-radius-sm)] border border-dashed border-[var(--app-border)] p-1.5 text-muted-foreground transition-colors hover:border-[var(--app-border-strong)] hover:bg-[var(--app-surface-muted)] hover:text-foreground"
                     title="Add Row"
                   >
                     <Plus size={16} />
@@ -734,13 +754,13 @@ export default function DataConsolePage({ hideSidebar }) {
               {activeTab === 'exerciseDb' && (
                 <button
                   onClick={addExerciseRow}
-                  className="flex items-center gap-1.5 rounded-lg border border-dashed border-indigo-200 px-3 py-1.5 text-xs font-bold text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  className="flex items-center gap-1.5 rounded-[var(--app-radius-sm)] border border-dashed border-[var(--app-border)] px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-[var(--app-border-strong)] hover:bg-[var(--app-surface-muted)] hover:text-foreground"
                 >
                   <Plus size={14} />
                   New Exercise
                 </button>
               )}
-              <button className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors">
+              <button className="flex items-center gap-2 rounded-[var(--app-radius-sm)] border border-[var(--app-border)] px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground">
                 <Filter size={14} />
                 Filter
               </button>
@@ -750,29 +770,29 @@ export default function DataConsolePage({ hideSidebar }) {
           {activeTab === 'workouts' && (
             <div className="flex-1 overflow-auto">
               <Table className="min-w-[1000px]">
-                <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                <TableHeader className={consoleTableHeaderClass}>
                   <TableRow className="hover:bg-transparent border-none">
-                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-10">#</TableHead>
-                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-24">Day</TableHead>
-                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-32">Date</TableHead>
-                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20">Session</TableHead>
-                    {showAdvancedCols && <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16">Group</TableHead>}
-                    {showAdvancedCols && <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16">Row</TableHead>}
-                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Muscle</TableHead>
-                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Sub Muscle</TableHead>
-                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-80">Exercise</TableHead>
-                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16 text-center">Sets</TableHead>
-                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-16 text-center">Reps</TableHead>
-                    <TableHead className="px-3 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20 text-center">Weight</TableHead>
-                    <TableHead className="px-3 py-3 text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 w-12">Del</TableHead>
+                    <TableHead className={`${consoleHeadCellClass} w-10`}>#</TableHead>
+                    <TableHead className={`${consoleHeadCellClass} w-24`}>Day</TableHead>
+                    <TableHead className={`${consoleHeadCellClass} w-32`}>Date</TableHead>
+                    <TableHead className={`${consoleHeadCellClass} w-20`}>Session</TableHead>
+                    {showAdvancedCols && <TableHead className={`${consoleHeadCellClass} w-16`}>Group</TableHead>}
+                    {showAdvancedCols && <TableHead className={`${consoleHeadCellClass} w-16`}>Row</TableHead>}
+                    <TableHead className={consoleHeadCellClass}>Muscle</TableHead>
+                    <TableHead className={consoleHeadCellClass}>Sub Muscle</TableHead>
+                    <TableHead className={`${consoleHeadCellClass} w-80`}>Exercise</TableHead>
+                    <TableHead className={`${consoleHeadCellClass} w-16 text-center`}>Sets</TableHead>
+                    <TableHead className={`${consoleHeadCellClass} w-16 text-center`}>Reps</TableHead>
+                    <TableHead className={`${consoleHeadCellClass} w-20 text-center`}>Weight</TableHead>
+                    <TableHead className={`${consoleHeadCellClass} w-12 text-center`}>Del</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="divide-y divide-slate-50">
+                <TableBody className={consoleTableBodyClass}>
                   {visibleWorkoutRows.map(({ row, idx }, visibleIdx) => (
-                    <TableRow key={`workout-row-${idx}`} className="group hover:bg-slate-50/50 transition-colors border-none">
-                      <TableCell className="px-3 py-2 text-slate-300 font-bold text-[10px]">{visibleIdx + 1}</TableCell>
+                    <TableRow key={`workout-row-${idx}`} className={consoleRowClass}>
+                      <TableCell className="px-3 py-2 text-[10px] font-semibold text-muted-foreground/45">{visibleIdx + 1}</TableCell>
                       <TableCell className="px-3 py-2">
-                        <span className="text-slate-700 font-bold italic text-[11px]">{row.day}</span>
+                        <span className="text-[11px] font-semibold italic text-foreground">{row.day}</span>
                       </TableCell>
                       <TableCell className="px-3 py-2">
                         <Input
@@ -786,14 +806,14 @@ export default function DataConsolePage({ hideSidebar }) {
                               updateWorkoutRow(idx, 'day', dayName);
                             }
                           }}
-                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] focus:bg-white focus:border-slate-200 transition-all"
+                          className={consoleInputClass}
                         />
                       </TableCell>
                       <TableCell className="px-3 py-2">
                         <select
                           value={row.session}
                           onChange={(e) => updateWorkoutRow(idx, 'session', e.target.value)}
-                          className="w-full px-1 py-1 bg-transparent border border-transparent rounded-md text-slate-700 text-[10px] font-bold uppercase focus:bg-white focus:border-slate-200"
+                          className="w-full rounded-[var(--app-radius-sm)] border border-transparent bg-transparent px-1 py-1 text-[10px] font-semibold uppercase tracking-normal text-foreground outline-none transition-colors focus:border-[var(--app-border)] focus:bg-[var(--app-surface)]"
                         >
                           <option value="am">{s1Label}</option>
                           <option value="pm">{s2Label}</option>
@@ -804,7 +824,7 @@ export default function DataConsolePage({ hideSidebar }) {
                           <Input
                             value={String(row.groupIndex)}
                             onChange={(e) => updateWorkoutRow(idx, 'groupIndex', e.target.value)}
-                            className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[10px] text-center focus:bg-white focus:border-slate-200"
+                            className={consoleCompactInputClass}
                           />
                         </TableCell>
                       )}
@@ -813,7 +833,7 @@ export default function DataConsolePage({ hideSidebar }) {
                           <Input
                             value={String(row.rowIndex)}
                             onChange={(e) => updateWorkoutRow(idx, 'rowIndex', e.target.value)}
-                            className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[10px] text-center focus:bg-white focus:border-slate-200"
+                            className={consoleCompactInputClass}
                           />
                         </TableCell>
                       )}
@@ -821,42 +841,42 @@ export default function DataConsolePage({ hideSidebar }) {
                         <Input
                           value={row.muscle}
                           onChange={(e) => updateWorkoutRow(idx, 'muscle', e.target.value)}
-                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200"
+                          className={consoleInputClass}
                         />
                       </TableCell>
                       <TableCell className="px-3 py-2">
                         <Input
                           value={row.subMuscle}
                           onChange={(e) => updateWorkoutRow(idx, 'subMuscle', e.target.value)}
-                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200"
+                          className={consoleInputClass}
                         />
                       </TableCell>
                       <TableCell className="px-3 py-2">
                         <Input
                           value={row.exercise}
                           onChange={(e) => updateWorkoutRow(idx, 'exercise', e.target.value)}
-                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] font-bold focus:bg-white focus:border-slate-200"
+                          className={consoleStrongInputClass}
                         />
                       </TableCell>
                       <TableCell className="px-3 py-2">
                         <Input
                           value={row.sets}
                           onChange={(e) => updateWorkoutRow(idx, 'sets', e.target.value)}
-                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
+                          className={`${consoleStrongInputClass} text-center`}
                         />
                       </TableCell>
                       <TableCell className="px-3 py-2">
                         <Input
                           value={row.reps}
                           onChange={(e) => updateWorkoutRow(idx, 'reps', e.target.value)}
-                          className="h-8 bg-transparent border-transparent rounded-md text-slate-700 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
+                          className={`${consoleStrongInputClass} text-center`}
                         />
                       </TableCell>
                       <TableCell className="px-3 py-2">
                         <Input
                           value={row.weight}
                           onChange={(e) => updateWorkoutRow(idx, 'weight', e.target.value)}
-                          className="h-8 bg-transparent border-transparent rounded-md text-indigo-600 text-[11px] text-center font-bold focus:bg-white focus:border-slate-200"
+                          className={`${consoleStrongInputClass} text-center`}
                         />
                       </TableCell>
                       <TableCell className="px-3 py-2 text-center">
@@ -864,7 +884,7 @@ export default function DataConsolePage({ hideSidebar }) {
                           variant="ghost"
                           size="icon-sm"
                           onClick={() => removeWorkoutGridRow(idx)}
-                          className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
+                          className={consoleDeleteButtonClass}
                         >
                           <Trash2 size={14} />
                         </Button>
@@ -879,24 +899,24 @@ export default function DataConsolePage({ hideSidebar }) {
           {activeTab === 'completion' && (
             <div className="flex-1 overflow-auto scrollbar-none">
               <Table className="min-w-[600px]">
-                <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                <TableHeader className={consoleTableHeaderClass}>
                   <TableRow className="hover:bg-transparent border-none">
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Day</TableHead>
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-40">Date</TableHead>
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">{s1FullLabel}</TableHead>
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">{s2FullLabel}</TableHead>
+                    <TableHead className={`${consoleHeadCellWideClass} w-40`}>Day</TableHead>
+                    <TableHead className={`${consoleHeadCellWideClass} w-40`}>Date</TableHead>
+                    <TableHead className={consoleHeadCellWideClass}>{s1FullLabel}</TableHead>
+                    <TableHead className={consoleHeadCellWideClass}>{s2FullLabel}</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="divide-y divide-slate-50">
+                <TableBody className={consoleTableBodyClass}>
                   {DAYS.map((day) => {
                     const dayData = weekCompletion[day];
                     const dateDisplay = dayData ? formatDateCompact(dayData.date) : '';
                     const dateKey = dayData ? dayData.date : null;
 
                     return (
-                      <TableRow key={day} className="group hover:bg-slate-50/50 transition-colors border-none">
-                        <TableCell className="px-4 py-3 font-bold text-slate-700 italic">{day}</TableCell>
-                        <TableCell className="px-4 py-3 text-slate-400 font-bold text-[10px] uppercase tracking-tight">{dateDisplay}</TableCell>
+                      <TableRow key={day} className={consoleRowClass}>
+                        <TableCell className="px-4 py-3 font-semibold italic text-foreground">{day}</TableCell>
+                        <TableCell className="px-4 py-3 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">{dateDisplay}</TableCell>
                         {['am', 'pm'].map((session) => {
                           const value = dayData?.[session];
                           const status = value === true ? 'done' : value === 'skipped' ? 'skipped' : '';
@@ -905,8 +925,8 @@ export default function DataConsolePage({ hideSidebar }) {
 
                           if (isInactive && !status) {
                             return (
-                              <TableCell key={session} className="px-4 py-2 opacity-20">
-                                <span className="text-[10px] font-black tracking-widest ml-4">—</span>
+                              <TableCell key={session} className="px-4 py-2 opacity-35">
+                                <span className="ml-4 text-[10px] font-semibold tracking-normal text-muted-foreground">—</span>
                               </TableCell>
                             );
                           }
@@ -914,16 +934,15 @@ export default function DataConsolePage({ hideSidebar }) {
                           return (
                             <TableCell key={session} className="px-4 py-2">
                               <select
-                                status={status}
                                 value={status}
                                 onChange={(e) => setCompletionCell(dateKey, session, e.target.value)}
                                 className={cn(
-                                  "px-3 py-1.5 rounded-lg text-[10px] font-bold border underline-offset-2 transition-all focus:outline-none",
+                                  "rounded-[var(--app-radius-sm)] border px-3 py-1.5 text-[10px] font-semibold underline-offset-2 transition-colors focus:outline-none",
                                   status === 'done'
                                     ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                                     : status === 'skipped'
                                       ? "bg-amber-50 text-amber-700 border-amber-100"
-                                      : "bg-transparent text-slate-300 border-transparent hover:border-slate-100"
+                                      : "border-transparent bg-transparent text-muted-foreground hover:border-[var(--app-border)]"
                                 )}
                                 disabled={!dateKey}
                               >
@@ -945,36 +964,36 @@ export default function DataConsolePage({ hideSidebar }) {
           {activeTab === 'exerciseDb' && (
             <div className="flex-1 overflow-auto scrollbar-none relative">
               <Table className="min-w-[700px]">
-                <TableHeader className="sticky top-0 bg-slate-50/50 backdrop-blur-sm border-b border-slate-100 z-10">
+                <TableHeader className={consoleTableHeaderClass}>
                   <TableRow className="hover:bg-transparent border-none">
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-1/4">Muscle</TableHead>
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 w-1/4">Sub Muscle</TableHead>
-                    <TableHead className="px-4 py-3 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400">Exercise</TableHead>
-                    <TableHead className="px-4 py-3 text-center font-bold text-[10px] uppercase tracking-widest text-slate-400 w-20">Actions</TableHead>
+                    <TableHead className={`${consoleHeadCellWideClass} w-1/4`}>Muscle</TableHead>
+                    <TableHead className={`${consoleHeadCellWideClass} w-1/4`}>Sub Muscle</TableHead>
+                    <TableHead className={consoleHeadCellWideClass}>Exercise</TableHead>
+                    <TableHead className={`${consoleHeadCellWideClass} w-20 text-center`}>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="divide-y divide-slate-50">
+                <TableBody className={consoleTableBodyClass}>
                   {paginatedExerciseRows.map(({ row, idx }) => (
-                    <TableRow key={`${row.muscle}-${row.subMuscle}-${row.exercise}-${idx}`} className="group hover:bg-slate-50/50 transition-colors border-none">
+                    <TableRow key={`${row.muscle}-${row.subMuscle}-${row.exercise}-${idx}`} className={consoleRowClass}>
                       <TableCell className="px-4 py-2">
                         <Input
                           value={row.muscle}
                           onChange={(e) => updateExerciseRow(idx, 'muscle', e.target.value)}
-                          className="h-8 bg-transparent border-transparent rounded-lg text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                          className={consoleInputClass}
                         />
                       </TableCell>
                       <TableCell className="px-4 py-2">
                         <Input
                           value={row.subMuscle}
                           onChange={(e) => updateExerciseRow(idx, 'subMuscle', e.target.value)}
-                          className="h-8 bg-transparent border-transparent rounded-lg text-slate-700 text-[11px] font-medium focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                          className={consoleInputClass}
                         />
                       </TableCell>
                       <TableCell className="px-4 py-2">
                         <Input
                           value={row.exercise}
                           onChange={(e) => updateExerciseRow(idx, 'exercise', e.target.value)}
-                          className="h-8 bg-transparent border-transparent rounded-lg text-slate-700 text-[11px] font-bold focus:bg-white focus:border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                          className={consoleStrongInputClass}
                         />
                       </TableCell>
                       <TableCell className="px-4 py-2 text-center">
@@ -982,7 +1001,7 @@ export default function DataConsolePage({ hideSidebar }) {
                           variant="ghost"
                           size="icon-sm"
                           onClick={() => removeExerciseRow(idx)}
-                          className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
+                          className={consoleDeleteButtonClass}
                         >
                           <Trash2 size={15} />
                         </Button>
@@ -996,8 +1015,8 @@ export default function DataConsolePage({ hideSidebar }) {
 
 
           {/* Table Footer */}
-          <footer className="px-4 py-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+          <footer className="flex items-center justify-between border-t border-[var(--app-border)] bg-[var(--app-surface-muted)]/60 px-4 py-3">
+            <div className="text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">
               {activeTab === 'exerciseDb' ? (
                 <>Showing {Math.min(EXERCISES_PER_PAGE, filteredExerciseRows.length)} of {filteredExerciseRows.length} Exercises</>
               ) : activeTab === 'workouts' ? (
@@ -1011,15 +1030,15 @@ export default function DataConsolePage({ hideSidebar }) {
               <button
                 onClick={() => setExercisePage(p => Math.max(1, p - 1))}
                 disabled={activeTab !== 'exerciseDb' || exercisePage === 1}
-                className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 disabled:opacity-30 transition-all shadow-sm bg-white"
+                className="rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1.5 text-muted-foreground shadow-[var(--app-shadow-sm)] transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground disabled:opacity-30"
               >
                 <ChevronLeft size={16} />
               </button>
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-white text-indigo-600 font-bold text-[10px] border border-slate-200 rounded-lg shadow-sm">
+              <div className="flex items-center gap-1.5 rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-1 text-[10px] font-semibold text-foreground shadow-[var(--app-shadow-sm)]">
                 {activeTab === 'exerciseDb' ? (
                   <>
                     <span>{exercisePage}</span>
-                    <span className="text-slate-300">/</span>
+                    <span className="text-muted-foreground/40">/</span>
                     <span>{totalExercisePages}</span>
                   </>
                 ) : (
@@ -1029,7 +1048,7 @@ export default function DataConsolePage({ hideSidebar }) {
               <button
                 onClick={() => setExercisePage(p => Math.min(totalExercisePages, p + 1))}
                 disabled={activeTab !== 'exerciseDb' || exercisePage === totalExercisePages}
-                className="p-1.5 rounded-lg border border-slate-200 text-slate-400 hover:bg-white hover:text-slate-600 disabled:opacity-30 transition-all shadow-sm bg-white"
+                className="rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1.5 text-muted-foreground shadow-[var(--app-shadow-sm)] transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground disabled:opacity-30"
               >
                 <ChevronRight size={16} />
               </button>
@@ -1037,11 +1056,11 @@ export default function DataConsolePage({ hideSidebar }) {
           </footer>
 
           {/* Action Footer */}
-          <div className="flex items-center gap-4 mt-6 px-4 pb-6">
+          <div className="mt-6 flex items-center gap-4 px-4 pb-6">
             {activeTab === 'workouts' && (
               <Button
                 onClick={saveWorkoutGrid}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-8 shadow-lg shadow-indigo-100"
+                className="rounded-[var(--app-radius-md)] bg-foreground px-8 font-semibold text-background shadow-[var(--app-shadow-sm)] hover:bg-foreground/90"
               >
                 <Save size={16} className="mr-2" />
                 Save Workouts
@@ -1050,7 +1069,7 @@ export default function DataConsolePage({ hideSidebar }) {
             {activeTab === 'exerciseDb' && (
               <Button
                 onClick={saveExerciseGrid}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-8 shadow-lg shadow-indigo-100"
+                className="rounded-[var(--app-radius-md)] bg-foreground px-8 font-semibold text-background shadow-[var(--app-shadow-sm)] hover:bg-foreground/90"
               >
                 <Save size={16} className="mr-2" />
                 Save Changes
@@ -1058,8 +1077,9 @@ export default function DataConsolePage({ hideSidebar }) {
             )}
 
             {(workoutsSaved || exerciseSaved || completionSaved) && (
-              <Badge variant="outline" className="text-emerald-500 border-emerald-200 bg-emerald-50/50 animate-pulse font-bold px-3 py-1">
-                ✓ SAVED TO CLOUD
+              <Badge variant="outline" className="inline-flex items-center gap-1.5 border-emerald-200 bg-emerald-50/70 px-3 py-1 font-semibold text-emerald-700">
+                <CheckCircle2 size={12} />
+                Saved to cloud
               </Badge>
             )}
           </div>
