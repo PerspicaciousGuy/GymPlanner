@@ -10,6 +10,10 @@ import InteractiveMuscleMap from '../components/InteractiveMuscleMap/Interactive
 import { getFoodLog, getDailyTotals } from '../utils/foodDatabase';
 import { getWeightForDate } from '../utils/vitalsDatabase';
 import { cn } from "@/lib/utils";
+import { PageShell } from "@/components/layout/PageShell";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Panel } from "@/components/layout/Panel";
+import { Button } from "@/components/ui/button";
 
 export default function DayDetailPage({ date, onBack, syncKey }) {
   const dateStr = formatDateKey(date);
@@ -132,40 +136,38 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
   }, [dayData]);
 
   return (
-    <div className="space-y-6 animate-in slide-in-from-right-4 duration-500 pb-12">
-      {/* Header with Back Button */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onBack}
-            className="p-2.5 bg-card hover:bg-muted text-muted-foreground hover:text-indigo-600 rounded-xl transition-all border border-border hover:border-indigo-200 hover:shadow-sm"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight">
-                {dayName}
-              </h1>
-              <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-current/10", statusInfo.color)}>
-                {statusInfo.icon}
-                {statusInfo.label}
-              </div>
-            </div>
-            <p className="text-[11px] md:text-sm text-muted-foreground font-bold uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
+    <PageShell className="animate-in slide-in-from-right-4 duration-500">
+      <PageHeader
+        title={dayName}
+        meta={(
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
               <CalendarIcon size={14} />
               {formatDateDisplay(date)}
-            </p>
+            </span>
+            <div className={cn("flex items-center gap-1.5 rounded-full border border-current/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-normal", statusInfo.color)}>
+              {statusInfo.icon}
+              {statusInfo.label}
+            </div>
           </div>
-        </div>
-      </div>
+        )}
+        actions={(
+          <Button
+            variant="outline"
+            onClick={onBack}
+            className="h-10 rounded-[var(--app-radius-md)] border-[var(--app-border)] bg-[var(--app-surface)] text-xs font-semibold text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground"
+          >
+            <ChevronLeft size={16} className="mr-2" />
+            Back
+          </Button>
+        )}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {/* Left Column: Muscle Map & Stats */}
         <div className="lg:col-span-1 xl:col-span-1 space-y-6">
-          <div className="bg-card rounded-3xl border border-border p-6 shadow-sm overflow-hidden relative">
-            <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Training Focus</h2>
+          <Panel className="overflow-hidden p-5 md:p-6">
+            <h2 className="mb-4 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">Training Focus</h2>
             <div className="flex justify-center -mx-6">
               <InteractiveMuscleMap 
                 muscleStats={getDailyFocus(['am', 'pm'].map(session => ({ date: dateStr, ...dayData[session], session })))} 
@@ -173,11 +175,11 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
                 noBackground={true}
               />
             </div>
-          </div>
+          </Panel>
 
           <div className="grid grid-cols-2 gap-4">
             <StatBox 
-              icon={<Weight size={18} className="text-indigo-600" />} 
+              icon={<Weight size={18} className="text-foreground" />} 
               label="Total Volume" 
               value={`${stats.totalVolume.toLocaleString()} kg`} 
             />
@@ -188,44 +190,44 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
             />
             {bodyWeight && (
               <StatBox 
-                icon={<Weight size={18} className="text-indigo-600" />} 
+                icon={<Weight size={18} className="text-foreground" />} 
                 label="Body Weight" 
                 value={`${bodyWeight} kg`} 
               />
             )}
-            <div className="col-span-2 bg-card rounded-2xl border border-border p-4 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+            <Panel className="col-span-2 flex items-center gap-4 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10">
                 <Zap size={20} className="text-amber-500" />
               </div>
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Main Movement</p>
-                <p className="text-sm font-black text-foreground truncate">{stats.topExerciseName}</p>
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal">Main Movement</p>
+                <p className="truncate text-sm font-semibold text-foreground">{stats.topExerciseName}</p>
               </div>
-            </div>
+            </Panel>
           </div>
         </div>
 
         {/* Middle Column: Detailed Lists */}
-        <div className="lg:col-span-2 xl:col-span-2 bg-card rounded-3xl border border-border p-4 md:p-8 shadow-sm flex flex-col">
+        <Panel className="flex flex-col p-4 md:p-6 lg:col-span-2 xl:col-span-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-6">
-              <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Activity Log</h2>
+              <h2 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal">Activity Log</h2>
               
               {/* Session Switcher */}
               {shouldShowSessionSwitcher && (
-                <div className="flex bg-muted p-1 rounded-xl border border-border/50">
+                <div className="flex rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-1">
                   <button 
                     onClick={() => setActiveSession('am')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                      activeSession === 'am' ? 'bg-card text-indigo-500 shadow-sm border border-border' : 'text-muted-foreground hover:text-foreground'
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-normal transition-all ${
+                      activeSession === 'am' ? 'bg-[var(--app-surface)] text-foreground shadow-sm border border-[var(--app-border)]' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     {plan.sessionLayout === 'split' ? <><Sun size={12} /> AM</> : "Session 1"}
                   </button>
                   <button 
                     onClick={() => setActiveSession('pm')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                      activeSession === 'pm' ? 'bg-card text-indigo-500 shadow-sm border border-border' : 'text-muted-foreground hover:text-foreground'
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-normal transition-all ${
+                      activeSession === 'pm' ? 'bg-[var(--app-surface)] text-foreground shadow-sm border border-[var(--app-border)]' : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     {plan.sessionLayout === 'split' ? <><Moon size={12} /> PM</> : "Session 2"}
@@ -235,19 +237,19 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
             </div>
 
             {/* View Mode Switcher */}
-            <div className="flex items-center gap-2 bg-indigo-500/5 p-1 rounded-xl border border-indigo-500/10">
+            <div className="flex items-center gap-1 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-1">
               <button 
                 onClick={() => setViewMode('activity')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                  viewMode === 'activity' ? 'bg-indigo-600 text-primary-foreground shadow-lg shadow-indigo-600/20' : 'text-indigo-400 hover:text-indigo-600'
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-normal transition-all ${
+                  viewMode === 'activity' ? 'bg-foreground text-background shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <List size={12} /> Summary
               </button>
               <button 
                 onClick={() => setViewMode('grid')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                  viewMode === 'grid' ? 'bg-indigo-600 text-primary-foreground shadow-lg shadow-indigo-600/20' : 'text-indigo-400 hover:text-indigo-600'
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-normal transition-all ${
+                  viewMode === 'grid' ? 'bg-foreground text-background shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <LayoutGrid size={12} /> Detailed Grid
@@ -274,50 +276,50 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
               />
             )}
           </div>
-        </div>
+        </Panel>
 
         {/* Right Column: Nutrition/Food details */}
         <div className="lg:col-span-3 xl:col-span-1 space-y-6">
-          <div className="bg-card rounded-3xl border border-border p-6 shadow-sm overflow-hidden flex flex-col h-full">
-            <h2 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Nutrition Summary</h2>
+          <Panel className="flex h-full flex-col overflow-hidden p-5 md:p-6">
+            <h2 className="mb-4 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">Nutrition Summary</h2>
             
             {/* Calories Ring / Summary */}
-            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border border-border/50 mb-6">
+            <div className="mb-6 flex items-center justify-between rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-4">
               <div>
-                <p className="text-2xl font-black text-foreground">{foodTotals.calories}</p>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5 flex items-center gap-1"><Flame size={12} className="text-amber-500"/> Calories</p>
+                <p className="text-2xl font-semibold text-foreground">{foodTotals.calories}</p>
+                <p className="mt-0.5 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground"><Flame size={12} className="text-amber-500"/> Calories</p>
               </div>
               <div className="flex gap-4 text-left">
                 <div>
-                  <p className="text-sm font-black text-foreground">{foodTotals.protein}g</p>
-                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-rose-500">Pro</p>
+                  <p className="text-sm font-semibold text-foreground">{foodTotals.protein}g</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-normal text-rose-500">Pro</p>
                 </div>
                 <div>
-                  <p className="text-sm font-black text-foreground">{foodTotals.carbs}g</p>
-                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-amber-500">Car</p>
+                  <p className="text-sm font-semibold text-foreground">{foodTotals.carbs}g</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-normal text-amber-500">Car</p>
                 </div>
                 <div>
-                  <p className="text-sm font-black text-foreground">{foodTotals.fats}g</p>
-                  <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-blue-500">Fat</p>
+                  <p className="text-sm font-semibold text-foreground">{foodTotals.fats}g</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-normal text-blue-500">Fat</p>
                 </div>
               </div>
             </div>
 
             {/* Food Log List */}
-            <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-3">Logged Food</h3>
+            <h3 className="mb-3 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">Logged Food</h3>
             <div className="flex-1 overflow-y-auto pr-2 space-y-2 max-h-[400px] scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
               {foodLog.length === 0 ? (
                 <div className="text-center py-8">
                   <Utensils size={24} className="mx-auto text-muted-foreground/30 mb-2" />
-                  <p className="text-xs font-bold text-muted-foreground">No food logged</p>
+                  <p className="text-xs font-semibold text-muted-foreground">No food logged</p>
                 </div>
               ) : (
                 foodLog.map((entry) => (
-                  <div key={entry.id} className="p-3 bg-muted/30 rounded-xl border border-border/50 flex items-center justify-between group">
+                  <div key={entry.id} className="group flex items-center justify-between rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-3">
                     <div className="min-w-0 pr-3">
-                      <p className="text-xs font-bold text-foreground truncate">{entry.food.name}</p>
+                      <p className="truncate text-xs font-semibold text-foreground">{entry.food.name}</p>
                       <div className="flex items-center gap-2 mt-1 w-full flex-wrap">
-                        <span className="text-[9px] font-bold text-muted-foreground border border-border px-1.5 py-0.5 rounded-md flex-shrink-0">
+                        <span className="flex-shrink-0 rounded-md border border-[var(--app-border)] px-1.5 py-0.5 text-[9px] font-semibold text-muted-foreground">
                           {entry.servings}x {entry.food.servingSize || 'serving'}
                         </span>
                         {entry.food.brand && (
@@ -333,38 +335,39 @@ export default function DayDetailPage({ date, onBack, syncKey }) {
                       )}
                     </div>
                     <div className="flex-shrink-0 text-right">
-                      <p className="text-xs font-black text-foreground">{Math.round((entry.food.calories || 0) * entry.servings)} cal</p>
+                      <p className="text-xs font-semibold text-foreground">{Math.round((entry.food.calories || 0) * entry.servings)} cal</p>
                     </div>
                   </div>
                 ))
               )}
             </div>
-          </div>
+          </Panel>
         </div>
       </div>
       
       <div className="flex justify-center pt-4">
-        <button 
+        <Button
+          variant="outline"
           onClick={onBack}
-          className="px-8 py-3 bg-card hover:bg-muted text-foreground font-black rounded-xl text-[11px] uppercase tracking-widest transition-all border border-border"
+          className="h-11 rounded-[var(--app-radius-md)] border-[var(--app-border)] px-6 text-xs font-semibold uppercase tracking-normal text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground"
         >
           Back to History
-        </button>
+        </Button>
       </div>
-    </div>
+    </PageShell>
   );
 }
 
 function StatBox({ icon, label, value }) {
   return (
-    <div className="bg-card rounded-2xl border border-border p-4 flex flex-col gap-2">
-      <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center border border-border/50">
+    <Panel className="flex flex-col gap-2 p-4">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)]">
         {icon}
       </div>
       <div>
-        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
-        <p className="text-lg font-black text-foreground leading-tight">{value}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">{label}</p>
+        <p className="text-lg font-semibold leading-tight text-foreground">{value}</p>
       </div>
-    </div>
+    </Panel>
   );
 }
