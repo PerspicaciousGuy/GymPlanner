@@ -1,18 +1,10 @@
 import { useState } from 'react';
 import { 
-  User, 
   Settings, 
-  Cloud, 
   RefreshCw, 
   LogOut, 
   ChevronRight, 
   Download, 
-  Trash2, 
-  Activity,
-  Shield,
-  Weight,
-  Bell,
-  BellOff,
   Sun,
   Moon,
   Utensils,
@@ -32,8 +24,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { PageShell } from "@/components/layout/PageShell";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Panel } from "@/components/layout/Panel";
 import { cn } from "@/lib/utils";
 import { loadSettings, updateSetting } from '../utils/settings';
 import { formatDateKey } from '../utils/dateUtils';
@@ -112,47 +106,54 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
 
   if (showConsole) {
     return (
-      <div className="animate-in fade-in slide-in-from-right-4 duration-500 pb-20">
-        <div className="max-w-7xl mx-auto px-4">
+      <PageShell className="animate-in fade-in slide-in-from-right-4 duration-500">
           <Button 
             variant="ghost" 
             onClick={() => setShowConsole(false)}
-            className="mb-8 text-slate-400 hover:text-indigo-600 font-black uppercase text-[10px] tracking-widest flex items-center gap-2 group"
+          className="w-fit text-[11px] font-semibold uppercase tracking-normal text-muted-foreground hover:text-foreground flex items-center gap-2 group"
           >
             <ChevronRight size={14} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
             Back to Profile
           </Button>
-          <div className="bg-white rounded-[3rem] border border-slate-100 shadow-2xl overflow-hidden min-h-[70vh]">
+          <Panel className="overflow-hidden min-h-[70vh]">
             <DataConsolePage hideSidebar />
-          </div>
-        </div>
-      </div>
+          </Panel>
+      </PageShell>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12 px-4">
+    <PageShell className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <PageHeader
+        title="Profile"
+        meta={(
+          <span className="text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
+            Account and preferences
+          </span>
+        )}
+      />
+
       {/* Header Profile Section - Centered */}
-      <div className="bg-white rounded-[2rem] border border-slate-100 p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center text-center relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50/30 rounded-full -mr-16 -mt-16 blur-3xl opacity-50" />
+      <Panel className="p-8 md:p-10 flex flex-col items-center text-center relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--app-accent-soft)] rounded-full -mr-16 -mt-16 blur-3xl opacity-70" />
         
-        <Avatar className="w-24 h-24 border-4 border-white shadow-xl ring-1 ring-slate-100 mb-4">
+        <Avatar className="w-24 h-24 border-4 border-[var(--app-surface)] shadow-[var(--app-shadow-md)] ring-1 ring-[var(--app-border)] mb-4">
           <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'guest'}`} />
-          <AvatarFallback className="bg-indigo-600 text-white font-black text-2xl">
+          <AvatarFallback className="bg-foreground text-background font-semibold text-2xl">
             {user?.email?.[0].toUpperCase() || 'G'}
           </AvatarFallback>
         </Avatar>
 
         <div className="space-y-1 mb-6">
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">
+          <h2 className="text-3xl font-semibold text-foreground tracking-normal">
             {user?.email?.split('@')[0] || 'guest'}
-          </h1>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+          </h2>
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal">
             {user ? 'Cloud Active' : 'Offline / Local'}
           </p>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center justify-center gap-2">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal flex items-center justify-center gap-2">
             Active Session: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-            <Zap size={10} className="text-indigo-500 fill-indigo-500" />
+            <Zap size={10} className="text-[var(--app-accent)] fill-[var(--app-accent)]" />
           </p>
         </div>
 
@@ -161,7 +162,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
             <Button 
               onClick={handleLogout} 
               variant="outline" 
-              className="w-full rounded-full border-indigo-200 text-indigo-600 font-black uppercase tracking-widest text-[11px] h-12 hover:bg-indigo-50 border-2"
+              className="w-full h-12 rounded-[var(--app-radius-md)] border-[var(--app-border)] text-foreground font-semibold uppercase tracking-normal text-[11px] hover:bg-[var(--app-surface-muted)]"
             >
               <LogOut size={16} className="mr-2" /> Sign Out
             </Button>
@@ -169,51 +170,51 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
             <Button 
               variant="outline" 
               onClick={() => onNavigateToLogin?.()}
-              className="w-full rounded-full border-indigo-200 text-indigo-600 font-black uppercase tracking-widest text-[11px] h-12 hover:bg-indigo-50 border-2"
+              className="w-full h-12 rounded-[var(--app-radius-md)] border-[var(--app-border)] text-foreground font-semibold uppercase tracking-normal text-[11px] hover:bg-[var(--app-surface-muted)]"
             >
               Sign In to Sync
             </Button>
           )}
         </div>
-      </div>
+      </Panel>
 
       {/* Settings Section */}
-      <div className="bg-white rounded-[2rem] border border-slate-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
+      <Panel className="p-6 md:p-8 space-y-6">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tighter">App Settings</h2>
-          <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.15em]">Personalize your experience</p>
+          <h2 className="text-xl font-semibold text-foreground tracking-normal">App Settings</h2>
+          <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-normal">Personalize your experience</p>
         </div>
 
         <div className="space-y-4">
           {/* Appearance Toggle */}
-          <div className="p-5 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
+          <div className="p-4 md:p-5 bg-[var(--app-surface-muted)] rounded-[var(--app-radius-lg)] border border-[var(--app-border)] transition-colors flex items-center justify-between">
             <div className="flex flex-col">
-              <p className="text-xs font-black text-slate-700 uppercase tracking-tight">Dark Mode Appearance</p>
-              <p className="text-[11px] text-slate-400 font-bold tracking-tight">
+              <p className="text-xs font-semibold text-foreground uppercase tracking-normal">Dark Mode Appearance</p>
+              <p className="text-[11px] text-muted-foreground font-medium tracking-normal">
                 Current: {settings.theme === 'dark' ? 'Racing Orange & Charcoal' : 'Legacy Indigo & White'}
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Sun size={14} className={cn(settings.theme === 'light' ? "text-amber-500" : "text-slate-300")} />
+              <Sun size={14} className={cn(settings.theme === 'light' ? "text-amber-500" : "text-muted-foreground/40")} />
               <Switch 
                 checked={settings.theme === 'dark'} 
                 onCheckedChange={handleToggleTheme}
-                className="data-[state=checked]:bg-indigo-600"
+                className="data-[state=checked]:bg-foreground"
               />
-              <Moon size={14} className={cn(settings.theme === 'dark' ? "text-indigo-600" : "text-slate-300")} />
+              <Moon size={14} className={cn(settings.theme === 'dark' ? "text-foreground" : "text-muted-foreground/40")} />
             </div>
           </div>
 
           {/* Weight Units Selector */}
-          <div className="p-5 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+          <div className="p-4 md:p-5 bg-[var(--app-surface-muted)] rounded-[var(--app-radius-lg)] border border-[var(--app-border)] transition-colors">
             <div className="flex items-center justify-between mb-2">
-               <p className="text-xs font-black text-slate-700 uppercase tracking-tight">Weight Units</p>
-               <div className="flex bg-slate-100 p-1 rounded-full">
+               <p className="text-xs font-semibold text-foreground uppercase tracking-normal">Weight Units</p>
+               <div className="flex bg-[var(--app-surface)] p-1 rounded-full border border-[var(--app-border)]">
                  <button 
                    onClick={() => handleToggleUnits('kg')}
                    className={cn(
-                     "px-3 py-1 rounded-full text-[10px] font-black transition-all",
-                     settings.units === 'kg' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                     "px-3 py-1 rounded-full text-[10px] font-semibold transition-all",
+                     settings.units === 'kg' ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:text-foreground"
                    )}
                  >
                    KG
@@ -221,163 +222,167 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
                  <button 
                    onClick={() => handleToggleUnits('lbs')}
                    className={cn(
-                     "px-3 py-1 rounded-full text-[10px] font-black transition-all",
-                     settings.units === 'lbs' ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400 hover:text-slate-600"
+                     "px-3 py-1 rounded-full text-[10px] font-semibold transition-all",
+                     settings.units === 'lbs' ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:text-foreground"
                    )}
                  >
                    LBS
                  </button>
                </div>
             </div>
-            <p className="text-[11px] text-slate-400 font-bold tracking-tight">Currently: {settings.units === 'kg' ? 'Kilograms' : 'Pounds'}</p>
+            <p className="text-[11px] text-muted-foreground font-medium tracking-normal">Currently: {settings.units === 'kg' ? 'Kilograms' : 'Pounds'}</p>
           </div>
 
           {/* Biometric Lock */}
-          <div className="p-5 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
+          <div className="p-4 md:p-5 bg-[var(--app-surface-muted)] rounded-[var(--app-radius-lg)] border border-[var(--app-border)] transition-colors flex items-center justify-between">
             <div>
-              <p className="text-xs font-black text-slate-700 uppercase tracking-tight">Biometric Lock</p>
-              <p className="text-[11px] text-slate-300 font-bold tracking-tight">Coming Soon</p>
+              <p className="text-xs font-semibold text-foreground uppercase tracking-normal">Biometric Lock</p>
+              <p className="text-[11px] text-muted-foreground/60 font-medium tracking-normal">Coming Soon</p>
             </div>
             <Switch disabled />
           </div>
 
           {/* Workout Reminders */}
-          <div className="p-5 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
+          <div className="p-4 md:p-5 bg-[var(--app-surface-muted)] rounded-[var(--app-radius-lg)] border border-[var(--app-border)] transition-colors flex items-center justify-between">
             <div>
-              <p className="text-xs font-black text-slate-700 uppercase tracking-tight">Workout Reminders</p>
-              <p className="text-[11px] text-slate-400 font-bold tracking-tight">Get tomorrow's session summary</p>
+              <p className="text-xs font-semibold text-foreground uppercase tracking-normal">Workout Reminders</p>
+              <p className="text-[11px] text-muted-foreground font-medium tracking-normal">Get tomorrow's session summary</p>
             </div>
             <Switch 
               checked={notificationsEnabled && notifPermission === 'granted'} 
               onCheckedChange={handleToggleNotifications}
               disabled={notifPermission === 'denied' || !isNotificationSupported()}
-              className="data-[state=checked]:bg-indigo-600"
+              className="data-[state=checked]:bg-foreground"
             />
           </div>
         </div>
-      </div>
+      </Panel>
 
       {/* Nutrition Goals Settings */}
-      <div className="bg-white rounded-[2rem] border border-slate-100 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
+      <Panel className="p-6 md:p-8 space-y-6">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tighter flex items-center gap-2">
-            Target Diet <Utensils size={20} className="text-indigo-600" />
+          <h2 className="text-xl font-semibold text-foreground tracking-normal flex items-center gap-2">
+            Target Diet <Utensils size={20} className="text-[var(--app-accent)]" />
           </h2>
-          <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.15em]">Manage your nutritional goals</p>
+          <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-normal">Manage your nutritional goals</p>
         </div>
 
         <div className="space-y-6">
-          <div className="p-5 bg-indigo-50/30 rounded-3xl border border-indigo-100/50 flex items-center justify-between">
+          <div className="p-4 md:p-5 bg-[var(--app-accent-soft)] rounded-[var(--app-radius-lg)] border border-[var(--app-border)] flex items-center justify-between">
             <div className="flex flex-col">
-              <p className="text-xs font-black text-indigo-700 uppercase tracking-tight">Track Daily Targets</p>
-              <p className="text-[11px] text-indigo-400 font-bold tracking-tight">Show goals on your Health Hub</p>
+              <p className="text-xs font-semibold text-foreground uppercase tracking-normal">Track Daily Targets</p>
+              <p className="text-[11px] text-muted-foreground font-medium tracking-normal">Show goals on your Health Hub</p>
             </div>
             <Switch 
               checked={settings.nutritionGoals?.enabled} 
               onCheckedChange={(checked) => handleUpdateNutrition('enabled', checked)}
-              className="data-[state=checked]:bg-indigo-600"
+              className="data-[state=checked]:bg-foreground"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
+              <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal px-1 flex items-center gap-1.5">
                 Target Calories <Flame size={10} className="text-amber-500 fill-amber-500" />
               </label>
               <Input 
                 type="number" 
                 value={settings.nutritionGoals?.calories || ''}
                 onChange={(e) => handleUpdateNutrition('calories', parseInt(e.target.value) || 0)}
-                className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
+                className="rounded-[var(--app-radius-md)] border-[var(--app-border)] h-12 font-semibold text-foreground bg-[var(--app-surface-muted)]"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center gap-1.5">
+              <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal px-1 flex items-center gap-1.5">
                 Protein (Grams) <Zap size={10} className="text-rose-500 fill-rose-500" />
               </label>
               <Input 
                 type="number" 
                 value={settings.nutritionGoals?.protein || ''}
                 onChange={(e) => handleUpdateNutrition('protein', parseInt(e.target.value) || 0)}
-                className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
+                className="rounded-[var(--app-radius-md)] border-[var(--app-border)] h-12 font-semibold text-foreground bg-[var(--app-surface-muted)]"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Carbohydrates (Grams)</label>
+              <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal px-1">Carbohydrates (Grams)</label>
               <Input 
                 type="number" 
                 value={settings.nutritionGoals?.carbs || ''}
                 onChange={(e) => handleUpdateNutrition('carbs', parseInt(e.target.value) || 0)}
-                className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
+                className="rounded-[var(--app-radius-md)] border-[var(--app-border)] h-12 font-semibold text-foreground bg-[var(--app-surface-muted)]"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Fats (Grams)</label>
+              <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal px-1">Fats (Grams)</label>
               <Input 
                 type="number" 
                 value={settings.nutritionGoals?.fats || ''}
                 onChange={(e) => handleUpdateNutrition('fats', parseInt(e.target.value) || 0)}
-                className="rounded-2xl border-slate-100 h-12 font-black text-slate-800 focus:ring-indigo-600"
+                className="rounded-[var(--app-radius-md)] border-[var(--app-border)] h-12 font-semibold text-foreground bg-[var(--app-surface-muted)]"
               />
             </div>
           </div>
         </div>
-      </div>
+      </Panel>
 
         <div className="pt-8 flex flex-col items-center gap-6">
           {notificationsEnabled && notifPermission === 'granted' && (
             <button 
               onClick={testNotification}
-              className="text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-600 transition-colors"
+              className="text-xs font-semibold uppercase tracking-normal text-muted-foreground hover:text-foreground transition-colors"
             >
               Send Test Reminder
             </button>
           )}
 
-          <div className="w-full flex flex-col gap-3 px-4">
+          <div className="w-full flex flex-col gap-3">
              <Button 
                 variant="ghost" 
-                className="w-full h-12 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 group transition-all"
+                className="w-full h-12 rounded-[var(--app-radius-md)] text-muted-foreground hover:bg-[var(--app-surface-muted)] hover:text-foreground group transition-all"
                 onClick={() => onDataRefreshed?.()}
               >
                 <div className="flex items-center gap-3">
                   <RefreshCw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Manual Data Sync</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-normal">Manual Data Sync</span>
                 </div>
               </Button>
 
               <Button 
                 variant="ghost" 
-                className="w-full h-12 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 group transition-all"
+                className="w-full h-12 rounded-[var(--app-radius-md)] text-muted-foreground hover:bg-[var(--app-surface-muted)] hover:text-foreground group transition-all"
                 onClick={exportData}
               >
                 <div className="flex items-center gap-3">
                   <Download size={14} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Export JSON Backup</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-normal">Export JSON Backup</span>
                 </div>
               </Button>
           </div>
         </div>
 
       {/* Data Control Center Card */}
-      <div className="bg-gradient-to-br from-card to-card/95 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden group cursor-pointer border border-border/50" onClick={() => setShowConsole(true)}>
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all opacity-40" />
+      <Panel className="bg-gradient-to-br from-[var(--app-surface)] to-[var(--app-surface-muted)] p-8 md:p-10 relative overflow-hidden group cursor-pointer" onClick={() => setShowConsole(true)}>
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-[var(--app-accent-soft)] rounded-full blur-3xl transition-all opacity-60" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <Badge className="bg-primary text-primary-foreground border-none font-black text-[9px] px-3 py-1 rounded-full uppercase tracking-widest">Internal</Badge>
-            <h3 className="text-2xl font-black text-foreground tracking-tight">Data Control Center</h3>
+            <Badge className="bg-foreground text-background border-none font-semibold text-[9px] px-3 py-1 rounded-full uppercase tracking-normal">Internal</Badge>
+            <h3 className="text-2xl font-semibold text-foreground tracking-normal">Data Control Center</h3>
             <p className="text-muted-foreground text-xs font-semibold max-w-[280px]">Manage training data, exercise libraries, and export all metrics.</p>
           </div>
-          <Button variant="outline" className="rounded-2xl border-border bg-card/50 hover:bg-muted text-foreground font-black text-[10px] uppercase tracking-[0.2em] px-6 h-12 border-2 group-hover:border-primary/50 transition-all">
-            Enter Console <Settings className="ml-2 w-4 h-4 text-primary" />
+          <Button
+            variant="outline"
+            onClick={() => setShowConsole(true)}
+            className="rounded-[var(--app-radius-md)] border-[var(--app-border)] bg-[var(--app-surface)] hover:bg-[var(--app-surface-muted)] text-foreground font-semibold text-[10px] uppercase tracking-normal px-6 h-12 transition-all"
+          >
+            Enter Console <Settings className="ml-2 w-4 h-4 text-[var(--app-accent)]" />
           </Button>
         </div>
-      </div>
+      </Panel>
 
       <div className="text-center pt-4">
-        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">GymPlanner v1.2.0 • Premium Edition</p>
-        <p className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-widest">Engineered for your progress</p>
+        <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-normal mb-1">GymPlanner v1.2.0 • Premium Edition</p>
+        <p className="text-[8px] font-medium text-muted-foreground/60 uppercase tracking-normal">Engineered for your progress</p>
       </div>
-    </div>
+    </PageShell>
   );
 }
