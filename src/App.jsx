@@ -32,8 +32,30 @@ const navItems = [
 function PageFallback() {
   return (
     <div className="flex min-h-[240px] items-center justify-center">
-      <div className="h-8 w-8 rounded-full border-2 border-slate-200 border-t-indigo-600 animate-spin" />
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--app-border)] border-t-[var(--app-accent)]" />
     </div>
+  );
+}
+
+function NavItemButton({ item, active, onClick, mobile = false }) {
+  return (
+    <Button
+      key={item.id}
+      variant="ghost"
+      onClick={onClick}
+      className={cn(
+        "group rounded-[var(--app-radius-md)] transition-colors",
+        mobile
+          ? "h-14 flex-1 flex-col gap-1 px-1"
+          : "h-14 w-16 flex-col gap-1 px-0",
+        active
+          ? "bg-[var(--app-accent-soft)] text-foreground"
+          : "text-muted-foreground hover:bg-[var(--app-surface-muted)] hover:text-foreground"
+      )}
+    >
+      <item.icon size={mobile ? 18 : 20} strokeWidth={active ? 2.5 : 2} />
+      <span className="text-[9px] font-bold uppercase tracking-normal">{item.name}</span>
+    </Button>
   );
 }
 
@@ -103,52 +125,44 @@ export default function App() {
 
   return (
 
-    <div className="flex flex-col md:flex-row min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-[var(--app-bg)] md:flex-row">
       {/* Sidebar for Desktop */}
-      <aside className="hidden md:flex w-20 lg:w-24 bg-white border-r border-slate-200 flex-col items-center py-8 gap-10 sticky top-0 h-screen z-50">
-        <div className="flex flex-col items-center gap-1">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+      <aside className="sticky top-0 z-50 hidden h-screen w-24 flex-col items-center gap-8 border-r border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-6 md:flex">
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex h-11 w-11 items-center justify-center rounded-[var(--app-radius-md)] bg-foreground text-background shadow-[var(--app-shadow-sm)]">
             <span className="text-xl font-bold">G</span>
           </div>
-          <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-tighter">Planner</span>
+          <span className="text-[10px] font-bold uppercase tracking-normal text-muted-foreground">Planner</span>
         </div>
 
-        <nav className="flex flex-col gap-6 flex-1">
+        <nav className="flex flex-1 flex-col gap-2">
           {navItems.map((item) => (
-            <Button
+            <NavItemButton
               key={item.id}
-              variant="ghost"
+              item={item}
+              active={activePage === item.id}
               onClick={() => {
                 setActivePage(item.id);
                 if (item.id === 'workout') {
                   setSelectedHistoryDate(null);
                 }
               }}
-              className={cn(
-                "w-14 h-14 flex-col gap-1 p-0 rounded-xl transition-all",
-                activePage === item.id
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100 hover:bg-indigo-700 hover:text-white"
-                  : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
-              )}
-            >
-              <item.icon size={20} strokeWidth={2.5} />
-              <span className="text-[9px] font-extrabold uppercase tracking-tighter">{item.name}</span>
-            </Button>
+            />
           ))}
         </nav>
 
         <div className="flex flex-col items-center gap-3">
-          <div className={`w-1.5 h-1.5 rounded-full transition-all ${syncScope.startsWith('local') ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]' : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]'}`} />
+          <div className={`h-2 w-2 rounded-full transition-all ${syncScope.startsWith('local') ? 'bg-amber-400' : 'bg-emerald-400'}`} />
           <Button
             variant="outline"
             size="icon"
             onClick={() => setSyncNonce(n => n + 1)}
-            className="rounded-xl p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all border border-slate-100"
+            className="rounded-[var(--app-radius-md)] border-[var(--app-border)] text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground"
           >
             <RefreshCw size={18} />
           </Button>
 
-          <Button variant="outline" size="icon" className="shadow-xs border-indigo-100 text-indigo-600 hover:bg-indigo-50 rounded-xl">
+          <Button variant="outline" size="icon" className="rounded-[var(--app-radius-md)] border-[var(--app-border)] text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground">
             <Cloud size={18} />
           </Button>
         </div>
@@ -161,7 +175,7 @@ export default function App() {
       )}>
 
         <main className="flex-1 overflow-auto">
-          <div className="p-3 sm:p-4 lg:p-6 mx-auto w-full max-w-[1600px]">
+          <div className="mx-auto w-full max-w-[1600px] p-4 sm:p-5 lg:p-7">
             {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} targetDate={selectedHistoryDate} />}
             {activePage !== 'workout' && (
               <Suspense fallback={<PageFallback />}>
@@ -197,34 +211,19 @@ export default function App() {
 
       {/* Floating Bottom Navigation for Mobile */}
       {showNavBar && (
-        <nav className="md:hidden fixed bottom-6 left-6 right-6 h-[72px] bg-white/20 dark:bg-black/40 border-t-[0.5px] border-white/50 dark:border-white/10 flex items-center justify-around z-[9999] rounded-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
+        <nav className="fixed bottom-4 left-4 right-4 z-[9999] flex h-[72px] items-center gap-1 rounded-[var(--app-radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] p-2 shadow-[var(--app-shadow-md)] transition-all duration-300 md:hidden"
           style={{
-            backdropFilter: 'blur(30px) saturate(210%) contrast(110%)',
-            WebkitBackdropFilter: 'blur(30px) saturate(210%) contrast(110%)'
+            backdropFilter: 'blur(18px) saturate(160%)',
+            WebkitBackdropFilter: 'blur(18px) saturate(160%)'
           }}>
         {navItems.map((item) => (
-          <Button
+          <NavItemButton
             key={item.id}
-            variant="ghost"
+            item={item}
+            active={activePage === item.id}
+            mobile
             onClick={() => setActivePage(item.id)}
-            className={cn(
-              "flex flex-col items-center justify-center gap-1 h-14 w-14 px-0 transition-all rounded-full",
-              activePage === item.id ? "text-primary" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <div className={cn(
-              "p-2 rounded-full transition-all duration-300",
-              activePage === item.id ? "bg-primary text-primary-foreground shadow-[0_0_15px_rgba(212,255,0,0.3)] scale-110" : "bg-transparent"
-            )}>
-              <item.icon size={18} strokeWidth={activePage === item.id ? 2.5 : 2} />
-            </div>
-            <span className={cn(
-              "text-[8px] font-black uppercase tracking-tight",
-              activePage === item.id ? "text-primary opacity-100 scale-105" : "text-muted-foreground opacity-60"
-            )}>
-              {item.name}
-            </span>
-          </Button>
+          />
         ))}
         </nav>
       )}
