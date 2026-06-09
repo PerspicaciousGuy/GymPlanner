@@ -28,6 +28,16 @@ import { PageShell } from '../components/layout/PageShell';
 import { PageHeader } from '../components/layout/PageHeader';
 import { Panel } from '../components/layout/Panel';
 
+const statusBadgeClass = "flex items-center gap-1.5 rounded-[var(--app-radius-sm)] border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-normal";
+const contextBadgeClasses = {
+  missed: "border-red-500/20 bg-red-500/10 text-red-500",
+  upcoming: "border-[var(--app-border)] bg-[var(--app-surface-muted)] text-muted-foreground",
+  today: "border-[var(--app-border)] bg-[var(--app-accent-soft)] text-foreground",
+  shifted: "border-amber-500/20 bg-amber-500/10 text-amber-600",
+  rest: "border-[var(--app-border)] bg-[var(--app-surface-muted)] text-muted-foreground",
+  cycle: "border-[var(--app-border)] bg-[var(--app-accent-soft)] text-foreground",
+};
+
 function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged }) {
   const [open, setOpen] = useState(defaultOpen && !section.isFullyComplete);
 
@@ -48,27 +58,27 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
 
   const badgeEl = section.showContextBadge ? (
     section.isMissed ? (
-      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-100 animate-pulse">
+      <div className={cn(statusBadgeClass, contextBadgeClasses.missed, "animate-pulse")}>
         <AlertCircle size={10} strokeWidth={3} />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Missed</span>
+        <span>Missed</span>
       </div>
     ) : section.isTomorrow ? (
-      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+      <div className={cn(statusBadgeClass, contextBadgeClasses.upcoming)}>
         <Clock size={10} strokeWidth={3} />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Upcoming</span>
+        <span>Upcoming</span>
       </div>
     ) : (
-      <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm shadow-indigo-100">
+      <div className={cn(statusBadgeClass, contextBadgeClasses.today)}>
         <CheckCircle2 size={10} strokeWidth={3} />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Today</span>
+        <span>Today</span>
       </div>
     )
   ) : null;
 
   const shiftedBadge = (section.isShifted || section.isShiftedFrom) ? (
-    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">
+    <div className={cn(statusBadgeClass, contextBadgeClasses.shifted)}>
       <RefreshCw size={10} strokeWidth={3} className="animate-spin-slow" />
-      <span className="text-[10px] font-bold uppercase tracking-wider">
+      <span>
         {section.isShiftedFrom 
           ? (section.shiftedToLabel ? `To ${section.shiftedToLabel}` : 'Shifted Out') 
           : (section.shiftedFromLabel ? `From ${section.shiftedFromLabel}` : 'Shifted In')
@@ -94,7 +104,7 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
       >
         <div className="flex items-center gap-2 md:gap-4">
           <div className="flex flex-col items-start min-w-[80px] md:min-w-[100px]">
-            <span className={`text-[10px] md:text-xs font-bold uppercase tracking-normal ${open ? 'text-foreground' : 'text-muted-foreground'}`}>
+            <span className={`text-[10px] md:text-xs font-semibold uppercase tracking-normal ${open ? 'text-foreground' : 'text-muted-foreground'}`}>
               {section.dayName}
             </span>
             <span className="text-[10px] font-medium text-muted-foreground">{formatDateDisplay(section.date)}</span>
@@ -107,13 +117,13 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
             {shiftedBadge}
             {section.cycleInfo && (
               <div className={cn(
-                "flex items-center gap-1.5 px-2 py-0.5 rounded-full border",
+                statusBadgeClass,
                 section.cycleInfo.slot?.type === 'rest'
-                  ? "bg-slate-50 text-slate-400 border-slate-200"
-                  : "bg-violet-50 text-violet-600 border-violet-100"
+                  ? contextBadgeClasses.rest
+                  : contextBadgeClasses.cycle
               )}>
                 <Repeat size={10} strokeWidth={3} />
-                <span className="text-[10px] font-bold uppercase tracking-wider">
+                <span>
                   Day {section.cycleInfo.position + 1}/{section.cycleInfo.cycleLength}
                 </span>
               </div>
@@ -121,8 +131,8 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
           </div>
 
           {section.muscleGroup && (
-            <span className="text-slate-400 font-bold text-[10px] md:text-[11px] hidden sm:block truncate max-w-[150px]">
-              — {section.muscleGroup}
+            <span className="hidden max-w-[150px] truncate text-[10px] font-semibold text-muted-foreground md:text-[11px] sm:block">
+              - {section.muscleGroup}
             </span>
           )}
         </div>
@@ -327,15 +337,15 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
         meta={(
           <>
             {syncState === 'loading' && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-[var(--app-accent-soft)] text-foreground animate-pulse border border-[var(--app-border)]">
+              <div className={cn(statusBadgeClass, contextBadgeClasses.today, "animate-pulse py-1")}>
                 <RefreshCw size={10} className="animate-spin" />
-                <span className="text-[10px] font-bold uppercase tracking-normal">Syncing</span>
+                <span>Syncing</span>
               </div>
             )}
             {syncState === 'offline' && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+              <div className={cn(statusBadgeClass, contextBadgeClasses.shifted, "py-1")}>
                 <AlertCircle size={10} />
-                <span className="text-[10px] font-bold uppercase tracking-normal">Offline</span>
+                <span>Offline</span>
               </div>
             )}
           </>
@@ -377,7 +387,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
               className="mt-2"
             >
               <Panel className="flex flex-col items-center justify-center gap-5 border-dashed py-16 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-600">
+                <div className="flex h-16 w-16 items-center justify-center rounded-[var(--app-radius-lg)] border border-[var(--app-border)] bg-[var(--app-accent-soft)] text-foreground">
                   <CheckCircle2 size={34} strokeWidth={1.75} />
                 </div>
                 <div className="space-y-2">
@@ -388,7 +398,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
                 </div>
                 <button 
                   onClick={() => setPlannerRefreshNonce(n => n + 1)}
-                  className="inline-flex h-10 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] px-4 text-xs font-bold uppercase tracking-normal text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
+                  className="inline-flex h-10 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] px-4 text-xs font-semibold uppercase tracking-normal text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
                 >
                   Refresh <RefreshCw size={14} className="ml-2" />
                 </button>
