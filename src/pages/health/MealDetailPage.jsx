@@ -26,7 +26,7 @@ import {
 } from './mealPageHelpers';
 
 /**
- * MealDetailPage — View / Edit a saved meal.
+ * MealDetailPage - View / Edit a saved meal.
  * Shows total nutrition, item list, and supports editing.
  */
 export default function MealDetailPage({
@@ -146,7 +146,7 @@ export default function MealDetailPage({
         {/* Calories Card */}
         <Card className="mb-4 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--app-shadow-sm)]">
           <CardContent className="py-0.5 px-5 flex items-center gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--app-surface-muted)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] bg-[var(--app-surface-muted)]">
               <Flame size={20} className="text-muted-foreground" />
             </div>
             <div>
@@ -210,9 +210,9 @@ export default function MealDetailPage({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => updateServings(idx, -0.5)}
-                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] text-xs font-semibold text-muted-foreground hover:text-foreground"
+                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[var(--app-radius-sm)] border border-[var(--app-border)] text-xs font-semibold text-muted-foreground hover:text-foreground"
                       >
-                        −
+                        -
                       </button>
                       {editingIndex === idx ? (
                         <input
@@ -244,7 +244,7 @@ export default function MealDetailPage({
                       )}
                       <button
                         onClick={() => updateServings(idx, 0.5)}
-                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] text-xs font-semibold text-muted-foreground hover:text-foreground"
+                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[var(--app-radius-sm)] border border-[var(--app-border)] text-xs font-semibold text-muted-foreground hover:text-foreground"
                       >
                         +
                       </button>
@@ -363,11 +363,11 @@ export default function MealDetailPage({
                       <div className="flex items-center gap-1.5 mt-1">
                         <Flame size={12} className="text-muted-foreground/50" />
                         <span className="text-xs text-muted-foreground">
-                          {food.calories} cal · {food.servingSize}
+                          {food.calories} cal - {food.servingSize}
                         </span>
                       </div>
                     </div>
-                    <div className="ml-3 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] text-muted-foreground transition-colors group-hover:border-[var(--app-border-strong)] group-hover:text-foreground">
+                    <div className="ml-3 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] text-muted-foreground transition-colors group-hover:border-[var(--app-border-strong)] group-hover:text-foreground">
                       <Plus size={18} strokeWidth={2.5} />
                     </div>
                   </motion.button>

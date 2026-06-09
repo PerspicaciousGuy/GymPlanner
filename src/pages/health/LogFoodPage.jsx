@@ -87,7 +87,7 @@ export default function LogFoodPage({ onBack, onSelectFood, onSelectMeal, onCrea
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={cn(
-              "whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold transition-colors",
+              "whitespace-nowrap rounded-[var(--app-radius-md)] px-4 py-2 text-xs font-semibold transition-colors",
               activeTab === tab.id
                 ? "bg-foreground text-background"
                 : "text-muted-foreground hover:bg-[var(--app-surface-muted)]"
@@ -173,16 +173,16 @@ export default function LogFoodPage({ onBack, onSelectFood, onSelectMeal, onCrea
                         <Flame size={12} className="text-muted-foreground/50" />
                         <span className="text-xs text-muted-foreground">
                           {food.calories} cal
-                          <span className="mx-1">·</span>
+                          <span className="mx-1">-</span>
                           P: {food.protein}g
-                          <span className="mx-1">·</span>
+                          <span className="mx-1">-</span>
                           C: {food.carbs}g
-                          <span className="mx-1">·</span>
+                          <span className="mx-1">-</span>
                           F: {food.fats}g
                         </span>
                       </div>
                     </div>
-                    <div className="ml-3 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] text-muted-foreground transition-colors group-hover:border-[var(--app-border-strong)] group-hover:text-foreground">
+                    <div className="ml-3 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] text-muted-foreground transition-colors group-hover:border-[var(--app-border-strong)] group-hover:text-foreground">
                       <Plus size={18} strokeWidth={2.5} />
                     </div>
                   </motion.button>
@@ -219,7 +219,7 @@ export default function LogFoodPage({ onBack, onSelectFood, onSelectMeal, onCrea
                         </span>
                       </div>
                     </div>
-                    <div className="ml-3 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] text-muted-foreground transition-colors group-hover:border-[var(--app-border-strong)] group-hover:text-foreground">
+                    <div className="ml-3 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] text-muted-foreground transition-colors group-hover:border-[var(--app-border-strong)] group-hover:text-foreground">
                       <Plus size={18} strokeWidth={2.5} />
                     </div>
                   </motion.button>
