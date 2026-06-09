@@ -68,14 +68,14 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
             <Button
               onClick={onOpenTrainingPlan}
               variant="outline"
-              className="h-10 rounded-[var(--app-radius-md)] border-[var(--app-border)] px-3 text-xs font-bold uppercase tracking-normal text-foreground shadow-none hover:bg-[var(--app-surface-muted)]"
+              className="h-10 rounded-[var(--app-radius-md)] border-[var(--app-border)] px-3 text-xs font-semibold uppercase tracking-normal text-foreground shadow-none hover:bg-[var(--app-surface-muted)]"
             >
               <Repeat size={12} strokeWidth={3} />
               <span className="truncate">Training Plan</span>
             </Button>
             <Button
               onClick={handleCreateNew}
-              className="h-10 rounded-[var(--app-radius-md)] px-3 text-xs font-bold uppercase tracking-normal shadow-none"
+              className="h-10 rounded-[var(--app-radius-md)] px-3 text-xs font-semibold uppercase tracking-normal shadow-none"
             >
               <Plus size={12} strokeWidth={3} />
               <span className="truncate">New Routine</span>
@@ -93,7 +93,7 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
               />
             </div>
             <div className="hidden xs:flex h-6 w-px bg-[var(--app-border)] mx-1" />
-            <div className="hidden xs:block rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-normal text-muted-foreground whitespace-nowrap">
+            <div className="hidden xs:block rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground whitespace-nowrap">
               <span className="text-primary">{templateRows.length}</span>
             </div>
           </div>
@@ -103,7 +103,7 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
 
       {templatesSaved && (
         <div className="fixed top-8 right-8 z-[100] animate-in slide-in-from-right-10 fade-in duration-300">
-          <Badge className="bg-emerald-600 text-white border-none shadow-[var(--app-shadow-md)] font-bold px-4 py-2 rounded-[var(--app-radius-md)] text-xs flex items-center gap-2">
+          <Badge className="flex items-center gap-2 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-foreground px-4 py-2 text-xs font-semibold text-background shadow-[var(--app-shadow-md)]">
              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
              Synchronized
           </Badge>
@@ -167,7 +167,7 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
                   <h3 className="text-base md:text-lg font-semibold text-foreground tracking-normal leading-tight break-words">{t.name}</h3>
                   <div className="flex flex-wrap items-center gap-1 mt-2">
                     {muscles.length > 0 ? muscles.map(m => (
-                      <span key={m} className="px-1.5 py-0.5 bg-[var(--app-surface-muted)] text-[9px] font-bold text-muted-foreground rounded-[var(--app-radius-sm)] border border-[var(--app-border)] uppercase tracking-normal">{m}</span>
+                      <span key={m} className="rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">{m}</span>
                     )) : (
                       <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-normal flex items-center gap-2">
                          Saved {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'recently'}
@@ -179,11 +179,11 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
 
               <div className="mt-auto space-y-5 relative z-10">
                 <div className="flex items-center justify-between px-2">
-                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em] flex items-center gap-2.5">
+                  <span className="flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">
                     <div className="w-2 h-2 rounded-full bg-foreground" />
                     Overview
                   </span>
-                  <Badge variant="secondary" className="bg-[var(--app-surface-muted)] text-foreground border border-[var(--app-border)] font-bold text-[10px] px-3 py-1 rounded-[var(--app-radius-sm)] uppercase tracking-normal shadow-none">
+                  <Badge variant="secondary" className="rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 py-1 text-[10px] font-semibold uppercase tracking-normal text-foreground shadow-none">
                     {(t.groups?.length || 0) + (t.standaloneExercises?.length || 0)} SECTIONS
                   </Badge>
                 </div>
@@ -199,10 +199,10 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
                         {combined.slice(0, 3).map((item, iIdx) => (
                           <div key={iIdx} className="flex items-center gap-4 group/ex text-ellipsis overflow-hidden">
                             <div className="w-2 h-2 rounded-full bg-[var(--app-border-strong)] shrink-0" />
-                            <span className="text-xs font-black text-muted-foreground truncate tracking-tight group-hover/ex:text-foreground">
+                            <span className="truncate text-xs font-semibold tracking-normal text-muted-foreground group-hover/ex:text-foreground">
                               {item.name}
                               {item.more > 0 && (
-                                <span className="text-primary ml-2 font-black text-[9px] bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
+                                <span className="ml-2 rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-accent-soft)] px-2 py-0.5 text-[9px] font-semibold text-foreground">
                                   +{item.more}
                                 </span>
                               )}
@@ -211,7 +211,7 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
                         ))}
                         {combined.length > 3 && (
                           <div className="pt-3 mt-2 border-t border-border/50 flex items-center justify-center">
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-normal">
+                            <p className="text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">
                               + {combined.length - 3} OTHERS
                             </p>
                           </div>
