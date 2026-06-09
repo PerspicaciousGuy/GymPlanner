@@ -151,28 +151,28 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                             <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-slate-100)" strokeOpacity={0.5} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--app-border)" strokeOpacity={0.7} />
                         <XAxis
                           dataKey="displayDate"
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--color-slate-400)' }}
+                          tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--app-text-soft)' }}
                           dy={10}
                         />
                         <YAxis
                           axisLine={false}
                           tickLine={false}
                           tickFormatter={(val) => `${(val / 1000).toFixed(1)}t`}
-                          tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--color-slate-400)' }}
+                          tick={{ fontSize: 10, fontWeight: 600, fill: 'var(--app-text-soft)' }}
                         />
                         <Tooltip
                           content={<CustomVolumeTooltip />}
-                          cursor={{ stroke: 'var(--color-primary)', strokeWidth: 2, strokeDasharray: '5 5', opacity: 0.3 }}
+                          cursor={{ stroke: 'var(--app-accent)', strokeWidth: 2, strokeDasharray: '5 5', opacity: 0.3 }}
                         />
                         <Area
                           type="monotone"
                           dataKey="volume"
-                          stroke="var(--primary)"
+                          stroke="var(--app-accent)"
                           strokeWidth={3}
                           fillOpacity={1}
                           fill="url(#colorVolume)"
@@ -239,23 +239,23 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                     <div className="h-[250px] w-full min-w-0" style={{ minHeight: '250px' }}>
                       <ResponsiveContainer width="100%" height="100%">
                         <RadarChart cx="50%" cy="50%" outerRadius="80%" data={combinedData} style={{ outline: 'none' }}>
-                          <PolarGrid stroke="#eef1f5ff" strokeOpacity={1} strokeWidth={1} />
-                          <PolarAngleAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 700, fill: 'var(--color-slate-500)' }} />
+                          <PolarGrid stroke="var(--app-border)" strokeOpacity={1} strokeWidth={1} />
+                          <PolarAngleAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 700, fill: 'var(--app-text-soft)' }} />
 
                           <Radar
                             name="Previous"
                             dataKey="previous"
-                            stroke="#94a3b8"
+                            stroke="var(--app-border-strong)"
                             strokeWidth={1}
                             strokeDasharray="4 4"
-                            fill="#f1f5f9"
+                            fill="var(--app-surface-muted)"
                             fillOpacity={0.2}
                           />
 
                           <Radar
                             name="Current"
                             dataKey="current"
-                            stroke="#6366f1"
+                            stroke="var(--app-accent)"
                             strokeWidth={2}
                             fill="url(#colorRadar)"
                             fillOpacity={0.5}
@@ -263,8 +263,8 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
 
                           <defs>
                             <radialGradient id="colorRadar" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                              <stop offset="0%" stopColor="#6366f1" stopOpacity={0.8} />
-                              <stop offset="100%" stopColor="#818cf8" stopOpacity={0.3} />
+                              <stop offset="0%" stopColor="var(--app-accent)" stopOpacity={0.8} />
+                              <stop offset="100%" stopColor="var(--app-border-strong)" stopOpacity={0.3} />
                             </radialGradient>
                           </defs>
                         </RadarChart>
@@ -276,12 +276,12 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center gap-4 mb-2">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-2.5 h-1 bg-indigo-500 rounded-full" />
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Current</span>
+                      <div className="h-1 w-2.5 rounded-[var(--app-radius-sm)] bg-foreground" />
+                      <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Current</span>
                     </div>
                     <div className="flex items-center gap-1.5 opacity-50">
-                      <div className="w-2.5 h-1 border border-slate-400 border-dashed rounded-full" />
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">Previous</span>
+                      <div className="h-1 w-2.5 rounded-[var(--app-radius-sm)] border border-[var(--app-border-strong)] border-dashed" />
+                      <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Previous</span>
                     </div>
                   </div>
 
@@ -294,7 +294,7 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                     return (
                       <div key={item.name} className="group relative flex items-center justify-between overflow-hidden rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-3 transition-all hover:border-[var(--app-border-strong)]">
                         <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                          <div className="h-2 w-2 rounded-[var(--app-radius-sm)] bg-foreground" />
                           <span className="text-[10px] font-semibold uppercase tracking-normal text-foreground">{item.name}</span>
                         </div>
                         <div className="flex items-center gap-3">
