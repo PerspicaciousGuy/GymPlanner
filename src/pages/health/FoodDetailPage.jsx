@@ -35,14 +35,14 @@ const MICRO_NUTRIENTS = [
   { key: 'fiber', label: 'Fiber', unit: 'g' },
   { key: 'sugar', label: 'Sugar', unit: 'g' },
   { key: 'potassium', label: 'Potassium', unit: 'mg' },
-  { key: 'vitaminA', label: 'Vitamin A', unit: 'μg' },
+  { key: 'vitaminA', label: 'Vitamin A', unit: 'mcg' },
   { key: 'vitaminC', label: 'Vitamin C', unit: 'mg' },
   { key: 'calcium', label: 'Calcium', unit: 'mg' },
   { key: 'iron', label: 'Iron', unit: 'mg' },
 ];
 
 /**
- * FoodDetailPage — Nutrition detail / editing screen.
+ * FoodDetailPage - Nutrition detail / editing screen.
  * If `food` is null, acts as a "Manual Add" blank form.
  */
 export default function FoodDetailPage({ food, onBack, onSave }) {
@@ -234,7 +234,7 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
               key={unit}
               onClick={() => setSelectedUnit(unit)}
               className={cn(
-                "rounded-full border px-4 py-2 text-xs font-semibold capitalize transition-colors",
+                "rounded-[var(--app-radius-md)] border px-4 py-2 text-xs font-semibold capitalize transition-colors",
                 selectedUnit === unit
                   ? "bg-foreground text-background border-foreground"
                   : "border-[var(--app-border)] text-muted-foreground hover:border-[var(--app-border-strong)]"
@@ -266,7 +266,7 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
                   setServings(prev => Math.max(0.5, prev - 0.5));
                 }
               }}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--app-border)] text-foreground transition-colors hover:bg-[var(--app-surface-muted)]"
+              className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] text-foreground transition-colors hover:bg-[var(--app-surface-muted)]"
             >
               <Minus size={18} strokeWidth={2.5} />
             </button>
@@ -336,7 +336,7 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
                   setServings(prev => prev + 0.5);
                 }
               }}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--app-border)] text-foreground transition-colors hover:bg-[var(--app-surface-muted)]"
+              className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] text-foreground transition-colors hover:bg-[var(--app-surface-muted)]"
             >
               <Plus size={18} strokeWidth={2.5} />
             </button>
@@ -347,7 +347,7 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
         <Panel className="mb-4">
           <div className="flex items-center justify-between px-5 py-3">
             <div className="flex items-center gap-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--app-surface-muted)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] bg-[var(--app-surface-muted)]">
                 <Flame size={20} className="text-muted-foreground" />
               </div>
               <div>
@@ -453,12 +453,12 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
                       defaultValue={isManual ? manualValues[micro.key] : activeFood?.[micro.key] || 0}
                       onBlur={(e) => handleManualValueChange(micro.key, e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleManualValueChange(micro.key, e.target.value)}
-                      className="text-sm font-bold text-foreground bg-transparent outline-none border-b border-foreground w-16 text-right appearance-none"
+                      className="w-16 appearance-none border-b border-foreground bg-transparent text-right text-sm font-semibold text-foreground outline-none"
                     />
-                    <span className="text-sm font-bold text-foreground ml-1">{micro.unit}</span>
+                    <span className="ml-1 text-sm font-semibold text-foreground">{micro.unit}</span>
                   </div>
                 ) : (
-                  <span className="text-sm font-bold text-foreground">
+                  <span className="text-sm font-semibold text-foreground">
                     {nutrition[micro.key] || 0}{micro.unit}
                   </span>
                 )}
