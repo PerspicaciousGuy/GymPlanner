@@ -68,7 +68,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
     setNotificationsEnabled(checked);
     
     if (checked) {
-      showNotification("🔔 Reminders Enabled", "You will receive a summary of tomorrow's workout daily.");
+      showNotification("Reminders Enabled", "You will receive a summary of tomorrow's workout daily.");
     }
   };
 
@@ -133,10 +133,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
         )}
       />
 
-      {/* Header Profile Section - Centered */}
-      <Panel className="p-8 md:p-10 flex flex-col items-center text-center relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--app-accent-soft)] rounded-full -mr-16 -mt-16 blur-3xl opacity-70" />
-        
+      <Panel className="flex flex-col items-center p-8 text-center md:p-10">
         <Avatar className="w-24 h-24 border-4 border-[var(--app-surface)] shadow-[var(--app-shadow-md)] ring-1 ring-[var(--app-border)] mb-4">
           <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email || 'guest'}`} />
           <AvatarFallback className="bg-foreground text-background font-semibold text-2xl">
@@ -209,11 +206,11 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
           <div className="p-4 md:p-5 bg-[var(--app-surface-muted)] rounded-[var(--app-radius-lg)] border border-[var(--app-border)] transition-colors">
             <div className="flex items-center justify-between mb-2">
                <p className="text-xs font-semibold text-foreground uppercase tracking-normal">Weight Units</p>
-               <div className="flex bg-[var(--app-surface)] p-1 rounded-full border border-[var(--app-border)]">
+               <div className="flex rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1">
                  <button 
                    onClick={() => handleToggleUnits('kg')}
                    className={cn(
-                     "px-3 py-1 rounded-full text-[10px] font-semibold transition-all",
+                     "rounded-[var(--app-radius-sm)] px-3 py-1 text-[10px] font-semibold transition-all",
                      settings.units === 'kg' ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:text-foreground"
                    )}
                  >
@@ -222,7 +219,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
                  <button 
                    onClick={() => handleToggleUnits('lbs')}
                    className={cn(
-                     "px-3 py-1 rounded-full text-[10px] font-semibold transition-all",
+                     "rounded-[var(--app-radius-sm)] px-3 py-1 text-[10px] font-semibold transition-all",
                      settings.units === 'lbs' ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:text-foreground"
                    )}
                  >
@@ -360,12 +357,10 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
           </div>
         </div>
 
-      {/* Data Control Center Card */}
-      <Panel className="bg-gradient-to-br from-[var(--app-surface)] to-[var(--app-surface-muted)] p-8 md:p-10 relative overflow-hidden group cursor-pointer" onClick={() => setShowConsole(true)}>
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-[var(--app-accent-soft)] rounded-full blur-3xl transition-all opacity-60" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <Panel className="group cursor-pointer p-8 transition-colors hover:border-[var(--app-border-strong)] md:p-10" onClick={() => setShowConsole(true)}>
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
           <div className="space-y-2">
-            <Badge className="bg-foreground text-background border-none font-semibold text-[9px] px-3 py-1 rounded-full uppercase tracking-normal">Internal</Badge>
+            <Badge className="rounded-[var(--app-radius-sm)] border-none bg-foreground px-3 py-1 text-[9px] font-semibold uppercase tracking-normal text-background">Internal</Badge>
             <h3 className="text-2xl font-semibold text-foreground tracking-normal">Data Control Center</h3>
             <p className="text-muted-foreground text-xs font-semibold max-w-[280px]">Manage training data, exercise libraries, and export all metrics.</p>
           </div>
@@ -380,7 +375,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
       </Panel>
 
       <div className="text-center pt-4">
-        <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-normal mb-1">GymPlanner v1.2.0 • Premium Edition</p>
+        <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-normal mb-1">GymPlanner v1.2.0 - Premium Edition</p>
         <p className="text-[8px] font-medium text-muted-foreground/60 uppercase tracking-normal">Engineered for your progress</p>
       </div>
     </PageShell>
