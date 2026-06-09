@@ -68,59 +68,54 @@ export default function LoginPage({ authState, onLoginSuccess, onBack }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0A0A0A] w-full absolute inset-0 z-50 text-white font-inter">
-      {/* Left side: Hero Image (Hidden on mobile) */}
-      <div className="hidden lg:flex w-1/2 relative bg-black items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/60 to-transparent" />
+    <div className="absolute inset-0 z-50 flex min-h-screen w-full bg-[var(--app-bg)] text-foreground">
+      <div className="relative hidden w-1/2 items-center justify-center overflow-hidden bg-[var(--app-surface-muted)] lg:flex">
+        <div className="absolute inset-0 z-10 bg-background/55" />
         <img
           src="/gym_hero_bg.png"
           alt="Gym planner hero"
-          className="absolute inset-0 w-full h-full object-cover opacity-60"
+          className="absolute inset-0 h-full w-full object-cover opacity-70"
         />
-        <div className="relative z-20 p-12 flex flex-col items-start w-full max-w-lg mt-auto pb-20">
-          <div className="mb-6 flex items-center justify-center w-16 h-16 rounded-xl border border-white/10 bg-[#121212]/80 backdrop-blur-md">
-            <span className="text-4xl font-lexend font-black text-white">G</span>
+        <div className="relative z-20 mt-auto flex w-full max-w-lg flex-col items-start p-12 pb-20">
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)]/85 shadow-[var(--app-shadow-sm)] backdrop-blur-md">
+            <span className="text-4xl font-semibold text-foreground">G</span>
           </div>
-          <h1 className="text-5xl font-lexend font-bold mb-4 leading-[1.1] tracking-tight">
+          <h1 className="mb-4 text-5xl font-semibold leading-[1.1] tracking-normal text-foreground">
             Elevate Your<br />Training Journey.
           </h1>
-          <p className="text-[#c4c9ac] text-lg max-w-sm">
+          <p className="max-w-sm text-lg font-medium text-muted-foreground">
             Track your progress, build routines, and achieve your fitness goals with our intelligent planner.
           </p>
         </div>
       </div>
 
-      {/* Right side: Auth Form */}
-      <div className="w-full lg:w-1/2 flex flex-col relative bg-[#0A0A0A] lg:border-l lg:border-[#262626]">
-        {/* Back Button */}
+      <div className="relative flex w-full flex-col bg-[var(--app-bg)] lg:w-1/2 lg:border-l lg:border-[var(--app-border)]">
         <button
           onClick={onBack}
-          className="absolute top-8 left-8 z-50 flex items-center gap-2 text-slate-400 hover:text-white font-space text-[12px] uppercase tracking-widest transition-colors"
+          className="absolute left-8 top-8 z-50 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-normal text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowRight size={14} className="rotate-180" strokeWidth={2} />
           Back
         </button>
 
-        <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 w-full max-w-md mx-auto">
+        <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center p-6 sm:p-12">
 
           <div className="w-full space-y-10">
-            {/* Header */}
             <div>
-              <div className="inline-block px-3 py-1 mb-4 rounded border border-[#262626] bg-[#1C1C1C]">
-                <span className="text-[11px] font-space text-[#CCFF00] tracking-widest uppercase font-medium">
+              <div className="mb-4 inline-block rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-1">
+                <span className="text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
                   Secure Authentication
                 </span>
               </div>
-              <h2 className="text-4xl font-lexend font-bold tracking-tight mb-3">
+              <h2 className="mb-3 text-4xl font-semibold tracking-normal text-foreground">
                 {isSignUp ? 'Create ' : 'Welcome '}
-                <span className="text-white">{isSignUp ? 'Account' : 'Back'}</span>
+                <span>{isSignUp ? 'Account' : 'Back'}</span>
               </h2>
-              <p className="text-[#8e9379] font-medium text-[16px]">
+              <p className="text-[16px] font-medium text-muted-foreground">
                 {isSignUp ? 'Sign up to start tracking your workouts.' : 'Sign in to access your training data.'}
               </p>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <AnimatePresence mode="wait">
                 {error && (
@@ -130,7 +125,7 @@ export default function LoginPage({ authState, onLoginSuccess, onBack }) {
                     exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="p-4 bg-[#93000a]/20 border border-[#93000a] rounded-lg flex items-start gap-3 text-[#ffb4ab] mb-2">
+                    <div className="mb-2 flex items-start gap-3 rounded-[var(--app-radius-md)] border border-red-500/25 bg-red-500/10 p-4 text-red-500">
                       <AlertCircle size={18} className="shrink-0 mt-0.5" />
                       <p className="text-sm font-medium">{error}</p>
                     </div>
@@ -139,12 +134,11 @@ export default function LoginPage({ authState, onLoginSuccess, onBack }) {
               </AnimatePresence>
 
               <div className="space-y-5">
-                {/* Email Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[12px] font-space uppercase tracking-widest text-slate-400">Email Address</Label>
+                  <Label htmlFor="email" className="text-[12px] font-semibold uppercase tracking-normal text-muted-foreground">Email Address</Label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Mail size={18} className="text-slate-500" strokeWidth={2} />
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                      <Mail size={18} className="text-muted-foreground" strokeWidth={2} />
                     </div>
                     <Input
                       id="email"
@@ -152,32 +146,31 @@ export default function LoginPage({ authState, onLoginSuccess, onBack }) {
                       placeholder="athlete@gymplanner.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-[56px] rounded-lg border-[#262626] bg-[#121212] text-white focus:bg-[#1C1C1C] focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00] transition-all font-inter pl-12 pr-6 text-[15px]"
+                      className="h-[56px] rounded-[var(--app-radius-md)] border-[var(--app-border)] bg-[var(--app-surface)] pl-12 pr-6 text-[15px] font-medium text-foreground transition-colors focus-visible:border-[var(--app-border-strong)] focus-visible:bg-[var(--app-surface-raised)] focus-visible:ring-0"
                       required
                     />
                   </div>
                 </div>
 
-                {/* Password Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-[12px] font-space uppercase tracking-widest text-slate-400">Password</Label>
+                  <Label htmlFor="password" className="text-[12px] font-semibold uppercase tracking-normal text-muted-foreground">Password</Label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock size={18} className="text-slate-500" strokeWidth={2} />
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                      <Lock size={18} className="text-muted-foreground" strokeWidth={2} />
                     </div>
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="••••••••••"
+                      placeholder="Enter password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-[56px] rounded-lg border-[#262626] bg-[#121212] text-white focus:bg-[#1C1C1C] focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00] transition-all font-inter pl-12 pr-12 text-[15px] tracking-widest placeholder:tracking-widest"
+                      className="h-[56px] rounded-[var(--app-radius-md)] border-[var(--app-border)] bg-[var(--app-surface)] pl-12 pr-12 text-[15px] font-medium text-foreground transition-colors focus-visible:border-[var(--app-border-strong)] focus-visible:bg-[var(--app-surface-raised)] focus-visible:ring-0"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-white transition-colors"
+                      className="absolute inset-y-0 right-0 flex items-center pr-4 text-muted-foreground transition-colors hover:text-foreground"
                     >
                       {showPassword ? <EyeOff size={20} strokeWidth={1.5} /> : <Eye size={20} strokeWidth={1.5} />}
                     </button>
@@ -190,7 +183,7 @@ export default function LoginPage({ authState, onLoginSuccess, onBack }) {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-[56px] bg-[#CCFF00] hover:bg-[#abd600] text-[#0A0A0A] rounded-lg font-lexend font-bold text-[16px] transition-all active:scale-[0.98] border-none"
+                  className="h-[56px] w-full rounded-[var(--app-radius-md)] border-none bg-foreground text-[16px] font-semibold text-background transition-colors hover:bg-foreground/90"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center">
@@ -207,14 +200,14 @@ export default function LoginPage({ authState, onLoginSuccess, onBack }) {
               </div>
 
               {/* Toggle Sign Up / Sign In */}
-              <div className="text-center pt-6 mt-6 border-t border-[#262626]">
-                <span className="text-[14px] font-inter text-[#8e9379] mr-2">
+              <div className="mt-6 border-t border-[var(--app-border)] pt-6 text-center">
+                <span className="mr-2 text-[14px] font-medium text-muted-foreground">
                   {isSignUp ? 'Already have an account?' : "Don't have an account?"}
                 </span>
                 <button
                   type="button"
                   onClick={toggleMode}
-                  className="text-[14px] font-inter font-semibold text-[#FF5C00] hover:text-[#ffb59a] transition-colors underline underline-offset-4"
+                  className="text-[14px] font-semibold text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
                 >
                   {isSignUp ? 'Sign In' : 'Create Account'}
                 </button>
