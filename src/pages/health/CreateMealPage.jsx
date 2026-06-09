@@ -27,7 +27,7 @@ import {
 } from './mealPageHelpers';
 
 /**
- * CreateMealPage — Build a multi-item meal.
+ * CreateMealPage - Build a multi-item meal.
  * Users name their meal, add food items from a search, and save it.
  */
 export default function CreateMealPage({ onBack, onSaveMeal }) {
@@ -154,15 +154,15 @@ export default function CreateMealPage({ onBack, onSaveMeal }) {
                     <div className="flex-1 min-w-0">
                       <p className="truncate text-sm font-semibold text-foreground">{item.food.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {itemNutrition.calories} cal · {item.servings} serving{item.servings !== 1 ? 's' : ''}
+                        {itemNutrition.calories} cal - {item.servings} serving{item.servings !== 1 ? 's' : ''}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => updateServings(idx, -0.5)}
-                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] text-xs font-semibold text-muted-foreground hover:text-foreground"
+                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[var(--app-radius-sm)] border border-[var(--app-border)] text-xs font-semibold text-muted-foreground hover:text-foreground"
                       >
-                        −
+                        -
                       </button>
                       {editingIndex === idx ? (
                         <input
@@ -194,7 +194,7 @@ export default function CreateMealPage({ onBack, onSaveMeal }) {
                       )}
                       <button
                         onClick={() => updateServings(idx, 0.5)}
-                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] text-xs font-semibold text-muted-foreground hover:text-foreground"
+                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[var(--app-radius-sm)] border border-[var(--app-border)] text-xs font-semibold text-muted-foreground hover:text-foreground"
                       >
                         +
                       </button>
@@ -218,7 +218,7 @@ export default function CreateMealPage({ onBack, onSaveMeal }) {
           className="flex w-full items-center justify-center gap-2 rounded-[var(--app-radius-md)] border border-dashed border-[var(--app-border)] p-4 text-muted-foreground transition-colors hover:border-[var(--app-border-strong)] hover:text-foreground"
         >
           <Plus size={18} />
-          <span className="text-sm font-bold">Add items to this meal</span>
+          <span className="text-sm font-semibold">Add items to this meal</span>
         </button>
       </div>
 
@@ -316,11 +316,11 @@ export default function CreateMealPage({ onBack, onSaveMeal }) {
                       <div className="flex items-center gap-1.5 mt-1">
                         <Flame size={12} className="text-muted-foreground/50" />
                         <span className="text-xs text-muted-foreground">
-                          {food.calories} cal · {food.servingSize}
+                          {food.calories} cal - {food.servingSize}
                         </span>
                       </div>
                     </div>
-                    <div className="ml-3 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-[var(--app-border)] text-muted-foreground transition-colors group-hover:border-[var(--app-border-strong)] group-hover:text-foreground">
+                    <div className="ml-3 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] text-muted-foreground transition-colors group-hover:border-[var(--app-border-strong)] group-hover:text-foreground">
                       <Plus size={18} strokeWidth={2.5} />
                     </div>
                   </motion.button>
