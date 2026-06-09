@@ -35,7 +35,7 @@ export function AnalyticsStatCard({ title, value, subtitle, icon, iconColor, bgC
       isMicro ? "p-3" : "p-5",
       className
     )}>
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--app-border-strong)] to-transparent opacity-80" />
+      <div className="absolute inset-x-0 top-0 h-px bg-[var(--app-border-strong)] opacity-80" />
       <div className="flex h-full flex-col">
         <div className="flex items-start justify-between relative">
           <div className={cn(

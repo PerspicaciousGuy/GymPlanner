@@ -16,7 +16,7 @@ export function CustomVolumeTooltip({ active, payload }) {
     <div className={`${tooltipClass} max-w-[220px]`}>
       <p className="mb-1 text-xs font-semibold text-foreground">{data.displayDate}</p>
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-2 h-2 rounded-full bg-indigo-500" />
+        <div className="h-2 w-2 rounded-[var(--app-radius-sm)] bg-foreground" />
         <p className="text-sm font-semibold text-foreground">
           {(data.volume / 1000).toFixed(1)} <span className={tooltipLabelClass}>tons</span>
         </p>
@@ -67,7 +67,7 @@ export function CustomExerciseTooltip({ active, payload }) {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full border border-indigo-500 border-dashed" />
+              <div className="h-2.5 w-2.5 rounded-[var(--app-radius-sm)] border border-[var(--app-border-strong)] border-dashed" />
               <span className={tooltipLabelClass}>Est. 1RM</span>
             </div>
             <p className="text-sm font-semibold text-primary">{data.est1RM}kg</p>
