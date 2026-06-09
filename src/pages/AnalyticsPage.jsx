@@ -83,10 +83,13 @@ export default function AnalyticsPage({ onDateSelect }) {
     // Add a slight delay to allow any UI states to settle
     setTimeout(async () => {
       try {
+        const exportBackgroundColor = getComputedStyle(document.documentElement)
+          .getPropertyValue('--app-bg')
+          .trim();
         const htmlToImage = await import('html-to-image');
         const dataUrl = await htmlToImage.toJpeg(dashboardRef.current, {
           quality: 0.95,
-          backgroundColor: '#f8fafc',
+          backgroundColor: exportBackgroundColor,
           style: {
             padding: '24px',
             margin: '0',
