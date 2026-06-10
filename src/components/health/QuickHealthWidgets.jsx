@@ -40,20 +40,20 @@ export default function QuickHealthWidgets() {
   return (
     <div className="grid grid-cols-2 gap-3 mb-6">
       {/* Weight Widget */}
-      <Card className="rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+      <Card className="overflow-hidden rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--app-shadow-sm)] transition-[box-shadow,border-color] duration-300 hover:border-[var(--app-border-strong)] hover:shadow-[var(--app-shadow-md)]">
         <CardContent className="p-3 md:p-4 h-full flex flex-col justify-between">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-xl bg-indigo-50/80 flex items-center justify-center text-indigo-600 border border-indigo-100/50 shrink-0">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-accent-soft)] text-foreground">
               <Scale size={16} strokeWidth={2.5} />
             </div>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Weight</p>
+            <p className="text-[9px] font-semibold uppercase leading-none tracking-normal text-muted-foreground">Weight</p>
           </div>
           
           <div className="flex items-end justify-between gap-2">
             <div>
-              <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight leading-none">
+              <h3 className="text-lg font-semibold leading-none tracking-normal text-foreground md:text-xl">
                 {todayWeight ? `${todayWeight}` : latestWeight ? `${latestWeight}` : '--'}
-                <span className="text-[10px] ml-0.5 text-slate-400 font-bold uppercase tracking-wide">kg</span>
+                <span className="ml-0.5 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">kg</span>
               </h3>
             </div>
 
@@ -68,7 +68,7 @@ export default function QuickHealthWidgets() {
                     setShowWeightInput(true);
                     setWeightInputValue(todayWeight?.toString() || latestWeight?.toString() || '');
                   }}
-                  className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center hover:bg-slate-800 active:scale-95 transition-all shadow-sm"
+                  className="flex h-8 w-8 items-center justify-center rounded-[var(--app-radius-md)] bg-foreground text-background shadow-[var(--app-shadow-sm)] transition-transform hover:bg-foreground/90 active:scale-95 md:h-10 md:w-10"
                 >
                   {todayWeight ? (
                     <PencilLine size={16} strokeWidth={2.5} />
@@ -83,7 +83,7 @@ export default function QuickHealthWidgets() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 5 }}
                   onSubmit={handleWeightSubmit}
-                  className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200"
+                  className="flex items-center gap-1 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-1"
                 >
                   <input
                     type="number"
@@ -91,9 +91,9 @@ export default function QuickHealthWidgets() {
                     autoFocus
                     value={weightInputValue}
                     onChange={(e) => setWeightInputValue(e.target.value)}
-                    className="w-10 bg-transparent text-xs font-black text-center focus:outline-none"
+                    className="w-10 bg-transparent text-center text-xs font-semibold text-foreground focus:outline-none"
                   />
-                  <button type="submit" className="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center">
+                  <button type="submit" className="flex h-6 w-6 items-center justify-center rounded-[var(--app-radius-sm)] bg-foreground text-background">
                     <Plus size={14} strokeWidth={3} />
                   </button>
                 </motion.form>
@@ -104,33 +104,33 @@ export default function QuickHealthWidgets() {
       </Card>
 
       {/* Water Widget */}
-      <Card className="rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 bg-white shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+      <Card className="overflow-hidden rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--app-shadow-sm)] transition-[box-shadow,border-color] duration-300 hover:border-[var(--app-border-strong)] hover:shadow-[var(--app-shadow-md)]">
         <CardContent className="p-3 md:p-4 h-full flex flex-col justify-between">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-xl bg-blue-50/80 flex items-center justify-center text-blue-500 border border-blue-100/50 shrink-0">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-accent-soft)] text-foreground">
               <GlassWater size={16} strokeWidth={2.5} />
             </div>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Water</p>
+            <p className="text-[9px] font-semibold uppercase leading-none tracking-normal text-muted-foreground">Water</p>
           </div>
 
           <div className="flex items-end justify-between gap-2">
             <div>
-              <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight leading-none">
+              <h3 className="text-lg font-semibold leading-none tracking-normal text-foreground md:text-xl">
                 {todayWater}
-                <span className="text-[10px] ml-0.5 text-slate-400 font-bold uppercase tracking-wide">ml</span>
+                <span className="ml-0.5 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">ml</span>
               </h3>
             </div>
 
-            <div className="flex items-center gap-1.5 p-1 bg-slate-50 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-1.5 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-1">
               <button
                 onClick={() => adjustWater(-250)}
-                className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-white transition-all shrink-0"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--app-radius-sm)] text-muted-foreground transition-colors hover:bg-[var(--app-surface)] hover:text-foreground"
               >
                 <Minus size={14} strokeWidth={3} />
               </button>
               <button
                 onClick={() => adjustWater(250)}
-                className="w-7 h-7 rounded-lg bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 active:scale-95 transition-all shadow-sm shrink-0"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--app-radius-sm)] bg-foreground text-background shadow-[var(--app-shadow-sm)] transition-transform hover:bg-foreground/90 active:scale-95"
               >
                 <Plus size={14} strokeWidth={3} />
               </button>

@@ -35,7 +35,7 @@ export default function QuickActionHub({ onNavigateToHealth }) {
             setWaterAmount(getWaterForDate(getToday()));
             setIsOpen(true);
           }}
-          className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-slate-900 text-white shadow-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all group"
+          className="group flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-[var(--app-shadow-md)] transition-transform hover:scale-105 active:scale-95 md:h-16 md:w-16"
         >
           <Plus size={28} className="group-hover:rotate-90 transition-transform duration-300" />
         </button>
@@ -51,7 +51,7 @@ export default function QuickActionHub({ onNavigateToHealth }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[10000]"
+              className="fixed inset-0 z-[10000] bg-foreground/40 backdrop-blur-sm"
             />
 
             {/* Content Panel */}
@@ -60,16 +60,16 @@ export default function QuickActionHub({ onNavigateToHealth }) {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] shadow-2xl z-[10001] pb-10 px-6 pt-8 max-w-[500px] mx-auto border-t border-slate-100"
+              className="fixed bottom-0 left-0 right-0 z-[10001] mx-auto max-w-[500px] rounded-t-[var(--app-radius-lg)] border-t border-[var(--app-border)] bg-[var(--app-surface)] px-6 pb-10 pt-8 shadow-[var(--app-shadow-md)]"
             >
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">Quick Log</h2>
-                  <p className="text-sm font-bold text-slate-400">What are we tracking today?</p>
+                  <h2 className="text-2xl font-semibold tracking-normal text-foreground">Quick Log</h2>
+                  <p className="text-sm font-medium text-muted-foreground">What are we tracking today?</p>
                 </div>
                 <button 
                   onClick={() => setIsOpen(false)}
-                  className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-all"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--app-surface-muted)] text-muted-foreground transition-colors hover:bg-[var(--app-surface-raised)] hover:text-foreground"
                 >
                   <X size={20} />
                 </button>
@@ -82,27 +82,27 @@ export default function QuickActionHub({ onNavigateToHealth }) {
                     onNavigateToHealth('log-food');
                     setIsOpen(false);
                   }}
-                  className="w-full p-5 rounded-[2rem] bg-indigo-600 text-white flex items-center gap-4 hover:bg-indigo-700 transition-all group shadow-lg shadow-indigo-100"
+                  className="group flex w-full items-center gap-4 rounded-[var(--app-radius-md)] bg-foreground p-5 text-background shadow-[var(--app-shadow-sm)] transition-colors hover:bg-foreground/90"
                 >
-                  <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--app-radius-md)] bg-background/15">
                     <Utensils size={24} />
                   </div>
                   <div className="text-left">
-                    <p className="text-lg font-black tracking-tight leading-none">Log a Meal</p>
-                    <p className="text-xs font-bold text-indigo-100 mt-1 uppercase tracking-widest">Macro Tracking</p>
+                    <p className="text-lg font-semibold leading-none tracking-normal">Log a Meal</p>
+                    <p className="mt-1 text-xs font-semibold uppercase tracking-normal text-background/70">Macro Tracking</p>
                   </div>
                 </button>
 
                 {/* Weight Action */}
-                <div className="p-5 rounded-[2rem] bg-slate-50 border border-slate-100 flex flex-col gap-4">
+                <div className="flex flex-col gap-4 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-slate-600 shadow-sm border border-slate-100">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] text-foreground shadow-[var(--app-shadow-sm)]">
                         <Scale size={24} />
                       </div>
                       <div className="text-left">
-                        <p className="text-lg font-black tracking-tight leading-none">Body Weight</p>
-                        <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-widest">
+                        <p className="text-lg font-semibold leading-none tracking-normal text-foreground">Body Weight</p>
+                        <p className="mt-1 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">
                           {isWeightLogged ? 'Already Logged Today' : 'Enter kilos'}
                         </p>
                       </div>
@@ -117,14 +117,14 @@ export default function QuickActionHub({ onNavigateToHealth }) {
                         placeholder={getWeightForDate(getToday()) || "70.0"}
                         value={weightInput}
                         onChange={(e) => setWeightInput(e.target.value)}
-                        className="w-full h-14 bg-white border border-slate-200 rounded-2xl px-6 font-black text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                        className="h-14 w-full rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-6 text-lg font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--app-border-strong)]"
                       />
-                      <span className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 font-bold">kg</span>
+                      <span className="absolute right-6 top-1/2 -translate-y-1/2 font-semibold text-muted-foreground">kg</span>
                     </div>
                     <button 
                       type="submit"
                       disabled={!weightInput}
-                      className="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center disabled:opacity-50 transition-all"
+                      className="flex h-14 w-14 items-center justify-center rounded-[var(--app-radius-md)] bg-foreground text-background transition-colors disabled:opacity-50"
                     >
                       {isWeightLogged ? <PencilLine size={24} /> : <Plus size={24} strokeWidth={3} />}
                     </button>
@@ -132,27 +132,27 @@ export default function QuickActionHub({ onNavigateToHealth }) {
                 </div>
 
                 {/* Water Action */}
-                <div className="p-5 rounded-[2rem] bg-blue-50 border border-blue-100 flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-5">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-blue-500 shadow-sm border border-blue-100">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] text-foreground shadow-[var(--app-shadow-sm)]">
                       <Droplet size={24} />
                     </div>
                     <div className="text-left">
-                      <p className="text-lg font-black tracking-tight leading-none">Hydration</p>
-                      <p className="text-[10px] font-black text-blue-400 mt-1 uppercase tracking-widest">{waterAmount} ml</p>
+                      <p className="text-lg font-semibold leading-none tracking-normal text-foreground">Hydration</p>
+                      <p className="mt-1 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">{waterAmount} ml</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 bg-white/50 p-1.5 rounded-2xl border border-blue-100">
+                  <div className="flex items-center gap-2 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1.5">
                     <button 
                       onClick={() => adjustWater(-250)}
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-blue-400 hover:bg-white transition-all"
+                      className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-sm)] text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
                     >
                       <Minus size={20} strokeWidth={3} />
                     </button>
                     <button 
                       onClick={() => adjustWater(250)}
-                      className="w-12 h-12 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-200 hover:bg-blue-600 active:scale-95 transition-all"
+                      className="flex h-12 w-12 items-center justify-center rounded-[var(--app-radius-sm)] bg-foreground text-background shadow-[var(--app-shadow-sm)] transition-transform hover:bg-foreground/90 active:scale-95"
                     >
                       <Plus size={24} strokeWidth={3} />
                     </button>
