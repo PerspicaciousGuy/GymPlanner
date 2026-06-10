@@ -102,6 +102,15 @@ svg.recharts-surface {
   --app-text-soft: #667085;
   --app-accent: #2563eb;
   --app-accent-soft: #eff6ff;
+  --status-completed: #10b981;
+  --status-completed-bg: #d1fae5;
+  --status-completed-border: #99f6e4;
+  --status-skipped: #f59e0b;
+  --status-skipped-bg: #fef3c7;
+  --status-skipped-border: #fde68a;
+  --status-missed: #f43f5e;
+  --status-missed-bg: #ffe4e6;
+  --status-missed-border: #fecdd3;
   --app-radius-sm: 0.5rem;
   --app-radius-md: 0.75rem;
   --app-radius-lg: 1rem;
@@ -174,6 +183,15 @@ svg.recharts-surface {
   --app-text-soft: #a5adba;
   --app-accent: #f8fafc;
   --app-accent-soft: rgb(255 255 255 / 0.08);
+  --status-completed: #34d399;
+  --status-completed-bg: rgb(52 211 153 / 0.14);
+  --status-completed-border: rgb(52 211 153 / 0.28);
+  --status-skipped: #fbbf24;
+  --status-skipped-bg: rgb(251 191 36 / 0.14);
+  --status-skipped-border: rgb(251 191 36 / 0.28);
+  --status-missed: #fb7185;
+  --status-missed-bg: rgb(251 113 133 / 0.14);
+  --status-missed-border: rgb(251 113 133 / 0.28);
   --app-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.25);
   --app-shadow-md: 0 12px 28px -18px rgb(0 0 0 / 0.8);
 
