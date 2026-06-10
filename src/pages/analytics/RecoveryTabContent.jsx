@@ -10,21 +10,21 @@ const recoveryStatusDotClass = "h-2.5 w-2.5 rounded-full";
 function getRecoveryStatusClasses(status) {
   if (status === 'fatigued') {
     return {
-      dot: "bg-rose-500",
-      badge: "bg-rose-500/10 text-rose-600",
+      dot: "bg-destructive",
+      badge: "bg-destructive/10 text-destructive",
     };
   }
 
   if (status === 'recovering') {
     return {
-      dot: "bg-amber-500",
-      badge: "bg-amber-500/10 text-amber-600",
+      dot: "bg-[var(--app-border-strong)]",
+      badge: "bg-[var(--app-surface-muted)] text-[var(--app-text-soft)]",
     };
   }
 
   return {
-    dot: "bg-emerald-500",
-    badge: "bg-emerald-500/10 text-emerald-600",
+    dot: "bg-foreground",
+    badge: "bg-[var(--app-accent-soft)] text-foreground",
   };
 }
 
@@ -41,15 +41,15 @@ export function RecoveryTabContent({ recoveryData }) {
                     </div>
                     <div className="flex gap-4 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-4 py-3">
                       <div className={recoveryLegendItemClass}>
-                        <div className={`${recoveryStatusDotClass} bg-rose-500`} />
+                        <div className={`${recoveryStatusDotClass} bg-destructive`} />
                         <span className={recoveryLegendLabelClass}>Rest</span>
                       </div>
                       <div className={recoveryLegendItemClass}>
-                        <div className={`${recoveryStatusDotClass} bg-amber-500`} />
+                        <div className={`${recoveryStatusDotClass} bg-[var(--app-border-strong)]`} />
                         <span className={recoveryLegendLabelClass}>Healing</span>
                       </div>
                       <div className={recoveryLegendItemClass}>
-                        <div className={`${recoveryStatusDotClass} bg-emerald-500`} />
+                        <div className={`${recoveryStatusDotClass} bg-foreground`} />
                         <span className={recoveryLegendLabelClass}>Ready</span>
                       </div>
                     </div>
@@ -62,7 +62,7 @@ export function RecoveryTabContent({ recoveryData }) {
 
                   <div className="mt-8 flex items-start gap-4 rounded-[var(--app-radius-md)] border border-primary/10 bg-primary/5 p-5">
                     <div className="rounded-[var(--app-radius-sm)] bg-primary/10 p-2">
-                      <Activity className="w-5 h-5 text-blue-600" />
+                      <Activity className="w-5 h-5 text-foreground" />
                     </div>
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-normal text-foreground">Recovery Science</p>

@@ -31,4 +31,4 @@ export const consoleCompactInputClass =
   "h-8 rounded-[var(--app-radius-sm)] border-transparent bg-transparent text-center text-[10px] font-semibold text-foreground transition-colors focus:border-[var(--app-border)] focus:bg-[var(--app-surface)]";
 
 export const consoleDeleteButtonClass =
-  "p-1.5 text-muted-foreground/45 transition-colors hover:bg-red-500/10 hover:text-red-500";
+  "p-1.5 text-muted-foreground/45 transition-colors hover:bg-destructive/10 hover:text-destructive";

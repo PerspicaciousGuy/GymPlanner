@@ -49,7 +49,7 @@ export function AnalyticsStatCard({ title, value, subtitle, icon, iconColor, bgC
           {trend !== undefined && trend !== null && (
             <div className={cn(
               "flex items-center gap-0.5 rounded-[var(--app-radius-sm)] px-1.5 py-0.5 text-[9px] font-semibold",
-              trend >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500',
+              trend >= 0 ? 'bg-[var(--app-accent-soft)] text-foreground' : 'bg-destructive/10 text-destructive',
               isMicro ? "absolute right-0 top-0" : ""
             )}>
               {trend >= 0 ? <TrendingUp size={8} /> : <TrendingDown size={8} />}

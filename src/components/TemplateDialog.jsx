@@ -155,7 +155,7 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
                         <div className="flex items-center gap-2 relative z-10">
                           <div 
                             onClick={(e) => handleDelete(t.id, e)}
-                            className="translate-x-2 rounded-[var(--app-radius-sm)] p-2.5 text-muted-foreground opacity-0 transition-all hover:bg-red-500/10 hover:text-red-500 group-hover:translate-x-0 group-hover:opacity-100"
+                            className="translate-x-2 rounded-[var(--app-radius-sm)] p-2.5 text-muted-foreground opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive group-hover:translate-x-0 group-hover:opacity-100"
                             title="Delete Routine"
                           >
                             <Trash2 size={16} />

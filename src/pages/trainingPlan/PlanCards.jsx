@@ -27,7 +27,7 @@ export function SavedPlanCard({ plan, isActive, isSelected, onSelect, onSetActiv
       className={cn(
         "relative w-40 shrink-0 cursor-pointer select-none rounded-[var(--app-radius-lg)] border p-3 shadow-[var(--app-shadow-sm)] transition-colors sm:w-44",
         isActive
-          ? "border-emerald-500 bg-[var(--app-surface)]"
+          ? "border-[var(--app-border-strong)] bg-[var(--app-surface)]"
           : isSelected
           ? "border-[var(--app-border-strong)] bg-[var(--app-accent-soft)]"
           : "border-[var(--app-border)] bg-[var(--app-surface)] hover:border-[var(--app-border-strong)]",

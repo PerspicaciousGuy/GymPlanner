@@ -153,7 +153,7 @@ export default function RoutinesPage({ onEdit, onOpenTrainingPlan, syncKey }) {
                     e.stopPropagation();
                     removeTemplate(t.id);
                   }}
-                  className="h-8 w-8 rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)] text-muted-foreground shadow-none transition-all hover:bg-rose-50 hover:text-rose-600 md:opacity-0 md:group-hover:opacity-100 md:translate-y-1 md:group-hover:translate-y-0 delay-75"
+                  className="h-8 w-8 rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)] text-muted-foreground shadow-none transition-all hover:bg-destructive/10 hover:text-destructive md:opacity-0 md:group-hover:opacity-100 md:translate-y-1 md:group-hover:translate-y-0 delay-75"
                 >
                   <Trash2 size={14} />
                 </Button>

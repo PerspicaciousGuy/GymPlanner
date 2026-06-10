@@ -78,7 +78,7 @@ export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift })
                   className={cn(
                     "flex h-auto flex-col items-start rounded-[var(--app-radius-md)] border px-4 py-3 transition-colors",
                     day.am.isRest 
-                      ? "border-dashed border-emerald-500/20 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/15"
+                      ? "border-dashed border-[var(--app-border-strong)] bg-[var(--app-accent-soft)] text-foreground hover:bg-[var(--app-surface-muted)]"
                       : "border-[var(--app-border)] bg-[var(--app-surface)] text-foreground shadow-[var(--app-shadow-sm)] hover:bg-[var(--app-surface-raised)]"
                   )}
                   onClick={() => onShift(day.date, 'am')}
@@ -88,7 +88,7 @@ export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift })
                       {day.pm.hasPlanned ? "AM Session" : "Session"}
                     </span>
                     {day.am.isRest && (
-                      <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <div className="ml-auto w-1.5 h-1.5 rounded-full bg-foreground" />
                     )}
                   </div>
                   <span className="w-full truncate text-left text-[12px] font-semibold text-foreground">
@@ -102,7 +102,7 @@ export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift })
                     className={cn(
                       "flex h-auto flex-col items-start rounded-[var(--app-radius-md)] border px-4 py-3 transition-colors",
                       day.pm.isRest 
-                        ? "border-dashed border-emerald-500/20 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/15"
+                        ? "border-dashed border-[var(--app-border-strong)] bg-[var(--app-accent-soft)] text-foreground hover:bg-[var(--app-surface-muted)]"
                         : "border-[var(--app-border)] bg-[var(--app-surface)] text-foreground shadow-[var(--app-shadow-sm)] hover:bg-[var(--app-surface-raised)]"
                     )}
                     onClick={() => onShift(day.date, 'pm')}
@@ -110,7 +110,7 @@ export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift })
                     <div className="mb-1.5 flex w-full items-center gap-2">
                       <span className="text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">PM Session</span>
                       {day.pm.isRest && (
-                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-foreground" />
                       )}
                     </div>
                     <span className="w-full truncate text-left text-[12px] font-semibold text-foreground">

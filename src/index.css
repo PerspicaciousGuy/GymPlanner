@@ -8,7 +8,7 @@
 
 @layer base {
   body {
-    @apply antialiased selection:bg-blue-100 selection:text-blue-900 bg-background text-foreground;
+    @apply antialiased bg-background text-foreground;
   }
 
   * {
@@ -31,7 +31,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+  @apply rounded-full bg-[var(--app-border-strong)] transition-colors hover:bg-[var(--app-text-soft)];
 }
 
 /* Hide native date picker icons for cleaner custom UI */

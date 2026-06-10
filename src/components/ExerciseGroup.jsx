@@ -10,7 +10,6 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
   const [isOpen, setIsOpen] = useState(true);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
-  // Auto-reset confirmation state after 3 seconds
   useEffect(() => {
     let timer;
     if (isConfirmingDelete) {
@@ -35,7 +34,6 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
 
   const canDeleteGroup = typeof onDeleteGroup === 'function';
 
-  // Summarize exercises for collapsed view
   const exercisesSummary = group.rows
     .map(r => r.exercise)
     .filter(Boolean)
@@ -45,27 +43,27 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
   const hasMore = group.rows.filter(r => r.exercise).length > 2;
 
   return (
-    <div className="bg-white dark:bg-[#1a1a1e] border border-slate-100 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden group/card">
+    <div className="group/card overflow-hidden rounded-[var(--app-radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--app-shadow-sm)] transition-[border-color,box-shadow] hover:border-[var(--app-border-strong)] hover:shadow-[var(--app-shadow-md)]">
       <div 
-        className="bg-slate-50/50 dark:bg-white/5 border-b border-slate-100 dark:border-white/5 px-4 py-2 flex items-center justify-between gap-2 cursor-pointer hover:bg-slate-100/50 dark:hover:bg-white/10 transition-colors group/header"
+        className="group/header flex cursor-pointer items-center justify-between gap-2 border-b border-[var(--app-border)] bg-[var(--app-surface-muted)] px-4 py-2 transition-colors hover:bg-[var(--app-surface-raised)]"
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="flex items-center gap-2">
-          <div className="bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 p-1 rounded-lg group-hover/header:bg-indigo-100 dark:group-hover/header:bg-indigo-500/30 transition-colors">
+          <div className="rounded-[var(--app-radius-sm)] bg-[var(--app-accent-soft)] p-1 text-foreground transition-colors group-hover/header:bg-[var(--app-surface)]">
             <Layers size={12} strokeWidth={3} />
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-tight">
+            <span className="text-[10px] font-semibold uppercase leading-tight tracking-normal text-muted-foreground">
               Exercise Group {groupIndex + 1}
             </span>
             {!isOpen && (
               <motion.span 
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-[9px] text-indigo-400 dark:text-indigo-500 font-bold uppercase tracking-tight leading-tight"
+                className="text-[9px] font-semibold uppercase leading-tight tracking-normal text-[var(--app-text-soft)]"
               >
                 {group.rows.length} {group.rows.length === 1 ? 'Exercise' : 'Exercises'} 
-                {exercisesSummary && <span className="text-slate-300 dark:text-slate-600 ml-1">• {exercisesSummary}{hasMore ? '...' : ''}</span>}
+                {exercisesSummary && <span className="ml-1 text-muted-foreground/70">- {exercisesSummary}{hasMore ? '...' : ''}</span>}
               </motion.span>
             )}
           </div>
@@ -88,7 +86,7 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
                         e.stopPropagation();
                         onDeleteGroup();
                       }}
-                      className="px-2 py-1 text-[10px] font-black text-white bg-red-500 rounded-lg shadow-sm shadow-red-100 hover:bg-red-600 transition-all uppercase tracking-tighter"
+                      className="rounded-[var(--app-radius-sm)] bg-destructive px-2 py-1 text-[10px] font-semibold uppercase tracking-normal text-background shadow-[var(--app-shadow-sm)] transition-colors hover:bg-destructive/90"
                     >
                       Confirm Delete
                     </button>
@@ -97,7 +95,7 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
                         e.stopPropagation();
                         setIsConfirmingDelete(false);
                       }}
-                      className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+                      className="rounded-[var(--app-radius-sm)] p-1 text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
                     >
                       <X size={12} strokeWidth={3} />
                     </button>
@@ -112,7 +110,7 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
                       e.stopPropagation();
                       setIsConfirmingDelete(true);
                     }}
-                    className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                    className="flex items-center gap-1.5 rounded-[var(--app-radius-sm)] px-2 py-1 text-[10px] font-semibold text-destructive transition-colors hover:bg-destructive/10"
                     title="Delete this entire group"
                   >
                     <Trash2 size={12} />
@@ -126,7 +124,7 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
           <motion.div 
             animate={{ rotate: isOpen ? 0 : -90 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="text-slate-400 group-hover/header:text-indigo-600 transition-colors"
+            className="text-muted-foreground transition-colors group-hover/header:text-foreground"
           >
             <ChevronDown size={14} strokeWidth={3} />
           </motion.div>
@@ -143,15 +141,14 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
             className="overflow-hidden"
           >
             <div className="relative">
-              {/* Desktop Table: shown on sm and up */}
               <div className="hidden sm:block overflow-x-auto scrollbar-none">
                 <table className="min-w-full text-xs border-collapse">
                   <thead>
-                    <tr className="bg-white border-b border-slate-50">
+                    <tr className="border-b border-[var(--app-border)] bg-[var(--app-surface)]">
                       {COLS.map((col, i) => (
                         <th
                           key={i}
-                          className={`px-3 py-2 text-left font-bold text-[10px] uppercase tracking-widest text-slate-400 whitespace-nowrap ${
+                          className={`whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-normal text-muted-foreground ${
                             col === 'Muscle Group'       ? 'min-w-[130px]'
                             : col === 'Sub Muscle'       ? 'min-w-[130px]'
                             : col === 'Exercise'         ? 'min-w-[200px]'
@@ -168,7 +165,7 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="divide-y divide-[var(--app-border)]">
                     {group.rows.map((row, rowIdx) => (
                       <ExerciseRow
                         key={rowIdx}
@@ -184,7 +181,6 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
                 </table>
               </div>
 
-              {/* Mobile Card List: shown below sm */}
               <div className="sm:hidden py-1">
                 <AnimatePresence mode="popLayout">
                   {group.rows.map((row, rowIdx) => (
@@ -205,26 +201,25 @@ const ExerciseGroup = memo(function ExerciseGroup({ groupIndex, group, onChange,
                         onChange={(updated) => handleRowChange(rowIdx, updated)}
                         onDelete={() => handleDeleteRow(rowIdx)}
                       />
-                      {/* Distinctive spacer line between cards */}
                       {rowIdx < group.rows.length - 1 && (
-                        <div className="mt-4 border-b-2 border-slate-100 mx-4" />
+                        <div className="mx-4 mt-4 border-b border-[var(--app-border)]" />
                       )}
                     </motion.div>
                   ))}
                 </AnimatePresence>
                 {group.rows.length === 0 && (
                   <div className="p-8 text-center space-y-2">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No exercises in this group</p>
-                    <p className="text-[10px] text-slate-300">Add an exercise to start logging your progress.</p>
+                    <p className="text-xs font-semibold uppercase tracking-normal text-muted-foreground">No exercises in this group</p>
+                    <p className="text-[10px] text-muted-foreground/70">Add an exercise to start logging your progress.</p>
                   </div>
                 )}
               </div>
             </div>
             
-            <div className="px-4 py-1.5 bg-slate-50/10 border-t border-slate-50">
+            <div className="border-t border-[var(--app-border)] bg-[var(--app-surface-muted)] px-4 py-1.5">
               <button
                 onClick={handleAddRow}
-                className="flex items-center gap-2 text-indigo-500 hover:text-indigo-700 text-[10px] font-bold uppercase tracking-widest transition-colors py-1 px-2 rounded-lg hover:bg-indigo-50"
+                className="flex items-center gap-2 rounded-[var(--app-radius-sm)] px-2 py-1 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground transition-colors hover:bg-[var(--app-surface)] hover:text-foreground"
               >
                 <Plus size={12} strokeWidth={3} />
                 <span>Add Row</span>

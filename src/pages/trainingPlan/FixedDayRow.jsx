@@ -144,7 +144,7 @@ export function FixedDayRow({ day, plan, updatePlan }) {
                       fw.pm = pm;
                       updatePlan({ fixedWeek: fw });
                     }}
-                    className="h-8 shrink-0 rounded-[var(--app-radius-sm)] border border-transparent px-2.5 text-[8px] font-semibold uppercase tracking-normal text-red-500 transition-colors hover:border-red-500/20 hover:bg-red-500/10 hover:text-red-600"
+                    className="h-8 shrink-0 rounded-[var(--app-radius-sm)] border border-transparent px-2.5 text-[8px] font-semibold uppercase tracking-normal text-destructive transition-colors hover:border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
                   >
                     Remove
                   </Button>

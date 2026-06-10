@@ -113,9 +113,9 @@ export default function CreateMealPage({ onBack, onSaveMeal }) {
         {/* Macro Cards Row */}
         <div className="grid grid-cols-3 gap-3 mb-8">
           {[
-            { key: 'protein', label: 'Protein', icon: Zap, color: 'text-rose-500' },
-            { key: 'carbs', label: 'Carbs', icon: Cookie, color: 'text-amber-500' },
-            { key: 'fats', label: 'Fats', icon: Droplet, color: 'text-blue-500' },
+            { key: 'protein', label: 'Protein', icon: Zap, color: 'text-destructive' },
+            { key: 'carbs', label: 'Carbs', icon: Cookie, color: 'text-[var(--app-text-soft)]' },
+            { key: 'fats', label: 'Fats', icon: Droplet, color: 'text-foreground' },
           ].map(macro => (
             <Card key={macro.key} className="rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--app-shadow-sm)]">
               <CardContent className="p-3 flex flex-col items-start gap-1">
@@ -201,7 +201,7 @@ export default function CreateMealPage({ onBack, onSaveMeal }) {
                     </div>
                     <button
                       onClick={() => removeItem(idx)}
-                      className="p-1.5 text-muted-foreground/40 hover:text-red-500 transition-colors"
+                      className="p-1.5 text-muted-foreground/40 hover:text-destructive transition-colors"
                     >
                       <Trash2 size={16} />
                     </button>

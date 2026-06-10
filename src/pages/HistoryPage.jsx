@@ -34,24 +34,24 @@ const historyLegendItemClass =
 
 const statusStyle = {
   completed: {
-    iconShell: "border-emerald-500/20 bg-emerald-500/10",
-    icon: "text-emerald-500",
-    dot: "bg-emerald-500",
+    iconShell: "border-[var(--app-border-strong)] bg-[var(--app-accent-soft)]",
+    icon: "text-foreground",
+    dot: "bg-foreground",
   },
   partial: {
-    iconShell: "border-amber-500/20 bg-amber-500/10",
-    icon: "text-amber-500",
-    dot: "bg-amber-500",
+    iconShell: "border-[var(--app-border-strong)] bg-[var(--app-surface-muted)]",
+    icon: "text-[var(--app-text-soft)]",
+    dot: "bg-[var(--app-border-strong)]",
   },
   skipped: {
-    iconShell: "border-yellow-500/20 bg-yellow-500/10",
-    icon: "text-yellow-500",
-    dot: "bg-yellow-500",
+    iconShell: "border-[var(--app-border-strong)] bg-[var(--app-surface-muted)]",
+    icon: "text-[var(--app-text-soft)]",
+    dot: "bg-[var(--app-border-strong)]",
   },
   missed: {
-    iconShell: "border-rose-500/20 bg-rose-500/10",
-    icon: "text-rose-500",
-    dot: "bg-rose-500",
+    iconShell: "border-destructive/20 bg-destructive/10",
+    icon: "text-destructive",
+    dot: "bg-destructive",
   },
   planned: {
     iconShell: "border-[var(--app-border)] bg-muted",
@@ -135,19 +135,19 @@ export default function HistoryPage({ onDateSelect }) {
 
       <div className="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 border-t border-[var(--app-border)] py-6">
         <div className={historyLegendItemClass}>
-          <CheckCircle2 size={16} className="text-emerald-500" />
+          <CheckCircle2 size={16} className="text-foreground" />
           Completed
         </div>
         <div className={historyLegendItemClass}>
-          <LegendDot className="bg-amber-500" />
+          <LegendDot className="bg-[var(--app-border-strong)]" />
           Partial
         </div>
         <div className={historyLegendItemClass}>
-          <LegendDot className="bg-yellow-500" />
+          <LegendDot className="bg-[var(--app-border-strong)]" />
           Skipped
         </div>
         <div className={historyLegendItemClass}>
-          <LegendDot className="bg-rose-500" />
+          <LegendDot className="bg-destructive" />
           Missed
         </div>
         <div className={historyLegendItemClass}>

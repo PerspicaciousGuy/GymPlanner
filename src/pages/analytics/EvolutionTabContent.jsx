@@ -92,8 +92,8 @@ export function EvolutionTabContent({ exerciseFilter, setExerciseFilter, analyti
                             const diff = last - first;
                             return (
                               <>
-                                {diff >= 0 ? <TrendingUp size={14} className="text-emerald-500" /> : <TrendingDown size={14} className="text-rose-500" />}
-                                <p className={cn("text-xl font-semibold", diff >= 0 ? "text-emerald-500" : "text-rose-500")}>
+                                {diff >= 0 ? <TrendingUp size={14} className="text-foreground" /> : <TrendingDown size={14} className="text-destructive" />}
+                                <p className={cn("text-xl font-semibold", diff >= 0 ? "text-foreground" : "text-destructive")}>
                                   {Math.abs(diff)}kg
                                 </p>
                               </>

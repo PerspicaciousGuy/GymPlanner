@@ -109,7 +109,7 @@ export function CycleSlotCard({ slot, index, onUpdate, onDelete, templates }) {
           <Button
             variant="ghost" size="icon"
             onClick={onDelete}
-            className="h-7 w-7 rounded-[var(--app-radius-sm)] bg-red-500/10 text-red-500 transition-colors hover:bg-red-500/15"
+            className="h-7 w-7 rounded-[var(--app-radius-sm)] bg-destructive/10 text-destructive transition-colors hover:bg-destructive/10"
           >
             <Trash2 size={12} strokeWidth={2.5} />
           </Button>

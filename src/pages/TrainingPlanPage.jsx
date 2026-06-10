@@ -224,7 +224,7 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
                 className={cn(
                   planPrimaryButtonClass,
                   saveFlash
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-foreground text-background"
                     : hasChanges
                     ? "bg-foreground text-background hover:bg-foreground/90"
                     : ""

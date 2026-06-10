@@ -61,7 +61,7 @@ export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
                     {ex.exercise}
                   </h3>
                   {ex.dropSets && (
-                    <Badge variant="secondary" className="flex items-center gap-0.5 rounded-[var(--app-radius-sm)] border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[8px] font-semibold uppercase text-amber-600 hover:bg-amber-500/15">
+                    <Badge variant="secondary" className="flex items-center gap-0.5 rounded-[var(--app-radius-sm)] border-[var(--app-border-strong)] bg-[var(--app-surface-muted)] px-1.5 py-0.5 text-[8px] font-semibold uppercase text-[var(--app-text-soft)] hover:bg-[var(--app-surface-raised)]">
                       <Zap size={8} fill="currentColor" /> Drop
                     </Badge>
                   )}
@@ -116,14 +116,14 @@ export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
 
               {ex.isAdvanced && ex.allSets.some(s => s.isDrop) && (
                 <div className="space-y-2 mt-4">
-                  <p className="pl-1 text-[9px] font-semibold uppercase tracking-normal text-amber-600">Drop Set Progressions</p>
+                  <p className="pl-1 text-[9px] font-semibold uppercase tracking-normal text-[var(--app-text-soft)]">Drop Set Progressions</p>
                   <div className="flex flex-wrap gap-2">
                     {ex.allSets.filter(s => s.isDrop).map((s, i) => {
                       const drops = s.drops || (s.dropReps || s.dropWeight ? [{ reps: s.dropReps, weight: s.dropWeight }] : []);
                       return drops.map((drop, j) => (
-                        <div key={`${i}-${j}`} className="flex items-center gap-2 rounded-[var(--app-radius-sm)] border border-amber-500/20 bg-amber-500/10 p-2">
-                          <Zap size={10} className="text-amber-500 fill-current" />
-                          <span className="text-[10px] font-semibold text-amber-700">
+                        <div key={`${i}-${j}`} className="flex items-center gap-2 rounded-[var(--app-radius-sm)] border border-[var(--app-border-strong)] bg-[var(--app-surface-muted)] p-2">
+                          <Zap size={10} className="text-[var(--app-text-soft)] fill-current" />
+                          <span className="text-[10px] font-semibold text-foreground">
                             {drop.reps} reps @ {drop.weight} kg
                           </span>
                         </div>
@@ -134,11 +134,11 @@ export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
               )}
 
               {!ex.isAdvanced && ex.dropSets && (
-                <div className="mt-4 flex items-center gap-3 rounded-[var(--app-radius-md)] border border-amber-500/20 bg-amber-500/10 p-3">
-                  <Layers size={14} className="text-amber-500" />
+                <div className="mt-4 flex items-center gap-3 rounded-[var(--app-radius-md)] border border-[var(--app-border-strong)] bg-[var(--app-surface-muted)] p-3">
+                  <Layers size={14} className="text-[var(--app-text-soft)]" />
                   <div className="flex-1">
-                    <p className="text-[9px] font-semibold uppercase tracking-normal text-amber-600">Drop Set Strategy</p>
-                    <p className="text-xs font-semibold text-amber-700">
+                    <p className="text-[9px] font-semibold uppercase tracking-normal text-[var(--app-text-soft)]">Drop Set Strategy</p>
+                    <p className="text-xs font-semibold text-foreground">
                       {ex.dropSets} sets @ {ex.dropWeight} kg drop
                     </p>
                   </div>

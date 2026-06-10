@@ -79,7 +79,7 @@ export function DataConsoleFooter({
         )}
 
         {(workoutsSaved || exerciseSaved || completionSaved) && (
-          <Badge variant="outline" className="inline-flex items-center gap-1.5 border-emerald-500/20 bg-emerald-500/10 px-3 py-1 font-semibold text-emerald-600">
+          <Badge variant="outline" className="inline-flex items-center gap-1.5 border-[var(--app-border-strong)] bg-[var(--app-accent-soft)] px-3 py-1 font-semibold text-foreground">
             <CheckCircle2 size={12} />
             Saved to cloud
           </Badge>

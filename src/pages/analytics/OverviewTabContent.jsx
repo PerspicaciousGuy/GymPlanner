@@ -57,8 +57,8 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                   subtitle={`${analyticsData.completedSessions} Days`}
                   trend={analyticsData.complianceTrend}
                   icon={<TrendingUp size={16} />}
-                  iconColor="text-emerald-500"
-                  bgColor="bg-emerald-500/10"
+                  iconColor="text-foreground"
+                  bgColor="bg-[var(--app-accent-soft)]"
                   className="stat-center snap-center"
                 />
                 <AnalyticsStatCard
@@ -67,8 +67,8 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                   value={8.4}
                   subtitle="Avg RPE"
                   icon={<Flame size={16} />}
-                  iconColor="text-orange-500"
-                  bgColor="bg-orange-500/10"
+                  iconColor="text-[var(--app-text-soft)]"
+                  bgColor="bg-[var(--app-surface-muted)]"
                   className="stat-center snap-center"
                 />
                 <AnalyticsStatCard
@@ -77,8 +77,8 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                   value={analyticsData.volumeHistory.length ? 12 : 0}
                   subtitle="New PRs"
                   icon={<Trophy size={16} />}
-                  iconColor="text-amber-500"
-                  bgColor="bg-amber-500/10"
+                  iconColor="text-[var(--app-text-soft)]"
+                  bgColor="bg-[var(--app-surface-muted)]"
                   className="stat-center snap-center"
                 />
               </div>
@@ -98,26 +98,26 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                   </div>
                 </Panel>
 
-                <Panel className="relative flex items-start gap-4 overflow-hidden border-emerald-500/15 bg-emerald-500/5 p-4">
-                  <div className="shrink-0 rounded-[var(--app-radius-md)] bg-emerald-500/15 p-2.5">
-                    <Target size={18} className="text-emerald-600" />
+                <Panel className="relative flex items-start gap-4 overflow-hidden border-[var(--app-border)] bg-[var(--app-accent-soft)] p-4">
+                  <div className="shrink-0 rounded-[var(--app-radius-md)] bg-[var(--app-accent-soft)] p-2.5">
+                    <Target size={18} className="text-foreground" />
                   </div>
                   <div className="min-w-0">
-                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-normal text-emerald-600">Primary Focus</p>
+                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-normal text-foreground">Primary Focus</p>
                     <p className="text-sm font-medium leading-snug text-foreground">
-                      <span className="font-semibold text-emerald-700">{analyticsData.insights.topMuscle?.name || 'Nothing'}</span> is your most trained muscle group with <span className="font-semibold text-emerald-600">{analyticsData.insights.topMuscle?.sets || 0} sets</span>.
+                      <span className="font-semibold text-foreground">{analyticsData.insights.topMuscle?.name || 'Nothing'}</span> is your most trained muscle group with <span className="font-semibold text-foreground">{analyticsData.insights.topMuscle?.sets || 0} sets</span>.
                     </p>
                   </div>
                 </Panel>
 
-                <Panel className="relative flex items-start gap-4 overflow-hidden border-amber-500/15 bg-amber-500/5 p-4">
-                  <div className="shrink-0 rounded-[var(--app-radius-md)] bg-amber-500/15 p-2.5">
-                    <Award size={18} className="text-amber-600" />
+                <Panel className="relative flex items-start gap-4 overflow-hidden border-[var(--app-border)] bg-[var(--app-surface-muted)] p-4">
+                  <div className="shrink-0 rounded-[var(--app-radius-md)] bg-[var(--app-surface-muted)] p-2.5">
+                    <Award size={18} className="text-[var(--app-text-soft)]" />
                   </div>
                   <div className="min-w-0">
-                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-normal text-amber-600">Top Movement</p>
+                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-normal text-[var(--app-text-soft)]">Top Movement</p>
                     <p className="text-sm font-medium leading-snug text-foreground">
-                      You've performed <span className="font-semibold text-amber-700">{analyticsData.insights.topExercise?.name || 'Nothing'}</span> the most, recording <span className="font-semibold text-amber-600">{analyticsData.insights.topExercise?.count || 0} sessions</span>.
+                      You've performed <span className="font-semibold text-foreground">{analyticsData.insights.topExercise?.name || 'Nothing'}</span> the most, recording <span className="font-semibold text-[var(--app-text-soft)]">{analyticsData.insights.topExercise?.count || 0} sessions</span>.
                     </p>
                   </div>
                 </Panel>
@@ -198,7 +198,7 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                       onClick={() => setMuscleMetric('sets')}
                       className={cn(
                         metricToggleButtonClass,
-                        muscleMetric === 'sets' ? "bg-[var(--app-surface)] text-foreground shadow-sm" : "text-muted-foreground"
+                        muscleMetric === 'sets' ? "bg-[var(--app-surface)] text-foreground shadow-[var(--app-shadow-sm)]" : "text-muted-foreground"
                       )}
                     >
                       Sets
@@ -207,7 +207,7 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                       onClick={() => setMuscleMetric('volume')}
                       className={cn(
                         metricToggleButtonClass,
-                        muscleMetric === 'volume' ? "bg-[var(--app-surface)] text-foreground shadow-sm" : "text-muted-foreground"
+                        muscleMetric === 'volume' ? "bg-[var(--app-surface)] text-foreground shadow-[var(--app-shadow-sm)]" : "text-muted-foreground"
                       )}
                     >
                       Volume
@@ -301,7 +301,7 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                           {diff !== 0 && (
                             <span className={cn(
                               "text-[9px] font-semibold tracking-normal",
-                              diff > 0 ? "text-emerald-500" : "text-rose-500"
+                              diff > 0 ? "text-foreground" : "text-destructive"
                             )}>
                               {diff > 0 ? '+' : ''}{diff}%
                             </span>
@@ -322,7 +322,7 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                   <div>
                     <h3 className={analyticsPanelTitleClass}>
-                      <Trophy size={16} className="text-amber-500" />
+                      <Trophy size={16} className="text-[var(--app-text-soft)]" />
                       Personal Records
                     </h3>
                     <p className={analyticsPanelMetaClass}>All-time best lifts</p>
@@ -331,7 +331,7 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                   {analyticsData.personalRecords.map((pr, idx) => (
-                    <div key={idx} className="group relative overflow-hidden rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-4 transition-all hover:border-amber-500/30">
+                    <div key={idx} className="group relative overflow-hidden rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-4 transition-all hover:border-[var(--app-border-strong)]">
                       <div className="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 group-hover:scale-110 group-hover:rotate-12 transition-all">
                         <Trophy size={64} className="text-foreground" />
                       </div>

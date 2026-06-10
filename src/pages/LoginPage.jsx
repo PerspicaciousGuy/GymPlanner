@@ -125,7 +125,7 @@ export default function LoginPage({ authState, onLoginSuccess, onBack }) {
                     exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="mb-2 flex items-start gap-3 rounded-[var(--app-radius-md)] border border-red-500/25 bg-red-500/10 p-4 text-red-500">
+                    <div className="mb-2 flex items-start gap-3 rounded-[var(--app-radius-md)] border border-destructive/20 bg-destructive/10 p-4 text-destructive">
                       <AlertCircle size={18} className="shrink-0 mt-0.5" />
                       <p className="text-sm font-medium">{error}</p>
                     </div>

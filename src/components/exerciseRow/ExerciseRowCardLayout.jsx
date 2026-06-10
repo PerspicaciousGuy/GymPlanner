@@ -100,7 +100,7 @@ export default function ExerciseRowCardLayout({
                   <div className="flex items-center justify-between rounded-[var(--app-radius-md)] border border-destructive/20 bg-destructive/10 p-2 animate-in slide-in-from-top-1 duration-200">
                     <span className="text-xs font-semibold uppercase text-destructive">Delete "{exercise}"?</span>
                     <div className="flex gap-2">
-                      <button onClick={handleConfirmDelete} className="rounded-[var(--app-radius-sm)] bg-destructive p-1.5 text-destructive-foreground shadow-[var(--app-shadow-sm)]"><Check size={14} strokeWidth={3} /></button>
+                      <button onClick={handleConfirmDelete} className="rounded-[var(--app-radius-sm)] bg-destructive p-1.5 text-background shadow-[var(--app-shadow-sm)]"><Check size={14} strokeWidth={3} /></button>
                       <button onClick={handleCancelDelete} className="rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1.5 text-muted-foreground shadow-[var(--app-shadow-sm)]"><X size={14} strokeWidth={3} /></button>
                     </div>
                   </div>

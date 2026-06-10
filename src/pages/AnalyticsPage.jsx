@@ -38,7 +38,7 @@ function AnalyticsTabsList() {
       <TabsTrigger value="history" className={analyticsTabTriggerClass}>History</TabsTrigger>
       <TabsTrigger value="evolution" className={analyticsTabTriggerClass}>Focus</TabsTrigger>
       <TabsTrigger value="recovery" className={cn(analyticsTabTriggerClass, "flex items-center justify-center gap-1")}>
-        Recovery <span className="h-1 w-1 shrink-0 rounded-full bg-emerald-500" />
+        Recovery <span className="h-1 w-1 shrink-0 rounded-full bg-foreground" />
       </TabsTrigger>
     </TabsList>
   );

@@ -53,7 +53,6 @@ export default function EditRoutinePage({ routineId, onBack }) {
     
     const currentRow = { ...next[gIdx].rows[rIdx], [field]: value };
     
-    // Cascading resets
     if (field === 'muscle') {
       currentRow.subMuscle = '';
       currentRow.exercise = '';
@@ -166,7 +165,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
               disabled={isSaved}
               className={cn(
                 "h-10 rounded-[var(--app-radius-md)] px-5 text-[10px] font-semibold uppercase tracking-normal transition-colors shadow-[var(--app-shadow-sm)]",
-                isSaved ? "bg-emerald-500 text-white hover:bg-emerald-500" : "bg-foreground text-background hover:bg-foreground/90"
+                isSaved ? "bg-foreground text-background hover:bg-foreground/90" : "bg-foreground text-background hover:bg-foreground/90"
               )}
             >
               {isSaved ? "Saved" : "Save Changes"}
@@ -176,13 +175,12 @@ export default function EditRoutinePage({ routineId, onBack }) {
       />
 
       <div className="space-y-10">
-        {/* Title Section */}
         <Panel className="space-y-4 p-5 md:p-6 edit-header">
           <Badge className="rounded-full border-none bg-[var(--app-accent-soft)] px-3 py-1 text-[9px] font-semibold uppercase tracking-normal text-foreground">
             Routing Configuration
           </Badge>
           <div className="relative group">
-             <div className="absolute left-0 top-1/2 -translate-y-1/2 -ml-3 w-1.5 h-12 bg-foreground rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
+             <div className="absolute left-0 top-1/2 -ml-3 h-12 w-1.5 -translate-y-1/2 rounded-full bg-foreground opacity-0 transition-opacity group-focus-within:opacity-100" />
              <input 
                value={name}
                onChange={(e) => setName(e.target.value)}
@@ -193,11 +191,10 @@ export default function EditRoutinePage({ routineId, onBack }) {
           <p className="text-sm font-medium text-muted-foreground">Routine templates are reused when building weekly and cycle plans.</p>
         </Panel>
 
-        {/* Exercises Section */}
         <div className="space-y-6">
           <div className="flex items-center justify-between px-2">
             <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
-               <div className="w-2 h-2 rounded-full bg-emerald-500" />
+               <div className="h-2 w-2 rounded-full bg-foreground" />
                Exercise Flow
             </h2>
             <Button 
@@ -221,7 +218,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                 transition={{ type: "spring", stiffness: 350, damping: 25, mass: 1 }}
                 className="group/card routine-section relative overflow-hidden rounded-[var(--app-radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] p-5 shadow-[var(--app-shadow-sm)] transition-colors hover:border-[var(--app-border-strong)] md:p-6"
               >
-                <div className="pointer-events-none absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-bl-[4rem] bg-[var(--app-surface-muted)]" />
+                <div className="pointer-events-none absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-bl-[var(--app-radius-lg)] bg-[var(--app-surface-muted)]" />
                 
                 <div className="flex items-center justify-between mb-6 relative z-10">
                   <span className="rounded-full border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 py-1 text-[10px] font-semibold uppercase tracking-normal text-foreground">
@@ -231,7 +228,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                     variant="ghost" 
                     size="icon" 
                     onClick={() => removeGroup(gIdx)}
-                    className="h-8 w-8 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg"
+                    className="h-8 w-8 rounded-[var(--app-radius-sm)] text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   >
                     <Trash2 size={16} />
                   </Button>
@@ -260,7 +257,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                           <select 
                             value={row.muscle || ''}
                             onChange={(e) => handleGroupTextChange(gIdx, rIdx, 'muscle', e.target.value)}
-                            className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors focus:border-[var(--app-border-strong)]"
+                            className="h-10 w-full cursor-pointer appearance-none rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors focus:border-[var(--app-border-strong)]"
                           >
                             <option value="">Select Muscle...</option>
                             {muscleList.map(m => <option key={m} value={m}>{m.toUpperCase()}</option>)}
@@ -271,7 +268,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                           <select 
                             value={row.subMuscle || ''}
                             onChange={(e) => handleGroupTextChange(gIdx, rIdx, 'subMuscle', e.target.value)}
-                            className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
+                            className="h-10 w-full cursor-pointer appearance-none rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
                             disabled={!row.muscle}
                           >
                             <option value="">Select Sub-Muscle...</option>
@@ -283,7 +280,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                           <select 
                             value={row.exercise || ''}
                             onChange={(e) => handleGroupTextChange(gIdx, rIdx, 'exercise', e.target.value)}
-                            className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
+                            className="h-10 w-full cursor-pointer appearance-none rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
                             disabled={!row.subMuscle}
                           >
                             <option value="">Select Exercise...</option>
@@ -294,7 +291,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
 
                       <div className="flex items-center justify-between pt-1">
                         <div className="flex items-center gap-3">
-                           <div className="flex items-center gap-2 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
+                           <div className="flex items-center gap-2 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
                               <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Sets</span>
                               <input 
                                 value={row.sets || ''} 
@@ -302,7 +299,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                                 className="w-8 bg-transparent text-center text-xs font-semibold text-foreground outline-none"
                               />
                            </div>
-                           <div className="flex items-center gap-2 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
+                           <div className="flex items-center gap-2 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
                               <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Reps</span>
                               <input 
                                 value={row.reps || ''} 
@@ -316,7 +313,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                            variant="ghost" 
                            size="icon"
                            onClick={() => removeRowFromGroup(gIdx, rIdx)}
-                           className="h-8 w-8 text-muted-foreground hover:text-rose-500 transition-all md:opacity-0 md:group-hover/row:opacity-100"
+                           className="h-8 w-8 text-muted-foreground transition-all hover:text-destructive md:opacity-0 md:group-hover/row:opacity-100"
                         >
                            <Trash2 size={14} />
                         </Button>
@@ -328,7 +325,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                   <Button 
                     variant="ghost" 
                     onClick={() => addRowToGroup(gIdx)}
-                    className="mt-2 h-10 w-full rounded-xl border border-dashed border-[var(--app-border)] text-[10px] font-semibold uppercase tracking-normal text-muted-foreground hover:border-[var(--app-border-strong)] hover:bg-[var(--app-surface)] hover:text-foreground"
+                    className="mt-2 h-10 w-full rounded-[var(--app-radius-md)] border border-dashed border-[var(--app-border)] text-[10px] font-semibold uppercase tracking-normal text-muted-foreground hover:border-[var(--app-border-strong)] hover:bg-[var(--app-surface)] hover:text-foreground"
                   >
                     <Plus size={14} className="mr-2" /> Add Exercise to Section
                   </Button>
@@ -339,11 +336,10 @@ export default function EditRoutinePage({ routineId, onBack }) {
           </div>
         </div>
 
-        {/* Standalone Exercises Section */}
         <div className="space-y-6">
           <div className="flex items-center justify-between px-2">
             <h2 className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
-               <div className="w-2 h-2 rounded-full bg-amber-500" />
+               <div className="h-2 w-2 rounded-full bg-[var(--app-border-strong)]" />
                Advanced Exercises
             </h2>
             <Button 
@@ -378,7 +374,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                     <select 
                       value={row.muscle || ''}
                       onChange={(e) => handleStandaloneTextChange(rIdx, 'muscle', e.target.value)}
-                      className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors focus:border-[var(--app-border-strong)]"
+                      className="h-10 w-full cursor-pointer appearance-none rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors focus:border-[var(--app-border-strong)]"
                     >
                       <option value="">Select Muscle...</option>
                       {muscleList.map(m => <option key={m} value={m}>{m.toUpperCase()}</option>)}
@@ -389,7 +385,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                     <select 
                       value={row.subMuscle || ''}
                       onChange={(e) => handleStandaloneTextChange(rIdx, 'subMuscle', e.target.value)}
-                      className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
+                      className="h-10 w-full cursor-pointer appearance-none rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
                       disabled={!row.muscle}
                     >
                       <option value="">Select Sub-Muscle...</option>
@@ -401,7 +397,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                     <select 
                       value={row.exercise || ''}
                       onChange={(e) => handleStandaloneTextChange(rIdx, 'exercise', e.target.value)}
-                      className="h-10 w-full cursor-pointer appearance-none rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
+                      className="h-10 w-full cursor-pointer appearance-none rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-3 text-[10px] font-semibold text-foreground outline-none transition-colors disabled:opacity-50 focus:border-[var(--app-border-strong)]"
                       disabled={!row.subMuscle}
                     >
                       <option value="">Select Exercise...</option>
@@ -412,7 +408,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
 
                 <div className="flex items-center justify-between pt-1">
                   <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
+                      <div className="flex items-center gap-2 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
                         <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Sets</span>
                         <input 
                           value={row.totalSets || ''} 
@@ -427,7 +423,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                           className="w-8 bg-transparent text-center text-xs font-semibold text-foreground outline-none"
                         />
                      </div>
-                     <div className="flex items-center gap-2 rounded-xl border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
+                     <div className="flex items-center gap-2 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-4 py-1.5 shadow-[var(--app-shadow-sm)]">
                         <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Reps</span>
                         <input 
                           value={row.sets?.[0]?.reps || ''} 
@@ -450,7 +446,7 @@ export default function EditRoutinePage({ routineId, onBack }) {
                      variant="ghost" 
                      size="icon"
                      onClick={() => removeStandalone(rIdx)}
-                     className="h-8 w-8 text-muted-foreground hover:text-rose-500 transition-all md:opacity-0 md:group-hover/row:opacity-100"
+                     className="h-8 w-8 text-muted-foreground transition-all hover:text-destructive md:opacity-0 md:group-hover/row:opacity-100"
                   >
                      <Trash2 size={14} />
                   </Button>

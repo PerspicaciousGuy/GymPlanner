@@ -152,7 +152,7 @@ export default function App() {
         </nav>
 
         <div className="flex flex-col items-center gap-3">
-          <div className={`h-2 w-2 rounded-full transition-all ${syncScope.startsWith('local') ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+          <div className={`h-2 w-2 rounded-full transition-all ${syncScope.startsWith('local') ? 'bg-[var(--app-border-strong)]' : 'bg-foreground'}`} />
           <Button
             variant="outline"
             size="icon"

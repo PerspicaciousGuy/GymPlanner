@@ -109,7 +109,7 @@ export default function MealDetailPage({
         <h1 className="text-lg font-semibold tracking-normal text-foreground">Edit Meal</h1>
         <button
           onClick={handleDeleteMeal}
-          className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-500"
+          className="flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
         >
           <Trash2 size={20} />
         </button>
@@ -159,9 +159,9 @@ export default function MealDetailPage({
         {/* Macro Cards Row */}
         <div className="grid grid-cols-3 gap-3 mb-8">
           {[
-            { key: 'protein', label: 'Protein', icon: Zap, color: 'text-rose-500' },
-            { key: 'carbs', label: 'Carbs', icon: Cookie, color: 'text-amber-500' },
-            { key: 'fats', label: 'Fats', icon: Droplet, color: 'text-blue-500' },
+            { key: 'protein', label: 'Protein', icon: Zap, color: 'text-destructive' },
+            { key: 'carbs', label: 'Carbs', icon: Cookie, color: 'text-[var(--app-text-soft)]' },
+            { key: 'fats', label: 'Fats', icon: Droplet, color: 'text-foreground' },
           ].map(macro => (
             <Card key={macro.key} className="rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] shadow-[var(--app-shadow-sm)]">
               <CardContent className="p-0.5 px-4 flex flex-col items-start gap-1">
@@ -251,7 +251,7 @@ export default function MealDetailPage({
                     </div>
                     <button
                       onClick={() => handleRemoveItem(idx)}
-                      className="p-1.5 text-muted-foreground/40 hover:text-red-500 transition-colors"
+                      className="p-1.5 text-muted-foreground/40 hover:text-destructive transition-colors"
                     >
                       <Trash2 size={16} />
                     </button>

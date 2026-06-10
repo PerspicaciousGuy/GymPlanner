@@ -380,9 +380,9 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
         {/* Macro Cards Row */}
         <div className="grid grid-cols-3 gap-3 mb-8">
           {[
-            { key: 'protein', label: 'Protein', icon: Zap, color: 'text-rose-500' },
-            { key: 'carbs', label: 'Carbs', icon: Cookie, color: 'text-amber-500' },
-            { key: 'fats', label: 'Fats', icon: Droplet, color: 'text-blue-500' },
+            { key: 'protein', label: 'Protein', icon: Zap, color: 'text-destructive' },
+            { key: 'carbs', label: 'Carbs', icon: Cookie, color: 'text-[var(--app-text-soft)]' },
+            { key: 'fats', label: 'Fats', icon: Droplet, color: 'text-foreground' },
           ].map(macro => (
             <Panel key={macro.key} className="flex flex-col items-start gap-1 p-3">
                 <div className="flex items-center gap-1.5">
@@ -482,7 +482,7 @@ export default function FoodDetailPage({ food, onBack, onSave }) {
       <div
         className="fixed bottom-0 left-0 right-0 px-4 py-4 z-[111]"
         style={{
-          background: 'linear-gradient(to top, var(--app-bg) 60%, transparent)',
+          background: 'var(--app-bg)',
         }}
       >
         <Button

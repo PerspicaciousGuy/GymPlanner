@@ -192,7 +192,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Sun size={14} className={cn(settings.theme === 'light' ? "text-amber-500" : "text-muted-foreground/40")} />
+              <Sun size={14} className={cn(settings.theme === 'light' ? "text-[var(--app-text-soft)]" : "text-muted-foreground/40")} />
               <Switch 
                 checked={settings.theme === 'dark'} 
                 onCheckedChange={handleToggleTheme}
@@ -211,7 +211,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
                    onClick={() => handleToggleUnits('kg')}
                    className={cn(
                      "rounded-[var(--app-radius-sm)] px-3 py-1 text-[10px] font-semibold transition-all",
-                     settings.units === 'kg' ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                     settings.units === 'kg' ? "bg-foreground text-background shadow-[var(--app-shadow-sm)]" : "text-muted-foreground hover:text-foreground"
                    )}
                  >
                    KG
@@ -220,7 +220,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
                    onClick={() => handleToggleUnits('lbs')}
                    className={cn(
                      "rounded-[var(--app-radius-sm)] px-3 py-1 text-[10px] font-semibold transition-all",
-                     settings.units === 'lbs' ? "bg-foreground text-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                     settings.units === 'lbs' ? "bg-foreground text-background shadow-[var(--app-shadow-sm)]" : "text-muted-foreground hover:text-foreground"
                    )}
                  >
                    LBS
@@ -280,7 +280,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal px-1 flex items-center gap-1.5">
-                Target Calories <Flame size={10} className="text-amber-500 fill-amber-500" />
+                Target Calories <Flame size={10} className="text-[var(--app-text-soft)] fill-foreground" />
               </label>
               <Input 
                 type="number" 
@@ -291,7 +291,7 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-normal px-1 flex items-center gap-1.5">
-                Protein (Grams) <Zap size={10} className="text-rose-500 fill-rose-500" />
+                Protein (Grams) <Zap size={10} className="text-destructive fill-destructive" />
               </label>
               <Input 
                 type="number" 

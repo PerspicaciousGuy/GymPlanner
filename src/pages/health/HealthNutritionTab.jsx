@@ -330,7 +330,7 @@ export function HealthNutritionTab({
                     removeFoodFromLog(dateKey, entry.id);
                     onSetLogVersion(version => version + 1);
                   }}
-                  className="relative z-10 flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] text-muted-foreground/40 transition-colors hover:bg-red-500/10 hover:text-red-500"
+                  className="relative z-10 flex h-10 w-10 items-center justify-center rounded-[var(--app-radius-md)] text-muted-foreground/40 transition-colors hover:bg-destructive/10 hover:text-destructive"
                 >
                   <Trash2 size={18} />
                 </button>

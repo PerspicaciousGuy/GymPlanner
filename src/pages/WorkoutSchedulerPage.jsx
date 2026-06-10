@@ -30,10 +30,10 @@ import { Panel } from '../components/layout/Panel';
 
 const statusBadgeClass = "flex items-center gap-1.5 rounded-[var(--app-radius-sm)] border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-normal";
 const contextBadgeClasses = {
-  missed: "border-red-500/20 bg-red-500/10 text-red-500",
+  missed: "border-destructive/20 bg-destructive/10 text-destructive",
   upcoming: "border-[var(--app-border)] bg-[var(--app-surface-muted)] text-muted-foreground",
   today: "border-[var(--app-border)] bg-[var(--app-accent-soft)] text-foreground",
-  shifted: "border-amber-500/20 bg-amber-500/10 text-amber-600",
+  shifted: "border-[var(--app-border-strong)] bg-[var(--app-surface-muted)] text-[var(--app-text-soft)]",
   rest: "border-[var(--app-border)] bg-[var(--app-surface-muted)] text-muted-foreground",
   cycle: "border-[var(--app-border)] bg-[var(--app-accent-soft)] text-foreground",
 };

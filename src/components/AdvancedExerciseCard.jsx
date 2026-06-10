@@ -252,7 +252,7 @@ export default function AdvancedExerciseCard({
                           update({ exercise: '' });
                           setConfirmingDelete(false);
                         }} 
-                        className="rounded-[var(--app-radius-sm)] bg-destructive p-1.5 text-destructive-foreground shadow-[var(--app-shadow-sm)] transition-colors hover:bg-destructive/90"
+                        className="rounded-[var(--app-radius-sm)] bg-destructive p-1.5 text-background shadow-[var(--app-shadow-sm)] transition-colors hover:bg-destructive/90"
                       >
                         <Check size={14} strokeWidth={3} />
                       </button>

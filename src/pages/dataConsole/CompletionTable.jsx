@@ -66,9 +66,9 @@ export function CompletionTable({
                         className={cn(
                           "rounded-[var(--app-radius-sm)] border px-3 py-1.5 text-[10px] font-semibold underline-offset-2 transition-colors focus:outline-none",
                           status === 'done'
-                            ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
+                            ? "border-[var(--app-border-strong)] bg-[var(--app-accent-soft)] text-foreground"
                             : status === 'skipped'
-                              ? "border-amber-500/20 bg-amber-500/10 text-amber-600"
+                              ? "border-[var(--app-border-strong)] bg-[var(--app-surface-muted)] text-[var(--app-text-soft)]"
                               : "border-transparent bg-transparent text-muted-foreground hover:border-[var(--app-border)]"
                         )}
                         disabled={!dateKey}
