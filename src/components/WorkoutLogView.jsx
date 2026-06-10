@@ -32,9 +32,9 @@ export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
 
   if (allExercises.length === 0) {
     return (
-      <div className="py-12 flex flex-col items-center justify-center text-slate-300 gap-3 border-2 border-dashed border-slate-100 rounded-3xl">
+      <div className="flex flex-col items-center justify-center gap-3 rounded-[var(--app-radius-lg)] border-2 border-dashed border-[var(--app-border)] py-12 text-muted-foreground">
         <Activity size={48} strokeWidth={1} />
-        <p className="font-bold text-sm uppercase tracking-widest text-slate-400">No activity recorded</p>
+        <p className="text-sm font-semibold uppercase tracking-normal">No activity recorded</p>
       </div>
     );
   }
@@ -45,34 +45,33 @@ export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
         <AccordionItem 
           key={idx} 
           value={`item-${idx}`}
-          className="bg-white border border-slate-100 rounded-2xl px-4 shadow-sm hover:shadow-md transition-[box-shadow,border-color] group/card relative border-none ring-1 ring-slate-200/60"
+          className="group/card relative rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-4 shadow-[var(--app-shadow-sm)] transition-[box-shadow,border-color] hover:border-[var(--app-border-strong)] hover:shadow-[var(--app-shadow-md)]"
         >
-          {/* Accent decoration */}
-          <div className="absolute left-0 top-2 bottom-2 w-1 bg-indigo-500 rounded-full opacity-0 group-hover/card:opacity-100 transition-opacity" />
+          <div className="absolute bottom-2 left-0 top-2 w-1 rounded-[var(--app-radius-sm)] bg-foreground opacity-0 transition-opacity group-hover/card:opacity-100" />
           
           <AccordionTrigger className="hover:no-underline py-4">
             <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0 text-left">
-              <div className="bg-slate-50 w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center text-indigo-500 shrink-0 shadow-inner">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] text-foreground md:h-12 md:w-12">
                 <Activity size={18} className="md:size-5" />
               </div>
               
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <h3 className="text-sm md:text-base font-black text-slate-800 uppercase tracking-tight leading-tight break-words">
+                  <h3 className="break-words text-sm font-semibold uppercase leading-tight tracking-normal text-foreground md:text-base">
                     {ex.exercise}
                   </h3>
                   {ex.dropSets && (
-                    <Badge variant="secondary" className="bg-amber-50 text-amber-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase flex items-center gap-0.5 border-amber-100 hover:bg-amber-100">
+                    <Badge variant="secondary" className="flex items-center gap-0.5 rounded-[var(--app-radius-sm)] border-amber-500/20 bg-amber-500/10 px-1.5 py-0.5 text-[8px] font-semibold uppercase text-amber-600 hover:bg-amber-500/15">
                       <Zap size={8} fill="currentColor" /> Drop
                     </Badge>
                   )}
                 </div>
                 
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <Badge variant="outline" className="text-[9px] md:text-[10px] font-bold text-slate-400 border-slate-200 uppercase tracking-widest px-1.5 py-0">
+                  <Badge variant="outline" className="border-[var(--app-border)] px-1.5 py-0 text-[9px] font-semibold uppercase tracking-normal text-muted-foreground md:text-[10px]">
                     {ex.muscle}
                   </Badge>
-                  <span className="text-[9px] md:text-[10px] font-bold text-indigo-500/70 uppercase tracking-widest">
+                  <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground md:text-[10px]">
                     {ex.subMuscle}
                   </span>
                 </div>
@@ -80,51 +79,51 @@ export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
 
               <div className="flex items-center gap-4 mr-4">
                 <div className="hidden sm:flex flex-col items-end">
-                   <div className="flex items-center gap-1.5 text-slate-900 font-extrabold text-sm">
-                    <span className="text-indigo-600">{ex.sets || 0}</span>
-                    <span className="text-[9px] text-slate-300 font-black">×</span>
+                   <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                    <span>{ex.sets || 0}</span>
+                    <span className="text-[9px] font-semibold text-muted-foreground">x</span>
                     <span>{ex.reps || 0}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-slate-400 font-black text-[9px]">
-                    <Weight size={10} strokeWidth={3} className="text-indigo-600" />
-                    <span className="text-slate-700">{ex.weight || 0} kg</span>
+                  <div className="flex items-center gap-1 text-[9px] font-semibold text-muted-foreground">
+                    <Weight size={10} strokeWidth={3} className="text-foreground" />
+                    <span className="text-foreground">{ex.weight || 0} kg</span>
                   </div>
                 </div>
               </div>
             </div>
           </AccordionTrigger>
 
-          <AccordionContent className="pt-2 pb-8 border-t border-slate-50">
+          <AccordionContent className="border-t border-[var(--app-border)] pb-8 pt-2">
             <div className="space-y-4">
                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="bg-slate-50/50 rounded-xl p-3 border border-slate-100">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Sets</p>
-                  <p className="text-sm font-black text-slate-800">{ex.sets || 0}</p>
+                <div className="rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-3">
+                  <p className="mb-1 text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Sets</p>
+                  <p className="text-sm font-semibold text-foreground">{ex.sets || 0}</p>
                 </div>
-                <div className="bg-slate-50/50 rounded-xl p-3 border border-slate-100">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Reps</p>
-                  <p className="text-sm font-black text-slate-800">{ex.reps || 0}</p>
+                <div className="rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-3">
+                  <p className="mb-1 text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Reps</p>
+                  <p className="text-sm font-semibold text-foreground">{ex.reps || 0}</p>
                 </div>
-                <div className="bg-slate-50/50 rounded-xl p-3 border border-slate-100">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Weight</p>
-                  <p className="text-sm font-black text-indigo-600">{ex.weight || 0} kg</p>
+                <div className="rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-3">
+                  <p className="mb-1 text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Weight</p>
+                  <p className="text-sm font-semibold text-foreground">{ex.weight || 0} kg</p>
                 </div>
-                <div className="bg-orange-50/20 rounded-xl p-3 border border-orange-100/50">
-                  <p className="text-[9px] font-bold text-orange-400 uppercase tracking-widest mb-1">Intensity</p>
-                  <p className="text-sm font-black text-orange-600">Est. 8.5 RPE</p>
+                <div className="rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-3">
+                  <p className="mb-1 text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Intensity</p>
+                  <p className="text-sm font-semibold text-foreground">Est. 8.5 RPE</p>
                 </div>
               </div>
 
               {ex.isAdvanced && ex.allSets.some(s => s.isDrop) && (
                 <div className="space-y-2 mt-4">
-                  <p className="text-[9px] font-bold text-amber-600 uppercase tracking-widest pl-1">Drop Set Progressions</p>
+                  <p className="pl-1 text-[9px] font-semibold uppercase tracking-normal text-amber-600">Drop Set Progressions</p>
                   <div className="flex flex-wrap gap-2">
                     {ex.allSets.filter(s => s.isDrop).map((s, i) => {
                       const drops = s.drops || (s.dropReps || s.dropWeight ? [{ reps: s.dropReps, weight: s.dropWeight }] : []);
                       return drops.map((drop, j) => (
-                        <div key={`${i}-${j}`} className="flex items-center gap-2 p-2 bg-amber-50/50 rounded-xl border border-amber-100/50">
+                        <div key={`${i}-${j}`} className="flex items-center gap-2 rounded-[var(--app-radius-sm)] border border-amber-500/20 bg-amber-500/10 p-2">
                           <Zap size={10} className="text-amber-500 fill-current" />
-                          <span className="text-[10px] font-black text-amber-800">
+                          <span className="text-[10px] font-semibold text-amber-700">
                             {drop.reps} reps @ {drop.weight} kg
                           </span>
                         </div>
@@ -135,11 +134,11 @@ export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
               )}
 
               {!ex.isAdvanced && ex.dropSets && (
-                <div className="flex items-center gap-3 p-3 bg-amber-50/50 rounded-xl border border-amber-100/50 mt-4">
+                <div className="mt-4 flex items-center gap-3 rounded-[var(--app-radius-md)] border border-amber-500/20 bg-amber-500/10 p-3">
                   <Layers size={14} className="text-amber-500" />
                   <div className="flex-1">
-                    <p className="text-[9px] font-bold text-amber-600 uppercase tracking-widest">Drop Set Strategy</p>
-                    <p className="text-xs font-black text-amber-800">
+                    <p className="text-[9px] font-semibold uppercase tracking-normal text-amber-600">Drop Set Strategy</p>
+                    <p className="text-xs font-semibold text-amber-700">
                       {ex.dropSets} sets @ {ex.dropWeight} kg drop
                     </p>
                   </div>
@@ -149,7 +148,7 @@ export default function WorkoutLogView({ dayData, sessionKey = 'am', onEdit }) {
               <div className="flex justify-end pt-4 pb-2">
                 <button 
                   onClick={onEdit}
-                  className="flex items-center gap-2 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                  className="flex items-center gap-2 rounded-[var(--app-radius-md)] bg-[var(--app-accent-soft)] px-4 py-2 text-[10px] font-semibold uppercase tracking-normal text-foreground transition-colors hover:bg-[var(--app-surface-muted)]"
                 >
                   Edit Session Data <ChevronRight size={14} />
                 </button>
