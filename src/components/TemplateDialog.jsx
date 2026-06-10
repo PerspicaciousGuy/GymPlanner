@@ -53,21 +53,18 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-md rounded-[2.5rem] border-none shadow-[0_24px_48px_-12px_rgba(79,70,229,0.18)] p-0 overflow-hidden bg-white/98 backdrop-blur-md">
-        <DialogHeader className="p-8 pb-10 bg-indigo-500 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-white/10 rounded-full blur-2xl" />
-          <div className="absolute bottom-0 left-0 -ml-10 -mb-10 w-40 h-40 bg-indigo-400/20 rounded-full blur-xl" />
-          
-          <div className="relative z-10">
+      <DialogContent className="w-[92vw] max-w-md overflow-hidden rounded-[var(--app-radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] p-0 shadow-[var(--app-shadow-md)]">
+        <DialogHeader className="relative overflow-hidden border-b border-[var(--app-border)] bg-foreground p-8 pb-10 text-background">
+          <div>
             <div className="flex items-center gap-4 mb-3">
-              <div className="bg-white/20 p-2.5 rounded-2xl backdrop-blur-sm border border-white/10">
-                <Sparkles size={22} className="text-white drop-shadow-sm" />
+              <div className="rounded-[var(--app-radius-md)] border border-background/10 bg-background/15 p-2.5">
+                <Sparkles size={22} className="text-background" />
               </div>
-              <DialogTitle className="text-3xl font-black tracking-tight leading-none">
+              <DialogTitle className="text-3xl font-semibold leading-none tracking-normal">
                 {mode === 'save' ? 'Save Routine' : 'Load Routine'}
               </DialogTitle>
             </div>
-            <DialogDescription className="text-indigo-50/90 font-semibold text-sm leading-relaxed max-w-[90%]">
+            <DialogDescription className="max-w-[90%] text-sm font-medium leading-relaxed text-background/75">
               {mode === 'save' 
                 ? 'Capture your current session setup into a reusable elite protocol.' 
                 : 'Choose a master routine to instantly pre-fill your training session.'}
@@ -75,12 +72,12 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
           </div>
         </DialogHeader>
 
-        <div className="p-6 -mt-6 relative z-20 space-y-6 max-h-[60vh] overflow-y-auto scrollbar-none">
+        <div className="relative z-20 max-h-[60vh] space-y-6 overflow-y-auto p-6 scrollbar-none">
           {mode === 'save' ? (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-3">
-                <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-1 flex items-center gap-2">
-                  <div className="w-1 h-1 rounded-full bg-indigo-500" />
+                <label className="flex items-center gap-2 px-1 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">
+                  <div className="h-1 w-1 rounded-full bg-foreground" />
                   Routine Identity
                 </label>
                 <div className="relative group">
@@ -89,22 +86,22 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
                     placeholder="e.g. Hypertrophy: Lower A" 
                     value={templateName}
                     onChange={(e) => setTemplateName(e.target.value)}
-                    className="h-14 rounded-2xl border-slate-100 bg-slate-50/50 focus-visible:bg-white focus-visible:border-indigo-400 focus-visible:ring-indigo-500/10 transition-all font-black text-slate-800 text-base shadow-sm group-hover:shadow-md"
+                    className="h-14 rounded-[var(--app-radius-md)] border-[var(--app-border)] bg-[var(--app-surface-muted)] text-base font-semibold text-foreground shadow-[var(--app-shadow-sm)] transition-colors focus-visible:border-[var(--app-border-strong)] focus-visible:bg-[var(--app-surface)] focus-visible:ring-0"
                   />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-300 uppercase tracking-widest pointer-events-none group-focus-within:text-indigo-400 transition-colors">
+                  <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground transition-colors group-focus-within:text-foreground">
                     Required
                   </div>
                 </div>
               </div>
               
-              <div className="bg-indigo-50/50 rounded-[2rem] p-5 border border-indigo-100/50 flex items-start gap-4">
-                <div className="bg-white p-2.5 rounded-xl shadow-sm border border-indigo-50 text-indigo-500 shrink-0">
+              <div className="flex items-start gap-4 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-5">
+                <div className="shrink-0 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-2.5 text-foreground shadow-[var(--app-shadow-sm)]">
                   <Dumbbell size={20} />
                 </div>
                 <div>
-                  <p className="text-[11px] font-black text-slate-800 uppercase tracking-wider mb-1">Session Summary</p>
-                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                    Will preserve <span className="text-indigo-600 font-bold">{currentGroups.length} {currentGroups.length === 1 ? 'group' : 'groups'}</span> and <span className="text-indigo-600 font-bold">{currentStandaloneExercises.length} standalone {currentStandaloneExercises.length === 1 ? 'exercise' : 'exercises'}</span> with all target sets, reps, and load benchmarks.
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-normal text-foreground">Session Summary</p>
+                  <p className="text-[11px] font-medium leading-relaxed text-muted-foreground">
+                    Will preserve <span className="font-semibold text-foreground">{currentGroups.length} {currentGroups.length === 1 ? 'group' : 'groups'}</span> and <span className="font-semibold text-foreground">{currentStandaloneExercises.length} standalone {currentStandaloneExercises.length === 1 ? 'exercise' : 'exercises'}</span> with all target sets, reps, and load benchmarks.
                   </p>
                 </div>
               </div>
@@ -112,27 +109,26 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
           ) : (
             <div className="space-y-6 animate-in fade-in duration-500">
               <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={16} />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-foreground" size={16} />
                 <Input 
                   placeholder="Search your library..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12 rounded-2xl border-slate-100 bg-slate-50/50 hover:bg-slate-50 text-xs font-bold transition-all focus-visible:bg-white focus-visible:border-indigo-400 focus-visible:ring-indigo-500/10 shadow-sm"
+                  className="h-12 rounded-[var(--app-radius-md)] border-[var(--app-border)] bg-[var(--app-surface-muted)] pl-12 text-xs font-semibold shadow-[var(--app-shadow-sm)] transition-colors hover:bg-[var(--app-surface-raised)] focus-visible:border-[var(--app-border-strong)] focus-visible:bg-[var(--app-surface)] focus-visible:ring-0"
                 />
               </div>
 
               <div className="space-y-3">
                 {filteredTemplates.length === 0 ? (
                   <div className="py-16 text-center space-y-4">
-                    <div className="relative inline-block">
-                      <div className="absolute inset-0 bg-indigo-100 rounded-full blur-xl opacity-50" />
-                      <div className="relative bg-white w-20 h-20 rounded-[2rem] shadow-xl border border-slate-50 flex items-center justify-center mx-auto text-slate-200">
+                    <div className="inline-block">
+                      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--app-radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] text-muted-foreground shadow-[var(--app-shadow-sm)]">
                         <Dumbbell size={32} strokeWidth={1.5} />
                       </div>
                     </div>
                     <div>
-                      <p className="text-sm font-black text-slate-800 tracking-tight">No Routines Found</p>
-                      <p className="text-[11px] text-slate-400 font-bold uppercase tracking-[0.15em] mt-1">Save a workout session as a routine to see it here</p>
+                      <p className="text-sm font-semibold tracking-normal text-foreground">No Routines Found</p>
+                      <p className="mt-1 text-[11px] font-semibold uppercase tracking-normal text-muted-foreground">Save a workout session as a routine to see it here</p>
                     </div>
                   </div>
                 ) : (
@@ -141,18 +137,16 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
                       <button
                         key={t.id}
                         onClick={() => onSelect(t)}
-                        className="w-full p-5 rounded-[2rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] hover:border-indigo-100 hover:bg-indigo-50/20 hover:shadow-xl hover:shadow-indigo-500/5 transition-all flex items-center justify-between group relative overflow-hidden active:scale-[0.98]"
+                        className="group relative flex w-full items-center justify-between overflow-hidden rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-5 shadow-[var(--app-shadow-sm)] transition-[box-shadow,border-color,background-color,transform] hover:border-[var(--app-border-strong)] hover:bg-[var(--app-surface-raised)] hover:shadow-[var(--app-shadow-md)] active:scale-[0.98]"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-indigo-500/0 to-indigo-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
-                        
                         <div className="text-left relative z-10">
-                          <p className="font-black text-slate-800 text-[15px] tracking-tight group-hover:text-indigo-600 transition-colors">{t.name}</p>
+                          <p className="text-[15px] font-semibold tracking-normal text-foreground transition-colors">{t.name}</p>
                           <div className="flex items-center gap-4 mt-1.5">
-                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                              <Calendar size={12} className="text-slate-300" /> {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'Unknown Date'}
+                            <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">
+                              <Calendar size={12} /> {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'Unknown Date'}
                             </span>
-                            <div className="w-1 h-1 rounded-full bg-slate-200" />
-                            <span className="text-[10px] text-indigo-500 font-black uppercase tracking-[0.1em] px-2 py-0.5 bg-indigo-50 rounded-full border border-indigo-100/50">
+                            <div className="h-1 w-1 rounded-full bg-[var(--app-border)]" />
+                            <span className="rounded-[var(--app-radius-sm)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-normal text-foreground">
                               {(t.groups || []).length} Sections
                             </span>
                           </div>
@@ -161,12 +155,12 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
                         <div className="flex items-center gap-2 relative z-10">
                           <div 
                             onClick={(e) => handleDelete(t.id, e)}
-                            className="p-2.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"
+                            className="translate-x-2 rounded-[var(--app-radius-sm)] p-2.5 text-muted-foreground opacity-0 transition-all hover:bg-red-500/10 hover:text-red-500 group-hover:translate-x-0 group-hover:opacity-100"
                             title="Delete Routine"
                           >
                             <Trash2 size={16} />
                           </div>
-                          <div className="p-3 bg-slate-50 text-slate-400 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm group-hover:shadow-indigo-200 group-hover:rotate-0 -rotate-12">
+                          <div className="rounded-[var(--app-radius-md)] bg-[var(--app-surface-muted)] p-3 text-muted-foreground shadow-[var(--app-shadow-sm)] transition-colors group-hover:bg-foreground group-hover:text-background">
                             <ChevronRight size={18} strokeWidth={3} />
                           </div>
                         </div>
@@ -179,20 +173,20 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
           )}
         </div>
 
-        <DialogFooter className="p-6 bg-white border-t border-slate-50 relative z-30">
+        <DialogFooter className="relative z-30 border-t border-[var(--app-border)] bg-[var(--app-surface)] p-6">
           {mode === 'save' ? (
             <div className="flex gap-4 w-full">
               <Button 
                 variant="ghost" 
                 onClick={() => onOpenChange(false)}
-                className="flex-1 h-11 rounded-2xl font-black text-slate-400 uppercase tracking-[0.2em] text-[10px] hover:bg-slate-50 hover:text-slate-600 transition-all border border-slate-100"
+                className="h-11 flex-1 rounded-[var(--app-radius-md)] border border-[var(--app-border)] text-[10px] font-semibold uppercase tracking-normal text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
               >
                 Dismiss
               </Button>
               <Button 
                 onClick={handleSave}
                 disabled={!templateName.trim()}
-                className="flex-[1.5] h-11 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-indigo-100 hover:shadow-indigo-200 transition-all border-b-4 border-indigo-800 active:border-b-0 active:translate-y-1"
+                className="h-11 flex-[1.5] rounded-[var(--app-radius-md)] bg-foreground text-[10px] font-semibold uppercase tracking-normal text-background shadow-[var(--app-shadow-sm)] transition-colors hover:bg-foreground/90"
               >
                 Save Routine
               </Button>
@@ -201,7 +195,7 @@ export default function TemplateDialog({ open, onOpenChange, mode = 'load', curr
             <Button 
               variant="outline" 
               onClick={() => onOpenChange(false)}
-              className="w-full h-11 rounded-2xl font-black text-slate-400 border-slate-200 uppercase tracking-[0.2em] text-[10px] hover:bg-slate-50 hover:text-slate-600 transition-all shadow-sm"
+              className="h-11 w-full rounded-[var(--app-radius-md)] border-[var(--app-border)] text-[10px] font-semibold uppercase tracking-normal text-muted-foreground shadow-[var(--app-shadow-sm)] transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
             >
               Close Window
             </Button>

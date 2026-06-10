@@ -51,24 +51,24 @@ export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-[2.5rem] p-6 border-slate-100 shadow-2xl">
+      <DialogContent className="max-w-md rounded-[var(--app-radius-lg)] border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-[var(--app-shadow-md)]">
         <DialogHeader>
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-[var(--app-radius-md)] bg-[var(--app-accent-soft)] text-foreground">
             <Calendar size={24} />
           </div>
-          <DialogTitle className="text-xl font-black text-slate-800 tracking-tight">Shift Workout</DialogTitle>
-          <DialogDescription className="text-slate-500 font-medium">
+          <DialogTitle className="text-xl font-semibold tracking-normal text-foreground">Shift Workout</DialogTitle>
+          <DialogDescription className="font-medium text-muted-foreground">
             Where would you like to move this session?
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-4 space-y-3 max-h-[450px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-100">
+        <div className="mt-4 max-h-[450px] space-y-3 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[var(--app-border)]">
           {nextDays.map((day) => (
-            <div key={day.dateKey} className="p-4 rounded-[2rem] bg-slate-50 border border-slate-100/50">
-              <div className="flex items-center justify-between mb-3 px-1">
+            <div key={day.dateKey} className="rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface-muted)] p-4">
+              <div className="mb-3 flex items-center justify-between px-1">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase text-indigo-500 tracking-widest leading-none mb-1">{day.dayName}</span>
-                  <span className="text-[11px] font-bold text-slate-400 leading-none">{formatDateDisplay(day.date)}</span>
+                  <span className="mb-1 text-[10px] font-semibold uppercase leading-none tracking-normal text-foreground">{day.dayName}</span>
+                  <span className="text-[11px] font-medium leading-none text-muted-foreground">{formatDateDisplay(day.date)}</span>
                 </div>
               </div>
               
@@ -76,22 +76,22 @@ export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift })
                 <Button
                   variant="ghost"
                   className={cn(
-                    "flex flex-col items-start h-auto py-3 px-4 rounded-[1.25rem] border transition-all",
+                    "flex h-auto flex-col items-start rounded-[var(--app-radius-md)] border px-4 py-3 transition-colors",
                     day.am.isRest 
-                      ? "bg-white border-dashed border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300" 
-                      : "bg-white border-slate-100 text-slate-700 hover:bg-slate-50 hover:border-indigo-100 shadow-sm"
+                      ? "border-dashed border-emerald-500/20 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/15"
+                      : "border-[var(--app-border)] bg-[var(--app-surface)] text-foreground shadow-[var(--app-shadow-sm)] hover:bg-[var(--app-surface-raised)]"
                   )}
                   onClick={() => onShift(day.date, 'am')}
                 >
-                  <div className="flex items-center gap-2 mb-1.5 w-full">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <div className="mb-1.5 flex w-full items-center gap-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">
                       {day.pm.hasPlanned ? "AM Session" : "Session"}
                     </span>
                     {day.am.isRest && (
                       <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400" />
                     )}
                   </div>
-                  <span className="text-[12px] font-black text-slate-800 truncate w-full text-left">
+                  <span className="w-full truncate text-left text-[12px] font-semibold text-foreground">
                     {day.am.isRest ? "Add to Rest Slot" : (day.am.title || "Untitled")}
                   </span>
                 </Button>
@@ -100,20 +100,20 @@ export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift })
                   <Button
                     variant="ghost"
                     className={cn(
-                      "flex flex-col items-start h-auto py-3 px-4 rounded-[1.25rem] border transition-all",
+                      "flex h-auto flex-col items-start rounded-[var(--app-radius-md)] border px-4 py-3 transition-colors",
                       day.pm.isRest 
-                        ? "bg-white border-dashed border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300" 
-                        : "bg-white border-slate-100 text-slate-700 hover:bg-slate-50 hover:border-indigo-100 shadow-sm"
+                        ? "border-dashed border-emerald-500/20 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/15"
+                        : "border-[var(--app-border)] bg-[var(--app-surface)] text-foreground shadow-[var(--app-shadow-sm)] hover:bg-[var(--app-surface-raised)]"
                     )}
                     onClick={() => onShift(day.date, 'pm')}
                   >
-                    <div className="flex items-center gap-2 mb-1.5 w-full">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">PM Session</span>
+                    <div className="mb-1.5 flex w-full items-center gap-2">
+                      <span className="text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">PM Session</span>
                       {day.pm.isRest && (
                         <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400" />
                       )}
                     </div>
-                    <span className="text-[12px] font-black text-slate-800 truncate w-full text-left">
+                    <span className="w-full truncate text-left text-[12px] font-semibold text-foreground">
                       {day.pm.isRest ? "Add to Rest Slot" : (day.pm.title || "Untitled")}
                     </span>
                   </Button>
@@ -127,7 +127,7 @@ export default function ShiftPicker({ open, onOpenChange, sourceDate, onShift })
           <Button 
             variant="ghost" 
             onClick={() => onOpenChange(false)}
-            className="w-full rounded-xl text-slate-400 font-bold text-xs uppercase"
+            className="w-full rounded-[var(--app-radius-md)] text-xs font-semibold uppercase tracking-normal text-muted-foreground hover:bg-[var(--app-surface-muted)] hover:text-foreground"
           >
             Cancel
           </Button>
