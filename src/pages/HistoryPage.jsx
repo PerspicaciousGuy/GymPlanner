@@ -34,24 +34,24 @@ const historyLegendItemClass =
 
 const statusStyle = {
   completed: {
-    iconShell: "border-[var(--app-border-strong)] bg-[var(--app-accent-soft)]",
-    icon: "text-foreground",
-    dot: "bg-foreground",
+    iconShell: "border-[var(--status-completed-border)] bg-[var(--status-completed-bg)]",
+    icon: "text-[var(--status-completed)]",
+    dot: "bg-[var(--status-completed)]",
   },
   partial: {
-    iconShell: "border-[var(--app-border-strong)] bg-[var(--app-surface-muted)]",
-    icon: "text-[var(--app-text-soft)]",
-    dot: "bg-[var(--app-border-strong)]",
+    iconShell: "border-[var(--status-skipped-border)] bg-[var(--status-skipped-bg)]",
+    icon: "text-[var(--status-skipped)]",
+    dot: "bg-[var(--status-skipped)]",
   },
   skipped: {
-    iconShell: "border-[var(--app-border-strong)] bg-[var(--app-surface-muted)]",
-    icon: "text-[var(--app-text-soft)]",
-    dot: "bg-[var(--app-border-strong)]",
+    iconShell: "border-[var(--status-skipped-border)] bg-[var(--status-skipped-bg)]",
+    icon: "text-[var(--status-skipped)]",
+    dot: "bg-[var(--status-skipped)]",
   },
   missed: {
-    iconShell: "border-destructive/20 bg-destructive/10",
-    icon: "text-destructive",
-    dot: "bg-destructive",
+    iconShell: "border-[var(--status-missed-border)] bg-[var(--status-missed-bg)]",
+    icon: "text-[var(--status-missed)]",
+    dot: "bg-[var(--status-missed)]",
   },
   planned: {
     iconShell: "border-[var(--app-border)] bg-muted",
@@ -135,19 +135,19 @@ export default function HistoryPage({ onDateSelect }) {
 
       <div className="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-4 border-t border-[var(--app-border)] py-6">
         <div className={historyLegendItemClass}>
-          <CheckCircle2 size={16} className="text-foreground" />
+          <CheckCircle2 size={16} className="text-[var(--status-completed)]" />
           Completed
         </div>
         <div className={historyLegendItemClass}>
-          <LegendDot className="bg-[var(--app-border-strong)]" />
+          <LegendDot className="bg-[var(--status-skipped)]" />
           Partial
         </div>
         <div className={historyLegendItemClass}>
-          <LegendDot className="bg-[var(--app-border-strong)]" />
+          <LegendDot className="bg-[var(--status-skipped)]" />
           Skipped
         </div>
         <div className={historyLegendItemClass}>
-          <LegendDot className="bg-destructive" />
+          <LegendDot className="bg-[var(--status-missed)]" />
           Missed
         </div>
         <div className={historyLegendItemClass}>
