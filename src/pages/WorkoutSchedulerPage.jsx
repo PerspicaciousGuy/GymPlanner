@@ -38,6 +38,14 @@ const contextBadgeClasses = {
   cycle: "border-[var(--app-border)] bg-[var(--app-accent-soft)] text-foreground",
 };
 
+const dayBadgeBaseClass = "flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-full border text-center shadow-[var(--app-shadow-sm)] md:h-16 md:w-16";
+const dayBadgeStateClasses = {
+  missed: "border-destructive/15 bg-destructive/10 text-destructive",
+  today: "border-[var(--app-border)] bg-[var(--app-accent-soft)] text-foreground",
+  upcoming: "border-[var(--app-border)] bg-[var(--app-surface-muted)] text-foreground",
+  default: "border-[var(--app-border)] bg-[var(--app-surface-muted)] text-foreground",
+};
+
 function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged }) {
   const [open, setOpen] = useState(defaultOpen && !section.isFullyComplete);
 
@@ -87,6 +95,10 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
     </div>
   ) : null;
 
+  const dayBadgeState = section.isMissed ? 'missed' : section.isTomorrow ? 'upcoming' : section.showContextBadge ? 'today' : 'default';
+  const dayAbbreviation = section.dayName.slice(0, 3).toUpperCase();
+  const dayNumber = section.date.getDate();
+
   return (
     <Panel
       className={cn(
@@ -98,43 +110,54 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
       <button
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "w-full flex items-center justify-between px-4 md:px-5 py-4 bg-transparent transition-colors",
+          "w-full flex items-center justify-between gap-4 bg-transparent px-4 py-4 text-left transition-colors md:px-5 md:py-4",
           open && "border-b border-[var(--app-border)]"
         )}
       >
-        <div className="flex items-center gap-2 md:gap-4">
-          <div className="flex flex-col items-start min-w-[80px] md:min-w-[100px]">
-            <span className={`text-[10px] md:text-xs font-semibold uppercase tracking-normal ${open ? 'text-foreground' : 'text-muted-foreground'}`}>
-              {section.dayName}
+        <div className="flex min-w-0 flex-1 items-center gap-3 md:gap-4">
+          <div className={cn(dayBadgeBaseClass, dayBadgeStateClasses[dayBadgeState])}>
+            <span className="text-[9px] font-semibold uppercase leading-none tracking-normal text-[var(--app-text-soft)]">
+              {dayAbbreviation}
             </span>
-            <span className="text-[10px] font-medium text-muted-foreground">{formatDateDisplay(section.date)}</span>
-          </div>
-          
-          <div className="w-px h-6 md:h-8 bg-[var(--app-border)] mx-0.5 md:mx-1 hidden xs:block" />
-          
-          <div className="scale-90 md:scale-100 origin-left flex items-center gap-2">
-            {badgeEl}
-            {shiftedBadge}
-            {section.cycleInfo && (
-              <div className={cn(
-                statusBadgeClass,
-                section.cycleInfo.slot?.type === 'rest'
-                  ? contextBadgeClasses.rest
-                  : contextBadgeClasses.cycle
-              )}>
-                <Repeat size={10} strokeWidth={3} />
-                <span>
-                  Day {section.cycleInfo.position + 1}/{section.cycleInfo.cycleLength}
-                </span>
-              </div>
-            )}
+            <span className="mt-0.5 text-xl font-semibold leading-none tracking-normal text-foreground md:text-2xl">
+              {dayNumber}
+            </span>
           </div>
 
-          {section.muscleGroup && (
-            <span className="hidden max-w-[150px] truncate text-[10px] font-semibold text-muted-foreground md:text-[11px] sm:block">
-              - {section.muscleGroup}
-            </span>
-          )}
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+              <div className="min-w-0">
+                <span className={`block truncate text-sm font-semibold tracking-normal md:text-base ${open ? 'text-foreground' : 'text-foreground'}`}>
+                  {section.dayName}
+                </span>
+                <span className="mt-0.5 block text-[10px] font-medium text-muted-foreground md:text-xs">{formatDateDisplay(section.date)}</span>
+              </div>
+
+              <div className="flex origin-left scale-95 flex-wrap items-center gap-2 md:scale-100">
+                {badgeEl}
+                {shiftedBadge}
+                {section.cycleInfo && (
+                  <div className={cn(
+                    statusBadgeClass,
+                    section.cycleInfo.slot?.type === 'rest'
+                      ? contextBadgeClasses.rest
+                      : contextBadgeClasses.cycle
+                  )}>
+                    <Repeat size={10} strokeWidth={3} />
+                    <span>
+                      Day {section.cycleInfo.position + 1}/{section.cycleInfo.cycleLength}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {section.muscleGroup && (
+              <span className="hidden max-w-[220px] truncate text-[10px] font-semibold text-muted-foreground md:text-[11px] sm:block">
+                {section.muscleGroup}
+              </span>
+            )}
+          </div>
         </div>
         
         <motion.div
