@@ -1,0 +1,86 @@
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body {
+    cursor: url('/dumbbell-cursor.svg') 8 8, auto;
+  }
+
+  a,
+  button,
+  [role="button"],
+  summary,
+  select,
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="range"] {
+    cursor: url('/dumbbell-cursor.svg') 8 8, pointer;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    cursor: text;
+  }
+
+  button,
+  a,
+  [role="button"] {
+    transition:
+      transform var(--app-motion-fast) ease,
+      border-color var(--app-motion-fast) ease,
+      background-color var(--app-motion-fast) ease,
+      box-shadow var(--app-motion-fast) ease,
+      color var(--app-motion-fast) ease;
+  }
+
+  button:hover,
+  a:hover,
+  [role="button"]:hover {
+    transform: translateY(-1px);
+  }
+
+  button:active,
+  a:active,
+  [role="button"]:active {
+    transform: translateY(0);
+  }
+
+  main article,
+  main img,
+  main [class*="shadow-"] {
+    transition:
+      transform var(--app-motion-standard) ease,
+      border-color var(--app-motion-standard) ease,
+      box-shadow var(--app-motion-standard) ease,
+      opacity var(--app-motion-standard) ease;
+  }
+
+  main article:hover {
+    transform: translateY(-2px);
+    border-color: var(--app-border-strong);
+    box-shadow: var(--app-shadow-md);
+  }
+
+  main img:hover {
+    transform: translateY(-2px);
+  }
+
+  main button:hover svg,
+  main a:hover svg {
+    transform: translateX(1px);
+  }
+
+  main svg {
+    transition: transform var(--app-motion-fast) ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
