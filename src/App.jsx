@@ -20,6 +20,7 @@ const EditRoutinePage = lazy(() => import('./pages/EditRoutinePage'));
 const TrainingPlanPage = lazy(() => import('./pages/TrainingPlanPage'));
 const HealthPage = lazy(() => import('./pages/HealthPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
+const LandingPage = lazy(() => import('./pages/landing/LandingPage'));
 
 const navItems = [
   { id: 'workout', name: 'Training', icon: Calendar },
@@ -28,6 +29,22 @@ const navItems = [
   { id: 'analytics', name: 'Insights', icon: BarChart3 },
   { id: 'profile', name: 'Profile', icon: User },
 ];
+
+const capturePageMap = {
+  landing: 'landing',
+  training: 'workout',
+  workout: 'workout',
+  health: 'health',
+  routines: 'routines',
+  analytics: 'analytics',
+  profile: 'profile',
+};
+
+function getInitialPage() {
+  if (typeof window === 'undefined') return 'landing';
+  const capturePage = new URLSearchParams(window.location.search).get('capture');
+  return capturePageMap[capturePage] || 'landing';
+}
 
 function PageFallback() {
   return (
@@ -60,7 +77,7 @@ function NavItemButton({ item, active, onClick, mobile = false }) {
 }
 
 export default function App() {
-  const [activePage, setActivePage] = useState('workout');
+  const [activePage, setActivePage] = useState(getInitialPage);
   const [selectedHistoryDate, setSelectedHistoryDate] = useState(null);
   const [editRoutineId, setEditRoutineId] = useState(null);
   const [syncNonce, setSyncNonce] = useState(0);
@@ -69,6 +86,7 @@ export default function App() {
   const authState = useFirebaseAuth();
   const syncScope = authState.user?.uid || (authState.isConfigured ? 'signed-out' : 'local');
   const syncKey = `${syncScope}:${syncNonce}`;
+  const isCaptureMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('capture');
 
   const [settings, setSettings] = useState(() => {
     const s = loadSettings();
@@ -106,7 +124,13 @@ export default function App() {
     setFullScreenMode(false);
   }, [activePage]);
 
-  const showNavBar = !fullScreenMode && !['training-plan', 'edit-routine', 'dayDetail', 'login'].includes(activePage);
+  useEffect(() => {
+    if (!isCaptureMode && !authState.loading && authState.user && activePage === 'landing') {
+      setActivePage('workout');
+    }
+  }, [activePage, authState.loading, authState.user, isCaptureMode]);
+
+  const showNavBar = !fullScreenMode && !['landing', 'training-plan', 'edit-routine', 'dayDetail', 'login'].includes(activePage);
 
   const handleDateSelect = (date) => {
     setSelectedHistoryDate(date);
@@ -127,46 +151,48 @@ export default function App() {
 
     <div className="flex min-h-screen flex-col bg-[var(--app-bg)] md:flex-row">
       {/* Sidebar for Desktop */}
-      <aside className="sticky top-0 z-50 hidden h-screen w-24 flex-col items-center gap-8 border-r border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-6 md:flex">
-        <div className="flex flex-col items-center gap-2">
-          <div className="flex h-11 w-11 items-center justify-center rounded-[var(--app-radius-md)] bg-foreground text-background shadow-[var(--app-shadow-sm)]">
-            <span className="text-xl font-bold">G</span>
+      {showNavBar && (
+        <aside className="sticky top-0 z-50 hidden h-screen w-24 flex-col items-center gap-8 border-r border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-6 md:flex">
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex h-11 w-11 items-center justify-center rounded-[var(--app-radius-md)] bg-foreground text-background shadow-[var(--app-shadow-sm)]">
+              <span className="text-xl font-bold">G</span>
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-normal text-muted-foreground">Planner</span>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-normal text-muted-foreground">Planner</span>
-        </div>
 
-        <nav className="flex flex-1 flex-col gap-2">
-          {navItems.map((item) => (
-            <NavItemButton
-              key={item.id}
-              item={item}
-              active={activePage === item.id}
-              onClick={() => {
-                setActivePage(item.id);
-                if (item.id === 'workout') {
-                  setSelectedHistoryDate(null);
-                }
-              }}
-            />
-          ))}
-        </nav>
+          <nav className="flex flex-1 flex-col gap-2">
+            {navItems.map((item) => (
+              <NavItemButton
+                key={item.id}
+                item={item}
+                active={activePage === item.id}
+                onClick={() => {
+                  setActivePage(item.id);
+                  if (item.id === 'workout') {
+                    setSelectedHistoryDate(null);
+                  }
+                }}
+              />
+            ))}
+          </nav>
 
-        <div className="flex flex-col items-center gap-3">
-          <div className={`h-2 w-2 rounded-full transition-all ${syncScope.startsWith('local') ? 'bg-[var(--app-border-strong)]' : 'bg-foreground'}`} />
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setSyncNonce(n => n + 1)}
-            className="rounded-[var(--app-radius-md)] border-[var(--app-border)] text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground"
-          >
-            <RefreshCw size={18} />
-          </Button>
+          <div className="flex flex-col items-center gap-3">
+            <div className={`h-2 w-2 rounded-full transition-all ${syncScope.startsWith('local') ? 'bg-[var(--app-border-strong)]' : 'bg-foreground'}`} />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSyncNonce(n => n + 1)}
+              className="rounded-[var(--app-radius-md)] border-[var(--app-border)] text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground"
+            >
+              <RefreshCw size={18} />
+            </Button>
 
-          <Button variant="outline" size="icon" className="rounded-[var(--app-radius-md)] border-[var(--app-border)] text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground">
-            <Cloud size={18} />
-          </Button>
-        </div>
-      </aside>
+            <Button variant="outline" size="icon" className="rounded-[var(--app-radius-md)] border-[var(--app-border)] text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground">
+              <Cloud size={18} />
+            </Button>
+          </div>
+        </aside>
+      )}
 
       {/* Main Content Area */}
       <div className={cn(
@@ -175,10 +201,20 @@ export default function App() {
       )}>
 
         <main className="flex-1 overflow-auto">
-          <div className="mx-auto w-full max-w-[1600px] p-4 sm:p-5 lg:p-7">
+          <div className={cn(
+            "mx-auto w-full",
+            activePage === 'landing' ? "max-w-none p-0" : "max-w-[1600px] p-4 sm:p-5 lg:p-7"
+          )}>
             {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} targetDate={selectedHistoryDate} />}
             {activePage !== 'workout' && (
               <Suspense fallback={<PageFallback />}>
+                {activePage === 'landing' && (
+                  <LandingPage
+                    onStart={() => setActivePage(authState.isConfigured ? 'login' : 'workout')}
+                    onSignIn={() => setActivePage('login')}
+                    onOpenPlanner={() => setActivePage('workout')}
+                  />
+                )}
                 {activePage === 'health' && (
                   <HealthPage 
                     settings={settings} 
@@ -193,13 +229,13 @@ export default function App() {
                 {activePage === 'analytics' && <AnalyticsPage onDateSelect={handleDateSelect} />}
                 {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('analytics')} syncKey={syncKey} />}
                 {activePage === 'profile' && <ProfilePage authState={authState} onDataRefreshed={() => setSyncNonce(n => n + 1)} onSettingsChange={setSettings} onNavigateToLogin={() => setActivePage('login')} />}
-                {activePage === 'login' && <LoginPage authState={authState} onLoginSuccess={() => setActivePage('profile')} onBack={() => setActivePage('profile')} />}
+                {activePage === 'login' && <LoginPage authState={authState} onLoginSuccess={() => setActivePage('profile')} onBack={() => setActivePage('landing')} />}
               </Suspense>
             )}
           </div>
         </main>
 
-        {!fullScreenMode && activePage !== 'login' && (
+        {!fullScreenMode && !['landing', 'login'].includes(activePage) && (
           <QuickActionHub 
             onNavigateToHealth={(view) => {
               setHealthInitialView(view);

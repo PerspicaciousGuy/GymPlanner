@@ -3,6 +3,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "./styles/microInteractions.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -116,6 +117,8 @@ svg.recharts-surface {
   --app-radius-lg: 1rem;
   --app-shadow-sm: 0 1px 2px rgb(15 23 42 / 0.05);
   --app-shadow-md: 0 10px 24px -18px rgb(15 23 42 / 0.45);
+  --app-motion-fast: 140ms;
+  --app-motion-standard: 220ms;
 
   /* Light Theme Specific Colors */
   --color-white: #ffffff;
