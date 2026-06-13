@@ -90,8 +90,17 @@ export default function AdvancedExerciseCard({
     onChange({ ...exerciseData, ...patch });
   }, [exerciseData, onChange]);
 
+  const createSetFromPrevious = (previousSet = {}) => ({
+    reps: previousSet.reps || '',
+    weight: previousSet.weight || '',
+    dropReps: previousSet.dropReps || '',
+    dropWeight: previousSet.dropWeight || '',
+    drops: (previousSet.drops || []).map((drop) => ({ ...drop })),
+    isDrop: hasDropsets || Boolean(previousSet.isDrop),
+  });
+
   const handleAddSet = () => {
-    const newSets = [...sets, { reps: '', weight: '', dropReps: '', dropWeight: '', isDrop: hasDropsets }];
+    const newSets = [...sets, createSetFromPrevious(sets[sets.length - 1])];
     update({ sets: newSets, totalSets: newSets.length });
   };
 
@@ -110,8 +119,7 @@ export default function AdvancedExerciseCard({
     let newSets = [...sets];
     if (num > sets.length) {
       for (let i = sets.length; i < num; i++) {
-        const lastSet = sets[sets.length - 1] || { reps: '', weight: '', isDrop: false };
-        newSets.push({ ...lastSet, isDrop: hasDropsets });
+        newSets.push(createSetFromPrevious(newSets[newSets.length - 1]));
       }
     } else if (num < sets.length) {
       newSets = newSets.slice(0, num);
