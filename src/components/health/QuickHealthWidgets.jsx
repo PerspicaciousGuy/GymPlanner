@@ -3,12 +3,11 @@ import { Scale, GlassWater, Plus, Minus, PencilLine } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from "@/components/ui/card";
 import { getToday, formatDateKey } from '../../utils/dateUtils';
-import { getWeightForDate, getWaterForDate, logWeight, logWater, getLatestWeight } from '../../utils/vitalsDatabase';
+import { getWeightForDate, getWaterForDate, logWeight, logWater } from '../../utils/vitalsDatabase';
 
 export default function QuickHealthWidgets() {
   const [todayWeight, setTodayWeight] = useState(null);
   const [todayWater, setTodayWater] = useState(0);
-  const [latestWeight, setLatestWeight] = useState(null);
   const [showWeightInput, setShowWeightInput] = useState(false);
   const [weightInputValue, setWeightInputValue] = useState('');
 
@@ -17,7 +16,6 @@ export default function QuickHealthWidgets() {
   useEffect(() => {
     setTodayWeight(getWeightForDate(todayKey));
     setTodayWater(getWaterForDate(todayKey));
-    setLatestWeight(getLatestWeight());
   }, [todayKey]);
 
   const handleWeightSubmit = (e) => {
@@ -26,7 +24,6 @@ export default function QuickHealthWidgets() {
     if (!isNaN(w) && w > 0) {
       logWeight(todayKey, w);
       setTodayWeight(w);
-      setLatestWeight(w);
       setShowWeightInput(false);
       setWeightInputValue('');
     }
@@ -52,7 +49,7 @@ export default function QuickHealthWidgets() {
           <div className="flex items-end justify-between gap-2">
             <div>
               <h3 className="text-lg font-semibold leading-none tracking-normal text-foreground md:text-xl">
-                {todayWeight ? `${todayWeight}` : latestWeight ? `${latestWeight}` : '--'}
+                {todayWeight ? `${todayWeight}` : '0'}
                 <span className="ml-0.5 text-[10px] font-semibold uppercase tracking-normal text-muted-foreground">kg</span>
               </h3>
             </div>
@@ -66,7 +63,7 @@ export default function QuickHealthWidgets() {
                   exit={{ opacity: 0, scale: 0.8 }}
                   onClick={() => {
                     setShowWeightInput(true);
-                    setWeightInputValue(todayWeight?.toString() || latestWeight?.toString() || '');
+                    setWeightInputValue(todayWeight?.toString() || '');
                   }}
                   className="flex h-8 w-8 items-center justify-center rounded-[var(--app-radius-md)] bg-foreground text-background shadow-[var(--app-shadow-sm)] transition-transform hover:bg-foreground/90 active:scale-95 md:h-10 md:w-10"
                 >
