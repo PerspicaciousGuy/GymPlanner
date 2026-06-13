@@ -1,4 +1,4 @@
-import { Plus, X, Zap } from 'lucide-react';
+import { Copy, Plus, X, Zap } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from "@/lib/utils";
 import { Stepper } from '../ui/stepper';
@@ -11,11 +11,24 @@ export default function AdvancedExerciseSetRows({
   onRemoveSet,
   onAddSet,
 }) {
+  const copySetToNext = (idx, set, drops) => {
+    if (idx >= sets.length - 1) return;
+
+    onUpdateSet(idx + 1, {
+      reps: set.reps,
+      weight: set.weight,
+      dropReps: set.dropReps || '',
+      dropWeight: set.dropWeight || '',
+      drops: drops.map((drop) => ({ ...drop })),
+      isDrop: set.isDrop,
+    });
+  };
+
   return (
     <>
       {sets.length > 0 && (
         <div className="space-y-3">
-          <div className="grid grid-cols-[1.75rem_1fr_1fr_1.5rem] gap-2 px-2">
+          <div className="grid grid-cols-[1.75rem_1fr_1fr_4.5rem] gap-2 px-2">
             <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Set</span>
             <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Rep</span>
             <span className="text-[9px] font-semibold uppercase tracking-normal text-muted-foreground">Weight</span>
@@ -34,7 +47,7 @@ export default function AdvancedExerciseSetRows({
                     animate={{ opacity: 1, y: 0 }}
                     className={cn(
                       "grid gap-2 items-center",
-                      "grid-cols-[1.75rem_1fr_1fr_1.5rem]"
+                      "grid-cols-[1.75rem_1fr_1fr_4.5rem]"
                     )}
                   >
                     <button
@@ -77,12 +90,25 @@ export default function AdvancedExerciseSetRows({
                       step={2.5}
                       placeholder="0"
                     />
-                    <button
-                      onClick={() => onRemoveSet(idx)}
-                      className="flex h-8 w-8 items-center justify-center rounded-[var(--app-radius-sm)] p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <X size={12} strokeWidth={3} />
-                    </button>
+                    <div className="flex items-center justify-end gap-1">
+                      {idx < sets.length - 1 && (
+                        <button
+                          type="button"
+                          onClick={() => copySetToNext(idx, set, drops)}
+                          title="Copy to next set"
+                          aria-label={`Copy set ${idx + 1} values to set ${idx + 2}`}
+                          className="flex h-8 w-8 items-center justify-center rounded-[var(--app-radius-sm)] p-1 text-muted-foreground transition-colors hover:bg-[var(--app-surface-muted)] hover:text-foreground"
+                        >
+                          <Copy size={12} strokeWidth={2.5} />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onRemoveSet(idx)}
+                        className="flex h-8 w-8 items-center justify-center rounded-[var(--app-radius-sm)] p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <X size={12} strokeWidth={3} />
+                      </button>
+                    </div>
                   </motion.div>
 
                   <AnimatePresence>
@@ -92,7 +118,7 @@ export default function AdvancedExerciseSetRows({
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -10 }}
-                        className="grid grid-cols-[1.75rem_1fr_1fr_1.5rem] gap-2 items-center pl-4"
+                        className="grid grid-cols-[1.75rem_1fr_1fr_4.5rem] gap-2 items-center pl-4"
                       >
                         <div className="h-6 flex items-center justify-center relative">
                           <div className="absolute bottom-1/2 left-[-10px] top-0 w-[2px] rounded-full bg-[var(--app-border)]" />
