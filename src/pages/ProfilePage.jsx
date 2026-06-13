@@ -364,11 +364,6 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
           </Button>
         </div>
       </Panel>
-
-      <div className="text-center pt-4">
-        <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-normal mb-1">GymPlanner v1.2.0 - Premium Edition</p>
-        <p className="text-[8px] font-medium text-muted-foreground/60 uppercase tracking-normal">Engineered for your progress</p>
-      </div>
     </PageShell>
   );
 }
