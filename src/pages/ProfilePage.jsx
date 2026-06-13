@@ -230,15 +230,6 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
             <p className="text-[11px] text-muted-foreground font-medium tracking-normal">Currently: {settings.units === 'kg' ? 'Kilograms' : 'Pounds'}</p>
           </div>
 
-          {/* Biometric Lock */}
-          <div className="p-4 md:p-5 bg-[var(--app-surface-muted)] rounded-[var(--app-radius-lg)] border border-[var(--app-border)] transition-colors flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-foreground uppercase tracking-normal">Biometric Lock</p>
-              <p className="text-[11px] text-muted-foreground/60 font-medium tracking-normal">Coming Soon</p>
-            </div>
-            <Switch disabled />
-          </div>
-
           {/* Workout Reminders */}
           <div className="p-4 md:p-5 bg-[var(--app-surface-muted)] rounded-[var(--app-radius-lg)] border border-[var(--app-border)] transition-colors flex items-center justify-between">
             <div>

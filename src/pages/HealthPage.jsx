@@ -107,7 +107,6 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
           <TabsList className="h-auto gap-1 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1 shadow-[var(--app-shadow-sm)]">
             <TabsTrigger value="nutrition" className="rounded-[var(--app-radius-sm)] px-5 py-2.5 text-[11px] font-semibold uppercase tracking-normal transition-all data-[state=active]:bg-foreground data-[state=active]:text-background">Nutrition</TabsTrigger>
             <TabsTrigger value="vitals" className="rounded-[var(--app-radius-sm)] px-5 py-2.5 text-[11px] font-semibold uppercase tracking-normal transition-all data-[state=active]:bg-foreground data-[state=active]:text-background">Vitals</TabsTrigger>
-            <TabsTrigger value="library" className="rounded-[var(--app-radius-sm)] px-5 py-2.5 text-[11px] font-semibold uppercase tracking-normal transition-all data-[state=active]:bg-foreground data-[state=active]:text-background">Library</TabsTrigger>
           </TabsList>
         </div>
 
@@ -125,11 +124,6 @@ export default function HealthPage({ settings, onFullScreenToggle, initialSubVie
         />
 
         <HealthVitalsTab dateKey={dateKey} />
-        <TabsContent value="library">
-          <div className="p-12 text-center text-muted-foreground italic">
-            Food and meal library coming soon...
-          </div>
-        </TabsContent>
       </Tabs>
 
       {/* Floating Action Button */}
