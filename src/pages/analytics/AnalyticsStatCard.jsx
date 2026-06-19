@@ -29,6 +29,8 @@ function GlowCounter({ value, suffix = "", decimals = 0 }) {
 }
 
 export function AnalyticsStatCard({ title, value, subtitle, icon, iconColor, bgColor, trend, suffix = "", className, isMicro }) {
+  const hasValue = value !== null && value !== undefined;
+
   return (
     <Panel className={cn(
       "group relative min-w-0 overflow-hidden transition-colors hover:border-[var(--app-border-strong)]",
@@ -68,7 +70,11 @@ export function AnalyticsStatCard({ title, value, subtitle, icon, iconColor, bgC
             "flex items-baseline gap-0.5 font-semibold leading-none text-foreground",
             isMicro ? "mt-0.5 text-base" : "mt-1.5 text-3xl"
           )}>
-            <GlowCounter value={value} suffix={suffix} decimals={suffix === 't' ? 1 : 0} />
+            {hasValue ? (
+              <GlowCounter value={value} suffix={suffix} decimals={suffix === 't' ? 1 : 0} />
+            ) : (
+              <span>--</span>
+            )}
           </h2>
           <p className={cn(
             "truncate font-medium tracking-normal text-muted-foreground",
