@@ -214,10 +214,10 @@ function NewPlanEmptyState({ onCreatePlan }) {
 
             <div className="space-y-3">
               <h2 className="max-w-lg text-2xl font-semibold leading-tight tracking-normal text-foreground md:text-3xl">
-                Build your first training plan before logging.
+                Create your training split.
               </h2>
               <p className="max-w-lg text-sm font-medium leading-6 text-muted-foreground">
-                Set your weekly split or rotating cycle once, then GymPlanner will turn it into daily sessions here.
+                Choose a fixed week or rotating cycle, name your days, then this hub becomes your daily workout log.
               </p>
             </div>
 
@@ -228,7 +228,7 @@ function NewPlanEmptyState({ onCreatePlan }) {
                 className="inline-flex h-11 items-center justify-center rounded-[var(--app-radius-md)] bg-foreground px-5 text-[11px] font-semibold uppercase tracking-normal text-background shadow-[var(--app-shadow-sm)] transition-colors hover:bg-foreground/90"
               >
                 <Plus size={15} className="mr-2" strokeWidth={3} />
-                Create Training Plan
+                Build Training Plan
               </button>
             </div>
           </div>
@@ -441,7 +441,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
         )}
       />
 
-      <QuickHealthWidgets />
+      {hasSavedPlans && <QuickHealthWidgets />}
 
       <div className="flex flex-col">
         <AnimatePresence initial={false} mode="popLayout">

@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useMemo, useState, useEffect, lazy, Suspense } from 'react';
 import { Sparkles, Calendar, BarChart3, User, Activity } from 'lucide-react';
 
 
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 import useFirebaseAuth from './hooks/useFirebaseAuth';
 import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isSessionFinished, getEffectiveSessionTitle } from './utils/storage';
+import { loadSavedPlans } from './utils/trainingPlan';
 import { scheduleTomorrowSummary } from './utils/notificationService';
 import { loadSettings } from './utils/settings';
 
@@ -87,6 +88,7 @@ export default function App() {
   const syncScope = authState.user?.uid || (authState.isConfigured ? 'signed-out' : 'local');
   const syncKey = `${syncScope}:${syncNonce}`;
   const isCaptureMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('capture');
+  const hasSavedTrainingPlans = useMemo(() => loadSavedPlans().length > 0, [activePage, syncKey]);
 
   const [settings, setSettings] = useState(() => {
     const s = loadSettings();
@@ -226,7 +228,7 @@ export default function App() {
           </div>
         </main>
 
-        {!fullScreenMode && !['landing', 'login'].includes(activePage) && (
+        {!fullScreenMode && hasSavedTrainingPlans && !['landing', 'login'].includes(activePage) && (
           <QuickActionHub 
             onNavigateToHealth={(view) => {
               setHealthInitialView(view);
