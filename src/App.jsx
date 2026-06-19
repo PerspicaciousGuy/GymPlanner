@@ -84,6 +84,7 @@ export default function App() {
   const [syncNonce, setSyncNonce] = useState(0);
   const [fullScreenMode, setFullScreenMode] = useState(false);
   const [healthInitialView, setHealthInitialView] = useState(null);
+  const [quickStartTemplate, setQuickStartTemplate] = useState(null);
   const authState = useFirebaseAuth();
   const syncScope = authState.user?.uid || (authState.isConfigured ? 'signed-out' : 'local');
   const syncKey = `${syncScope}:${syncNonce}`;
@@ -197,6 +198,10 @@ export default function App() {
                 syncKey={syncKey}
                 targetDate={selectedHistoryDate}
                 onCreateTrainingPlan={() => setActivePage('training-plan')}
+                onUseQuickStartTemplate={(template) => {
+                  setQuickStartTemplate(template);
+                  setActivePage('training-plan');
+                }}
               />
             )}
             {activePage !== 'workout' && (
@@ -218,7 +223,14 @@ export default function App() {
                 )}
                 {activePage === 'routines' && <RoutinesPage syncKey={syncKey} onEdit={(id) => { setEditRoutineId(id); setActivePage('edit-routine'); }} onOpenTrainingPlan={() => setActivePage('training-plan')} />}
                 {activePage === 'edit-routine' && <EditRoutinePage routineId={editRoutineId} onBack={() => setActivePage('routines')} />}
-                {activePage === 'training-plan' && <TrainingPlanPage syncKey={syncKey} onBack={() => setActivePage('routines')} />}
+                {activePage === 'training-plan' && (
+                  <TrainingPlanPage
+                    syncKey={syncKey}
+                    initialQuickStartTemplate={quickStartTemplate}
+                    onQuickStartTemplateConsumed={() => setQuickStartTemplate(null)}
+                    onBack={() => setActivePage('routines')}
+                  />
+                )}
                 {activePage === 'analytics' && <AnalyticsPage onDateSelect={handleDateSelect} />}
                 {activePage === 'dayDetail' && <DayDetailPage date={selectedHistoryDate} onBack={() => setActivePage('analytics')} syncKey={syncKey} />}
                 {activePage === 'profile' && <ProfilePage authState={authState} onDataRefreshed={() => setSyncNonce(n => n + 1)} onSettingsChange={setSettings} onNavigateToLogin={() => setActivePage('login')} />}
