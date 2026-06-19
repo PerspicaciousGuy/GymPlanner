@@ -27,6 +27,7 @@ import QuickHealthWidgets from '../components/health/QuickHealthWidgets';
 import { PageShell } from '../components/layout/PageShell';
 import { PageHeader } from '../components/layout/PageHeader';
 import { Panel } from '../components/layout/Panel';
+import { QuickStartTemplatePicker } from './trainingPlan/QuickStartTemplatePicker';
 
 const statusBadgeClass = "flex items-center gap-1.5 rounded-[var(--app-radius-sm)] border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-normal";
 const contextBadgeClasses = {
@@ -198,7 +199,9 @@ function AccordionSection({ section, defaultOpen, syncToken, onWorkoutChanged })
   );
 }
 
-function NewPlanEmptyState({ onCreatePlan }) {
+function NewPlanEmptyState({ onCreatePlan, onUseQuickStart }) {
+  const [showTemplates, setShowTemplates] = useState(false);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -230,7 +233,20 @@ function NewPlanEmptyState({ onCreatePlan }) {
                 <Plus size={15} className="mr-2" strokeWidth={3} />
                 Build Training Plan
               </button>
+              <button
+                type="button"
+                onClick={() => setShowTemplates((value) => !value)}
+                className="inline-flex h-11 items-center justify-center rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] px-5 text-[11px] font-semibold uppercase tracking-normal text-foreground shadow-[var(--app-shadow-sm)] transition-colors hover:bg-[var(--app-surface-muted)]"
+              >
+                Use Quick Start
+              </button>
             </div>
+
+            {showTemplates && (
+              <div className="pt-1">
+                <QuickStartTemplatePicker onSelect={onUseQuickStart} />
+              </div>
+            )}
           </div>
 
           <div className="border-t border-[var(--app-border)] bg-[var(--app-surface-muted)] p-5 md:border-l md:border-t-0 md:p-6">
@@ -255,7 +271,7 @@ function NewPlanEmptyState({ onCreatePlan }) {
   );
 }
 
-export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = null, onCreateTrainingPlan }) {
+export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = null, onCreateTrainingPlan, onUseQuickStartTemplate }) {
   const [selectedWeek, setSelectedWeek] = useState(() => getWeekStart(targetDate || new Date()));
   const [plannerRefreshNonce, setPlannerRefreshNonce] = useState(0);
 
@@ -446,7 +462,7 @@ export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = n
       <div className="flex flex-col">
         <AnimatePresence initial={false} mode="popLayout">
           {!hasSavedPlans ? (
-            <NewPlanEmptyState onCreatePlan={onCreateTrainingPlan} />
+            <NewPlanEmptyState onCreatePlan={onCreateTrainingPlan} onUseQuickStart={onUseQuickStartTemplate} />
           ) : sections.length > 0 ? (
             sections.map((s) => (
               <motion.div
