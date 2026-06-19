@@ -250,9 +250,11 @@ export function buildAnalyticsData(timeRange) {
   const prevMuscleData = formatMuscleMap(prevMuscleMap);
   const personalRecords = buildPersonalRecords(exerciseHistory);
   const sessionsTrend = timeRange === 'all' ? null : calculateTrend(completedSessions, prevCompletedSessions);
-  const compliance = plannedSessions > 0 ? Math.round((completedSessions / plannedSessions) * 100) : 100;
-  const prevCompliance = prevPlannedSessions > 0 ? Math.round((prevCompletedSessions / prevPlannedSessions) * 100) : 100;
-  const complianceTrend = timeRange === 'all' ? null : calculateTrend(compliance, prevCompliance);
+  const compliance = plannedSessions > 0 ? Math.round((completedSessions / plannedSessions) * 100) : null;
+  const prevCompliance = prevPlannedSessions > 0 ? Math.round((prevCompletedSessions / prevPlannedSessions) * 100) : null;
+  const complianceTrend = timeRange === 'all' || compliance === null || prevCompliance === null
+    ? null
+    : calculateTrend(compliance, prevCompliance);
   const recoveryData = calculateRecovery(Object.entries(workouts).flatMap(([date, day]) =>
     ['am', 'pm'].map((session) => ({ date, ...day[session], session }))
   ));
