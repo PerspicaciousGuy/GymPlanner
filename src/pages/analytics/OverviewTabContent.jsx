@@ -54,7 +54,7 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                   title="Consistency"
                   value={analyticsData.compliance}
                   suffix="%"
-                  subtitle={`${analyticsData.completedSessions} Days`}
+                  subtitle={analyticsData.plannedSessions > 0 ? `${analyticsData.completedSessions} Days` : "No plan data"}
                   trend={analyticsData.complianceTrend}
                   icon={<TrendingUp size={16} />}
                   iconColor="text-foreground"
@@ -64,8 +64,8 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                 <AnalyticsStatCard
                   isMicro
                   title="Intensity"
-                  value={8.4}
-                  subtitle="Avg RPE"
+                  value={null}
+                  subtitle="Avg RPE unavailable"
                   icon={<Flame size={16} />}
                   iconColor="text-[var(--app-text-soft)]"
                   bgColor="bg-[var(--app-surface-muted)]"
@@ -74,7 +74,7 @@ export function OverviewTabContent({ analyticsData, timeRange, muscleMetric, set
                 <AnalyticsStatCard
                   isMicro
                   title="Records"
-                  value={analyticsData.volumeHistory.length ? 12 : 0}
+                  value={analyticsData.personalRecords.length}
                   subtitle="New PRs"
                   icon={<Trophy size={16} />}
                   iconColor="text-[var(--app-text-soft)]"
