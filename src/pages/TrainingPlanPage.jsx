@@ -35,13 +35,14 @@ import {
   planSuccessButtonClass,
 } from './trainingPlan/trainingPlanStyles';
 
-export default function TrainingPlanPage({ onBack, syncKey, initialQuickStartTemplate, onQuickStartTemplateConsumed }) {
+export default function TrainingPlanPage({ onBack, onStartLogging, syncKey, initialQuickStartTemplate, onQuickStartTemplateConsumed }) {
   const [savedPlans, setSavedPlans] = useState(() => loadSavedPlans());
   const [activePlanId, setActiveId] = useState(() => getActivePlanId());
   const [selectedPlanId, setSelectedPlanId] = useState(() => getActivePlanId());
   const [plan, setPlan] = useState(null); // The plan currently being edited
   const [templates, setTemplates] = useState(() => loadTemplates());
   const [saveFlash, setSaveFlash] = useState(false);
+  const [showStartLogging, setShowStartLogging] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
@@ -93,6 +94,7 @@ export default function TrainingPlanPage({ onBack, syncKey, initialQuickStartTem
   const updatePlan = (updates) => {
     setPlan(prev => ({ ...prev, ...updates }));
     setHasChanges(true);
+    setShowStartLogging(false);
   };
 
   const handleUseQuickStartTemplate = (template) => {
@@ -101,6 +103,7 @@ export default function TrainingPlanPage({ onBack, syncKey, initialQuickStartTem
     setPlan(templatePlan);
     setHasChanges(true);
     setEditingName(false);
+    setShowStartLogging(false);
   };
 
   useEffect(() => {
@@ -124,6 +127,7 @@ export default function TrainingPlanPage({ onBack, syncKey, initialQuickStartTem
     refreshPlans();
     setSelectedPlanId(plan.id);
     setHasChanges(false);
+    setShowStartLogging(shouldSetActive);
     setSaveFlash(true);
     setTimeout(() => setSaveFlash(false), 2000);
   };
@@ -143,6 +147,7 @@ export default function TrainingPlanPage({ onBack, syncKey, initialQuickStartTem
     setSelectedPlanId(newPlan.id);
     setPlan({ ...newPlan });
     setHasChanges(false);
+    setShowStartLogging(false);
   };
 
   const handleDuplicate = (sourcePlan) => {
@@ -158,6 +163,7 @@ export default function TrainingPlanPage({ onBack, syncKey, initialQuickStartTem
     setSelectedPlanId(dup.id);
     setPlan({ ...dup });
     setHasChanges(false);
+    setShowStartLogging(false);
   };
 
   const handleDelete = (planId) => {
@@ -258,6 +264,15 @@ export default function TrainingPlanPage({ onBack, syncKey, initialQuickStartTem
                   <><Save size={12} className="mr-1.5" strokeWidth={3} /> Save</>
                 )}
               </Button>
+              {showStartLogging && (
+                <Button
+                  onClick={onStartLogging}
+                  className={planSuccessButtonClass}
+                >
+                  <CheckCircle2 size={12} className="mr-1.5" strokeWidth={3} />
+                  Start Logging
+                </Button>
+              )}
             </>
           )}
           </>
@@ -313,6 +328,7 @@ export default function TrainingPlanPage({ onBack, syncKey, initialQuickStartTem
                     }
                     setSelectedPlanId(p.id);
                     setHasChanges(false);
+                    setShowStartLogging(false);
                   }}
                   onSetActive={() => handleSetActive(p.id)}
                   onDelete={() => handleDelete(p.id)}

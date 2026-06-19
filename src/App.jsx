@@ -228,6 +228,11 @@ export default function App() {
                     syncKey={syncKey}
                     initialQuickStartTemplate={quickStartTemplate}
                     onQuickStartTemplateConsumed={() => setQuickStartTemplate(null)}
+                    onStartLogging={() => {
+                      setSelectedHistoryDate(null);
+                      setSyncNonce(n => n + 1);
+                      setActivePage('workout');
+                    }}
                     onBack={() => setActivePage('routines')}
                   />
                 )}
