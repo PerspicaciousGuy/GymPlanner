@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Sparkles, Calendar, Cloud, RefreshCw, BarChart3, User, Activity } from 'lucide-react';
+import { Sparkles, Calendar, BarChart3, User, Activity } from 'lucide-react';
 
 
 import WorkoutSchedulerPage from './pages/WorkoutSchedulerPage';
@@ -176,21 +176,6 @@ export default function App() {
             ))}
           </nav>
 
-          <div className="flex flex-col items-center gap-3">
-            <div className={`h-2 w-2 rounded-full transition-all ${syncScope.startsWith('local') ? 'bg-[var(--app-border-strong)]' : 'bg-foreground'}`} />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setSyncNonce(n => n + 1)}
-              className="rounded-[var(--app-radius-md)] border-[var(--app-border)] text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground"
-            >
-              <RefreshCw size={18} />
-            </Button>
-
-            <Button variant="outline" size="icon" className="rounded-[var(--app-radius-md)] border-[var(--app-border)] text-muted-foreground shadow-none hover:bg-[var(--app-surface-muted)] hover:text-foreground">
-              <Cloud size={18} />
-            </Button>
-          </div>
         </aside>
       )}
 
