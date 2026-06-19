@@ -25,7 +25,9 @@ import {
 import { loadTemplates, freezeHistoryUnderPlan } from '../utils/storage';
 
 import { SavedPlanCard } from './trainingPlan/PlanCards';
+import { QuickStartTemplatePicker } from './trainingPlan/QuickStartTemplatePicker';
 import { TrainingPlanEditor } from './trainingPlan/TrainingPlanEditor';
+import { createPlanFromQuickStartTemplate } from './trainingPlan/quickStartTemplates';
 import {
   planActionButtonClass,
   planPrimaryButtonClass,
@@ -33,7 +35,7 @@ import {
   planSuccessButtonClass,
 } from './trainingPlan/trainingPlanStyles';
 
-export default function TrainingPlanPage({ onBack, syncKey }) {
+export default function TrainingPlanPage({ onBack, syncKey, initialQuickStartTemplate, onQuickStartTemplateConsumed }) {
   const [savedPlans, setSavedPlans] = useState(() => loadSavedPlans());
   const [activePlanId, setActiveId] = useState(() => getActivePlanId());
   const [selectedPlanId, setSelectedPlanId] = useState(() => getActivePlanId());
@@ -93,14 +95,34 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
     setHasChanges(true);
   };
 
+  const handleUseQuickStartTemplate = (template) => {
+    const templatePlan = createPlanFromQuickStartTemplate(template);
+    setSelectedPlanId(null);
+    setPlan(templatePlan);
+    setHasChanges(true);
+    setEditingName(false);
+  };
+
+  useEffect(() => {
+    if (!initialQuickStartTemplate) return;
+    handleUseQuickStartTemplate(initialQuickStartTemplate);
+    onQuickStartTemplateConsumed?.();
+  }, [initialQuickStartTemplate]);
+
   const handleSave = () => {
     if (!plan) return;
+    const shouldSetActive = savedPlans.length === 0;
     
     // Freeze all current logged/completed past history using the OLD plan before we overwrite it
     freezeHistoryUnderPlan(loadTrainingPlan());
 
     saveTrainingPlan(plan);
+    if (shouldSetActive) {
+      setActivePlanId(plan.id);
+      setActiveId(plan.id);
+    }
     refreshPlans();
+    setSelectedPlanId(plan.id);
     setHasChanges(false);
     setSaveFlash(true);
     setTimeout(() => setSaveFlash(false), 2000);
@@ -270,6 +292,9 @@ export default function TrainingPlanPage({ onBack, syncKey }) {
             <p className="text-[10px] text-muted-foreground font-medium mt-1">
               Create your first training plan to get started.
             </p>
+            <div className="mx-auto mt-5 max-w-3xl px-4">
+              <QuickStartTemplatePicker onSelect={handleUseQuickStartTemplate} />
+            </div>
           </motion.div>
         ) : (
           <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
