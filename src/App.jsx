@@ -205,7 +205,13 @@ export default function App() {
             "mx-auto w-full",
             activePage === 'landing' ? "max-w-none p-0" : "max-w-[1600px] p-4 sm:p-5 lg:p-7"
           )}>
-            {activePage === 'workout' && <WorkoutSchedulerPage syncKey={syncKey} targetDate={selectedHistoryDate} />}
+            {activePage === 'workout' && (
+              <WorkoutSchedulerPage
+                syncKey={syncKey}
+                targetDate={selectedHistoryDate}
+                onCreateTrainingPlan={() => setActivePage('training-plan')}
+              />
+            )}
             {activePage !== 'workout' && (
               <Suspense fallback={<PageFallback />}>
                 {activePage === 'landing' && (
