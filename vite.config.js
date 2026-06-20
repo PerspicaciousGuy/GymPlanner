@@ -51,18 +51,6 @@ export default defineConfig({
   },
   server: {
     host: true,
-    proxy: {
-      '/fatsecret-token': {
-        target: 'https://oauth.fatsecret.com',
-        changeOrigin: true,
-        rewrite: () => '/connect/token',
-      },
-      '/fatsecret-api': {
-        target: 'https://platform.fatsecret.com',
-        changeOrigin: true,
-        rewrite: () => '/rest/server.api',
-      },
-    },
   },
   build: {
     outDir: 'dist',
