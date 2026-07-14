@@ -36,7 +36,7 @@ export function formatDateKey(date) {
  * @returns {Date} Monday of that week
  */
 export function getWeekStart(date) {
-  const d = date instanceof Date ? new Date(date) : new Date(date);
+  const d = new Date(date);
   const day = d.getDay();
   const diff = day === 0 ? -6 : 1 - day; // If Sunday, go back 6 days; otherwise go to Monday
   const monday = new Date(d);

@@ -1222,7 +1222,8 @@ export function freezeHistoryUnderPlan(plan) {
   for (const [dateStr, sessions] of Object.entries(allWorkouts)) {
     for (const session of ['am', 'pm']) {
       const workout = sessions[session];
-      if (workout && workout.exercises && workout.exercises.length > 0) {
+      const hasWorkoutData = (workout?.groups?.length > 0) || (workout?.standaloneExercises?.length > 0);
+      if (hasWorkoutData) {
         checkAndFreeze(dateStr, session);
       }
     }

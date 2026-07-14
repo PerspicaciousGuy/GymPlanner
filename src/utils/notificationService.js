@@ -1,11 +1,10 @@
 import { getTomorrow, getDayOfWeek, formatDateKey } from './dateUtils';
 import { saveCloudNotifSettings } from './cloudSync';
-import { NOTIFICATION_SETTINGS_KEY } from '../constants/storageKeys.js';
+import { NOTIFICATION_SETTINGS_KEY, LAST_NOTIFIED_DATE_KEY } from '../constants/storageKeys.js';
 import { loadWorkoutByDate, loadSessionTitles } from './storage';
 import { runCloudSync } from './cloudSyncRunner.js';
 
-export { NOTIFICATION_SETTINGS_KEY };
-export const LAST_NOTIFIED_DATE_KEY = 'last_notified_date'; // Store the date (YYYY-MM-DD) when we last showed a summary
+export { NOTIFICATION_SETTINGS_KEY, LAST_NOTIFIED_DATE_KEY };
 
 export const isNotificationSupported = () => 'Notification' in window;
 

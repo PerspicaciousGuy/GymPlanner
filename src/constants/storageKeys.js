@@ -21,3 +21,5 @@ export const ACTIVE_PLAN_KEY = 'gymplanner_active_plan_id';
 
 export const VITALS_LOG_KEY = 'gymplanner_vitals_log';
 export const WATER_LOG_KEY = 'gymplanner_water_log';
+
+export const LAST_NOTIFIED_DATE_KEY = 'last_notified_date';

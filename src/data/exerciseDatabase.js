@@ -266,8 +266,4 @@ export const exerciseDatabase = {
   }
 };
 
-export const muscleGroupKeys = Object.keys(exerciseDatabase);
-
 export const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
-export const SCHEDULER_OPTIONS = [...muscleGroupKeys, 'Rest'];
