@@ -1,4 +1,6 @@
-import { loadWorkouts, loadCompletion, getEffectiveSessionTitle } from '../../utils/storage';
+import { loadWorkouts } from '../../utils/workoutStorage';
+import { loadCompletion } from '../../utils/completionStorage';
+import { getEffectiveSessionTitle } from '../../utils/sessionMetaStorage';
 import { formatDateDisplay, formatDateKey } from '../../utils/dateUtils';
 import { calculateRecovery } from '../../utils/recoveryLogic';
 

@@ -33,7 +33,7 @@ export default function WorkoutExerciseList({
 
       {groups.map((group, index) => (
         <ExerciseGroup
-          key={index}
+          key={group.id || index}
           groupIndex={index}
           group={group}
           groupCount={groups.length}

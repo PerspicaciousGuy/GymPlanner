@@ -2,15 +2,17 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { ChevronDown, Trash2, X, Hash, Dumbbell, History } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  getMuscleGroupKeys, 
-  getSubMusclesForMuscle, 
+import {
+  getMuscleGroupKeys,
+  getSubMusclesForMuscle,
   getExercisesForSubMuscle,
   addExerciseWithSync,
   removeExerciseWithSync,
+} from '../utils/exerciseDbStorage';
+import {
   findPreviousExerciseEntry,
-  getExerciseOccurrenceCount
-} from '../utils/storage';
+  getExerciseOccurrenceCount,
+} from '../utils/workoutStorage';
 import { formatDateCompact } from '../utils/dateUtils';
 import { Stepper } from './ui/stepper';
 import { Button } from "@/components/ui/button";

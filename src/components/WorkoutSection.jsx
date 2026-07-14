@@ -1,18 +1,21 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ensureAmPm, defaultGroup } from '../utils/storageCore';
 import {
   saveDayWorkoutWithSync,
+  shiftWorkout,
+} from '../utils/workoutStorage';
+import {
   markDayCompleteWithSync,
   markDaySkippedWithSync,
   isDayComplete,
   isDaySkipped,
-  ensureAmPm,
-  defaultGroup,
+} from '../utils/completionStorage';
+import {
   getEffectiveSessionTitle,
   getEffectiveSessionNotes,
   saveDailyMetadataWithSync,
-  shiftWorkout
-} from '../utils/storage';
+} from '../utils/sessionMetaStorage';
 import { loadTrainingPlan, getPlanSessionSubtitle } from '../utils/trainingPlan';
 import { formatDateKey } from '../utils/dateUtils';
 import WorkoutCompleteBanner from './workoutSection/WorkoutCompleteBanner';

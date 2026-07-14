@@ -4,11 +4,14 @@ import { Sparkles, Calendar, BarChart3, User, Activity } from 'lucide-react';
 
 import WorkoutSchedulerPage from './pages/WorkoutSchedulerPage';
 import QuickActionHub from './components/health/QuickActionHub';
+import ErrorBoundary from './components/ErrorBoundary';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import useFirebaseAuth from './hooks/useFirebaseAuth';
-import { migrateCompletionToDateBased, migrateWorkoutsToDateBased, isSessionFinished, getEffectiveSessionTitle } from './utils/storage';
+import { migrateCompletionToDateBased, isSessionFinished } from './utils/completionStorage';
+import { migrateWorkoutsToDateBased } from './utils/workoutStorage';
+import { getEffectiveSessionTitle } from './utils/sessionMetaStorage';
 import { loadSavedPlans } from './utils/trainingPlan';
 import { scheduleTomorrowSummary } from './utils/notificationService';
 import { loadSettings } from './utils/settings';
@@ -193,6 +196,7 @@ export default function App() {
             "mx-auto w-full",
             activePage === 'landing' ? "max-w-none p-0" : "max-w-[1600px] p-4 sm:p-5 lg:p-7"
           )}>
+            <ErrorBoundary key={activePage}>
             {activePage === 'workout' && (
               <WorkoutSchedulerPage
                 syncKey={syncKey}
@@ -242,6 +246,7 @@ export default function App() {
                 {activePage === 'login' && <LoginPage authState={authState} onLoginSuccess={() => setActivePage('profile')} onBack={() => setActivePage('landing')} />}
               </Suspense>
             )}
+            </ErrorBoundary>
           </div>
         </main>
 

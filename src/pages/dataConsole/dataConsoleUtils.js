@@ -4,8 +4,8 @@ import {
   defaultGroup,
   defaultRow,
   ensureAmPm,
-  loadWorkouts,
-} from '../../utils/storage';
+} from '../../utils/storageCore';
+import { loadWorkouts } from '../../utils/workoutStorage';
 import {
   formatDateKey,
   getDayOfWeek,

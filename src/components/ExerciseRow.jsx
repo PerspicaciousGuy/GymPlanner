@@ -2,12 +2,14 @@ import { useEffect, useMemo, useState, useCallback, memo } from 'react';
 import {
   addExerciseWithSync,
   removeExerciseWithSync,
-  findPreviousExerciseEntry,
-  getExerciseOccurrenceCount,
   getExercisesForSubMuscle,
   getMuscleGroupKeys,
   getSubMusclesForMuscle,
-} from '../utils/storage';
+} from '../utils/exerciseDbStorage';
+import {
+  findPreviousExerciseEntry,
+  getExerciseOccurrenceCount,
+} from '../utils/workoutStorage';
 import ExerciseRowCardLayout from './exerciseRow/ExerciseRowCardLayout';
 import ExerciseRowTableLayout from './exerciseRow/ExerciseRowTableLayout';
 
