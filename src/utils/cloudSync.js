@@ -43,10 +43,8 @@ export async function fetchCloudPlannerData() {
     foodLog,
     customFoods,
     savedMeals,
-    bookmarkedFoods,
     vitalsLog,
-    waterLog,
-    notifSettings
+    waterLog
   ] = await Promise.all([
     readPlannerDoc('schedule'),
     readPlannerDoc('workouts'),
@@ -65,7 +63,6 @@ export async function fetchCloudPlannerData() {
     readPlannerDoc('bookmarkedFoods'),
     readPlannerDoc('vitalsLog'),
     readPlannerDoc('waterLog'),
-    readPlannerDoc('notifSettings'),
   ]);
 
   return {
@@ -86,7 +83,6 @@ export async function fetchCloudPlannerData() {
     bookmarkedFoods: bookmarkedFoods || null,
     vitalsLog: vitalsLog || null,
     waterLog: waterLog || null,
-    notifSettings: notifSettings || null,
   };
 }
 
@@ -108,10 +104,6 @@ export async function saveCloudSavedMeals(savedMeals) {
 
 export async function saveCloudBookmarkedFoods(bookmarks) {
   return savePlannerDoc('bookmarkedFoods', { bookmarks: bookmarks || [] }, false);
-}
-
-export async function saveCloudNotifSettings(enabled) {
-  return savePlannerDoc('notifSettings', { enabled: Boolean(enabled) }, false);
 }
 
 export async function saveCloudVitalsLog(vitalsLog) {

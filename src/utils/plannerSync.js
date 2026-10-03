@@ -19,7 +19,6 @@ import {
   saveCloudCustomFoods,
   saveCloudSavedMeals,
   saveCloudBookmarkedFoods,
-  saveCloudNotifSettings,
   saveCloudVitalsLog,
   saveCloudWaterLog,
 } from './cloudSync.js';
@@ -33,7 +32,6 @@ import {
   CUSTOM_FOODS_KEY,
   DAILY_METADATA_KEY,
   FOOD_LOG_KEY,
-  NOTIFICATION_SETTINGS_KEY,
   SAVED_MEALS_KEY,
   SAVED_PLANS_KEY,
   SCHEDULE_KEY,
@@ -90,7 +88,6 @@ export async function migrateLocalDataToCloud() {
     const customFoods = getCustomFoods();
     const savedMeals = getSavedMeals();
     const bookmarkedFoods = getBookmarkedFoods();
-    const notifEnabled = localStorage.getItem(NOTIFICATION_SETTINGS_KEY) === 'true';
     const vitalsLog = safeLoad(VITALS_LOG_KEY, {});
     const waterLog = safeLoad(WATER_LOG_KEY, {});
 
@@ -109,7 +106,6 @@ export async function migrateLocalDataToCloud() {
       saveCloudCustomFoods(customFoods),
       saveCloudSavedMeals(savedMeals),
       saveCloudBookmarkedFoods(bookmarkedFoods),
-      saveCloudNotifSettings(notifEnabled),
       saveCloudVitalsLog(vitalsLog),
       saveCloudWaterLog(waterLog),
       ...Object.entries(workouts).map(([day, dayData]) =>
@@ -183,7 +179,7 @@ export async function syncPlannerData() {
       schedule, workouts, completion, exerciseDb, sessionTitles,
       savedPlans, activePlanId, templates, customExercises, dailyMetadata,
       settings, foodLog, customFoods, savedMeals, bookmarkedFoods,
-      vitalsLog, waterLog, notifSettings
+      vitalsLog, waterLog
     } = result;
 
     if (schedule && typeof schedule === 'object') {
@@ -267,10 +263,6 @@ export async function syncPlannerData() {
 
     if (waterLog && typeof waterLog === 'object') {
       localStorage.setItem(WATER_LOG_KEY, JSON.stringify(waterLog));
-    }
-
-    if (notifSettings && notifSettings.enabled !== undefined) {
-      localStorage.setItem(NOTIFICATION_SETTINGS_KEY, notifSettings.enabled ? 'true' : 'false');
     }
 
     window.dispatchEvent(new CustomEvent('gymplanner_sync_completed'));

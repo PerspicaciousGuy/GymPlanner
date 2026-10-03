@@ -10,21 +10,11 @@ import {
   Utensils,
   Flame,
   Zap,
-  Bell,
   Scale,
   Database,
   User
 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
-import {
-  isNotificationSupported,
-  requestNotificationPermission,
-  getNotificationPermission,
-  showNotification,
-  scheduleTomorrowSummary,
-  NOTIFICATION_SETTINGS_KEY,
-  setNotificationEnabledWithSync
-} from '../utils/notificationService';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
@@ -40,10 +30,6 @@ import DataConsolePage from './DataConsolePage';
 export default function ProfilePage({ authState, onDataRefreshed, onSettingsChange, onNavigateToLogin }) {
   const [settings, setSettings] = useState(loadSettings());
   const [, setBusy] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(
-    localStorage.getItem(NOTIFICATION_SETTINGS_KEY) === 'true'
-  );
-  const [notifPermission, setNotifPermission] = useState(getNotificationPermission());
   const [showConsole, setShowConsole] = useState(false);
   const user = authState?.user;
 
@@ -59,25 +45,6 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
     } finally {
       setBusy(false);
     }
-  };
-
-  const handleToggleNotifications = async (checked) => {
-    if (checked && notifPermission !== 'granted') {
-      const granted = await requestNotificationPermission();
-      setNotifPermission(getNotificationPermission());
-      if (!granted) return;
-    }
-
-    setNotificationEnabledWithSync(checked);
-    setNotificationsEnabled(checked);
-
-    if (checked) {
-      showNotification("Reminders Enabled", "You will receive a summary of tomorrow's workout daily.");
-    }
-  };
-
-  const testNotification = () => {
-    scheduleTomorrowSummary();
   };
 
   const exportData = () => {
@@ -111,17 +78,17 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
   if (showConsole) {
     return (
       <PageShell className="animate-in fade-in slide-in-from-right-4 duration-500">
-          <Button
-            variant="ghost"
-            onClick={() => setShowConsole(false)}
+        <Button
+          variant="ghost"
+          onClick={() => setShowConsole(false)}
           className="w-fit text-[11px] font-semibold uppercase tracking-normal text-muted-foreground hover:text-foreground flex items-center gap-2 group"
-          >
-            <ChevronRight size={14} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
-            Back to Profile
-          </Button>
-          <Panel className="overflow-hidden min-h-[70vh]">
-            <DataConsolePage hideSidebar />
-          </Panel>
+        >
+          <ChevronRight size={14} className="rotate-180 group-hover:-translate-x-1 transition-transform" />
+          Back to Profile
+        </Button>
+        <Panel className="overflow-hidden min-h-[70vh]">
+          <DataConsolePage hideSidebar />
+        </Panel>
       </PageShell>
     );
   }
@@ -246,24 +213,6 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
               </button>
             </div>
           </div>
-
-          <div className="flex items-center justify-between gap-4 p-3 md:p-4">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--app-radius-md)] bg-[var(--app-surface-muted)] text-muted-foreground md:h-10 md:w-10">
-                <Bell size={17} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-normal text-foreground">Workout Reminders</p>
-                <p className="text-[11px] font-medium tracking-normal text-muted-foreground">Get tomorrow's session summary</p>
-              </div>
-            </div>
-            <Switch
-              checked={notificationsEnabled && notifPermission === 'granted'}
-              onCheckedChange={handleToggleNotifications}
-              disabled={notifPermission === 'denied' || !isNotificationSupported()}
-              className="data-[state=checked]:bg-foreground"
-            />
-          </div>
         </div>
       </Panel>
 
@@ -356,20 +305,6 @@ export default function ProfilePage({ authState, onDataRefreshed, onSettingsChan
               <span className="text-[10px] font-medium tracking-normal text-muted-foreground">Download all browser-stored app data</span>
             </span>
           </Button>
-
-          {notificationsEnabled && notifPermission === 'granted' && (
-            <Button
-              variant="outline"
-              className="h-14 justify-start rounded-[var(--app-radius-md)] border-[var(--app-border)] bg-[var(--app-surface)] px-4 text-left hover:bg-[var(--app-surface-muted)]"
-              onClick={testNotification}
-            >
-              <Bell size={16} className="mr-3 text-muted-foreground" />
-              <span className="flex flex-col">
-                <span className="text-[11px] font-semibold uppercase tracking-normal text-foreground">Send Test Reminder</span>
-                <span className="text-[10px] font-medium tracking-normal text-muted-foreground">Preview the reminder notification</span>
-              </span>
-            </Button>
-          )}
 
           <button
             type="button"

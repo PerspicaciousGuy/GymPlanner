@@ -86,7 +86,6 @@ GymPlanner transforms the way fitness professionals and enthusiasts manage their
 - **Installable**: Install on iOS, Android, or Desktop as a native-feeling application.
 - **Offline Support**: Service workers provide offline functionality with background sync when connectivity returns.
 - **App-Like Experience**: Full-screen mode, custom splash screens, and app icons for immersive experience.
-- **Background Notifications**: Optional workout reminder notifications with scheduling for tomorrow's sessions.
 
 ---
 
@@ -352,7 +351,6 @@ User account, settings, and data management.
 - **Cloud Migration**: Migrate local data to cloud account.
 - **Theme Selection**: Toggle between light and dark modes.
 - **Units**: Switch between metric (kg, cm) and imperial (lbs, inches).
-- **Notifications**: Enable/disable workout reminders and tomorrow's summary.
 - **Data Actions**: Clear local cache, rehydrate from cloud, force sync.
 - **Account**: View logged-in email, logout option.
 - **Data Console**: Quick access to bulk editing interface.
@@ -390,7 +388,6 @@ gymplanner_water_log         // Water intake logging
 gymplanner_settings          // User settings (theme, units, etc.)
 gymplanner_active_plan_id    // Currently active training plan
 gymplanner_saved_plans       // Saved training cycles
-workout_reminders_enabled    // Notification setting
 
 // Flags & Metadata
 gymplanner_migrated_to_dates // Migration flag for date-based keys
@@ -687,18 +684,6 @@ User preferences and configuration.
 - `loadSettings()` - Load all user settings
 - `updateSetting()` - Update single setting
 - Available settings: `theme`, `units` (metric/imperial), `language`
-
-### Notifications (`src/utils/notificationService.js`)
-
-Push notification management.
-
-**Key Functions**:
-- `isNotificationSupported()` - Check browser support
-- `requestNotificationPermission()` - Request user permission
-- `getNotificationPermission()` - Get current permission state
-- `showNotification()` - Show notification
-- `scheduleTomorrowSummary()` - Schedule tomorrow's workout summary
-- `setNotificationEnabledWithSync()` - Enable/disable with sync
 
 ### Recovery Logic (`src/utils/recoveryLogic.js`)
 

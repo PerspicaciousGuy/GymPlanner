@@ -13,7 +13,6 @@ import { migrateCompletionToDateBased, isSessionFinished } from './utils/complet
 import { migrateWorkoutsToDateBased } from './utils/workoutStorage';
 import { getEffectiveSessionTitle } from './utils/sessionMetaStorage';
 import { loadSavedPlans } from './utils/trainingPlan';
-import { scheduleTomorrowSummary } from './utils/notificationService';
 import { loadSettings } from './utils/settings';
 
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
@@ -107,13 +106,6 @@ export default function App() {
   useEffect(() => {
     migrateCompletionToDateBased();
     migrateWorkoutsToDateBased();
-
-    // Check for tomorrow's workout reminder
-    const timer = setTimeout(() => {
-      scheduleTomorrowSummary();
-    }, 2000);
-
-    return () => clearTimeout(timer);
   }, []);
 
   // Theme Sync
