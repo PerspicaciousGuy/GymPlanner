@@ -34,13 +34,13 @@
 
   button:hover,
   a:hover,
-  [role="button"]:hover {
+  [role="button"]:not([data-region-id]):hover {
     transform: translateY(-1px);
   }
 
   button:active,
   a:active,
-  [role="button"]:active {
+  [role="button"]:not([data-region-id]):active {
     transform: translateY(0);
   }
 

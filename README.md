@@ -23,6 +23,36 @@ GymPlanner transforms the way fitness professionals and enthusiasts manage their
 
 ## Key Features
 
+### Open-Muscle-Map
+
+Insights > Recovery and daily workout details use the inline, tappable
+[Open-Muscle-Map](https://github.com/perspicaciousguy/Open-Muscle-Map) male/female
+front/rear SVGs and controller, pinned to commit
+`502d0bea9938a63c37d4976480ee2eaca769f8ba`. Unchanged assets and their MIT license
+are in `src/components/InteractiveMuscleMap/vendor/`.
+
+- Select using a tap or Tab then Enter/Space; Escape or Clear selection clears it.
+- Sides are anatomical. Panels belonging to the same side and `muscleId` select
+  together across front and rear; non-muscle regions are not selectable.
+- `muscleMapping.js` maps all 31 selectable IDs explicitly to existing broad
+  workout groups, or `null` with a visible "Not tracked separately" fallback.
+  Several anatomical muscles can share one workout-group status; this is a
+  schematic training visualization, not a medical assessment.
+- `InteractiveMuscleMap` defaults to single, side-specific selection. Optional
+  `multiple` and `bilateral` props enable those upstream modes. `onSelect(region)`
+  receives the full upstream payload, including `muscleId`, `side`, `view`,
+  `selected`, and `selectionKey`. Existing `onMuscleClick(groupKey, region)` callers
+  receive the mapped app group only when supported.
+- Colors come from `--muscle-active`, `--muscle-hover`, and `--muscle-focus` in
+  `src/index.css`; recovery status styling lives in `openMuscleMap.css`.
+  The React effect always destroys its controller on cleanup, including StrictMode.
+- No runtime CDN or remote SVG fetch is needed. Serve the app over HTTP.
+
+Run `node e2e/open-muscle-map.e2e.mjs` for the focused integration checks using
+the already-installed Playwright and Chromium. It starts its own Vite server,
+uses disposable browser data, and saves screenshots under
+`temp/open-muscle-map-verification/`. Also run `npm run build` and `npm run lint`.
+
 ### Training & Scheduling
 
 - **Flexible Cycle Planning**: Create training plans with custom cycle lengths (7-day, 8-day, 10-day, etc.) instead of rigid weekly schedules. Dynamically adjust cycles to match periodization strategies.

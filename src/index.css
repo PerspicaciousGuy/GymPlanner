@@ -103,6 +103,9 @@ svg.recharts-surface {
   --app-text-soft: #667085;
   --app-accent: #2563eb;
   --app-accent-soft: #eff6ff;
+  --muscle-active: var(--app-accent);
+  --muscle-hover: var(--app-text-soft);
+  --muscle-focus: var(--app-accent);
   --status-completed: #10b981;
   --status-completed-bg: #d1fae5;
   --status-completed-border: #99f6e4;
