@@ -13,6 +13,11 @@
       selectable: d.selectable === 'true', selectionKey: d.selectionKey
     };
   }
+  // Blend low -> high by t in [0,1]; relies on CSS color-mix (all current browsers).
+  function heatColor(t, low = '#3b82f6', high = '#ef4444') {
+    if (!Number.isFinite(t)) throw new TypeError('Heat values must be finite numbers.');
+    return 'color-mix(in srgb, ' + high + ' ' + Math.round(Math.min(1, Math.max(0, t)) * 100) + '%, ' + low + ')';
+  }
   function createMuscleMap(svg, options = {}) {
     if (!svg || svg.localName !== 'svg') throw new TypeError('Pass the inline SVG element.');
     if (instances.has(svg)) throw new Error('This SVG already has a controller; call destroy() before rebinding.');
@@ -93,6 +98,30 @@
         draw(); changed();
       },
       clear() { if (!destroyed) { selected.clear(); draw(); changed(); } },
+      // values: { muscleId: number 0..1 | CSS colour string }; replaces any earlier colours.
+      setColors(values, opts = {}) {
+        if (destroyed) return;
+        const ids = new Set(elements.map(e => e.dataset.muscleId));
+        const next = new Map();
+        for (const [id, v] of Object.entries(values)) {
+          if (!ids.has(id)) throw new RangeError('Unknown muscleId: ' + id);
+          next.set(id, typeof v === 'string' ? v : heatColor(v, opts.low, opts.high));
+        }
+        api.clearColors();
+        if (!svg.querySelector('style[data-heat-style]')) {
+          const style = svg.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'style');
+          style.setAttribute('data-heat-style', '');
+          style.textContent = '[data-heat] path { fill: var(--heat); }';
+          svg.prepend(style);
+        }
+        for (const e of elements) {
+          const c = next.get(e.dataset.muscleId);
+          if (c) { e.dataset.heat = ''; e.style.setProperty('--heat', c); }
+        }
+      },
+      clearColors() {
+        for (const e of elements) { delete e.dataset.heat; e.style.removeProperty('--heat'); }
+      },
       setView(view) {
         if (!Object.prototype.hasOwnProperty.call(boxes, view)) throw new RangeError('View must be both, front, or rear.');
         svg.setAttribute('viewBox', boxes[view]);
@@ -105,7 +134,7 @@
       },
       destroy() {
         if (destroyed) return;
-        selected.clear(); draw();
+        selected.clear(); draw(); api.clearColors();
         svg.removeEventListener('click', click); svg.removeEventListener('keydown', keydown);
         instances.delete(svg); destroyed = true;
       }
@@ -116,7 +145,7 @@
     if (options.view) api.setView(options.view);
     return api;
   }
-  const api = { createMuscleMap, readRegion };
+  const api = { createMuscleMap, readRegion, heatColor };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   if (scope) scope.MuscleMap = api;
 })(typeof window !== 'undefined' ? window : globalThis);

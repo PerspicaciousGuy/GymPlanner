@@ -28,8 +28,10 @@ GymPlanner transforms the way fitness professionals and enthusiasts manage their
 Insights > Recovery and daily workout details use the inline, tappable
 [Open-Muscle-Map](https://github.com/perspicaciousguy/Open-Muscle-Map) male/female
 front/rear SVGs and controller, pinned to commit
-`502d0bea9938a63c37d4976480ee2eaca769f8ba`. Unchanged assets and their MIT license
+`32ffea69539a66e2de1c6282ab16dd4db5844c6c`. Unchanged assets and their MIT license
 are in `src/components/InteractiveMuscleMap/vendor/`.
+This pin includes the v1.1.0 transparent artwork and heatmap API, plus the latest
+CDN documentation correction. The app continues to use its existing recovery colors.
 
 - Select using a tap or Tab then Enter/Space; Escape or Clear selection clears it.
 - Sides are anatomical. Panels belonging to the same side and `muscleId` select
