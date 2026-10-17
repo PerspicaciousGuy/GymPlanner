@@ -1,12 +1,12 @@
 import { useMemo, useState, useEffect } from 'react';
 import { AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
-import { 
-  loadWorkoutByDate, 
-  isSessionFinished, 
-  syncPlannerData,
+import { loadWorkoutByDate } from '../utils/workoutStorage';
+import { isSessionFinished } from '../utils/completionStorage';
+import { syncPlannerData } from '../utils/plannerSync';
+import {
   getEffectiveSessionTitle,
-  getDailyMetadata
-} from '../utils/storage';
+  getDailyMetadata,
+} from '../utils/sessionMetaStorage';
 import { 
   getYesterday, 
   getToday, 
@@ -26,7 +26,8 @@ import { PageShell } from '../components/layout/PageShell';
 import { PageHeader } from '../components/layout/PageHeader';
 import { Panel } from '../components/layout/Panel';
 import { NewPlanEmptyState } from './workoutScheduler/NewPlanEmptyState';
-import { AccordionSection, contextBadgeClasses, statusBadgeClass } from './workoutScheduler/AccordionSection';
+import { AccordionSection } from './workoutScheduler/AccordionSection';
+import { contextBadgeClasses, statusBadgeClass } from './workoutScheduler/workoutSchedulerStyles';
 
 export default function WorkoutSchedulerPage({ syncKey = 'local', targetDate = null, onCreateTrainingPlan, onUseQuickStartTemplate }) {
   const [selectedWeek, setSelectedWeek] = useState(() => getWeekStart(targetDate || new Date()));

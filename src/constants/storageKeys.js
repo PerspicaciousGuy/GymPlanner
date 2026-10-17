@@ -14,12 +14,9 @@ export const SAVED_MEALS_KEY = 'gymplanner_saved_meals';
 export const FOOD_LOG_KEY = 'gymplanner_food_log';
 export const BOOKMARKED_FOODS_KEY = 'gymplanner_bookmarked_foods';
 export const SETTINGS_KEY = 'gymplanner_settings';
-export const NOTIFICATION_SETTINGS_KEY = 'workout_reminders_enabled';
 
 export const SAVED_PLANS_KEY = 'gymplanner_saved_plans';
 export const ACTIVE_PLAN_KEY = 'gymplanner_active_plan_id';
 
 export const VITALS_LOG_KEY = 'gymplanner_vitals_log';
 export const WATER_LOG_KEY = 'gymplanner_water_log';
-
-export const LAST_NOTIFIED_DATE_KEY = 'last_notified_date';

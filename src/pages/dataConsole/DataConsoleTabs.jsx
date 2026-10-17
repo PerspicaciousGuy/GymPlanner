@@ -1,4 +1,4 @@
-export const DATA_CONSOLE_TABS = [
+const DATA_CONSOLE_TABS = [
   { key: 'workouts', label: 'Workouts' },
   { key: 'completion', label: 'Completion' },
   { key: 'exerciseDb', label: 'Exercise DB' },

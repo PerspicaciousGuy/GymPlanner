@@ -1,0 +1,28 @@
+.open-muscle-map {
+  width: 100%;
+}
+
+.open-muscle-map > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.open-muscle-map [data-recovery-status="fatigued"]:not([data-selected="true"]) path {
+  fill: var(--destructive);
+}
+
+.open-muscle-map [data-recovery-status="recovering"]:not([data-selected="true"]) path {
+  fill: var(--app-border-strong);
+}
+
+.open-muscle-map [data-recovery-status="recovered"]:not([data-selected="true"]) path,
+.open-muscle-map [data-recovery-status="active"]:not([data-selected="true"]) path {
+  fill: var(--app-accent);
+}
+
+@media (hover: hover) {
+  .open-muscle-map [data-recovery-status]:not([data-selected="true"]):hover path {
+    fill: var(--muscle-hover);
+  }
+}

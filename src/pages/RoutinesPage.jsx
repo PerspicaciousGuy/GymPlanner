@@ -14,7 +14,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { loadTemplates, deleteTemplate, saveTemplate, defaultSession } from '../utils/storage';
+import { loadTemplates, deleteTemplate, saveTemplate } from '../utils/exerciseDbStorage';
+import { defaultSession } from '../utils/storageCore';
 import { PageShell } from '../components/layout/PageShell';
 import { PageHeader } from '../components/layout/PageHeader';
 import { Panel } from '../components/layout/Panel';

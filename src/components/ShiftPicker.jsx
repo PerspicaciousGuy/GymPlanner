@@ -8,9 +8,9 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   getEffectiveSessionTitle
-} from '../utils/storage';
+} from '../utils/sessionMetaStorage';
 import {
   getDayOfWeek, 
   formatDateKey, 

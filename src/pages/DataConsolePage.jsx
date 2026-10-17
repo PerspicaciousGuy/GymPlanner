@@ -1,20 +1,26 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { exerciseDatabase } from '../data/exerciseDatabase';
+import { ensureAmPm } from '../utils/storageCore';
 import {
-  ensureAmPm,
-  loadCompletion,
   loadExerciseDb,
-  loadSessionTitles,
-  loadWorkouts,
-  saveCompletionWithSync,
-  saveDayWorkoutWithSync,
   saveExerciseDbWithSync,
-  saveSessionTitlesWithSync,
-  saveWorkoutsMapWithSync,
+} from '../utils/exerciseDbStorage';
+import {
+  loadCompletion,
+  saveCompletionWithSync,
   getCompletionForWeek,
   setCompletionStatusWithSync,
+} from '../utils/completionStorage';
+import {
+  loadWorkouts,
+  saveDayWorkoutWithSync,
+  saveWorkoutsMapWithSync,
+} from '../utils/workoutStorage';
+import {
+  loadSessionTitles,
+  saveSessionTitlesWithSync,
   getEffectiveSessionTitle,
-} from '../utils/storage';
+} from '../utils/sessionMetaStorage';
 import { exportPlannerWorkbook } from '../utils/exportWorkbook';
 import { importPlannerWorkbook } from '../utils/importWorkbook';
 import { loadTrainingPlan } from '../utils/trainingPlan';

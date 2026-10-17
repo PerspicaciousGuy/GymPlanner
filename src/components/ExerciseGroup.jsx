@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, memo } from 'react';
 import { Plus, Trash2, Layers, ChevronDown, X } from 'lucide-react';
-import { defaultRow } from '../utils/storage';
+import { defaultRow } from '../utils/storageCore';
 import ExerciseRow from './ExerciseRow';
 import { motion, AnimatePresence } from 'framer-motion';
 

@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { loadTemplates, deleteTemplate, saveTemplate } from '../utils/storage';
+import { loadTemplates, deleteTemplate, saveTemplate } from '../utils/exerciseDbStorage';
 
 export default function TemplateDialog({ open, onOpenChange, mode = 'load', currentGroups = [], currentStandaloneExercises = [], onSelect }) {
   const [templates, setTemplates] = useState([]);

@@ -22,7 +22,8 @@ import {
   defaultTrainingPlan,
   loadTrainingPlan,
 } from '../utils/trainingPlan';
-import { loadTemplates, freezeHistoryUnderPlan } from '../utils/storage';
+import { loadTemplates } from '../utils/exerciseDbStorage';
+import { freezeHistoryUnderPlan } from '../utils/plannerSync';
 
 import { SavedPlanCard } from './trainingPlan/PlanCards';
 import { QuickStartTemplatePicker } from './trainingPlan/QuickStartTemplatePicker';

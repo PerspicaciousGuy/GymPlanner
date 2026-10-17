@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { loadTemplates, updateTemplate, getMuscleGroupKeys, getSubMusclesForMuscle, getExercisesForSubMuscle } from '../utils/storage';
+import { loadTemplates, updateTemplate, getMuscleGroupKeys, getSubMusclesForMuscle, getExercisesForSubMuscle } from '../utils/exerciseDbStorage';
 import { cn } from "@/lib/utils";
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';

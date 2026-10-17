@@ -18,7 +18,9 @@ import {
   isSameDay,
   getToday
 } from '../utils/dateUtils';
-import { loadWorkoutByDate, isDayComplete, isDaySkipped, getEffectiveSessionTitle } from '../utils/storage';
+import { loadWorkoutByDate } from '../utils/workoutStorage';
+import { isDayComplete, isDaySkipped } from '../utils/completionStorage';
+import { getEffectiveSessionTitle } from '../utils/sessionMetaStorage';
 
 const historyNavShellClass =
   "flex max-w-full items-center gap-1 rounded-[var(--app-radius-md)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1 shadow-[var(--app-shadow-sm)] sm:gap-2";
