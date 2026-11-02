@@ -43,6 +43,7 @@ export async function fetchCloudPlannerData() {
     foodLog,
     customFoods,
     savedMeals,
+    bookmarkedFoods,
     vitalsLog,
     waterLog
   ] = await Promise.all([
